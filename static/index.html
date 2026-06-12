@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ARIA FLEET · SCORECARD</title>
+<title>FLEET SCORECARD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -43,7 +43,8 @@ body {
   font-family: var(--display);
   font-size: .95rem;
   letter-spacing: .2em;
-  color: var(--sub);
+  color: #ffffff;
+  font-weight: 700;
   margin-bottom: 14px;
 }
 
@@ -86,7 +87,7 @@ body {
 
 /* ── Progress bars ── */
 .pb-wrap { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
-.pb-label { width: 130px; flex-shrink: 0; color: var(--sub); font-size: 11px; letter-spacing: .05em; }
+.pb-label { width: 130px; flex-shrink: 0; color: #ffffff; font-weight: 700; font-size: 11px; letter-spacing: .05em; }
 .pb-track { flex: 1; height: 3px; background: #0f0f0f; border-radius: 2px; overflow: hidden; }
 .pb-fill  { height: 100%; border-radius: 2px; transition: width .5s; }
 .pb-val   { width: 72px; text-align: right; flex-shrink: 0; font-size: 12px; }
@@ -110,12 +111,12 @@ body {
   border-radius: 2px;
   min-width: 110px;
 }
-.stat-label { color: var(--sub); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+.stat-label { color: #ffffff; font-weight: 700; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
 .stat-val   { font-family: var(--display); font-size: 1.2rem; }
 
 /* ── J Map ── */
 .j-rail-block { margin-bottom: 30px; }
-.j-rail-label { font-size: 10px; letter-spacing: .15em; color: var(--sub); margin-bottom: 6px; }
+.j-rail-label { font-size: 10px; letter-spacing: .15em; color: #ffffff; font-weight: 700; margin-bottom: 6px; }
 .j-rail {
   position: relative;
   height: 44px;
@@ -168,13 +169,13 @@ body {
   border-bottom: 1px solid #0c0c0c;
 }
 .duel-row:last-child { border-bottom: none; }
-.duel-row-lbl { color: var(--sub); font-size: 10px; letter-spacing: .05em; }
+.duel-row-lbl { color: #ffffff; font-weight: 700; font-size: 10px; letter-spacing: .05em; }
 .duel-row-val { font-family: var(--display); font-size: 1.05rem; }
 
 /* ── Twins ── */
 .twins-hdr {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 11px; color: var(--sub); margin-bottom: 12px;
+  font-size: 11px; color: #ffffff; font-weight: 700; margin-bottom: 12px;
 }
 .twins-hdr strong { color: #bbb; }
 .twin-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -198,9 +199,9 @@ body {
 /* ── Session table ── */
 .sess-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .sess-table th {
-  color: var(--sub); font-size: 9px; letter-spacing: .1em;
+  color: #ffffff; font-size: 9px; letter-spacing: .1em;
   padding: 5px 8px; text-align: left; border-bottom: 1px solid var(--border);
-  font-weight: 400; white-space: nowrap;
+  font-weight: 700; white-space: nowrap;
 }
 .sess-table td { padding: 6px 8px; border-bottom: 1px solid #0c0c0c; }
 .heat-cell { border-radius: 2px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -208,9 +209,9 @@ body {
 /* ── Pair league ── */
 .league-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .league-table th {
-  color: var(--sub); font-size: 9px; letter-spacing: .1em;
+  color: #ffffff; font-size: 9px; letter-spacing: .1em;
   padding: 5px 8px; text-align: left; border-bottom: 1px solid var(--border);
-  font-weight: 400;
+  font-weight: 700;
 }
 .league-table td { padding: 5px 8px; border-bottom: 1px solid #0a0a0a; }
 .league-table tbody tr:hover td { background: #070707; }
@@ -224,7 +225,7 @@ body {
   border-radius: 2px;
   padding: 9px 12px;
 }
-.exc-lbl { color: var(--sub); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+.exc-lbl { color: #ffffff; font-weight: 700; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
 .exc-val { font-family: var(--display); font-size: 1.15rem; }
 .cut-box {
   background: #050505;
@@ -232,7 +233,7 @@ body {
   border-radius: 2px;
   padding: 12px 14px;
 }
-.cut-label { font-size: 9px; color: var(--sub); letter-spacing: .15em; margin-bottom: 8px; }
+.cut-label { font-size: 9px; color: #ffffff; font-weight: 700; letter-spacing: .15em; margin-bottom: 8px; }
 .cut-row   { display: flex; gap: 24px; flex-wrap: wrap; align-items: baseline; font-size: 12px; }
 .cut-verdict { font-family: var(--display); font-size: 1.6rem; letter-spacing: .1em; margin-left: auto; }
 .cut-skip { font-size: 10px; color: #383838; margin-top: 6px; }
@@ -279,7 +280,7 @@ body {
 
   <!-- A. HEADER -->
   <div class="header">
-    <div class="logo">ARIA FLEET · SCORECARD</div>
+    <div class="logo">FLEET SCORECARD</div>
     <div class="header-right">
       <div class="range-btns">
         <button id="btn-today" onclick="setRange('today')" class="active">TODAY</button>
@@ -575,7 +576,8 @@ function extractPairs(state, venue) {
   const res = [];
   // Try to find the array of pairs in common state shapes
   let arr = null;
-  const tryKeys = ['pairs','data','signals','coins','positions','tickers','markets'];
+  // Real scanner shape: pair_states is a list; try it first
+  const tryKeys = ['pair_states','pairs','data','signals','coins','positions','tickers','markets'];
   for (const k of tryKeys) {
     if (Array.isArray(state[k])) { arr = state[k]; break; }
   }
@@ -590,7 +592,8 @@ function extractPairs(state, venue) {
     const sym = item.symbol || item.pair || item.coin || item.ticker || item.name || '';
     const j15 = firstNum(item, ['j15m','J15M','j_15m','jk_15m','j15','j_fast','stochK15','kd15m_k','kdj15m_k','j_15','k15m']);
     const j1h  = firstNum(item, ['j1h','J1H','j_1h','jk_1h','j60','j_slow','stochK60','kd1h_k','kdj1h_k','j_60','k1h']);
-    const c    = !!(item.confirmed || item.ready || item.signal || item.triggered || item.active);
+    // in_trade is the real confirmed/active flag in the scanner API
+    const c    = !!(item.in_trade || item.confirmed || item.ready || item.signal || item.triggered || item.active);
     if (sym && (j15 != null || j1h != null)) {
       res.push({ s: sym.replace(/_?USDT$/i,'').replace(/USDT$/i,'').replace(/\/USDT$/i,''), j15m: j15, j1h: j1h, c });
     }
