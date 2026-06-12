@@ -69,10 +69,30 @@ async def _poll_live() -> None:
                 try:
                     r = await client.get(url)
                     r.raise_for_status()
-                    _live[key] = r.json()
+                    data = r.json()
+                    _live[key] = data
                     _live[f"{key}_ok"] = True
-                except Exception:
+                    ps = data.get("pair_states", [])
+                    ot = data.get("open_trades", {})
+                    n_ps = len(ps) if isinstance(ps, list) else f"type={type(ps).__name__}"
+                    n_ot = len(ot) if isinstance(ot, (dict, list)) else f"type={type(ot).__name__}"
+                    print(
+                        f"[LIVE] {key.upper()} OK — pair_states={n_ps} items, "
+                        f"open_trades={n_ot}, daily_pnl={data.get('daily', {}).get('pnl')}",
+                        flush=True,
+                    )
+                    if isinstance(ps, list) and ps:
+                        sample = ps[0]
+                        print(
+                            f"[LIVE] {key.upper()} sample pair: symbol={sample.get('symbol')} "
+                            f"j15m={sample.get('j15m')} j1h={sample.get('j1h')} in_trade={sample.get('in_trade')}",
+                            flush=True,
+                        )
+                    else:
+                        print(f"[LIVE] {key.upper()} WARNING — pair_states is empty or wrong type: {type(ps).__name__}", flush=True)
+                except Exception as exc:
                     _live[f"{key}_ok"] = False
+                    print(f"[LIVE] {key.upper()} ERROR — {exc}", flush=True)
         _live["updated_at"] = time.time()
         await asyncio.sleep(30)
 
@@ -341,16 +361,16 @@ def _compute_excursion(all_rows: list) -> dict:
 def _live_open(state: Any) -> Optional[int]:
     if not state or not isinstance(state, dict):
         return None
-    for key in ("positions", "open_positions", "openPositions"):
-        val = state.get(key)
-        if isinstance(val, list):
-            return len(val)
-    for key in ("pairs", "data", "signals", "coins"):
-        val = state.get(key)
-        if isinstance(val, list):
-            count = sum(1 for p in val if isinstance(p, dict) and (p.get("open") or p.get("position") or p.get("active")))
-            if count:
-                return count
+    # Real scanner shape: open_trades is a dict keyed by symbol+direction
+    ot = state.get("open_trades")
+    if isinstance(ot, dict):
+        return len(ot)
+    if isinstance(ot, list):
+        return len(ot)
+    # Fallback: count pair_states where in_trade is True
+    ps = state.get("pair_states")
+    if isinstance(ps, list):
+        return sum(1 for p in ps if isinstance(p, dict) and p.get("in_trade"))
     return 0
 
 def _live_unrealized(state: Any) -> Optional[float]:
@@ -407,7 +427,7 @@ def _login_html(error: str = "") -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ARIA FLEET</title>
+<title>FLEET SCORECARD</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -426,7 +446,7 @@ button:active{{background:#141414}}
 </head>
 <body>
 <div class="wrap">
-  <h1>ARIA FLEET</h1>
+  <h1>FLEET SCORECARD</h1>
   <div class="sub">Scorecard Access</div>
   <form method="POST" action="/login" autocomplete="off">
     <input type="password" name="password" placeholder="PASSWORD" autofocus autocomplete="current-password">
