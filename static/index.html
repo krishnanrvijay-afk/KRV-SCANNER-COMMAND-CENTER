@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARIA FLEET · SCORECARD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --hl:     #b388ff;
+  --mexc:   #ff9100;
+  --green:  #00e676;
+  --red:    #ff4d4d;
+  --amber:  #ffb300;
+  --bg:     #000;
+  --card:   #060606;
+  --border: #161616;
+  --dim:    #333;
+  --text:   #d8d8d8;
+  --sub:    #555;
+  --mono:   'JetBrains Mono', monospace;
+  --display:'Bebas Neue', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ── */
+.page { max-width: 1160px; margin: 0 auto; padding: 0 14px 56px; }
+
+/* ── Band ── */
+.band { border-top: 1px solid var(--border); padding: 22px 0 4px; }
+.band-title {
+  font-family: var(--display);
+  font-size: .95rem;
+  letter-spacing: .2em;
+  color: var(--sub);
+  margin-bottom: 14px;
+}
+
+/* ── A. Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-family: var(--display); font-size: 1.9rem; letter-spacing: .1em; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.range-btns { display: flex; gap: 2px; }
+.range-btns button {
+  background: transparent;
+  border: 1px solid #1c1c1c;
+  color: var(--sub);
+  padding: 5px 13px;
+  font-family: var(--display);
+  font-size: .9rem;
+  letter-spacing: .15em;
+  cursor: pointer;
+  transition: color .12s, border-color .12s;
+  -webkit-appearance: none;
+}
+.range-btns button.active  { border-color: #383838; color: #e0e0e0; }
+.range-btns button:hover   { border-color: #2a2a2a; color: #aaa; }
+.badge-paper {
+  background: #120d00;
+  border: 1px solid #ffb30030;
+  color: var(--amber);
+  padding: 4px 10px;
+  font-family: var(--display);
+  font-size: .85rem;
+  letter-spacing: .2em;
+}
+
+/* ── Progress bars ── */
+.pb-wrap { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+.pb-label { width: 130px; flex-shrink: 0; color: var(--sub); font-size: 11px; letter-spacing: .05em; }
+.pb-track { flex: 1; height: 3px; background: #0f0f0f; border-radius: 2px; overflow: hidden; }
+.pb-fill  { height: 100%; border-radius: 2px; transition: width .5s; }
+.pb-val   { width: 72px; text-align: right; flex-shrink: 0; font-size: 12px; }
+.verdict  { font-size: 10px; padding: 1px 6px; border-radius: 2px; flex-shrink: 0; letter-spacing: .06em; }
+.pass { background: #00e67614; color: var(--green); border: 1px solid #00e67628; }
+.fail { background: #ff4d4d14; color: var(--red);   border: 1px solid #ff4d4d28; }
+
+/* ── Fleet band ── */
+.fleet-top  { display: grid; grid-template-columns: 220px 1fr; gap: 20px; margin-bottom: 16px; align-items: start; }
+.fleet-pnl  { font-family: var(--display); font-size: 2.8rem; line-height: 1; }
+.fleet-pnl.pos { color: var(--green); }
+.fleet-pnl.neg { color: var(--red); }
+.fleet-meta { font-size: 11px; color: var(--sub); margin-top: 5px; }
+
+/* ── Stats ── */
+.stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border-radius: 2px;
+  min-width: 110px;
+}
+.stat-label { color: var(--sub); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+.stat-val   { font-family: var(--display); font-size: 1.2rem; }
+
+/* ── J Map ── */
+.j-rail-block { margin-bottom: 30px; }
+.j-rail-label { font-size: 10px; letter-spacing: .15em; color: var(--sub); margin-bottom: 6px; }
+.j-rail {
+  position: relative;
+  height: 44px;
+  background: #040404;
+  border: 1px solid #111;
+  border-radius: 2px;
+  overflow: visible;
+}
+.j-zone {
+  position: absolute;
+  top: 0; bottom: 0;
+  pointer-events: none;
+}
+.j-zone-g { left: 0;  width: 20%; background: #00e6760a; border-right: 1px solid #00e67618; }
+.j-zone-r { right: 0; width: 20%; background: #ff4d4d0a; border-left:  1px solid #ff4d4d18; }
+.j-axis {
+  position: absolute;
+  bottom: -17px; left: 0; right: 0;
+  display: flex; justify-content: space-between;
+  font-size: 9px; color: #2a2a2a; padding: 0 2px;
+  pointer-events: none;
+}
+.j-tag {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 9.5px;
+  font-family: var(--mono);
+  white-space: nowrap;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1.3;
+  pointer-events: none;
+}
+.j-tag.hl   { color: var(--hl); }
+.j-tag.mexc { color: var(--mexc); }
+.j-tag.dim  { opacity: .28; }
+
+/* ── Duel ── */
+.duel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.duel-card { background: var(--card); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+.duel-strap { padding: 8px 14px; font-family: var(--display); font-size: 1.2rem; letter-spacing: .15em; }
+.duel-strap.hl   { background: #b388ff0c; color: var(--hl);   border-bottom: 2px solid var(--hl); }
+.duel-strap.mexc { background: #ff91000c; color: var(--mexc); border-bottom: 2px solid var(--mexc); }
+.duel-body { padding: 10px 14px; }
+.duel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid #0c0c0c;
+}
+.duel-row:last-child { border-bottom: none; }
+.duel-row-lbl { color: var(--sub); font-size: 10px; letter-spacing: .05em; }
+.duel-row-val { font-family: var(--display); font-size: 1.05rem; }
+
+/* ── Twins ── */
+.twins-hdr {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 11px; color: var(--sub); margin-bottom: 12px;
+}
+.twins-hdr strong { color: #bbb; }
+.twin-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.twin-info { width: 72px; flex-shrink: 0; }
+.twin-name { font-size: 12px; font-weight: 700; color: #ccc; }
+.twin-dir  { font-size: 9px; padding: 1px 5px; border-radius: 2px; margin-top: 2px; display: inline-block; letter-spacing: .06em; }
+.twin-dir.long  { background: #00e67614; color: var(--green); }
+.twin-dir.short { background: #ff4d4d14; color: var(--red); }
+.twin-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.twin-bar-row { display: flex; align-items: center; gap: 6px; }
+.twin-side-l { display: flex; align-items: center; justify-content: flex-end; gap: 5px; flex: 1; }
+.twin-side-r { display: flex; align-items: center; justify-content: flex-start;  gap: 5px; flex: 1; }
+.twin-bar  { height: 5px; border-radius: 2px; min-width: 2px; }
+.twin-bar.hl   { background: var(--hl); }
+.twin-bar.mexc { background: var(--mexc); }
+.twin-fig { font-size: 10px; white-space: nowrap; min-width: 52px; }
+.twin-fig.hl   { color: var(--hl);   text-align: right; }
+.twin-fig.mexc { color: var(--mexc); text-align: left; }
+.twin-edge { font-size: 9px; color: #444; text-align: center; min-width: 58px; flex-shrink: 0; }
+
+/* ── Session table ── */
+.sess-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sess-table th {
+  color: var(--sub); font-size: 9px; letter-spacing: .1em;
+  padding: 5px 8px; text-align: left; border-bottom: 1px solid var(--border);
+  font-weight: 400; white-space: nowrap;
+}
+.sess-table td { padding: 6px 8px; border-bottom: 1px solid #0c0c0c; }
+.heat-cell { border-radius: 2px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Pair league ── */
+.league-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.league-table th {
+  color: var(--sub); font-size: 9px; letter-spacing: .1em;
+  padding: 5px 8px; text-align: left; border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.league-table td { padding: 5px 8px; border-bottom: 1px solid #0a0a0a; }
+.league-table tbody tr:hover td { background: #070707; }
+.rank { color: var(--dim); font-size: 11px; }
+
+/* ── Excursion ── */
+.exc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.exc-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 9px 12px;
+}
+.exc-lbl { color: var(--sub); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+.exc-val { font-family: var(--display); font-size: 1.15rem; }
+.cut-box {
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 12px 14px;
+}
+.cut-label { font-size: 9px; color: var(--sub); letter-spacing: .15em; margin-bottom: 8px; }
+.cut-row   { display: flex; gap: 24px; flex-wrap: wrap; align-items: baseline; font-size: 12px; }
+.cut-verdict { font-family: var(--display); font-size: 1.6rem; letter-spacing: .1em; margin-left: auto; }
+.cut-skip { font-size: 10px; color: #383838; margin-top: 6px; }
+
+/* ── Footer ── */
+.footer {
+  padding: 14px 0;
+  font-size: 10px;
+  color: #383838;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+}
+.dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.dot-ok  { background: var(--green); }
+.dot-err { background: var(--red); }
+
+/* ── Skeleton / empty ── */
+.empty { color: var(--dim); font-size: 11px; padding: 10px 0; }
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  .logo { font-size: 1.4rem; }
+  .fleet-top { grid-template-columns: 1fr; }
+  .fleet-pnl { font-size: 2.2rem; }
+  .duel-grid { grid-template-columns: 1fr; }
+  .twin-edge { display: none; }
+  .exc-grid  { grid-template-columns: repeat(2, 1fr); }
+  .cut-row   { gap: 12px; }
+  .pb-label  { width: 110px; }
+  .j-tag     { font-size: 8.5px; }
+}
+@media (max-width: 400px) {
+  .page { padding: 0 10px 48px; }
+  .range-btns button { padding: 5px 8px; font-size: .8rem; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- A. HEADER -->
+  <div class="header">
+    <div class="logo">ARIA FLEET · SCORECARD</div>
+    <div class="header-right">
+      <div class="range-btns">
+        <button id="btn-today" onclick="setRange('today')" class="active">TODAY</button>
+        <button id="btn-week"  onclick="setRange('week')">WEEK</button>
+        <button id="btn-all"   onclick="setRange('all')">ALL</button>
+      </div>
+      <div class="badge-paper">PAPER</div>
+    </div>
+  </div>
+
+  <!-- B. FLEET BAND -->
+  <div class="band">
+    <div class="band-title">FLEET</div>
+    <div class="fleet-top">
+      <div>
+        <div style="font-size:9px;color:var(--sub);letter-spacing:.12em;margin-bottom:5px">NET P&amp;L</div>
+        <div class="fleet-pnl" id="fleet-pnl">—</div>
+        <div class="fleet-meta" id="fleet-meta">loading…</div>
+      </div>
+      <div id="fleet-bars"></div>
+    </div>
+    <div id="fleet-validation"></div>
+  </div>
+
+  <!-- C. FLEET J MAP -->
+  <div class="band">
+    <div class="band-title">FLEET J MAP</div>
+    <div class="j-rail-block">
+      <div class="j-rail-label">J 15M</div>
+      <div class="j-rail" id="rail-15m">
+        <div class="j-zone j-zone-g"></div>
+        <div class="j-zone j-zone-r"></div>
+        <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
+      </div>
+    </div>
+    <div class="j-rail-block" style="margin-top:26px">
+      <div class="j-rail-label">J 1H</div>
+      <div class="j-rail" id="rail-1h">
+        <div class="j-zone j-zone-g"></div>
+        <div class="j-zone j-zone-r"></div>
+        <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
+      </div>
+    </div>
+    <div id="jmap-status" style="font-size:10px;color:var(--sub);margin-top:20px">Awaiting live state…</div>
+  </div>
+
+  <!-- D. EXCHANGE DUEL -->
+  <div class="band">
+    <div class="band-title">EXCHANGE DUEL</div>
+    <div class="duel-grid">
+      <div class="duel-card">
+        <div class="duel-strap hl">HYPERLIQUID</div>
+        <div class="duel-body" id="duel-hl"><div class="empty">loading…</div></div>
+      </div>
+      <div class="duel-card">
+        <div class="duel-strap mexc">MEXC</div>
+        <div class="duel-body" id="duel-mexc"><div class="empty">loading…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E. TWIN SIGNALS -->
+  <div class="band">
+    <div class="band-title">TWIN SIGNALS</div>
+    <div class="twins-hdr">
+      <div><strong id="twin-count">—</strong> twins · venue edge <strong id="twin-edge">—</strong></div>
+    </div>
+    <div id="twins-list"><div class="empty">loading…</div></div>
+  </div>
+
+  <!-- F. SESSION × DIRECTION -->
+  <div class="band">
+    <div class="band-title">SESSION × DIRECTION</div>
+    <div style="overflow-x:auto">
+      <table class="sess-table">
+        <thead>
+          <tr>
+            <th>SESSION</th>
+            <th style="color:#00e67666">↑ LONG P&amp;L</th>
+            <th>TRADES</th>
+            <th>WR</th>
+            <th style="color:#ff4d4d66">↓ SHORT P&amp;L</th>
+            <th>TRADES</th>
+            <th>WR</th>
+          </tr>
+        </thead>
+        <tbody id="sess-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- G. PAIR LEAGUE -->
+  <div class="band">
+    <div class="band-title">PAIR LEAGUE</div>
+    <div style="overflow-x:auto">
+      <table class="league-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>PAIR</th>
+            <th>P&amp;L</th>
+            <th>TRADES</th>
+            <th>AVG R</th>
+          </tr>
+        </thead>
+        <tbody id="league-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- H. EXCURSION STRIP -->
+  <div class="band">
+    <div class="band-title">EXCURSION</div>
+    <div id="excursion"></div>
+  </div>
+
+  <!-- I. FOOTER -->
+  <div class="footer">
+    <div id="foot-refresh">—</div>
+    <div id="foot-rows">—</div>
+    <div id="foot-health">—</div>
+    <form action="/logout" method="POST" style="margin:0">
+      <button type="submit" style="background:none;border:none;color:#2a2a2a;font-family:var(--mono);font-size:10px;cursor:pointer;padding:0;letter-spacing:.05em">LOGOUT</button>
+    </form>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+"use strict";
+
+// ── palette ──
+const C = {
+  hl:    '#b388ff',
+  mexc:  '#ff9100',
+  green: '#00e676',
+  red:   '#ff4d4d',
+  amber: '#ffb300',
+};
+
+// ── state ──
+let range = 'today';
+let analytics = null;
+let live = null;
+
+// ── format helpers ──
+function fmtDollar(v, prefix = true) {
+  if (v == null || v === '') return '—';
+  const n = parseFloat(v);
+  if (!isFinite(n)) return '—';
+  const abs = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return prefix ? ((n >= 0 ? '+$' : '-$') + abs) : ((n >= 0 ? '+' : '-') + '$' + abs);
+}
+function fmtPct(v, dec = 1) {
+  if (v == null) return '—';
+  return (parseFloat(v) * 100).toFixed(dec) + '%';
+}
+function fmtR(v) {
+  if (v == null) return '—';
+  const n = parseFloat(v);
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + 'R';
+}
+function fmtPF(v) {
+  if (v == null) return '—';
+  const n = parseFloat(v);
+  return n >= 999 ? '∞' : n.toFixed(2);
+}
+function pnlColor(v) {
+  if (v == null) return '#aaa';
+  return parseFloat(v) >= 0 ? C.green : C.red;
+}
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function heatBg(pnl, scale = 400) {
+  if (pnl == null) return 'transparent';
+  const v = parseFloat(pnl);
+  const a = clamp(Math.abs(v) / scale, 0, 1);
+  return v > 0 ? `rgba(0,230,118,${(.04 + a*.18).toFixed(3)})`
+       : v < 0 ? `rgba(255,77,77,${(.04 + a*.18).toFixed(3)})`
+       : 'transparent';
+}
+function etNow() {
+  return new Date().toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  });
+}
+
+// ── range selector ──
+function setRange(r) {
+  range = r;
+  ['today','week','all'].forEach(x => {
+    document.getElementById('btn-' + x).classList.toggle('active', x === r);
+  });
+  loadAnalytics();
+}
+
+// ── fetch ──
+async function loadAnalytics() {
+  try {
+    const res = await fetch('/api/analytics?range=' + range);
+    if (!res.ok) return;
+    analytics = await res.json();
+    renderAnalytics();
+    renderFooter();
+  } catch (e) { console.error('analytics', e); }
+}
+
+async function loadLive() {
+  try {
+    const res = await fetch('/api/live');
+    if (!res.ok) return;
+    live = await res.json();
+    renderJMap();
+    renderFooter();
+  } catch (e) { console.error('live', e); }
+}
+
+// ── B. Fleet ──
+function renderFleet() {
+  const f = analytics.fleet;
+  const pnlEl = document.getElementById('fleet-pnl');
+  pnlEl.textContent = fmtDollar(f.pnl);
+  pnlEl.className = 'fleet-pnl ' + (parseFloat(f.pnl) >= 0 ? 'pos' : 'neg');
+
+  document.getElementById('fleet-meta').textContent =
+    `${f.trade_count} trades · L ${f.long_count} · S ${f.short_count}`;
+
+  const wr = f.win_rate, pf = f.profit_factor;
+  const wrPct  = clamp(wr / 0.65, 0, 1);
+  const pfPct  = clamp(pf / 2.0,  0, 1);
+  const pnlPct = f.daily_target > 0 ? clamp(f.pnl / f.daily_target, 0, 1) : 0;
+
+  const barDefs = [];
+  if (range === 'today') {
+    barDefs.push({
+      label: 'vs $1,000 target',
+      fill: pnlPct, color: f.pnl >= 0 ? C.green : C.red,
+      value: fmtDollar(f.pnl), verdict: null,
+    });
+  }
+  barDefs.push(
+    {
+      label: 'WIN RATE',
+      fill: wrPct, color: wr >= 0.65 ? C.green : C.red,
+      value: fmtPct(wr), verdict: wr >= 0.65 ? 'PASS' : 'FAIL',
+    },
+    {
+      label: 'PROFIT FACTOR',
+      fill: pfPct, color: pf >= 2.0 ? C.green : C.red,
+      value: fmtPF(pf), verdict: pf >= 2.0 ? 'PASS' : 'FAIL',
+    },
+  );
+  document.getElementById('fleet-bars').innerHTML = barDefs.map(barHTML).join('');
+
+  document.getElementById('fleet-validation').innerHTML = `
+    <div style="font-size:9px;color:var(--sub);letter-spacing:.12em;margin:10px 0 6px">VALIDATION — DISTINCT PAIRS / 10</div>
+    ${barHTML({label:'LONG PAIRS',  fill:clamp(f.long_distinct/10,0,1),  color:C.hl,   value:f.long_distinct+'/10',  verdict:null})}
+    ${barHTML({label:'SHORT PAIRS', fill:clamp(f.short_distinct/10,0,1), color:C.mexc, value:f.short_distinct+'/10', verdict:null})}
+  `;
+}
+function barHTML(b) {
+  const vCls = b.verdict ? (b.verdict === 'PASS' ? 'pass' : 'fail') : '';
+  return `<div class="pb-wrap">
+    <div class="pb-label">${b.label}</div>
+    <div class="pb-track"><div class="pb-fill" style="width:${(b.fill*100).toFixed(1)}%;background:${b.color}"></div></div>
+    <div class="pb-val" style="color:${b.color}">${b.value}</div>
+    ${b.verdict ? `<div class="verdict ${vCls}">${b.verdict}</div>` : ''}
+  </div>`;
+}
+
+// ── C. J Map ──
+function renderJMap() {
+  if (!live) return;
+  const hlTags   = extractPairs(live.hl,   'hl');
+  const mexcTags = extractPairs(live.mexc, 'mexc');
+
+  const tags15m = [...hlTags.map(p=>({symbol:p.s,j:p.j15m,venue:'hl',  confirmed:p.c})),
+                   ...mexcTags.map(p=>({symbol:p.s,j:p.j15m,venue:'mexc',confirmed:p.c}))].filter(t=>t.j!=null);
+  const tags1h  = [...hlTags.map(p=>({symbol:p.s,j:p.j1h, venue:'hl',  confirmed:p.c})),
+                   ...mexcTags.map(p=>({symbol:p.s,j:p.j1h, venue:'mexc',confirmed:p.c}))].filter(t=>t.j!=null);
+
+  paintRail('rail-15m', tags15m);
+  paintRail('rail-1h',  tags1h);
+
+  const total = new Set([...hlTags.map(p=>p.s), ...mexcTags.map(p=>p.s)]).size;
+  document.getElementById('jmap-status').textContent =
+    `${total} pair${total !== 1 ? 's' : ''} tracked · HL ${hlTags.length} · MEXC ${mexcTags.length}`;
+}
+
+function extractPairs(state, venue) {
+  if (!state || typeof state !== 'object') return [];
+  const res = [];
+  // Try to find the array of pairs in common state shapes
+  let arr = null;
+  const tryKeys = ['pairs','data','signals','coins','positions','tickers','markets'];
+  for (const k of tryKeys) {
+    if (Array.isArray(state[k])) { arr = state[k]; break; }
+  }
+  if (!arr) {
+    // Maybe it's a flat object of symbol→data
+    const vals = Object.values(state);
+    if (vals.length && typeof vals[0] === 'object') arr = vals;
+  }
+  if (!arr) return [];
+  for (const item of arr) {
+    if (!item || typeof item !== 'object') continue;
+    const sym = item.symbol || item.pair || item.coin || item.ticker || item.name || '';
+    const j15 = firstNum(item, ['j15m','J15M','j_15m','jk_15m','j15','j_fast','stochK15','kd15m_k','kdj15m_k','j_15','k15m']);
+    const j1h  = firstNum(item, ['j1h','J1H','j_1h','jk_1h','j60','j_slow','stochK60','kd1h_k','kdj1h_k','j_60','k1h']);
+    const c    = !!(item.confirmed || item.ready || item.signal || item.triggered || item.active);
+    if (sym && (j15 != null || j1h != null)) {
+      res.push({ s: sym.replace(/_?USDT$/i,'').replace(/USDT$/i,'').replace(/\/USDT$/i,''), j15m: j15, j1h: j1h, c });
+    }
+  }
+  return res;
+}
+
+function firstNum(obj, keys) {
+  for (const k of keys) {
+    const v = obj[k];
+    if (v != null && !isNaN(parseFloat(v))) return parseFloat(v);
+  }
+  return null;
+}
+
+function paintRail(railId, tags) {
+  const rail = document.getElementById(railId);
+  rail.querySelectorAll('.j-tag').forEach(el => el.remove());
+  if (!tags.length) return;
+
+  // Bucket by position (1% buckets) then stagger vertically
+  const buckets = {};
+  for (const t of tags) {
+    const jv = clamp(parseFloat(t.j), 0, 100);
+    const key = Math.round(jv);
+    if (!buckets[key]) buckets[key] = [];
+    buckets[key].push({ ...t, jv });
+  }
+
+  const RAIL_H   = 44;  // px (matches CSS)
+  const TAG_H    = 14;  // approx tag height px
+
+  for (const group of Object.values(buckets)) {
+    // Sort: HL first, then MEXC; within same venue alphabetical
+    group.sort((a,b) => (a.venue===b.venue ? a.symbol.localeCompare(b.symbol) : a.venue==='hl' ? -1 : 1));
+    group.forEach((t, i) => {
+      const el = document.createElement('div');
+      const isDim = t.jv > 30 && t.jv < 70;
+      el.className = `j-tag ${t.venue}${isDim ? ' dim' : ''}`;
+      el.textContent = t.symbol + (t.c ? ' ✦' : '');
+      const leftPct  = (t.jv / 100 * 100).toFixed(2);
+      // Stagger: distribute top positions to fill rail height
+      const topPx = clamp(4 + i * (TAG_H + 2), 0, RAIL_H - TAG_H);
+      el.style.left = leftPct + '%';
+      el.style.top  = topPx + 'px';
+      rail.appendChild(el);
+    });
+  }
+}
+
+// ── D. Exchange Duel ──
+function renderDuel() {
+  renderDuelCard('duel-hl',   analytics.hl,   'hl');
+  renderDuelCard('duel-mexc', analytics.mexc, 'mexc');
+}
+
+function renderDuelCard(elId, d, venue) {
+  const el = document.getElementById(elId);
+  if (!d) { el.innerHTML = '<div class="empty">no data</div>'; return; }
+  const vc = venue === 'hl' ? C.hl : C.mexc;
+  const rows = [
+    ['NET P&L',       fmtDollar(d.pnl),         pnlColor(d.pnl)],
+    ['WIN RATE',      fmtPct(d.win_rate),        d.win_rate >= 0.65 ? C.green : C.red],
+    ['PROFIT FACTOR', fmtPF(d.profit_factor),    d.profit_factor >= 2 ? C.green : C.red],
+    ['AVG R',         fmtR(d.avg_r),             d.avg_r >= 0 ? C.green : C.red],
+    ['BEST PAIR',     d.best_pair  || '—',       '#ccc'],
+    ['WORST PAIR',    d.worst_pair || '—',       '#ccc'],
+    ['AVG HOLD',      d.avg_hold_hours != null ? d.avg_hold_hours.toFixed(1)+'h' : '—', '#aaa'],
+    ['AVG RUNNER R',  d.avg_runner_r != null ? fmtR(d.avg_runner_r) : '—', C.amber],
+    ['OPEN POSITIONS',d.open_count != null ? String(d.open_count) : '—', vc],
+    ['UNREALIZED',    fmtDollar(d.unrealized_pnl), pnlColor(d.unrealized_pnl)],
+  ];
+  el.innerHTML = rows.map(([lbl, val, col]) => `
+    <div class="duel-row">
+      <div class="duel-row-lbl">${lbl}</div>
+      <div class="duel-row-val" style="color:${col}">${val}</div>
+    </div>
+  `).join('');
+}
+
+// ── E. Twins ──
+function renderTwins() {
+  const twins = analytics.twins || [];
+  const edge  = analytics.venue_edge;
+
+  document.getElementById('twin-count').textContent = twins.length;
+  if (edge != null) {
+    const sign = edge >= 0 ? 'HL' : 'MEXC';
+    document.getElementById('twin-edge').textContent = `${sign} +$${Math.abs(edge).toFixed(2)}`;
+  } else {
+    document.getElementById('twin-edge').textContent = '—';
+  }
+
+  if (!twins.length) {
+    document.getElementById('twins-list').innerHTML = '<div class="empty">No twins detected for this range</div>';
+    return;
+  }
+
+  const maxAbs = Math.max(...twins.flatMap(t => [Math.abs(t.hl_pnl), Math.abs(t.mexc_pnl)]), 1);
+  const BAR_MAX = 120; // px
+
+  document.getElementById('twins-list').innerHTML = twins.map(t => {
+    const hlW  = ((Math.abs(t.hl_pnl)   / maxAbs) * BAR_MAX).toFixed(0);
+    const mxW  = ((Math.abs(t.mexc_pnl) / maxAbs) * BAR_MAX).toFixed(0);
+    const dc   = t.direction === 'LONG' ? 'long' : 'short';
+    return `<div class="twin-item">
+      <div class="twin-info">
+        <div class="twin-name">${t.base_pair}</div>
+        <div class="twin-dir ${dc}">${t.direction}</div>
+      </div>
+      <div class="twin-bars">
+        <div class="twin-bar-row">
+          <div class="twin-side-l">
+            <div class="twin-fig hl">${fmtDollar(t.hl_pnl)}</div>
+            <div class="twin-bar hl" style="width:${hlW}px"></div>
+          </div>
+          <div class="twin-edge">${t.edge}</div>
+          <div class="twin-side-r">
+            <div class="twin-bar mexc" style="width:${mxW}px"></div>
+            <div class="twin-fig mexc">${fmtDollar(t.mexc_pnl)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── F. Sessions ──
+function renderSessions() {
+  const sessions = analytics.sessions || [];
+  document.getElementById('sess-body').innerHTML = sessions.map(s => {
+    const lpColor = pnlColor(s.long_pnl),  spColor = pnlColor(s.short_pnl);
+    const lwColor = s.long_wr  != null && s.long_wr  >= 0.65 ? C.green : '#888';
+    const swColor = s.short_wr != null && s.short_wr >= 0.65 ? C.green : '#888';
+    return `<tr>
+      <td style="color:#888;letter-spacing:.07em">${s.session}</td>
+      <td class="heat-cell" style="background:${heatBg(s.long_pnl)};color:${lpColor}">${fmtDollar(s.long_pnl)}</td>
+      <td style="color:var(--sub)">${s.long_trades}</td>
+      <td style="color:${lwColor}">${s.long_wr != null ? fmtPct(s.long_wr) : '—'}</td>
+      <td class="heat-cell" style="background:${heatBg(s.short_pnl)};color:${spColor}">${fmtDollar(s.short_pnl)}</td>
+      <td style="color:var(--sub)">${s.short_trades}</td>
+      <td style="color:${swColor}">${s.short_wr != null ? fmtPct(s.short_wr) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── G. Pair League ──
+function renderLeague() {
+  const league = analytics.pair_league || [];
+  document.getElementById('league-body').innerHTML = league.length === 0
+    ? '<tr><td colspan="5" class="empty" style="padding:10px 8px">No data</td></tr>'
+    : league.map((p, i) => {
+        const rc = parseFloat(p.avg_r) >= 0 ? C.green : C.red;
+        return `<tr>
+          <td class="rank">${i+1}</td>
+          <td style="color:#ccc">${p.pair}</td>
+          <td style="color:${pnlColor(p.pnl)}">${fmtDollar(p.pnl)}</td>
+          <td style="color:var(--sub)">${p.trade_count}</td>
+          <td style="color:${p.avg_r != null ? rc : 'var(--sub)'}">${fmtR(p.avg_r)}</td>
+        </tr>`;
+      }).join('');
+}
+
+// ── H. Excursion ──
+function renderExcursion() {
+  const e = analytics.excursion;
+  if (!e) { document.getElementById('excursion').innerHTML = '<div class="empty">No data</div>'; return; }
+  const verdictColor = e.verdict === 'HOLD' ? C.amber : C.green;
+
+  document.getElementById('excursion').innerHTML = `
+    <div class="exc-grid">
+      <div class="exc-card">
+        <div class="exc-lbl">WINNERS AVG MAE</div>
+        <div class="exc-val" style="color:${C.amber}">${e.winners_avg_mae != null ? e.winners_avg_mae.toFixed(2)+'R' : '—'}</div>
+      </div>
+      <div class="exc-card">
+        <div class="exc-lbl">LOSERS AVG MAE</div>
+        <div class="exc-val" style="color:${C.red}">${e.losers_avg_mae != null ? e.losers_avg_mae.toFixed(2)+'R' : '—'}</div>
+      </div>
+      <div class="exc-card">
+        <div class="exc-lbl">AVG MFE CAPTURE</div>
+        <div class="exc-val" style="color:${C.green}">${e.avg_mfe_capture != null ? (e.avg_mfe_capture*100).toFixed(1)+'%' : '—'}</div>
+      </div>
+      <div class="exc-card">
+        <div class="exc-lbl">DEEP MAE WINNERS</div>
+        <div class="exc-val" style="color:${C.amber}">${e.deep_mae_winner_count}</div>
+        <div style="font-size:9px;color:var(--sub);margin-top:2px">mae ≤ −0.5R</div>
+      </div>
+    </div>
+    <div class="cut-box">
+      <div class="cut-label">EARLY-CUT READ</div>
+      <div class="cut-row">
+        <div><span style="color:var(--sub)">FORGONE </span><span style="color:${C.red}">${fmtDollar(e.forgone)}</span></div>
+        <div><span style="color:var(--sub)">SAVED </span><span style="color:${C.green}">${fmtDollar(e.saved)}</span></div>
+        <div><span style="color:var(--sub)">NET </span><span style="color:${pnlColor(e.net)}">${fmtDollar(e.net)}</span></div>
+        <div class="cut-verdict" style="color:${verdictColor}">${e.verdict}</div>
+      </div>
+      ${e.skipped > 0 ? `<div class="cut-skip">${e.skipped} row${e.skipped !== 1 ? 's' : ''} skipped — null mae_r</div>` : ''}
+    </div>
+  `;
+}
+
+// ── I. Footer ──
+function renderFooter() {
+  document.getElementById('foot-refresh').textContent = 'Refreshed ' + etNow() + ' ET';
+  if (analytics) {
+    const rc = analytics.row_counts || {};
+    document.getElementById('foot-rows').textContent =
+      `HL ${rc.hl ?? '?'} rows · MEXC ${rc.mexc ?? '?'} rows`;
+  }
+  if (live && analytics) {
+    const hlOk   = !!live.hl_ok;
+    const mexcOk = !!live.mexc_ok;
+    document.getElementById('foot-health').innerHTML =
+      `<span class="dot ${hlOk   ?'dot-ok':'dot-err'}"></span>HL state: ${hlOk   ?'OK':'OFFLINE'}&emsp;` +
+      `<span class="dot ${mexcOk ?'dot-ok':'dot-err'}"></span>MEXC state: ${mexcOk?'OK':'OFFLINE'}&emsp;` +
+      `<span class="dot dot-ok"></span>Supabase: OK`;
+  }
+}
+
+// ── render all analytics bands ──
+function renderAnalytics() {
+  if (!analytics) return;
+  renderFleet();
+  renderDuel();
+  renderTwins();
+  renderSessions();
+  renderLeague();
+  renderExcursion();
+  renderFooter();
+}
+
+// ── boot ──
+(async function init() {
+  await Promise.all([loadAnalytics(), loadLive()]);
+  // Live: poll every 30s
+  setInterval(loadLive, 30_000);
+  // Analytics: re-fetch every 5 min
+  setInterval(loadAnalytics, 300_000);
+})();
+</script>
+</body>
+</html>
