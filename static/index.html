@@ -144,16 +144,18 @@ body {
 .j-tag {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 9.5px;
+  font-size: 13px;
+  font-weight: 700;
   font-family: var(--mono);
   white-space: nowrap;
   padding: 1px 3px;
   border-radius: 2px;
   line-height: 1.3;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
-.j-tag.hl   { color: var(--hl); }
-.j-tag.mexc { color: var(--mexc); }
 .j-tag.dim  { opacity: .28; }
 
 /* ── Duel ── */
@@ -618,29 +620,57 @@ function paintRail(railId, tags) {
   rail.querySelectorAll('.j-tag').forEach(el => el.remove());
   if (!tags.length) return;
 
-  // Bucket by position (1% buckets) then stagger vertically
-  const buckets = {};
+  // Merge same-symbol tags: collect all venues, use first j value seen
+  const bySymbol = {};
   for (const t of tags) {
     const jv = clamp(parseFloat(t.j), 0, 100);
-    const key = Math.round(jv);
-    if (!buckets[key]) buckets[key] = [];
-    buckets[key].push({ ...t, jv });
+    if (!bySymbol[t.symbol]) {
+      bySymbol[t.symbol] = { ...t, jv, venues: [t.venue] };
+    } else {
+      if (!bySymbol[t.symbol].venues.includes(t.venue)) {
+        bySymbol[t.symbol].venues.push(t.venue);
+        // hl always first
+        bySymbol[t.symbol].venues.sort(a => a === 'hl' ? -1 : 1);
+      }
+    }
   }
 
-  const RAIL_H   = 44;  // px (matches CSS)
-  const TAG_H    = 14;  // approx tag height px
+  // Bucket by J position (1-unit buckets) then stagger vertically
+  const buckets = {};
+  for (const t of Object.values(bySymbol)) {
+    const key = Math.round(t.jv);
+    if (!buckets[key]) buckets[key] = [];
+    buckets[key].push(t);
+  }
+
+  const RAIL_H = 44;  // px (matches CSS height)
+  const TAG_H  = 16;  // approx tag height px at 13px font
 
   for (const group of Object.values(buckets)) {
-    // Sort: HL first, then MEXC; within same venue alphabetical
-    group.sort((a,b) => (a.venue===b.venue ? a.symbol.localeCompare(b.symbol) : a.venue==='hl' ? -1 : 1));
+    group.sort((a, b) => a.symbol.localeCompare(b.symbol));
     group.forEach((t, i) => {
       const el = document.createElement('div');
       const isDim = t.jv > 30 && t.jv < 70;
-      el.className = `j-tag ${t.venue}${isDim ? ' dim' : ''}`;
-      el.textContent = t.symbol + (t.c ? ' ✦' : '');
-      const leftPct  = (t.jv / 100 * 100).toFixed(2);
-      // Stagger: distribute top positions to fill rail height
-      const topPx = clamp(4 + i * (TAG_H + 2), 0, RAIL_H - TAG_H);
+      el.className = `j-tag${isDim ? ' dim' : ''}`;
+
+      // Label color: green if LONG zone (J≤20), red if SHORT zone (J≥80), white if neutral
+      el.style.color = t.jv <= 20 ? '#00e676' : t.jv >= 80 ? '#ff5252' : '#ffffff';
+
+      // Exchange dot(s) — purple for HL, orange for MEXC, left of text
+      t.venues.forEach(v => {
+        const dot = document.createElement('span');
+        dot.style.cssText = `display:inline-block;width:6px;height:6px;border-radius:50%;` +
+          `background:${v === 'hl' ? '#b388ff' : '#ff9100'};flex-shrink:0;`;
+        el.appendChild(dot);
+      });
+
+      // Pair name text
+      const txt = document.createElement('span');
+      txt.textContent = t.symbol + (t.c ? ' ✦' : '');
+      el.appendChild(txt);
+
+      const leftPct = (t.jv / 100 * 100).toFixed(2);
+      const topPx   = clamp(4 + i * (TAG_H + 2), 0, RAIL_H - TAG_H);
       el.style.left = leftPct + '%';
       el.style.top  = topPx + 'px';
       rail.appendChild(el);
