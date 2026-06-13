@@ -139,9 +139,9 @@ body {
   border-radius: 2px;
   overflow: visible;
 }
-.j-zone    { position:absolute; top:0; bottom:0; pointer-events:none; }
-.j-zone-g  { left:0;  width:20%; background:#00e6760a; border-right:1px solid #00e67618; }
-.j-zone-r  { right:0; width:20%; background:#ff4d4d0a; border-left:1px solid #ff4d4d18; }
+.j-zone    { position:absolute; top:0; height:100%; pointer-events:none; z-index:0; }
+.j-zone-g  { left:0;  width:20%; background:rgba(0,220,100,0.10);  border-right:1px solid rgba(0,220,100,0.25); }
+.j-zone-r  { right:0; width:20%; background:rgba(255,70,70,0.10);  border-left:1px solid rgba(255,70,70,0.25); }
 .j-centre  { position:absolute; left:0; right:0; top:50%; height:1px; background:#1a1a1a; pointer-events:none; }
 .j-tick    { position:absolute; top:30%; bottom:30%; width:1px; background:#1c1c1c; pointer-events:none; }
 .j-axis {
@@ -162,6 +162,7 @@ body {
   align-items:center;
   gap:3px;
   line-height:1.2;
+  z-index:1;
 }
 
 /* ── Duel ── */
