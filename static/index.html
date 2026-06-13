@@ -139,10 +139,9 @@ body {
   border-radius: 2px;
   overflow: visible;
 }
-.j-seg     { position:absolute; pointer-events:none; z-index:0; }
-.j-seg-g   { left:0;   width:20%; height:3px; background:#00dc64; top:calc(50% - 1.5px); }
-.j-seg-mid { left:20%; width:60%; height:2px; background:#1a1a1a; top:calc(50% - 1px);   }
-.j-seg-r   { right:0;  width:20%; height:3px; background:#ff4646; top:calc(50% - 1.5px); }
+.track-low  { position:absolute; left:0;   width:20%; height:10px; background:#00ff6a; opacity:0.25; top:50%; transform:translateY(-50%); z-index:0; pointer-events:none; border-radius:1px; }
+.track-mid  { position:absolute; left:20%; width:60%; height:10px; background:#2a2a2a; top:50%; transform:translateY(-50%); z-index:0; pointer-events:none; }
+.track-high { position:absolute; right:0;  width:20%; height:10px; background:#ff3d3d; opacity:0.25; top:50%; transform:translateY(-50%); z-index:0; pointer-events:none; border-radius:1px; }
 .j-tick    { position:absolute; top:30%; bottom:30%; width:1px; background:#1c1c1c; pointer-events:none; }
 .j-axis {
   position:absolute; bottom:-18px; left:0; right:0;
@@ -339,9 +338,9 @@ body {
     <div id="jrail-wrap-15m" class="j-rail-block">
       <div class="j-rail-label">J 15M</div>
       <div class="j-rail" id="rail-15m">
-        <div class="j-seg j-seg-g"></div>
-        <div class="j-seg j-seg-mid"></div>
-        <div class="j-seg j-seg-r"></div>
+        <div class="track-low"></div>
+        <div class="track-mid"></div>
+        <div class="track-high"></div>
         <div class="j-tick" style="left:20%"></div>
         <div class="j-tick" style="left:40%"></div>
         <div class="j-tick" style="left:60%"></div>
@@ -352,9 +351,9 @@ body {
     <div id="jrail-wrap-1h" class="j-rail-block" style="margin-top:26px">
       <div class="j-rail-label">J 1H</div>
       <div class="j-rail" id="rail-1h">
-        <div class="j-seg j-seg-g"></div>
-        <div class="j-seg j-seg-mid"></div>
-        <div class="j-seg j-seg-r"></div>
+        <div class="track-low"></div>
+        <div class="track-mid"></div>
+        <div class="track-high"></div>
         <div class="j-tick" style="left:20%"></div>
         <div class="j-tick" style="left:40%"></div>
         <div class="j-tick" style="left:60%"></div>
