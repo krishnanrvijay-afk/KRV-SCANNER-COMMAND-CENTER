@@ -116,47 +116,53 @@ body {
 .stat-val   { font-family: var(--display); font-size: 1.6rem; color: #ffffff; }
 
 /* ── J Map ── */
-.j-rail-block { margin-bottom: 30px; }
-.j-rail-label { font-size: 18px; letter-spacing: .15em; color: #ffffff; font-weight: 700; margin-bottom: 6px; }
+.jmap-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.jmap-legend { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.jleg-item   { display:flex; align-items:center; gap:4px; font-size:10px; font-weight:700; color:#ffffff; white-space:nowrap; font-family:var(--mono); }
+.jleg-dot    { display:inline-block; width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.jleg-sq     { display:inline-block; width:6px; height:6px; border-radius:1px; border:1.5px solid; background:transparent; flex-shrink:0; }
+.jmap-toggle { display:flex; gap:3px; }
+.jmap-btn {
+  background:#111; border:1px solid #2a2a2a; color:#444;
+  padding:3px 10px; font-family:var(--mono); font-size:10px; font-weight:700;
+  letter-spacing:.1em; cursor:pointer; border-radius:2px; -webkit-appearance:none;
+  transition:all .1s;
+}
+.jmap-btn.active { background:#12122a; border-color:#b388ff; color:#ffffff; }
+.j-rail-block { margin-bottom:30px; }
+.j-rail-label { font-family:var(--display); font-size:13px; letter-spacing:.15em; color:#aaaaaa; font-weight:400; margin-bottom:6px; }
 .j-rail {
   position: relative;
-  height: 44px;
+  height: 52px;
   background: #040404;
   border: 1px solid #111;
   border-radius: 2px;
   overflow: visible;
 }
-.j-zone {
-  position: absolute;
-  top: 0; bottom: 0;
-  pointer-events: none;
-}
-.j-zone-g { left: 0;  width: 20%; background: #00e6760a; border-right: 1px solid #00e67618; }
-.j-zone-r { right: 0; width: 20%; background: #ff4d4d0a; border-left:  1px solid #ff4d4d18; }
+.j-zone    { position:absolute; top:0; bottom:0; pointer-events:none; }
+.j-zone-g  { left:0;  width:20%; background:#00e6760a; border-right:1px solid #00e67618; }
+.j-zone-r  { right:0; width:20%; background:#ff4d4d0a; border-left:1px solid #ff4d4d18; }
+.j-centre  { position:absolute; left:0; right:0; top:50%; height:1px; background:#1a1a1a; pointer-events:none; }
+.j-tick    { position:absolute; top:30%; bottom:30%; width:1px; background:#1c1c1c; pointer-events:none; }
 .j-axis {
-  position: absolute;
-  bottom: -17px; left: 0; right: 0;
-  display: flex; justify-content: space-between;
-  font-size: 13px; color: #aaaaaa; padding: 0 2px;
-  pointer-events: none;
-  font-weight: 400;
+  position:absolute; bottom:-18px; left:0; right:0;
+  display:flex; justify-content:space-between;
+  font-size:11px; color:#aaaaaa; padding:0 2px;
+  pointer-events:none; font-weight:400;
 }
 .j-tag {
-  position: absolute;
-  transform: translateX(-50%);
-  font-size: 13px;
-  font-weight: 700;
-  font-family: var(--mono);
-  white-space: nowrap;
-  padding: 1px 3px;
-  border-radius: 2px;
-  line-height: 1.3;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  gap: 3px;
+  position:absolute;
+  transform:translateX(-50%);
+  font-size:11px;
+  font-weight:700;
+  font-family:var(--mono);
+  white-space:nowrap;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  line-height:1.2;
 }
-.j-tag.dim  { opacity: .28; }
 
 /* ── Duel ── */
 .duel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -314,19 +320,44 @@ body {
   <!-- C. FLEET J MAP -->
   <div class="band">
     <div class="band-title">FLEET J MAP</div>
-    <div class="j-rail-block">
+    <div class="jmap-header">
+      <div class="jmap-legend">
+        <span class="jleg-item"><span class="jleg-dot" style="background:#00dc64"></span>LONG ZONE</span>
+        <span class="jleg-item"><span class="jleg-dot" style="background:#ff4646"></span>SHORT ZONE</span>
+        <span class="jleg-item"><span class="jleg-dot" style="background:#555555"></span>NEUTRAL</span>
+        <span class="jleg-item"><span class="jleg-sq"  style="border-color:#b388ff"></span>HYPERLIQUID</span>
+        <span class="jleg-item"><span class="jleg-sq"  style="border-color:#ff9100"></span>MEXC</span>
+        <span class="jleg-item" style="color:#aaaaaa">✦ CONFIRMED</span>
+      </div>
+      <div class="jmap-toggle">
+        <button class="jmap-btn"        id="jbtn-15m"  onclick="setJView('15m')">15M</button>
+        <button class="jmap-btn"        id="jbtn-1h"   onclick="setJView('1h')">1H</button>
+        <button class="jmap-btn active" id="jbtn-both" onclick="setJView('both')">BOTH</button>
+      </div>
+    </div>
+    <div id="jrail-wrap-15m" class="j-rail-block">
       <div class="j-rail-label">J 15M</div>
       <div class="j-rail" id="rail-15m">
         <div class="j-zone j-zone-g"></div>
         <div class="j-zone j-zone-r"></div>
+        <div class="j-centre"></div>
+        <div class="j-tick" style="left:20%"></div>
+        <div class="j-tick" style="left:40%"></div>
+        <div class="j-tick" style="left:60%"></div>
+        <div class="j-tick" style="left:80%"></div>
         <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
       </div>
     </div>
-    <div class="j-rail-block" style="margin-top:26px">
+    <div id="jrail-wrap-1h" class="j-rail-block" style="margin-top:26px">
       <div class="j-rail-label">J 1H</div>
       <div class="j-rail" id="rail-1h">
         <div class="j-zone j-zone-g"></div>
         <div class="j-zone j-zone-r"></div>
+        <div class="j-centre"></div>
+        <div class="j-tick" style="left:20%"></div>
+        <div class="j-tick" style="left:40%"></div>
+        <div class="j-tick" style="left:60%"></div>
+        <div class="j-tick" style="left:80%"></div>
         <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
       </div>
     </div>
@@ -559,6 +590,17 @@ function barHTML(b) {
 }
 
 // ── C. J Map ──
+let jView = 'both';
+
+function setJView(v) {
+  jView = v;
+  ['15m','1h','both'].forEach(x => {
+    document.getElementById('jbtn-' + x).classList.toggle('active', x === v);
+  });
+  document.getElementById('jrail-wrap-15m').style.display = (v === '15m' || v === 'both') ? '' : 'none';
+  document.getElementById('jrail-wrap-1h').style.display  = (v === '1h'  || v === 'both') ? '' : 'none';
+}
+
 function renderJMap() {
   if (!live) return;
   const hlTags   = extractPairs(live.hl,   'hl');
@@ -580,15 +622,12 @@ function renderJMap() {
 function extractPairs(state, venue) {
   if (!state || typeof state !== 'object') return [];
   const res = [];
-  // Try to find the array of pairs in common state shapes
   let arr = null;
-  // Real scanner shape: pair_states is a list; try it first
   const tryKeys = ['pair_states','pairs','data','signals','coins','positions','tickers','markets'];
   for (const k of tryKeys) {
     if (Array.isArray(state[k])) { arr = state[k]; break; }
   }
   if (!arr) {
-    // Maybe it's a flat object of symbol→data
     const vals = Object.values(state);
     if (vals.length && typeof vals[0] === 'object') arr = vals;
   }
@@ -598,7 +637,6 @@ function extractPairs(state, venue) {
     const sym = item.symbol || item.pair || item.coin || item.ticker || item.name || '';
     const j15 = firstNum(item, ['j15m','J15M','j_15m','jk_15m','j15','j_fast','stochK15','kd15m_k','kdj15m_k','j_15','k15m']);
     const j1h  = firstNum(item, ['j1h','J1H','j_1h','jk_1h','j60','j_slow','stochK60','kd1h_k','kdj1h_k','j_60','k1h']);
-    // in_trade is the real confirmed/active flag in the scanner API
     const c    = !!(item.in_trade || item.confirmed || item.ready || item.signal || item.triggered || item.active);
     if (sym && (j15 != null || j1h != null)) {
       res.push({ s: sym.replace(/_?USDT$/i,'').replace(/USDT$/i,'').replace(/\/USDT$/i,''), j15m: j15, j1h: j1h, c });
@@ -620,7 +658,7 @@ function paintRail(railId, tags) {
   rail.querySelectorAll('.j-tag').forEach(el => el.remove());
   if (!tags.length) return;
 
-  // Merge same-symbol tags: collect all venues, use first j value seen
+  // Merge same-symbol tags across venues; keep first j value seen, collect all venues
   const bySymbol = {};
   for (const t of tags) {
     const jv = clamp(parseFloat(t.j), 0, 100);
@@ -629,52 +667,77 @@ function paintRail(railId, tags) {
     } else {
       if (!bySymbol[t.symbol].venues.includes(t.venue)) {
         bySymbol[t.symbol].venues.push(t.venue);
-        // hl always first
-        bySymbol[t.symbol].venues.sort(a => a === 'hl' ? -1 : 1);
+        bySymbol[t.symbol].venues.sort(a => a === 'hl' ? -1 : 1); // HL always left
       }
     }
   }
 
-  // Bucket by J position (1-unit buckets) then stagger vertically
-  const buckets = {};
-  for (const t of Object.values(bySymbol)) {
-    const key = Math.round(t.jv);
-    if (!buckets[key]) buckets[key] = [];
-    buckets[key].push(t);
-  }
+  // Sort left-to-right for collision sweep
+  const sorted = Object.values(bySymbol).sort((a, b) => a.jv - b.jv);
 
-  const RAIL_H = 44;  // px (matches CSS height)
-  const TAG_H  = 16;  // approx tag height px at 13px font
+  // 2-row collision detection using estimated label widths (in % units)
+  const rowRanges = [[], []];
+  const ROW_H   = 14;
+  const ROW_GAP = 2;
 
-  for (const group of Object.values(buckets)) {
-    group.sort((a, b) => a.symbol.localeCompare(b.symbol));
-    group.forEach((t, i) => {
-      const el = document.createElement('div');
-      const isDim = t.jv > 30 && t.jv < 70;
-      el.className = `j-tag${isDim ? ' dim' : ''}`;
+  for (const t of sorted) {
+    const halfW  = (t.symbol.length * 1.3 + 4) / 2; // estimated half-width in %
+    const fromPct = t.jv - halfW;
+    const toPct   = t.jv + halfW;
 
-      // Label color: green if LONG zone (J≤20), red if SHORT zone (J≥80), white if neutral
-      el.style.color = t.jv <= 20 ? '#00e676' : t.jv >= 80 ? '#ff5252' : '#ffffff';
+    let row = rowRanges.length - 1; // fallback: last row
+    for (let r = 0; r < rowRanges.length; r++) {
+      if (!rowRanges[r].some(rng => fromPct < rng.to && toPct > rng.from)) {
+        row = r; break;
+      }
+    }
+    rowRanges[row].push({ from: fromPct, to: toPct });
 
-      // Exchange dot(s) — purple for HL, orange for MEXC, left of text
-      t.venues.forEach(v => {
-        const dot = document.createElement('span');
-        dot.style.cssText = `display:inline-block;width:6px;height:6px;border-radius:50%;` +
-          `background:${v === 'hl' ? '#b388ff' : '#ff9100'};flex-shrink:0;`;
-        el.appendChild(dot);
-      });
+    // Build tag element
+    const el = document.createElement('div');
+    el.className = 'j-tag';
 
-      // Pair name text
-      const txt = document.createElement('span');
-      txt.textContent = t.symbol + (t.c ? ' ✦' : '');
-      el.appendChild(txt);
+    // J-direction color: green ≤20, red ≥80, grey neutral
+    const labelColor = t.jv <= 20 ? '#00dc64' : t.jv >= 80 ? '#ff4646' : '#3a3a3a';
+    el.style.color = labelColor;
 
-      const leftPct = (t.jv / 100 * 100).toFixed(2);
-      const topPx   = clamp(4 + i * (TAG_H + 2), 0, RAIL_H - TAG_H);
-      el.style.left = leftPct + '%';
-      el.style.top  = topPx + 'px';
-      rail.appendChild(el);
-    });
+    // Eclipse dot wrapper: dot centered, venue squares overlaid left (HL) / right (MEXC)
+    const hasHL   = t.venues.includes('hl');
+    const hasMEXC = t.venues.includes('mexc');
+    const wrapW   = (hasHL && hasMEXC) ? 14 : 10;
+    const dotLeft = (hasHL && hasMEXC) ? 3 : 2;
+
+    const wrap = document.createElement('span');
+    wrap.style.cssText = `position:relative;display:inline-block;width:${wrapW}px;` +
+      `height:9px;flex-shrink:0;vertical-align:middle;`;
+
+    const dot = document.createElement('span');
+    dot.style.cssText = `position:absolute;width:7px;height:7px;border-radius:50%;` +
+      `background:${labelColor};top:1px;left:${dotLeft}px;`;
+    wrap.appendChild(dot);
+
+    if (hasHL) {
+      const sq = document.createElement('span');
+      sq.style.cssText = `position:absolute;width:6px;height:6px;border-radius:1px;` +
+        `border:1.5px solid #b388ff;background:transparent;top:1.5px;left:0;`;
+      wrap.appendChild(sq);
+    }
+    if (hasMEXC) {
+      const sq = document.createElement('span');
+      sq.style.cssText = `position:absolute;width:6px;height:6px;border-radius:1px;` +
+        `border:1.5px solid #ff9100;background:transparent;top:1.5px;right:0;`;
+      wrap.appendChild(sq);
+    }
+
+    el.appendChild(wrap);
+
+    const txt = document.createElement('span');
+    txt.textContent = t.symbol + (t.c ? ' ✦' : '');
+    el.appendChild(txt);
+
+    el.style.left = t.jv.toFixed(2) + '%';
+    el.style.top  = (4 + row * (ROW_H + ROW_GAP)) + 'px';
+    rail.appendChild(el);
   }
 }
 
