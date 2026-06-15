@@ -25,7 +25,7 @@ SUPABASE_URL       = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_KEY       = os.environ.get("SUPABASE_KEY", "")
 PORT               = int(os.environ.get("PORT", "8000"))
 
-HL_STATE_URL   = "https://bounce-scanner-deux-production.up.railway.app/api/state"
+HL_STATE_URL   = "https://bounce-scanner-deux-production-88de.up.railway.app/api/state"
 MEXC_STATE_URL = "https://web-production-d03dd.up.railway.app/api/state"
 
 COOKIE_NAME     = "aria_session"
