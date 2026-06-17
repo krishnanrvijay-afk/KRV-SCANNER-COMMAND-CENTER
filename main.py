@@ -361,13 +361,11 @@ def _compute_excursion(all_rows: list) -> dict:
 def _live_open(state: Any) -> Optional[int]:
     if not state or not isinstance(state, dict):
         return None
-    # Real scanner shape: open_trades is a dict keyed by symbol+direction
     ot = state.get("open_trades")
     if isinstance(ot, dict):
         return len(ot)
     if isinstance(ot, list):
         return len(ot)
-    # Fallback: count pair_states where in_trade is True
     ps = state.get("pair_states")
     if isinstance(ps, list):
         return sum(1 for p in ps if isinstance(p, dict) and p.get("in_trade"))
@@ -511,6 +509,25 @@ async def api_analytics(request: Request, range: str = "today") -> JSONResponse:
     data["mexc"]["open_count"]     = _live_open(_live["mexc"])
     data["mexc"]["unrealized_pnl"] = _live_unrealized(_live["mexc"])
     return JSONResponse(data)
+
+@app.get("/api/log")
+async def api_log(request: Request, range: str = "all") -> JSONResponse:
+    _require_auth(request)
+    if range not in ("today", "week", "all"):
+        raise HTTPException(400, "range must be: today | week | all")
+    hl_rows, mexc_rows = await asyncio.gather(
+        _sb_fetch("hl_trade_log",   {"order": "close_time.desc", "limit": "2000"}),
+        _sb_fetch("mexc_trade_log", {"order": "close_time.desc", "limit": "2000"}),
+    )
+    start    = _range_start(range)
+    hl_f     = _filter_by_range(hl_rows,   start)
+    mexc_f   = _filter_by_range(mexc_rows, start)
+    all_rows = (
+        [{"_venue": "hl",   **r} for r in hl_f   if r.get("close_time")]
+      + [{"_venue": "mexc", **r} for r in mexc_f if r.get("close_time")]
+    )
+    all_rows.sort(key=lambda r: str(r.get("close_time") or ""), reverse=True)
+    return JSONResponse(all_rows)
 
 @app.get("/api/schema")
 async def api_schema(request: Request) -> JSONResponse:

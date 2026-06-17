@@ -13,6 +13,7 @@
   --green:  #00e676;
   --red:    #ff4d4d;
   --amber:  #ffb300;
+  --teal:   #22d3ee;
   --bg:     #000;
   --card:   #060606;
   --border: #161616;
@@ -59,23 +60,35 @@ body {
   gap: 10px;
   border-bottom: 1px solid var(--border);
 }
-.logo { font-family: var(--display); font-size: 1.9rem; letter-spacing: .1em; }
+.logo { font-family: var(--display); font-size: 1.9rem; letter-spacing: .1em; display: flex; align-items: center; gap: 9px; }
+.logo-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--teal);
+  flex-shrink: 0;
+}
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.range-btns { display: flex; gap: 2px; }
+
+/* ── Range buttons — pill style ── */
+.range-btns { display: flex; gap: 3px; }
 .range-btns button {
   background: transparent;
-  border: 1px solid #1c1c1c;
-  color: #aaaaaa;
-  padding: 5px 13px;
+  border: 1px solid #222;
+  color: #555;
+  padding: 5px 14px;
   font-family: var(--display);
   font-size: 18px;
   letter-spacing: .15em;
   cursor: pointer;
-  transition: color .12s, border-color .12s;
+  border-radius: 999px;
+  transition: color .12s, border-color .12s, background .12s;
   -webkit-appearance: none;
 }
-.range-btns button.active  { border-color: #383838; color: #ffffff; }
-.range-btns button:hover   { border-color: #2a2a2a; color: #cccccc; }
+.range-btns button.active  { border-color: var(--teal); color: var(--teal); background: #22d3ee12; }
+.range-btns button:hover:not(.active) { border-color: #2a2a2a; color: #888; }
+
 .badge-paper {
   background: #120d00;
   border: 1px solid #ffb30030;
@@ -84,7 +97,36 @@ body {
   font-family: var(--display);
   font-size: .85rem;
   letter-spacing: .2em;
+  border-radius: 999px;
 }
+
+/* ── Tab bar ── */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 14px 0 0;
+  margin-bottom: 2px;
+}
+.tab-btn {
+  background: transparent;
+  border: 1px solid #1c1c1c;
+  color: #444;
+  padding: 6px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all .15s;
+  -webkit-appearance: none;
+}
+.tab-btn.active {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: #22d3ee0d;
+}
+.tab-btn:hover:not(.active) { border-color: #2a2a2a; color: #666; }
 
 /* ── Progress bars ── */
 .pb-wrap { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
@@ -269,6 +311,161 @@ body {
 /* ── Skeleton / empty ── */
 .empty { color: #aaaaaa; font-size: 13px; font-weight: 400; padding: 10px 0; }
 
+/* ── LOG TAB ── */
+.log-filters {
+  padding: 18px 0 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.log-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.log-filter-label {
+  font-size: 10px;
+  color: #444;
+  letter-spacing: .12em;
+  font-weight: 700;
+}
+.venue-chips { display: flex; gap: 3px; }
+.venue-chip {
+  border-radius: 999px;
+  border: 1px solid #222;
+  background: transparent;
+  color: #444;
+  padding: 4px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  cursor: pointer;
+  -webkit-appearance: none;
+  transition: all .12s;
+}
+.venue-chip.active-all  { background: #22d3ee15; border-color: var(--teal);   color: var(--teal); }
+.venue-chip.active-hl   { background: #a855f715; border-color: #a855f7;       color: #a855f7; }
+.venue-chip.active-mexc { background: #f9731615; border-color: #f97316;       color: #f97316; }
+.venue-chip:hover:not([class*="active"]) { border-color: #333; color: #666; }
+.log-date-input {
+  background: #070707;
+  border: 1px solid #222;
+  color: #fff;
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 3px;
+  -webkit-appearance: none;
+  outline: none;
+  color-scheme: dark;
+}
+.log-date-input:focus { border-color: #333; }
+.log-pair-input {
+  background: #070707;
+  border: 1px solid #222;
+  color: #fff;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 3px;
+  width: 130px;
+  letter-spacing: .05em;
+  outline: none;
+}
+.log-pair-input:focus { border-color: #333; }
+.log-pair-input::placeholder { color: #2a2a2a; }
+.log-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.log-count-wrap { display: flex; align-items: baseline; gap: 7px; }
+.log-count-num {
+  font-family: var(--display);
+  font-size: 2.2rem;
+  color: #fff;
+  line-height: 1;
+}
+.log-count-lbl {
+  font-size: 10px;
+  color: #444;
+  letter-spacing: .15em;
+  font-weight: 700;
+}
+.export-btn {
+  border: 1px solid #22d3ee55;
+  background: transparent;
+  color: var(--teal);
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  cursor: pointer;
+  -webkit-appearance: none;
+  transition: background .12s;
+}
+.export-btn:hover { background: #22d3ee10; }
+.log-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.log-table th {
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: #444;
+  font-size: 10px;
+  letter-spacing: .12em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  background: #000;
+  z-index: 2;
+}
+.log-table th:hover { color: #888; }
+.log-table th.sort-active { color: var(--teal); }
+.log-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #080808;
+  white-space: nowrap;
+  font-weight: 700;
+  color: #ffffff;
+}
+.log-table tbody tr:hover td { background: #060606; }
+.venue-tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+.venue-tag.hl   { background: #a855f718; border: 1px solid #a855f738; color: #a855f7; }
+.venue-tag.mexc { background: #f9731618; border: 1px solid #f9731638; color: #f97316; }
+.dir-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.dir-tag.long  { background: #00e67614; color: var(--green); }
+.dir-tag.short { background: #ff4d4d14; color: var(--red); }
+
 /* ── Responsive ── */
 @media (max-width: 680px) {
   .logo { font-size: 1.4rem; }
@@ -280,10 +477,11 @@ body {
   .cut-row   { gap: 12px; }
   .pb-label  { width: 110px; }
   .j-tag     { font-size: 8.5px; }
+  .tab-btn   { padding: 5px 12px; font-size: 10px; }
 }
 @media (max-width: 400px) {
   .page { padding: 0 10px 48px; }
-  .range-btns button { padding: 5px 8px; font-size: .8rem; }
+  .range-btns button { padding: 5px 9px; font-size: .8rem; }
 }
 </style>
 </head>
@@ -292,7 +490,7 @@ body {
 
   <!-- A. HEADER -->
   <div class="header">
-    <div class="logo">FLEET SCORECARD</div>
+    <div class="logo"><span class="logo-dot"></span>FLEET SCORECARD</div>
     <div class="header-right">
       <div class="range-btns">
         <button id="btn-today" onclick="setRange('today')" class="active">TODAY</button>
@@ -303,138 +501,200 @@ body {
     </div>
   </div>
 
-  <!-- B. FLEET BAND -->
-  <div class="band">
-    <div class="band-title">FLEET</div>
-    <div class="fleet-top">
-      <div>
-        <div style="font-size:18px;color:#ffffff;font-weight:700;letter-spacing:.12em;margin-bottom:5px">NET P&amp;L</div>
-        <div class="fleet-pnl" id="fleet-pnl">—</div>
-        <div class="fleet-meta" id="fleet-meta">loading…</div>
-      </div>
-      <div id="fleet-bars"></div>
-    </div>
-    <div id="fleet-validation"></div>
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-insights"  onclick="setTab('insights')">INSIGHTS</button>
+    <button class="tab-btn"        id="tab-scorecard" onclick="setTab('scorecard')">SCORECARD</button>
+    <button class="tab-btn"        id="tab-log"       onclick="setTab('log')">LOG</button>
   </div>
 
-  <!-- C. FLEET J MAP -->
-  <div class="band">
-    <div class="band-title">FLEET J MAP</div>
-    <div class="jmap-header">
-      <div class="jmap-legend">
-        <span class="jleg-item"><span class="jleg-dot" style="background:#00dc64"></span>LONG ZONE</span>
-        <span class="jleg-item"><span class="jleg-dot" style="background:#ff4646"></span>SHORT ZONE</span>
-        <span class="jleg-item"><span class="jleg-dot" style="background:#555555"></span>NEUTRAL</span>
-        <span class="jleg-item"><span class="jleg-sq"  style="border-color:#b388ff"></span>HYPERLIQUID</span>
-        <span class="jleg-item"><span class="jleg-sq"  style="border-color:#ff9100"></span>MEXC</span>
-        <span class="jleg-item" style="color:#aaaaaa">✦ CONFIRMED</span>
-      </div>
-      <div class="jmap-toggle">
-        <button class="jmap-btn"        id="jbtn-15m"  onclick="setJView('15m')">15M</button>
-        <button class="jmap-btn"        id="jbtn-1h"   onclick="setJView('1h')">1H</button>
-        <button class="jmap-btn active" id="jbtn-both" onclick="setJView('both')">BOTH</button>
-      </div>
-    </div>
-    <div id="jrail-wrap-15m" class="j-rail-block">
-      <div class="j-rail-label">J 15M</div>
-      <div class="j-rail" id="rail-15m">
-        <div class="track-low"></div>
-        <div class="track-mid"></div>
-        <div class="track-high"></div>
-        <div class="j-tick" style="left:20%"></div>
-        <div class="j-tick" style="left:40%"></div>
-        <div class="j-tick" style="left:60%"></div>
-        <div class="j-tick" style="left:80%"></div>
-        <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
-      </div>
-    </div>
-    <div id="jrail-wrap-1h" class="j-rail-block" style="margin-top:26px">
-      <div class="j-rail-label">J 1H</div>
-      <div class="j-rail" id="rail-1h">
-        <div class="track-low"></div>
-        <div class="track-mid"></div>
-        <div class="track-high"></div>
-        <div class="j-tick" style="left:20%"></div>
-        <div class="j-tick" style="left:40%"></div>
-        <div class="j-tick" style="left:60%"></div>
-        <div class="j-tick" style="left:80%"></div>
-        <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
-      </div>
-    </div>
-    <div id="jmap-status" style="font-size:13px;color:#aaaaaa;font-weight:400;margin-top:20px">Awaiting live state…</div>
-  </div>
+  <!-- ═══ TAB 1: INSIGHTS ═══ -->
+  <div id="panel-insights">
 
-  <!-- D. EXCHANGE DUEL -->
-  <div class="band">
-    <div class="band-title">EXCHANGE DUEL</div>
-    <div class="duel-grid">
-      <div class="duel-card">
-        <div class="duel-strap hl">HYPERLIQUID</div>
-        <div class="duel-body" id="duel-hl"><div class="empty">loading…</div></div>
+    <!-- E. TWIN SIGNALS -->
+    <div class="band">
+      <div class="band-title">TWIN SIGNALS</div>
+      <div class="twins-hdr">
+        <div><strong id="twin-count">—</strong> twins · venue edge <strong id="twin-edge">—</strong></div>
       </div>
-      <div class="duel-card">
-        <div class="duel-strap mexc">MEXC</div>
-        <div class="duel-body" id="duel-mexc"><div class="empty">loading…</div></div>
+      <div id="twins-list"><div class="empty">loading…</div></div>
+    </div>
+
+    <!-- F. SESSION × DIRECTION -->
+    <div class="band">
+      <div class="band-title">SESSION × DIRECTION</div>
+      <div style="overflow-x:auto">
+        <table class="sess-table">
+          <thead>
+            <tr>
+              <th>SESSION</th>
+              <th style="color:#00e67666">↑ LONG P&amp;L</th>
+              <th>TRADES</th>
+              <th>WR</th>
+              <th style="color:#ff4d4d66">↓ SHORT P&amp;L</th>
+              <th>TRADES</th>
+              <th>WR</th>
+            </tr>
+          </thead>
+          <tbody id="sess-body"></tbody>
+        </table>
       </div>
     </div>
-  </div>
 
-  <!-- E. TWIN SIGNALS -->
-  <div class="band">
-    <div class="band-title">TWIN SIGNALS</div>
-    <div class="twins-hdr">
-      <div><strong id="twin-count">—</strong> twins · venue edge <strong id="twin-edge">—</strong></div>
+    <!-- G. PAIR LEAGUE -->
+    <div class="band">
+      <div class="band-title">PAIR LEAGUE</div>
+      <div style="overflow-x:auto">
+        <table class="league-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>PAIR</th>
+              <th>P&amp;L</th>
+              <th>TRADES</th>
+              <th>AVG R</th>
+            </tr>
+          </thead>
+          <tbody id="league-body"></tbody>
+        </table>
+      </div>
     </div>
-    <div id="twins-list"><div class="empty">loading…</div></div>
-  </div>
 
-  <!-- F. SESSION × DIRECTION -->
-  <div class="band">
-    <div class="band-title">SESSION × DIRECTION</div>
-    <div style="overflow-x:auto">
-      <table class="sess-table">
-        <thead>
-          <tr>
-            <th>SESSION</th>
-            <th style="color:#00e67666">↑ LONG P&amp;L</th>
-            <th>TRADES</th>
-            <th>WR</th>
-            <th style="color:#ff4d4d66">↓ SHORT P&amp;L</th>
-            <th>TRADES</th>
-            <th>WR</th>
-          </tr>
-        </thead>
-        <tbody id="sess-body"></tbody>
+    <!-- H. EXCURSION STRIP -->
+    <div class="band">
+      <div class="band-title">EXCURSION</div>
+      <div id="excursion"></div>
+    </div>
+
+  </div><!-- /panel-insights -->
+
+  <!-- ═══ TAB 2: SCORECARD ═══ -->
+  <div id="panel-scorecard" style="display:none">
+
+    <!-- B. FLEET BAND -->
+    <div class="band">
+      <div class="band-title">FLEET</div>
+      <div class="fleet-top">
+        <div>
+          <div style="font-size:18px;color:#ffffff;font-weight:700;letter-spacing:.12em;margin-bottom:5px">NET P&amp;L</div>
+          <div class="fleet-pnl" id="fleet-pnl">—</div>
+          <div class="fleet-meta" id="fleet-meta">loading…</div>
+        </div>
+        <div id="fleet-bars"></div>
+      </div>
+      <div id="fleet-validation"></div>
+    </div>
+
+    <!-- C. FLEET J MAP -->
+    <div class="band">
+      <div class="band-title">FLEET J MAP</div>
+      <div class="jmap-header">
+        <div class="jmap-legend">
+          <span class="jleg-item"><span class="jleg-dot" style="background:#00dc64"></span>LONG ZONE</span>
+          <span class="jleg-item"><span class="jleg-dot" style="background:#ff4646"></span>SHORT ZONE</span>
+          <span class="jleg-item"><span class="jleg-dot" style="background:#555555"></span>NEUTRAL</span>
+          <span class="jleg-item"><span class="jleg-sq"  style="border-color:#b388ff"></span>HYPERLIQUID</span>
+          <span class="jleg-item"><span class="jleg-sq"  style="border-color:#ff9100"></span>MEXC</span>
+          <span class="jleg-item" style="color:#aaaaaa">✦ CONFIRMED</span>
+        </div>
+        <div class="jmap-toggle">
+          <button class="jmap-btn"        id="jbtn-15m"  onclick="setJView('15m')">15M</button>
+          <button class="jmap-btn"        id="jbtn-1h"   onclick="setJView('1h')">1H</button>
+          <button class="jmap-btn active" id="jbtn-both" onclick="setJView('both')">BOTH</button>
+        </div>
+      </div>
+      <div id="jrail-wrap-15m" class="j-rail-block">
+        <div class="j-rail-label">J 15M</div>
+        <div class="j-rail" id="rail-15m">
+          <div class="track-low"></div>
+          <div class="track-mid"></div>
+          <div class="track-high"></div>
+          <div class="j-tick" style="left:20%"></div>
+          <div class="j-tick" style="left:40%"></div>
+          <div class="j-tick" style="left:60%"></div>
+          <div class="j-tick" style="left:80%"></div>
+          <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
+        </div>
+      </div>
+      <div id="jrail-wrap-1h" class="j-rail-block" style="margin-top:26px">
+        <div class="j-rail-label">J 1H</div>
+        <div class="j-rail" id="rail-1h">
+          <div class="track-low"></div>
+          <div class="track-mid"></div>
+          <div class="track-high"></div>
+          <div class="j-tick" style="left:20%"></div>
+          <div class="j-tick" style="left:40%"></div>
+          <div class="j-tick" style="left:60%"></div>
+          <div class="j-tick" style="left:80%"></div>
+          <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
+        </div>
+      </div>
+      <div id="jmap-status" style="font-size:13px;color:#aaaaaa;font-weight:400;margin-top:20px">Awaiting live state…</div>
+    </div>
+
+    <!-- D. EXCHANGE DUEL -->
+    <div class="band">
+      <div class="band-title">EXCHANGE DUEL</div>
+      <div class="duel-grid">
+        <div class="duel-card">
+          <div class="duel-strap hl">HYPERLIQUID</div>
+          <div class="duel-body" id="duel-hl"><div class="empty">loading…</div></div>
+        </div>
+        <div class="duel-card">
+          <div class="duel-strap mexc">MEXC</div>
+          <div class="duel-body" id="duel-mexc"><div class="empty">loading…</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-scorecard -->
+
+  <!-- ═══ TAB 3: LOG ═══ -->
+  <div id="panel-log" style="display:none">
+
+    <!-- Filters -->
+    <div class="log-filters">
+      <div class="log-filter-group">
+        <div class="venue-chips">
+          <button class="venue-chip active-all" id="vchip-all"  onclick="setVenueChip('all')">ALL</button>
+          <button class="venue-chip"            id="vchip-hl"   onclick="setVenueChip('hl')">HL</button>
+          <button class="venue-chip"            id="vchip-mexc" onclick="setVenueChip('mexc')">MEXC</button>
+        </div>
+      </div>
+      <div class="log-filter-group">
+        <span class="log-filter-label">FROM</span>
+        <input type="date" id="log-from" class="log-date-input" onchange="onLogFilterChange()">
+        <span class="log-filter-label">TO</span>
+        <input type="date" id="log-to"   class="log-date-input" onchange="onLogFilterChange()">
+      </div>
+      <div class="log-filter-group">
+        <input type="text" id="log-pair" class="log-pair-input" placeholder="PAIR FILTER" oninput="onLogFilterChange()">
+      </div>
+    </div>
+
+    <!-- Toolbar: count + export -->
+    <div class="log-toolbar">
+      <div class="log-count-wrap">
+        <div class="log-count-num" id="log-count">—</div>
+        <div class="log-count-lbl">TRADES</div>
+      </div>
+      <button class="export-btn" onclick="exportCSV()">EXPORT CSV</button>
+    </div>
+
+    <!-- Table -->
+    <div class="log-wrap">
+      <table class="log-table" id="log-table">
+        <thead><tr>
+          <th>VENUE</th><th>PAIR</th><th>DIR</th><th>TIER</th>
+          <th>CLOSE</th><th>EXIT</th><th>PNL</th><th>R</th><th>DUR</th>
+        </tr></thead>
+        <tbody><tr><td colspan="9" class="empty" style="padding:12px 10px">Select the LOG tab to load trades…</td></tr></tbody>
       </table>
     </div>
-  </div>
 
-  <!-- G. PAIR LEAGUE -->
-  <div class="band">
-    <div class="band-title">PAIR LEAGUE</div>
-    <div style="overflow-x:auto">
-      <table class="league-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>PAIR</th>
-            <th>P&amp;L</th>
-            <th>TRADES</th>
-            <th>AVG R</th>
-          </tr>
-        </thead>
-        <tbody id="league-body"></tbody>
-      </table>
-    </div>
-  </div>
+  </div><!-- /panel-log -->
 
-  <!-- H. EXCURSION STRIP -->
-  <div class="band">
-    <div class="band-title">EXCURSION</div>
-    <div id="excursion"></div>
-  </div>
-
-  <!-- I. FOOTER -->
+  <!-- I. FOOTER (always visible) -->
   <div class="footer">
     <div id="foot-refresh">—</div>
     <div id="foot-rows">—</div>
@@ -456,12 +716,13 @@ const C = {
   green: '#00e676',
   red:   '#ff4d4d',
   amber: '#ffb300',
+  teal:  '#22d3ee',
 };
 
 // ── state ──
-let range = 'today';
+let range     = 'today';
 let analytics = null;
-let live = null;
+let live      = null;
 
 // ── format helpers ──
 function fmtDollar(v, prefix = true) {
@@ -505,6 +766,23 @@ function etNow() {
     hour: '2-digit', minute: '2-digit', second: '2-digit',
   });
 }
+function fmtDur(secs) {
+  if (secs == null || secs < 0) return '—';
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m`;
+  return `${secs}s`;
+}
+
+// ── tab switching ──
+function setTab(name) {
+  ['insights','scorecard','log'].forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === name ? '' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+  });
+  if (name === 'log' && !logLoaded) loadLog();
+}
 
 // ── range selector ──
 function setRange(r) {
@@ -513,9 +791,10 @@ function setRange(r) {
     document.getElementById('btn-' + x).classList.toggle('active', x === r);
   });
   loadAnalytics();
+  if (logLoaded) loadLog();
 }
 
-// ── fetch ──
+// ── fetch analytics ──
 async function loadAnalytics() {
   try {
     const res = await fetch('/api/analytics?range=' + range);
@@ -658,7 +937,6 @@ function paintRail(railId, tags) {
   rail.querySelectorAll('.j-tag').forEach(el => el.remove());
   if (!tags.length) return;
 
-  // Merge same-symbol tags across venues; keep first j value seen, collect all venues
   const bySymbol = {};
   for (const t of tags) {
     const jv = clamp(parseFloat(t.j), 0, 100);
@@ -667,25 +945,22 @@ function paintRail(railId, tags) {
     } else {
       if (!bySymbol[t.symbol].venues.includes(t.venue)) {
         bySymbol[t.symbol].venues.push(t.venue);
-        bySymbol[t.symbol].venues.sort(a => a === 'hl' ? -1 : 1); // HL always left
+        bySymbol[t.symbol].venues.sort(a => a === 'hl' ? -1 : 1);
       }
     }
   }
 
-  // Sort left-to-right for collision sweep
   const sorted = Object.values(bySymbol).sort((a, b) => a.jv - b.jv);
-
-  // 2-row collision detection using estimated label widths (in % units)
   const rowRanges = [[], []];
   const ROW_H   = 14;
   const ROW_GAP = 2;
 
   for (const t of sorted) {
-    const halfW  = (t.symbol.length * 1.3 + 4) / 2; // estimated half-width in %
+    const halfW  = (t.symbol.length * 1.3 + 4) / 2;
     const fromPct = t.jv - halfW;
     const toPct   = t.jv + halfW;
 
-    let row = rowRanges.length - 1; // fallback: last row
+    let row = rowRanges.length - 1;
     for (let r = 0; r < rowRanges.length; r++) {
       if (!rowRanges[r].some(rng => fromPct < rng.to && toPct > rng.from)) {
         row = r; break;
@@ -693,15 +968,12 @@ function paintRail(railId, tags) {
     }
     rowRanges[row].push({ from: fromPct, to: toPct });
 
-    // Build tag element
     const el = document.createElement('div');
     el.className = 'j-tag';
 
-    // J-direction color: green ≤20, red ≥80, grey neutral
     const labelColor = t.jv <= 20 ? '#00dc64' : t.jv >= 80 ? '#ff4646' : '#3a3a3a';
     el.style.color = labelColor;
 
-    // Eclipse dot wrapper: dot centered, venue squares overlaid left (HL) / right (MEXC)
     const hasHL   = t.venues.includes('hl');
     const hasMEXC = t.venues.includes('mexc');
     const wrapW   = (hasHL && hasMEXC) ? 14 : 10;
@@ -732,7 +1004,7 @@ function paintRail(railId, tags) {
     el.appendChild(wrap);
 
     const txt = document.createElement('span');
-    txt.textContent = t.symbol + (t.c ? ' ✦' : '');
+    txt.textContent = t.symbol + (t.c ? ' \u2736' : '');
     el.appendChild(txt);
 
     el.style.left = t.jv.toFixed(2) + '%';
@@ -790,7 +1062,7 @@ function renderTwins() {
   }
 
   const maxAbs = Math.max(...twins.flatMap(t => [Math.abs(t.hl_pnl), Math.abs(t.mexc_pnl)]), 1);
-  const BAR_MAX = 120; // px
+  const BAR_MAX = 120;
 
   document.getElementById('twins-list').innerHTML = twins.map(t => {
     const hlW  = ((Math.abs(t.hl_pnl)   / maxAbs) * BAR_MAX).toFixed(0);
@@ -877,7 +1149,7 @@ function renderExcursion() {
       <div class="exc-card">
         <div class="exc-lbl">DEEP MAE WINNERS</div>
         <div class="exc-val" style="color:${C.amber}">${e.deep_mae_winner_count}</div>
-        <div style="font-size:13px;color:#aaaaaa;font-weight:400;margin-top:2px">mae ≤ −0.5R</div>
+        <div style="font-size:13px;color:#aaaaaa;font-weight:400;margin-top:2px">mae &le; &minus;0.5R</div>
       </div>
     </div>
     <div class="cut-box">
@@ -888,7 +1160,7 @@ function renderExcursion() {
         <div><span style="color:#ffffff;font-weight:700">NET </span><span style="color:${pnlColor(e.net)};font-weight:700">${fmtDollar(e.net)}</span></div>
         <div class="cut-verdict" style="color:${verdictColor}">${e.verdict}</div>
       </div>
-      ${e.skipped > 0 ? `<div class="cut-skip">${e.skipped} row${e.skipped !== 1 ? 's' : ''} skipped — null mae_r</div>` : ''}
+      ${e.skipped > 0 ? `<div class="cut-skip">${e.skipped} row${e.skipped !== 1 ? 's' : ''} skipped &mdash; null mae_r</div>` : ''}
     </div>
   `;
 }
@@ -899,7 +1171,7 @@ function renderFooter() {
   if (analytics) {
     const rc = analytics.row_counts || {};
     document.getElementById('foot-rows').textContent =
-      `HL ${rc.hl ?? '?'} rows · MEXC ${rc.mexc ?? '?'} rows`;
+      `HL ${rc.hl ?? '?'} rows \u00B7 MEXC ${rc.mexc ?? '?'} rows`;
   }
   if (live && analytics) {
     const hlOk   = !!live.hl_ok;
@@ -923,12 +1195,197 @@ function renderAnalytics() {
   renderFooter();
 }
 
+// ═══════════════════════════════════════
+// ── LOG TAB ─────────────────────────────
+// ═══════════════════════════════════════
+
+let logData   = null;
+let logLoaded = false;
+let logSort   = { col: 'close_time', dir: 'desc' };
+let logVenue  = 'all';
+
+async function loadLog() {
+  document.getElementById('log-count').textContent = '…';
+  try {
+    const res = await fetch('/api/log?range=' + range);
+    if (!res.ok) return;
+    logData   = await res.json();
+    logLoaded = true;
+    renderLog();
+  } catch (e) { console.error('log', e); }
+}
+
+function getLogFiltered() {
+  if (!logData) return [];
+  let rows = logData;
+
+  if (logVenue !== 'all') {
+    rows = rows.filter(r => r._venue === logVenue);
+  }
+
+  const pairQ = (document.getElementById('log-pair')?.value || '').trim().toLowerCase();
+  if (pairQ) {
+    rows = rows.filter(r => (r.pair || '').toLowerCase().includes(pairQ));
+  }
+
+  const fromVal = document.getElementById('log-from')?.value;
+  const toVal   = document.getElementById('log-to')?.value;
+  if (fromVal) {
+    const from = new Date(fromVal + 'T00:00:00Z');
+    rows = rows.filter(r => r.close_time && new Date(r.close_time) >= from);
+  }
+  if (toVal) {
+    const to = new Date(toVal + 'T23:59:59Z');
+    rows = rows.filter(r => r.close_time && new Date(r.close_time) <= to);
+  }
+
+  rows = [...rows].sort((a, b) => {
+    let av = a[logSort.col], bv = b[logSort.col];
+    if (av == null) av = logSort.dir === 'asc' ? '\uFFFF' : '';
+    if (bv == null) bv = logSort.dir === 'asc' ? '\uFFFF' : '';
+    if (typeof av === 'number' && typeof bv === 'number') {
+      return logSort.dir === 'asc' ? av - bv : bv - av;
+    }
+    const cmp = String(av).localeCompare(String(bv));
+    return logSort.dir === 'asc' ? cmp : -cmp;
+  });
+
+  return rows;
+}
+
+function renderLog() {
+  const rows = getLogFiltered();
+  document.getElementById('log-count').textContent = rows.length;
+
+  const COL_DEFS = [
+    { key: '_venue',           label: 'VENUE' },
+    { key: 'pair',             label: 'PAIR'  },
+    { key: 'direction',        label: 'DIR'   },
+    { key: 'tier',             label: 'TIER'  },
+    { key: 'close_time',       label: 'CLOSE' },
+    { key: 'exit_reason',      label: 'EXIT'  },
+    { key: 'pnl_dollars',      label: 'PNL'   },
+    { key: 'r_value',          label: 'R'     },
+    { key: 'duration_seconds', label: 'DUR'   },
+  ];
+
+  const arrowHTML = (col) => {
+    if (logSort.col !== col) return '<span style="color:#282828;margin-left:3px">&#8597;</span>';
+    return logSort.dir === 'asc'
+      ? '<span style="color:#22d3ee;margin-left:3px">&#8593;</span>'
+      : '<span style="color:#22d3ee;margin-left:3px">&#8595;</span>';
+  };
+
+  const thead = COL_DEFS.map(c => {
+    const active = logSort.col === c.key ? ' sort-active' : '';
+    return `<th class="${active}" onclick="sortLog('${c.key}')">${c.label}${arrowHTML(c.key)}</th>`;
+  }).join('');
+
+  const tbody = rows.length === 0
+    ? `<tr><td colspan="${COL_DEFS.length}" class="empty" style="padding:14px 10px">No trades match current filters</td></tr>`
+    : rows.map(r => {
+        const venue = r._venue === 'hl'
+          ? '<span class="venue-tag hl">HL</span>'
+          : '<span class="venue-tag mexc">MEXC</span>';
+        const dirTag = (r.direction || '').toUpperCase() === 'LONG'
+          ? '<span class="dir-tag long">LONG</span>'
+          : '<span class="dir-tag short">SHORT</span>';
+        const closeFmt = r.close_time
+          ? new Date(r.close_time).toLocaleString('en-US', {
+              timeZone: 'America/New_York',
+              month: 'numeric', day: 'numeric',
+              hour: '2-digit', minute: '2-digit',
+            })
+          : '—';
+        const pnlV   = r.pnl_dollars != null ? parseFloat(r.pnl_dollars) : null;
+        const pnlStr = pnlV != null ? fmtDollar(pnlV) : '—';
+        const pnlCol = pnlV != null ? pnlColor(pnlV) : '#555';
+        const rvV    = r.r_value != null ? parseFloat(r.r_value) : null;
+        const rvStr  = rvV != null ? fmtR(rvV) : '—';
+        const rvCol  = rvV != null ? (rvV >= 0 ? C.green : C.red) : '#555';
+        const dur    = fmtDur(r.duration_seconds);
+        const exitStr = r.exit_reason || '—';
+        const tier    = r.tier || '—';
+        return `<tr>
+          <td>${venue}</td>
+          <td style="color:#fff;font-weight:700;letter-spacing:.04em">${r.pair || '—'}</td>
+          <td>${dirTag}</td>
+          <td style="color:#555;font-size:11px">${tier}</td>
+          <td style="color:#666;font-size:11px">${closeFmt}</td>
+          <td style="color:#555;font-size:11px;letter-spacing:.03em">${exitStr}</td>
+          <td style="color:${pnlCol};font-weight:700">${pnlStr}</td>
+          <td style="color:${rvCol};font-weight:700">${rvStr}</td>
+          <td style="color:#666;font-size:11px">${dur}</td>
+        </tr>`;
+      }).join('');
+
+  document.getElementById('log-table').innerHTML =
+    `<thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody>`;
+}
+
+function sortLog(col) {
+  if (logSort.col === col) {
+    logSort.dir = logSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    logSort.col = col;
+    logSort.dir = col === 'pnl_dollars' || col === 'close_time' ? 'desc' : 'asc';
+  }
+  renderLog();
+}
+
+function setVenueChip(v) {
+  logVenue = v;
+  ['all','hl','mexc'].forEach(x => {
+    const el = document.getElementById('vchip-' + x);
+    if (!el) return;
+    el.className = 'venue-chip' + (x === v ? ' active-' + x : '');
+  });
+  renderLog();
+}
+
+function onLogFilterChange() {
+  renderLog();
+}
+
+function exportCSV() {
+  const rows = getLogFiltered();
+  const headers = ['venue','pair','direction','tier','close_time','exit_reason','pnl_dollars','r_value','duration_seconds','score','adx1h','session_opened'];
+  const lines = [headers.join(',')];
+  for (const r of rows) {
+    lines.push(headers.map(h => {
+      const v = h === 'venue' ? (r._venue || '') : (r[h] ?? '');
+      const s = String(v);
+      return s.includes(',') || s.includes('"') || s.includes('\n')
+        ? '"' + s.replace(/"/g, '""') + '"'
+        : s;
+    }).join(','));
+  }
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `fleet-log-${range}-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function _initLogDates() {
+  const today = new Date();
+  const from  = new Date(today.getTime() - 7 * 24 * 3600 * 1000);
+  const fmt   = d => d.toISOString().slice(0, 10);
+  const fromEl = document.getElementById('log-from');
+  const toEl   = document.getElementById('log-to');
+  if (fromEl) fromEl.value = fmt(from);
+  if (toEl)   toEl.value   = fmt(today);
+}
+
 // ── boot ──
 (async function init() {
+  _initLogDates();
   await Promise.all([loadAnalytics(), loadLive()]);
-  // Live: poll every 30s
-  setInterval(loadLive, 30_000);
-  // Analytics: re-fetch every 5 min
+  setInterval(loadLive,      30_000);
   setInterval(loadAnalytics, 300_000);
 })();
 </script>
