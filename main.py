@@ -808,6 +808,11 @@ async def api_reconstruct(
                                  "mae_timestamp": _ts_iso(mae_hit["time_ms"]),
                                  "mae_price": round(mae_price, 6), "mfe_price": round(mfe_price, 6)})
 
+        # Breakeven crossing: after MAE adverse, before MFE (price recovers through entry)
+        bev_candles_a = [c for c in candles if c["time_ms"] < mfe_hit["time_ms"]]
+        bev_hit_a = _find_crossing(bev_candles_a, entry, mfe_up, sl_dist,
+                                   after_ms=mae_hit["time_ms"] + 1)
+
         adverse_s  = (mae_hit["time_ms"] - open_ms) / 1000
         recovery_s = (mfe_hit["time_ms"] - mae_hit["time_ms"]) / 1000
 
@@ -833,6 +838,10 @@ async def api_reconstruct(
             "pct_of_duration_recovery": _pct(recovery_s),
             "window_start_pct":  _pct(adverse_s),
             "window_end_pct":    _pct(adverse_s + recovery_s),
+            "breakeven_timestamp":       _ts_iso(bev_hit_a["time_ms"]) if bev_hit_a else None,
+            "breakeven_tag":             bev_hit_a["tag"] if bev_hit_a else "not_found",
+            "breakeven_gap_r":           bev_hit_a["gap_r"] if bev_hit_a else None,
+            "breakeven_pct_of_duration": _pct((bev_hit_a["time_ms"] - open_ms) / 1000) if bev_hit_a else None,
         })
 
     else:  # SL — group b: entry -> MFE -> MAE/SL -> close
@@ -848,6 +857,11 @@ async def api_reconstruct(
             return JSONResponse({"status": "no_crossing", "msg": "MAE/SL crossing not found after MFE peak in 1m candles",
                                  "mfe_timestamp": _ts_iso(mfe_hit["time_ms"]),
                                  "mae_price": round(mae_price, 6)})
+
+        # Breakeven crossing: after MFE peak, before SL/MAE (price falls back through entry)
+        bev_candles_b = [c for c in candles if c["time_ms"] < mae_hit["time_ms"]]
+        bev_hit_b = _find_crossing(bev_candles_b, entry, mae_up, sl_dist,
+                                   after_ms=mfe_hit["time_ms"] + 1)
 
         favorable_s  = (mfe_hit["time_ms"] - open_ms) / 1000
         roundtrip_s  = (mae_hit["time_ms"] - mfe_hit["time_ms"]) / 1000
@@ -874,6 +888,10 @@ async def api_reconstruct(
             "pct_of_duration_roundtrip":  _pct(roundtrip_s),
             "window_start_pct": _pct(favorable_s),
             "window_end_pct":   _pct(favorable_s + roundtrip_s),
+            "breakeven_timestamp":       _ts_iso(bev_hit_b["time_ms"]) if bev_hit_b else None,
+            "breakeven_tag":             bev_hit_b["tag"] if bev_hit_b else "not_found",
+            "breakeven_gap_r":           bev_hit_b["gap_r"] if bev_hit_b else None,
+            "breakeven_pct_of_duration": _pct((bev_hit_b["time_ms"] - open_ms) / 1000) if bev_hit_b else None,
         })
 
 

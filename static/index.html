@@ -614,6 +614,11 @@ body {
   .tl-seg { position: absolute; top: 0; height: 100%; border-radius: 2px; }
   .tl-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #fff; border-radius: 1px; z-index: 2; }
   .recon-meta { font-size: 10px; font-weight: 700; color: #ffffff; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 7px; letter-spacing: .04em; }
+    .recon-legend { display: flex; gap: 14px; align-items: center; margin-bottom: 7px; }
+    .recon-legend-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 3px; vertical-align: middle; flex-shrink: 0; }
+    .recon-legend-label { font-size: 7.5px; font-weight: 600; color: #ffffff; letter-spacing: .1em; vertical-align: middle; }
+    .tl-bev-tick { position: absolute; top: -6px; bottom: -6px; width: 0; border-left: 2px dashed #fbbf24; z-index: 3; }
+    .recon-caption { font-size: 8.5px; font-style: italic; color: #3a3a3a; margin-top: 7px; line-height: 1.5; }
 
     /* ── Intelligence Pill Row ── */
     .intel-pill-row {
@@ -2053,56 +2058,97 @@ function _initLogDates() {
   }
 
   function _renderReconResult(key) {
-    const r = rcResults[key];
-    if (!r) return '';
-    if (r._loading) return '<div class="recon-loading">RECONSTRUCTING...</div>';
-    if (r.status === 'outside_retention') return '<div class="recon-loading" style="color:' + C.amber + '">OUTSIDE HL 5-DAY RETENTION WINDOW</div>';
-    if (r.status === 'unsupported')  return '<div class="recon-loading" style="color:#555">' + r.msg + '</div>';
-    if (r.status === 'no_crossing')  return '<div class="recon-loading" style="color:' + C.amber + '">NO CROSSING FOUND -- ' + r.msg + '</div>';
-    if (r.status === 'error')        return '<div class="recon-loading" style="color:' + C.red   + '">ERROR -- ' + r.msg + '</div>';
-    if (r.status !== 'ok')           return '<div class="recon-loading" style="color:#555">status: ' + r.status + '</div>';
+      const r = rcResults[key];
+      if (!r) return '';
+      if (r._loading) return '<div class="recon-loading">RECONSTRUCTING...</div>';
+      if (r.status === 'outside_retention') return '<div class="recon-loading" style="color:' + C.amber + '">OUTSIDE HL 5-DAY RETENTION WINDOW</div>';
+      if (r.status === 'unsupported')  return '<div class="recon-loading" style="color:#555">' + r.msg + '</div>';
+      if (r.status === 'no_crossing')  return '<div class="recon-loading" style="color:' + C.amber + '">NO CROSSING FOUND -- ' + r.msg + '</div>';
+      if (r.status === 'error')        return '<div class="recon-loading" style="color:' + C.red   + '">ERROR -- ' + r.msg + '</div>';
+      if (r.status !== 'ok')           return '<div class="recon-loading" style="color:#555">status: ' + r.status + '</div>';
 
-    const isTB     = r.group === 'a';
-    const segColor = isTB ? '#22d3ee' : C.red;
-    const ws       = r.window_start_pct.toFixed(1);
-    const we       = r.window_end_pct.toFixed(1);
-    const ww       = (parseFloat(we) - parseFloat(ws)).toFixed(1);
+      const isTB = r.group === 'a';
+      const ws   = parseFloat(r.window_start_pct).toFixed(1);
+      const we   = parseFloat(r.window_end_pct).toFixed(1);
+      const bp   = (r.breakeven_tag !== 'not_found' && r.breakeven_pct_of_duration != null)
+                     ? parseFloat(r.breakeven_pct_of_duration).toFixed(1) : null;
 
-    let metaItems = [];
-    if (isTB) {
-      const maeT = new Date(r.mae_timestamp).toISOString().slice(11, 16);
-      const mfeT = new Date(r.mfe_timestamp).toISOString().slice(11, 16);
-      metaItems = [
-        'MAE @ ' + maeT + ' UTC [' + r.mae_tag + ', gap=' + r.mae_gap_r + 'R]',
-        'MFE @ ' + mfeT + ' UTC [' + r.mfe_tag + ', gap=' + r.mfe_gap_r + 'R]',
-        'Adverse ' + r.time_to_mae_seconds + 's (' + r.pct_of_duration_adverse + '%)  '
-          + 'Recovery ' + r.mae_to_mfe_seconds + 's (' + r.pct_of_duration_recovery + '%)',
-        'Trade total ' + r.total_seconds + 's',
-      ];
-    } else {
-      const mfeT = new Date(r.mfe_timestamp).toISOString().slice(11, 16);
-      const slT  = new Date(r.sl_timestamp).toISOString().slice(11, 16);
-      metaItems = [
-        'Peak @ ' + mfeT + ' UTC [' + r.mfe_tag + ', gap=' + r.mfe_gap_r + 'R]',
-        'SL   @ ' + slT  + ' UTC [' + r.sl_tag  + ', gap=' + r.sl_gap_r  + 'R]',
-        'To peak ' + r.time_to_mfe_seconds + 's (' + r.pct_of_duration_favorable + '%)  '
-          + 'Round-trip ' + r.mfe_to_sl_seconds + 's (' + r.pct_of_duration_roundtrip + '%)',
-        'Trade total ' + r.total_seconds + 's',
-      ];
+      // Tri-color gradient across full bar width
+      let grad;
+      if (isTB) {
+        // TRAILBLAZER: red(adverse) -> amber(breakeven) -> green(favorable)
+        if (bp !== null) {
+          grad = 'linear-gradient(to right,#ef4444 0%,#ef4444 ' + ws + '%,#fbbf24 ' + bp + '%,#16a34a ' + we + '%,#16a34a 100%)';
+        } else {
+          grad = 'linear-gradient(to right,#ef4444 0%,#ef4444 ' + ws + '%,#22c55e ' + we + '%,#22c55e 100%)';
+        }
+      } else {
+        // SL: green(favorable) -> amber(breakeven) -> red(adverse/SL)
+        if (bp !== null) {
+          grad = 'linear-gradient(to right,#16a34a 0%,#22c55e ' + ws + '%,#fbbf24 ' + bp + '%,#ef4444 ' + we + '%,#ef4444 100%)';
+        } else {
+          grad = 'linear-gradient(to right,#16a34a 0%,#22c55e ' + ws + '%,#ef4444 ' + we + '%,#ef4444 100%)';
+        }
+      }
+
+      const bevTickHtml = bp !== null
+        ? '<div class="tl-bev-tick" style="left:' + bp + '%"></div>'
+        : '';
+
+      let bevStatHtml = '';
+      if (r.breakeven_timestamp && r.breakeven_tag !== 'not_found') {
+        const bevT = new Date(r.breakeven_timestamp).toISOString().slice(11, 16);
+        bevStatHtml = '<span>BREAKEVEN AT <span style="color:#fbbf24">' + bevT + ' UTC</span> [' + r.breakeven_tag + ', gap=' + r.breakeven_gap_r + 'R]</span>';
+      } else {
+        bevStatHtml = '<span>BREAKEVEN AT <span style="color:#555">&#8212;</span></span>';
+      }
+
+      let metaItems = [bevStatHtml];
+      if (isTB) {
+        const maeT = new Date(r.mae_timestamp).toISOString().slice(11, 16);
+        const mfeT = new Date(r.mfe_timestamp).toISOString().slice(11, 16);
+        metaItems = metaItems.concat([
+          'MAE AT <span style="color:#ef4444">' + maeT + ' UTC</span> [' + r.mae_tag + ', gap=' + r.mae_gap_r + 'R]',
+          'MFE AT <span style="color:#22c55e">' + mfeT + ' UTC</span> [' + r.mfe_tag + ', gap=' + r.mfe_gap_r + 'R]',
+          'Adverse ' + r.time_to_mae_seconds + 's (' + r.pct_of_duration_adverse + '%)  '
+            + 'Recovery ' + r.mae_to_mfe_seconds + 's (' + r.pct_of_duration_recovery + '%)',
+          'Trade total ' + r.total_seconds + 's',
+        ]);
+      } else {
+        const mfeT = new Date(r.mfe_timestamp).toISOString().slice(11, 16);
+        const slT  = new Date(r.sl_timestamp).toISOString().slice(11, 16);
+        metaItems = metaItems.concat([
+          'PEAK AT <span style="color:#22c55e">' + mfeT + ' UTC</span> [' + r.mfe_tag + ', gap=' + r.mfe_gap_r + 'R]',
+          'SL AT <span style="color:#ef4444">' + slT + ' UTC</span> [' + r.sl_tag + ', gap=' + r.sl_gap_r + 'R]',
+          'To peak ' + r.time_to_mfe_seconds + 's (' + r.pct_of_duration_favorable + '%)  '
+            + 'Round-trip ' + r.mfe_to_sl_seconds + 's (' + r.pct_of_duration_roundtrip + '%)',
+          'Trade total ' + r.total_seconds + 's',
+        ]);
+      }
+
+      const captionSeq = isTB
+        ? 'OPEN&#8594;MAE&#8594;BREAKEVEN&#8594;MFE&#8594;CLOSE'
+        : 'OPEN&#8594;MFE&#8594;BREAKEVEN&#8594;SL&#8594;CLOSE';
+
+      return '<div class="timeline-wrap">'
+        + '<div class="recon-legend">'
+        + '<span class="recon-legend-dot" style="background:#22c55e"></span><span class="recon-legend-label">POSITIVE</span>'
+        + '<span class="recon-legend-dot" style="background:#fbbf24"></span><span class="recon-legend-label">BREAKEVEN</span>'
+        + '<span class="recon-legend-dot" style="background:#ef4444"></span><span class="recon-legend-label">NEGATIVE</span>'
+        + '</div>'
+        + '<div class="timeline-lbl">TRADE PnL PATH</div>'
+        + '<div class="tl-track">'
+        +   '<div class="tl-seg" style="left:0;width:100%;background:' + grad + ';opacity:.85"></div>'
+        +   '<div class="tl-tick" style="left:' + ws + '%"></div>'
+        +   '<div class="tl-tick" style="left:' + we + '%"></div>'
+        +   bevTickHtml
+        + '</div>'
+        + '<div class="recon-caption">&#9888; Approximate PnL path &#8212; interpolated linearly between ' + captionSeq + ' using only the candles confirming each crossing. Will not show intermediate whipsaw between anchors.</div>'
+        + '</div>'
+        + '<div class="recon-meta">'
+        + metaItems.map(m => '<span>' + m + '</span>').join('')
+        + '</div>';
     }
-
-    return '<div class="timeline-wrap">'
-      + '<div class="timeline-lbl">'
-      + (isTB ? 'MAE → MFE RECOVERY WINDOW' : 'PEAK → SL ROUND-TRIP WINDOW') + '</div>'
-      + '<div class="tl-track">'
-      +   '<div class="tl-seg" style="left:' + ws + '%;width:' + ww + '%;background:' + segColor + ';opacity:.8"></div>'
-      +   '<div class="tl-tick" style="left:' + ws + '%"></div>'
-      +   '<div class="tl-tick" style="left:' + we + '%"></div>'
-      + '</div></div>'
-      + '<div class="recon-meta">'
-      + metaItems.map(m => '<span>' + m + '</span>').join('')
-      + '</div>';
-  }
 
   async function reconstructOne(venue, tradeId, key) {
     if (rcResults[key] && !rcResults[key]._loading) {
