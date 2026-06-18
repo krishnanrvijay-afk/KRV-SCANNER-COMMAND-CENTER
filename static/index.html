@@ -1292,14 +1292,14 @@ function toggleDetailRow(rowId) {
 }
 
 function detailHTML(r) {
-  function dc(lbl, val, color) {
-    return `<div class="detail-cell"><div class="detail-lbl">${lbl}</div><div class="detail-val" style="color:${color || '#ffffff'}">${val}</div></div>`;
+  function dc(lbl, val, color, fw) {
+    return `<div class="detail-cell"><div class="detail-lbl">${lbl}</div><div class="detail-val" style="color:${color || '#ffffff'}${fw ? ';font-weight:'+fw : ''}">${val}</div></div>`;
   }
   const slTp   = [r.sl, r.tp1, r.tp2].map(v => v != null ? fmtNum(v, 4) : '—').join(' / ');
   const jVals  = [r.j15m_entry, r.j1h_entry].map(v => fmtNum(v, 1)).join(' / ');
   const stoch  = [r.stoch_k_entry, r.stoch_d_entry].map(v => fmtNum(v, 1)).join(' / ');
   const chg24  = r.chg24h_entry != null ? fmtNum(r.chg24h_entry, 2) + '%' : 'not yet tracked';
-  const chg24c = r.chg24h_entry != null ? (parseFloat(r.chg24h_entry) >= 0 ? C.green : C.red) : '#555555';
+  const chg24c = r.chg24h_entry != null ? (parseFloat(r.chg24h_entry) >= 0 ? C.green : C.red) : '#ffffff';
   const maeC   = r.mae_r != null ? (parseFloat(r.mae_r) < 0 ? C.red : '#ffffff') : '#ffffff';
   const mfeC   = r.mfe_r != null ? (parseFloat(r.mfe_r) > 0 ? C.green : '#ffffff') : '#ffffff';
   return [
@@ -1313,7 +1313,7 @@ function detailHTML(r) {
     dc('STOCH K / D', stoch),
     dc('RSI',         r.rsi_entry         != null ? fmtNum(r.rsi_entry, 1)        : '—'),
     dc('DEPTH %',     r.depth_pct_entry   != null ? fmtNum(r.depth_pct_entry, 2) + '%' : '—'),
-    dc('CHG24H',      chg24, chg24c),
+    dc('CHG24H',      chg24, chg24c, r.chg24h_entry == null ? 700 : undefined),
     dc('SESSION',     r.session_opened || '—'),
     dc('MAE R',       r.mae_r             != null ? fmtNum(r.mae_r, 2) + 'R'      : '—', maeC),
     dc('MFE R',       r.mfe_r             != null ? fmtNum(r.mfe_r, 2) + 'R'      : '—', mfeC),
