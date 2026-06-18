@@ -660,10 +660,8 @@ async def api_schema(request: Request) -> JSONResponse:
   ) -> JSONResponse:
       _require_auth(request)
 
-      hl_rows, mexc_rows = await asyncio.gather(
-          _sb_fetch("hl_trade_log",   {"order": "close_time.desc", "limit": "1000"}) if venue in ("all", "hl")   else asyncio.coroutine(lambda: [])(),
-          _sb_fetch("mexc_trade_log", {"order": "close_time.desc", "limit": "1000"}) if venue in ("all", "mexc") else asyncio.coroutine(lambda: [])(),
-      )
+      hl_rows   = await _sb_fetch("hl_trade_log",   {"order": "close_time.desc", "limit": "1000"}) if venue in ("all", "hl")   else []
+      mexc_rows = await _sb_fetch("mexc_trade_log", {"order": "close_time.desc", "limit": "1000"}) if venue in ("all", "mexc") else []
       rows = ([{"_venue": "hl",   **r} for r in hl_rows   if r.get("close_time")] +
               [{"_venue": "mexc", **r} for r in mexc_rows if r.get("close_time")])
 
