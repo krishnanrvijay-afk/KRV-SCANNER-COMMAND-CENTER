@@ -466,6 +466,14 @@ body {
 .dir-tag.long  { background: #00e67614; color: var(--green); }
 .dir-tag.short { background: #ff4d4d14; color: var(--red); }
 
+/* ── LOG expand ── */
+.chv-col { width: 20px; padding: 6px 4px 6px 10px !important; cursor: pointer; color: #ffffff; font-size: 10px; user-select: none; }
+.detail-row td { padding: 0 !important; border-bottom: 1px solid #161616; background: #040404; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; padding: 10px 14px 14px; }
+.detail-cell { padding: 5px 8px; }
+.detail-lbl { font-size: 9px; letter-spacing: .12em; color: #ffffff; font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+.detail-val { font-size: 12px; font-weight: 700; color: #ffffff; font-family: 'JetBrains Mono', monospace; word-break: break-all; }
+
 /* ── Responsive ── */
 @media (max-width: 680px) {
   .logo { font-size: 1.4rem; }
@@ -685,10 +693,11 @@ body {
     <div class="log-wrap">
       <table class="log-table" id="log-table">
         <thead><tr>
-          <th>VENUE</th><th>PAIR</th><th>DIR</th><th>TIER</th>
-          <th>CLOSE</th><th>EXIT</th><th>PNL</th><th>R</th><th>DUR</th>
+          <th style="width:20px"></th>
+          <th>VENUE</th><th>PAIR</th><th>DIR</th><th>TIER</th><th>SESS</th>
+          <th>CLOSE</th><th>EXIT</th><th>PNL</th><th>R</th><th>MAE</th><th>MFE</th><th>DUR</th>
         </tr></thead>
-        <tbody><tr><td colspan="9" class="empty" style="padding:12px 10px">Select the LOG tab to load trades…</td></tr></tbody>
+        <tbody><tr><td colspan="13" class="empty" style="padding:12px 10px">Select the LOG tab to load trades…</td></tr></tbody>
       </table>
     </div>
 
@@ -1199,13 +1208,33 @@ function renderAnalytics() {
 // ── LOG TAB ─────────────────────────────
 // ═══════════════════════════════════════
 
-let logData   = null;
-let logLoaded = false;
-let logSort   = { col: 'close_time', dir: 'desc' };
-let logVenue  = 'all';
+let logData       = null;
+let logLoaded     = false;
+let logSort       = { col: 'close_time', dir: 'desc' };
+let logVenue      = 'all';
+let _expandedRows = new Set();
+
+function fmtSess(v) {
+  if (!v) return '—';
+  const s = String(v).toUpperCase().trim();
+  const MAP = {
+    ASIA_EARLY: 'ASIA', ASIA_LATE: 'ASIA',
+    LONDON: 'EU', NY: 'US', NEW_YORK: 'US', NEWYORK: 'US',
+    ASIA: 'ASIA', EU: 'EU', US: 'US', OFF: 'OFF',
+  };
+  return MAP[s] || s;
+}
+
+function fmtNum(v, dec) {
+  if (v == null) return '—';
+  const n = parseFloat(v);
+  if (!isFinite(n)) return '—';
+  return n.toFixed(dec != null ? dec : 2);
+}
 
 async function loadLog() {
   document.getElementById('log-count').textContent = '…';
+  _expandedRows.clear();
   try {
     const res = await fetch('/api/log?range=' + range);
     if (!res.ok) return;
@@ -1253,21 +1282,65 @@ function getLogFiltered() {
   return rows;
 }
 
+function toggleDetailRow(rowId) {
+  if (_expandedRows.has(rowId)) {
+    _expandedRows.delete(rowId);
+  } else {
+    _expandedRows.add(rowId);
+  }
+  renderLog();
+}
+
+function detailHTML(r) {
+  function dc(lbl, val, color) {
+    return `<div class="detail-cell"><div class="detail-lbl">${lbl}</div><div class="detail-val" style="color:${color || '#ffffff'}">${val}</div></div>`;
+  }
+  const slTp   = [r.sl, r.tp1, r.tp2].map(v => v != null ? fmtNum(v, 4) : '—').join(' / ');
+  const jVals  = [r.j15m_entry, r.j1h_entry].map(v => fmtNum(v, 1)).join(' / ');
+  const stoch  = [r.stoch_k_entry, r.stoch_d_entry].map(v => fmtNum(v, 1)).join(' / ');
+  const chg24  = r.chg24h_entry != null ? fmtNum(r.chg24h_entry, 2) + '%' : 'not yet tracked';
+  const chg24c = r.chg24h_entry != null ? (parseFloat(r.chg24h_entry) >= 0 ? C.green : C.red) : '#555555';
+  const maeC   = r.mae_r != null ? (parseFloat(r.mae_r) < 0 ? C.red : '#ffffff') : '#ffffff';
+  const mfeC   = r.mfe_r != null ? (parseFloat(r.mfe_r) > 0 ? C.green : '#ffffff') : '#ffffff';
+  return [
+    dc('ENTRY',       r.entry_price       != null ? fmtNum(r.entry_price, 4)       : '—'),
+    dc('EXIT PRICE',  r.exit_price        != null ? fmtNum(r.exit_price,  4)       : '—'),
+    dc('SL / TP1 / TP2', slTp),
+    dc('LEVERAGE',    r.leverage          != null ? fmtNum(r.leverage, 1) + 'x'   : '—'),
+    dc('SCORE',       r.score             != null ? fmtNum(r.score, 1)             : '—'),
+    dc('ADX1H',       r.adx1h             != null ? fmtNum(r.adx1h, 1)            : '—'),
+    dc('J15M / J1H',  jVals),
+    dc('STOCH K / D', stoch),
+    dc('RSI',         r.rsi_entry         != null ? fmtNum(r.rsi_entry, 1)        : '—'),
+    dc('DEPTH %',     r.depth_pct_entry   != null ? fmtNum(r.depth_pct_entry, 2) + '%' : '—'),
+    dc('CHG24H',      chg24, chg24c),
+    dc('SESSION',     r.session_opened || '—'),
+    dc('MAE R',       r.mae_r             != null ? fmtNum(r.mae_r, 2) + 'R'      : '—', maeC),
+    dc('MFE R',       r.mfe_r             != null ? fmtNum(r.mfe_r, 2) + 'R'      : '—', mfeC),
+  ].join('');
+}
+
 function renderLog() {
   const rows = getLogFiltered();
   document.getElementById('log-count').textContent = rows.length;
 
   const COL_DEFS = [
+    { key: '_chv',             label: '',      noSort: true },
     { key: '_venue',           label: 'VENUE' },
     { key: 'pair',             label: 'PAIR'  },
     { key: 'direction',        label: 'DIR'   },
     { key: 'tier',             label: 'TIER'  },
+    { key: 'session_opened',   label: 'SESS'  },
     { key: 'close_time',       label: 'CLOSE' },
     { key: 'exit_reason',      label: 'EXIT'  },
     { key: 'pnl_dollars',      label: 'PNL'   },
     { key: 'r_value',          label: 'R'     },
+    { key: 'mae_r',            label: 'MAE'   },
+    { key: 'mfe_r',            label: 'MFE'   },
     { key: 'duration_seconds', label: 'DUR'   },
   ];
+
+  const NCOLS = COL_DEFS.length;
 
   const arrowHTML = (col) => {
     if (logSort.col !== col) return '<span style="color:#ffffff;margin-left:3px">&#8597;</span>';
@@ -1277,13 +1350,19 @@ function renderLog() {
   };
 
   const thead = COL_DEFS.map(c => {
+    if (c.noSort) return `<th style="width:20px;padding:7px 4px 7px 10px"></th>`;
     const active = logSort.col === c.key ? ' sort-active' : '';
     return `<th class="${active}" onclick="sortLog('${c.key}')">${c.label}${arrowHTML(c.key)}</th>`;
   }).join('');
 
   const tbody = rows.length === 0
-    ? `<tr><td colspan="${COL_DEFS.length}" class="empty" style="padding:14px 10px">No trades match current filters</td></tr>`
+    ? `<tr><td colspan="${NCOLS}" class="empty" style="padding:14px 10px">No trades match current filters</td></tr>`
     : rows.map(r => {
+        const rowId   = (r._venue || '') + '|' + (r.close_time || '') + '|' + (r.pair || '');
+        const expanded = _expandedRows.has(rowId);
+        const chevron  = expanded ? '&#9660;' : '&#9658;';
+        const safeId   = rowId.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
         const venue = r._venue === 'hl'
           ? '<span class="venue-tag hl">HL</span>'
           : '<span class="venue-tag mexc">MEXC</span>';
@@ -1306,17 +1385,36 @@ function renderLog() {
         const dur    = fmtDur(r.duration_seconds);
         const exitStr = r.exit_reason || '—';
         const tier    = r.tier || '—';
-        return `<tr>
+
+        const maeV   = r.mae_r != null ? parseFloat(r.mae_r) : null;
+        const maeStr = maeV != null ? fmtNum(maeV, 2) + 'R' : '—';
+        const maeCol = maeV != null ? (maeV < 0 ? C.red : '#ffffff') : '#ffffff';
+        const mfeV   = r.mfe_r != null ? parseFloat(r.mfe_r) : null;
+        const mfeStr = mfeV != null ? fmtNum(mfeV, 2) + 'R' : '—';
+        const mfeCol = mfeV != null ? (mfeV > 0 ? C.green : '#ffffff') : '#ffffff';
+        const sessStr = fmtSess(r.session_opened);
+
+        const dataRow = `<tr onclick="toggleDetailRow('${safeId}')" style="cursor:pointer">
+          <td class="chv-col">${chevron}</td>
           <td>${venue}</td>
           <td style="color:#fff;font-weight:700;letter-spacing:.04em">${r.pair || '—'}</td>
           <td>${dirTag}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${tier}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px">${sessStr}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${closeFmt}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px;letter-spacing:.03em">${exitStr}</td>
           <td style="color:${pnlCol};font-weight:700">${pnlStr}</td>
           <td style="color:${rvCol};font-weight:700">${rvStr}</td>
+          <td style="color:${maeCol};font-weight:700;font-size:11px">${maeStr}</td>
+          <td style="color:${mfeCol};font-weight:700;font-size:11px">${mfeStr}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${dur}</td>
         </tr>`;
+
+        const detailRow = expanded
+          ? `<tr class="detail-row" style="cursor:default"><td colspan="${NCOLS}"><div class="detail-grid">${detailHTML(r)}</div></td></tr>`
+          : '';
+
+        return dataRow + detailRow;
       }).join('');
 
   document.getElementById('log-table').innerHTML =
@@ -1328,7 +1426,7 @@ function sortLog(col) {
     logSort.dir = logSort.dir === 'asc' ? 'desc' : 'asc';
   } else {
     logSort.col = col;
-    logSort.dir = col === 'pnl_dollars' || col === 'close_time' ? 'desc' : 'asc';
+    logSort.dir = (col === 'pnl_dollars' || col === 'close_time' || col === 'mae_r' || col === 'mfe_r') ? 'desc' : 'asc';
   }
   renderLog();
 }
@@ -1349,7 +1447,7 @@ function onLogFilterChange() {
 
 function exportCSV() {
   const rows = getLogFiltered();
-  const headers = ['venue','pair','direction','tier','close_time','exit_reason','pnl_dollars','r_value','duration_seconds','score','adx1h','session_opened'];
+  const headers = ['venue','pair','direction','tier','session_opened','close_time','exit_reason','pnl_dollars','r_value','mae_r','mfe_r','duration_seconds','score','adx1h'];
   const lines = [headers.join(',')];
   for (const r of rows) {
     lines.push(headers.map(h => {
