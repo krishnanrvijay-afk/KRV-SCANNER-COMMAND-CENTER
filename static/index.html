@@ -614,7 +614,70 @@ body {
   .tl-seg { position: absolute; top: 0; height: 100%; border-radius: 2px; }
   .tl-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #fff; border-radius: 1px; z-index: 2; }
   .recon-meta { font-size: 10px; font-weight: 700; color: #ffffff; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 7px; letter-spacing: .04em; }
-  </style>
+
+    /* ── Intelligence Pill Row ── */
+    .intel-pill-row {
+      display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0;
+    }
+    .intel-pill {
+      position: relative; flex: 1; min-width: 130px;
+      background: #060606; border: 1px solid #1a1a1a; border-radius: 6px;
+      padding: 12px 14px 28px; cursor: pointer; user-select: none;
+      overflow: hidden; transition: border-color .15s, transform .15s, box-shadow .15s;
+    }
+    .intel-pill::before {
+      content: ''; position: absolute; inset: 0; border-radius: 6px;
+      pointer-events: none;
+      background: radial-gradient(circle at top left, currentColor, transparent 70%);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .intel-pill:hover { transform: translateY(-1px); }
+    .intel-pill:hover::before { opacity: .07; }
+    .intel-pill:hover .intel-chevron { transform: translateX(3px); }
+    .intel-pill-name  { font-size: 8px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+    .intel-pill-value { font-family: var(--display); font-size: 28px; line-height: 1; color: #ffffff; margin-bottom: 4px; }
+    .intel-pill-sub   { font-size: 8.5px; font-weight: 700; color: #555; line-height: 1.5; }
+    .intel-chevron    { position: absolute; bottom: 8px; right: 12px; font-size: 18px; color: #333; transition: transform .15s; font-style: normal; }
+
+    .intel-pill.twin      { border-color: #a855f730; color: #a855f7; }
+    .intel-pill.twin:hover      { border-color: #a855f7; box-shadow: 0 4px 20px #a855f715; }
+    .intel-pill.twin      .intel-pill-name { color: #a855f7; }
+    .intel-pill.twin      .intel-chevron   { color: #a855f755; }
+
+    .intel-pill.league    { border-color: #22d3ee30; color: #22d3ee; }
+    .intel-pill.league:hover    { border-color: #22d3ee; box-shadow: 0 4px 20px #22d3ee15; }
+    .intel-pill.league    .intel-pill-name { color: #22d3ee; }
+    .intel-pill.league    .intel-chevron   { color: #22d3ee55; }
+
+    .intel-pill.excursion { border-color: #fbbf2430; color: #fbbf24; }
+    .intel-pill.excursion:hover { border-color: #fbbf24; box-shadow: 0 4px 20px #fbbf2415; }
+    .intel-pill.excursion .intel-pill-name { color: #fbbf24; }
+    .intel-pill.excursion .intel-chevron   { color: #fbbf2455; }
+
+    .intel-pill.recon     { border-color: #22d3ee30; color: #22d3ee; }
+    .intel-pill.recon:hover     { border-color: #22d3ee; box-shadow: 0 4px 20px #22d3ee15; }
+    .intel-pill.recon     .intel-pill-name { color: #22d3ee; }
+    .intel-pill.recon     .intel-chevron   { color: #22d3ee55; }
+
+    .intel-pill.timeline  { border-color: #f59e0b30; color: #f59e0b; }
+    .intel-pill.timeline:hover  { border-color: #f59e0b; box-shadow: 0 4px 20px #f59e0b15; }
+    .intel-pill.timeline  .intel-pill-name { color: #f59e0b; }
+    .intel-pill.timeline  .intel-chevron   { color: #f59e0b55; }
+
+    .intel-pill.peak      { border-color: #22c55e30; color: #22c55e; }
+    .intel-pill.peak:hover      { border-color: #22c55e; box-shadow: 0 4px 20px #22c55e15; }
+    .intel-pill.peak      .intel-pill-name { color: #22c55e; }
+    .intel-pill.peak      .intel-chevron   { color: #22c55e55; }
+
+    /* ── Peak Protection overlay ── */
+    .peak-caution {
+      border: 1px solid #f59e0b; border-radius: 2px; padding: 12px 14px;
+      margin-bottom: 16px; font-size: 13px; color: #f59e0b; font-weight: 700; line-height: 1.5;
+    }
+    .peak-caution-hdr { font-size: 11px; letter-spacing: .12em; margin-bottom: 6px; }
+    .peak-placeholder { font-size: 13px; color: #333; font-weight: 700; padding: 12px 0; }
+    </style>
 </head>
 <body>
 <div class="page">
@@ -639,114 +702,73 @@ body {
     <button class="tab-btn"        id="tab-log"       onclick="setTab('log')">LOG</button>
   </div>
 
-  <!-- ═══ TAB 1: INSIGHTS ═══ -->
-  <div id="panel-insights">
+  <!-- TAB 1: INSIGHTS -->
+    <div id="panel-insights">
 
-    <!-- E. TWIN SIGNALS -->
-    <div class="band">
-      <div class="band-title">TWIN SIGNALS</div>
-      <div class="twins-hdr">
-        <div><strong id="twin-count">—</strong> twins · venue edge <strong id="twin-edge">—</strong></div>
-      </div>
-      <div id="twins-list"><div class="empty">loading…</div></div>
-    </div>
-
-    <!-- F. SESSION × DIRECTION -->
-    <div class="band">
-      <div class="band-title">SESSION × DIRECTION</div>
-      <div style="overflow-x:auto">
-        <table class="sess-table">
-          <thead>
-            <tr>
-              <th>SESSION</th>
-              <th style="color:#00e67666">↑ LONG P&amp;L</th>
-              <th>TRADES</th>
-              <th>WR</th>
-              <th style="color:#ff4d4d66">↓ SHORT P&amp;L</th>
-              <th>TRADES</th>
-              <th>WR</th>
-            </tr>
-          </thead>
-          <tbody id="sess-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- G. PAIR LEAGUE -->
-    <div class="band">
-      <div class="band-title">PAIR LEAGUE</div>
-      <div style="overflow-x:auto">
-        <table class="league-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>PAIR</th>
-              <th>P&amp;L</th>
-              <th>TRADES</th>
-              <th>AVG R</th>
-            </tr>
-          </thead>
-          <tbody id="league-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- H0. SESSION TIMELINE -->
+      <!-- SESSION x DIRECTION (always-visible band) -->
       <div class="band">
-        <div class="band-title">SESSION TIMELINE</div>
-        <div id="tl-pill"></div>
+        <div class="band-title">SESSION x DIRECTION</div>
+        <div style="overflow-x:auto">
+          <table class="sess-table">
+            <thead>
+              <tr>
+                <th>SESSION</th>
+                <th style="color:#00e67666">&#x2191; LONG P&amp;L</th>
+                <th>TRADES</th>
+                <th>WR</th>
+                <th style="color:#ff4d4d66">&#x2193; SHORT P&amp;L</th>
+                <th>TRADES</th>
+                <th>WR</th>
+              </tr>
+            </thead>
+            <tbody id="sess-body"></tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- H. EXCURSION STRIP -->
-    <div class="band">
-      <div class="band-title">EXCURSION</div>
-      <div id="excursion"></div>
-    </div>
-
-
-      <!-- I. RECONSTRUCT -->
-      <div class="band">
-        <div class="band-title">RECONSTRUCT</div>
-        <div class="recon-filters">
-          <div class="log-filter-group">
-            <span class="log-filter-label">VENUE</span>
-            <div class="venue-chips">
-              <button class="venue-chip active-all" id="rc-vchip-all"  onclick="setReconVenue('all')">ALL</button>
-              <button class="venue-chip"            id="rc-vchip-hl"   onclick="setReconVenue('hl')">HL</button>
-              <button class="venue-chip"            id="rc-vchip-mexc" onclick="setReconVenue('mexc')">MEXC</button>
-            </div>
-          </div>
-          <div class="log-filter-group">
-            <span class="log-filter-label">TYPE</span>
-            <div class="venue-chips">
-              <button class="venue-chip active-all" id="rc-echip-all" onclick="setReconExit('all')">ALL</button>
-              <button class="venue-chip"            id="rc-echip-tb"  onclick="setReconExit('trailblazer')">TRAILBLAZER</button>
-              <button class="venue-chip"            id="rc-echip-sl"  onclick="setReconExit('sl')">SL</button>
-            </div>
-          </div>
-          <div class="log-filter-group">
-            <span class="log-filter-label">FROM</span>
-            <input type="date" id="rc-from" class="log-date-input" onchange="loadReconShortlist()">
-            <span class="log-filter-label">TO</span>
-            <input type="date" id="rc-to"   class="log-date-input" onchange="loadReconShortlist()">
-          </div>
-          <div class="log-filter-group">
-            <span class="log-filter-label">MIN |MAE|</span>
-            <input type="number" id="rc-mae" class="recon-num-input" value="0.3" step="0.1" min="0" onchange="loadReconShortlist()">
-            <span class="log-filter-label">MIN MFE</span>
-            <input type="number" id="rc-mfe" class="recon-num-input" value="0.5" step="0.1" min="0" onchange="loadReconShortlist()">
-          </div>
+      <!-- Six intelligence pills -->
+      <div class="intel-pill-row">
+        <div class="intel-pill twin" id="twin-pill-open" onclick="openTwinSheet()">
+          <div class="intel-pill-name">TWIN SIGNALS</div>
+          <div class="intel-pill-value" id="twin-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub">PAIRS ON<br>BOTH VENUES</div>
+          <span class="intel-chevron">&#x203A;</span>
         </div>
-        <div class="recon-toolbar">
-          <div class="recon-count-wrap">
-            <div class="recon-count-num" id="rc-count">--</div>
-            <div class="recon-count-lbl">QUALIFY</div>
-          </div>
-          <button class="recon-btn" id="rc-all-btn" onclick="reconstructAll()" style="display:none">RECONSTRUCT ALL (<span id="rc-all-n">0</span>)</button>
-          <button class="recon-btn" id="rc-export-btn" onclick="exportReconResults()" style="display:none">EXPORT RESULTS</button>
+        <div class="intel-pill league" id="league-pill-open" onclick="openLeagueSheet()">
+          <div class="intel-pill-name">PAIR LEAGUE</div>
+          <div class="intel-pill-value" id="league-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub">RANKED<br>BY P&amp;L</div>
+          <span class="intel-chevron">&#x203A;</span>
         </div>
-        <div id="rc-shortlist"></div>
+        <div class="intel-pill excursion" id="excursion-pill-open" onclick="openExcSheet()">
+          <div class="intel-pill-name">EXCURSION</div>
+          <div class="intel-pill-value" id="excursion-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub">MAE/MFE<br>EARLY-CUT READ</div>
+          <span class="intel-chevron">&#x203A;</span>
+        </div>
+        <div class="intel-pill recon" id="recon-pill-open" onclick="openReconSheet()">
+          <div class="intel-pill-name">RECONSTRUCT</div>
+          <div class="intel-pill-value" id="recon-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub">QUALIFY<br>FOR REPLAY</div>
+          <span class="intel-chevron">&#x203A;</span>
+        </div>
+        <div class="intel-pill timeline" id="timeline-pill-open" onclick="openTlSheet()">
+          <div class="intel-pill-name">SESSION TIMELINE</div>
+          <div class="intel-pill-value" id="timeline-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub">MARGIN<br>CLUSTERS</div>
+          <span class="intel-chevron">&#x203A;</span>
+        </div>
+        <div class="intel-pill peak" id="peak-pill-open" onclick="openPeakSheet()">
+          <div class="intel-pill-name">PEAK PROTECTION</div>
+          <div class="intel-pill-value" id="peak-pill-val">0</div>
+          <div class="intel-pill-sub">QUALIFYING<br>ROWS</div>
+          <span class="intel-chevron">&#x203A;</span>
+        </div>
       </div>
+
+      <!-- Hidden sinks so existing JS render functions still find their targets -->
+      <div id="excursion" style="display:none"></div>
+      <div id="tl-pill"   style="display:none"></div>
 
     </div><!-- /panel-insights -->
 
@@ -1452,6 +1474,7 @@ function renderTlPill() {
     + '<span class="exc-pill-glance" style="color:' + color + '">' + clust + ' CLUSTER' + (clust !== 1 ? 'S' : '') + ' &nbsp;&middot;&nbsp; PEAK ' + fmtDollar(tlData.peak_margin) + '</span>'
     + '<span class="exc-chevron">&#9660;</span>'
     + '</div></div>';
+  _updateTimelinePill();
 }
 
 function openTlSheet() {
@@ -1615,6 +1638,7 @@ function renderAnalytics() {
   renderLeague();
   renderExcursion();
   renderFooter();
+  _updatePillValues();
 }
 
 // ═══════════════════════════════════════
@@ -1968,6 +1992,7 @@ function _initLogDates() {
       btn.style.display = n > 0 ? '' : 'none';
       document.getElementById('rc-export-btn').style.display = n > 0 ? '' : 'none';
       renderReconShortlist();
+      _setPillVal('recon-pill-val', rcShortlist.length);
     } catch (e) {
       document.getElementById('rc-count').textContent   = '!';
       document.getElementById('rc-shortlist').innerHTML = '<div class="empty">Error loading shortlist</div>';
@@ -2173,8 +2198,179 @@ function _initLogDates() {
       setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
     }
     
+
+  // ── Intelligence Dashboard — open/close handlers ──
+  function openTwinSheet()   { document.getElementById('twin-scrim').classList.add('open');   document.body.style.overflow = 'hidden'; }
+  function closeTwinSheet()  { document.getElementById('twin-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+  function openLeagueSheet() { document.getElementById('league-scrim').classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeLeagueSheet(){ document.getElementById('league-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+  function openReconSheet()  { document.getElementById('recon-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; }
+  function closeReconSheet() { document.getElementById('recon-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+  function openPeakSheet()   { document.getElementById('peak-scrim').classList.add('open');   document.body.style.overflow = 'hidden'; loadPeakProtection(); }
+  function closePeakSheet()  { document.getElementById('peak-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+
+  // ── Pill value helpers ──
+  function _setPillVal(id, v) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = String(v);
+  }
+
+  function _updatePillValues() {
+    if (!analytics) return;
+    var twins  = analytics.twins || [];
+    _setPillVal('twin-pill-val', twins.length || '0');
+    var league = analytics.pair_league || [];
+    _setPillVal('league-pill-val', league.length || '0');
+    var e = analytics.excursion;
+    _setPillVal('excursion-pill-val', e ? (e.verdict || '--') : '--');
+  }
+
+  function _updateTimelinePill() {
+    if (!tlData) return;
+    _setPillVal('timeline-pill-val', tlData.cluster_count != null ? tlData.cluster_count : '--');
+  }
+
+  async function loadPeakProtection() {
+    var rowsEl = document.getElementById('peak-rows-state');
+    try {
+      var res = await fetch('/api/peak-protection');
+      if (!res.ok) throw new Error(res.statusText);
+      var data = await res.json();
+      var n = data.row_count != null ? data.row_count : 0;
+      _setPillVal('peak-pill-val', n);
+      if (rowsEl) rowsEl.textContent = n + ' qualifying row' + (n !== 1 ? 's' : '');
+    } catch(e) {
+      if (rowsEl) rowsEl.textContent = 'error loading peak data';
+      console.error('peak-protection', e);
+    }
+  }
+  
 </script>
 
+    <!-- TWIN SIGNALS overlay sheet -->
+      <div id="twin-scrim" class="exc-scrim" onclick="closeTwinSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">TWIN SIGNALS</div>
+              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIRS TRADED ON BOTH VENUES</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeTwinSheet()">&#x2715;</button>
+          </div>
+          <div id="twin-sheet-body">
+            <div class="twins-hdr">
+              <div><strong id="twin-count">&#x2014;</strong> twins &middot; venue edge <strong id="twin-edge">&#x2014;</strong></div>
+            </div>
+            <div id="twins-list"><div class="empty">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAIR LEAGUE overlay sheet -->
+      <div id="league-scrim" class="exc-scrim" onclick="closeLeagueSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">PAIR LEAGUE</div>
+              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">RANKED BY CUMULATIVE P&amp;L</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeLeagueSheet()">&#x2715;</button>
+          </div>
+          <div id="league-sheet-body">
+            <div style="overflow-x:auto">
+              <table class="league-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>PAIR</th>
+                    <th>P&amp;L</th>
+                    <th>TRADES</th>
+                    <th>AVG R</th>
+                  </tr>
+                </thead>
+                <tbody id="league-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECONSTRUCT overlay sheet -->
+      <div id="recon-scrim" class="exc-scrim" onclick="closeReconSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">RECONSTRUCT</div>
+              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">REPLAY TRADE TIMING WINDOWS</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeReconSheet()">&#x2715;</button>
+          </div>
+          <div id="recon-sheet-body">
+            <div class="recon-filters">
+              <div class="log-filter-group">
+                <span class="log-filter-label">VENUE</span>
+                <div class="venue-chips">
+                  <button class="venue-chip active-all" id="rc-vchip-all"  onclick="setReconVenue('all')">ALL</button>
+                  <button class="venue-chip"            id="rc-vchip-hl"   onclick="setReconVenue('hl')">HL</button>
+                  <button class="venue-chip"            id="rc-vchip-mexc" onclick="setReconVenue('mexc')">MEXC</button>
+                </div>
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">TYPE</span>
+                <div class="venue-chips">
+                  <button class="venue-chip active-all" id="rc-echip-all" onclick="setReconExit('all')">ALL</button>
+                  <button class="venue-chip"            id="rc-echip-tb"  onclick="setReconExit('trailblazer')">TRAILBLAZER</button>
+                  <button class="venue-chip"            id="rc-echip-sl"  onclick="setReconExit('sl')">SL</button>
+                </div>
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">FROM</span>
+                <input type="date" id="rc-from" class="log-date-input" onchange="loadReconShortlist()">
+                <span class="log-filter-label">TO</span>
+                <input type="date" id="rc-to"   class="log-date-input" onchange="loadReconShortlist()">
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">MIN |MAE|</span>
+                <input type="number" id="rc-mae" class="recon-num-input" value="0.3" step="0.1" min="0" onchange="loadReconShortlist()">
+                <span class="log-filter-label">MIN MFE</span>
+                <input type="number" id="rc-mfe" class="recon-num-input" value="0.5" step="0.1" min="0" onchange="loadReconShortlist()">
+              </div>
+            </div>
+            <div class="recon-toolbar">
+              <div class="recon-count-wrap">
+                <div class="recon-count-num" id="rc-count">--</div>
+                <div class="recon-count-lbl">QUALIFY</div>
+              </div>
+              <button class="recon-btn" id="rc-all-btn" onclick="reconstructAll()" style="display:none">RECONSTRUCT ALL (<span id="rc-all-n">0</span>)</button>
+              <button class="recon-btn" id="rc-export-btn" onclick="exportReconResults()" style="display:none">EXPORT RESULTS</button>
+            </div>
+            <div id="rc-shortlist"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEAK PROTECTION overlay sheet -->
+      <div id="peak-scrim" class="exc-scrim" onclick="closePeakSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">PEAK PROTECTION</div>
+              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">PEAK-DOLLAR DECAY ANALYSIS</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closePeakSheet()">&#x2715;</button>
+          </div>
+          <div id="peak-sheet-body">
+            <div class="peak-caution">
+              <div class="peak-caution-hdr">DATASET BUILDING</div>
+              Target 20+ qualifying trades per pair family before the 20%/30%/40% decay comparison renders. Shadow logging is active &#x2014; rows accumulate automatically as trades close.
+            </div>
+            <div id="peak-comparison-placeholder" class="peak-placeholder">20% / 30% / 40% decay comparison will appear here once threshold is met.</div>
+            <div id="peak-rows-state" style="font-size:12px;color:#555;font-weight:700;margin-top:14px;letter-spacing:.06em">0 qualifying rows</div>
+          </div>
+        </div>
+      </div>
+
+  
     <!-- SESSION TIMELINE overlay sheet -->
     <div id="tl-scrim" class="exc-scrim" onclick="closeTlSheet()">
       <div class="exc-sheet" onclick="event.stopPropagation()">
