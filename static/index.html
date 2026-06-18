@@ -329,6 +329,64 @@ body {
   }
   .exc-caution-hdr { font-size: 12px; letter-spacing: .12em; margin-bottom: 6px; }
 
+  /* ── Session Timeline ── */
+  .tl-controls {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px;
+  }
+  .tl-margin-row { display:flex; align-items:center; gap:6px; }
+  .tl-margin-lbl { font-size:11px; color:#666; font-weight:700; letter-spacing:.08em; }
+  .tl-margin-input {
+    background: var(--card); border: 1px solid var(--border); color: #ffffff;
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    padding: 4px 8px; width: 76px; text-align: right;
+  }
+  .tl-session {
+    border: 1px solid; border-radius: 2px; padding: 10px 10px 8px;
+    margin-bottom: 14px; overflow: hidden;
+  }
+  .tl-session-header {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .tl-sess-name { font-family: var(--display); font-size: 15px; letter-spacing: .15em; color: #ffffff; }
+  .tl-sess-meta { font-size: 11px; color: #666; font-weight: 700; letter-spacing: .06em; }
+  .tl-track-outer { position: relative; padding-bottom: 18px; margin-bottom: 6px; }
+  .tl-track-wrap  { position: relative; }
+  .tl-grid-line {
+    position: absolute; top: 0; bottom: 0;
+    border-left: 1px solid rgba(255,255,255,0.05); pointer-events: none; z-index: 0;
+  }
+  .tl-grid-lbl {
+    position: absolute; bottom: -17px; font-size: 9px; color: #444; font-weight: 700;
+    transform: translateX(-50%); white-space: nowrap; letter-spacing: .04em;
+  }
+  .tl-cluster-halo {
+    position: absolute; top: 0; bottom: 0;
+    border: 1px solid; border-radius: 2px; z-index: 1; pointer-events: none;
+  }
+  .tl-cluster-badge {
+    position: absolute; top: 2px; left: 4px;
+    font-size: 8px; font-weight: 700; letter-spacing: .08em; color: rgba(255,255,255,0.9);
+    white-space: nowrap; text-shadow: 0 0 4px rgba(0,0,0,0.9);
+  }
+  .tl-bars-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .tl-bar {
+    position: absolute; border: 1px solid; border-radius: 1px;
+    overflow: hidden; min-width: 3px; box-sizing: border-box; pointer-events: auto;
+  }
+  .tl-bar-lbl {
+    font-size: 9px; font-weight: 700; color: rgba(0,0,0,0.85); padding: 2px 3px;
+    display: block; overflow: hidden; white-space: nowrap; line-height: 1.5;
+  }
+  .tl-empty-sess { font-size: 12px; color: #333; font-weight: 700; padding: 10px 0; }
+  .tl-spark-wrap { margin-top: 22px; }
+  .tl-sparkline  { display: block; overflow: visible; }
+  .tl-spark-lbl  { font-size: 9px; color: #444; font-weight: 700; letter-spacing: .1em; margin-top: 2px; }
+  .tl-caption {
+    font-size: 11px; color: #555; font-weight: 700; padding: 10px 0 4px;
+    border-top: 1px solid var(--border); margin-top: 8px; line-height: 1.6;
+  }
+  
 /* ── Footer ── */
 .footer {
   padding: 14px 0;
@@ -633,7 +691,13 @@ body {
       </div>
     </div>
 
-    <!-- H. EXCURSION STRIP -->
+    <!-- H0. SESSION TIMELINE -->
+      <div class="band">
+        <div class="band-title">SESSION TIMELINE</div>
+        <div id="tl-pill"></div>
+      </div>
+
+      <!-- H. EXCURSION STRIP -->
     <div class="band">
       <div class="band-title">EXCURSION</div>
       <div id="excursion"></div>
@@ -1331,6 +1395,215 @@ function renderFooter() {
       `<span class="dot dot-ok"></span>Supabase: OK`;
   }
 }
+// ─── SESSION TIMELINE ──────────────────────────────────────────────────────────────
+let tlVenue = 'all';
+let tlData  = null;
+
+const TL_SESSIONS = [
+  { key:'ASIA', label:'ASIA', startH:0,  endH:8,  bg:'rgba(79,70,229,0.07)',  bd:'rgba(79,70,229,0.22)'  },
+  { key:'EU',   label:'EU',   startH:8,  endH:14, bg:'rgba(124,58,237,0.07)', bd:'rgba(124,58,237,0.22)' },
+  { key:'US',   label:'US',   startH:14, endH:22, bg:'rgba(180,83,9,0.07)',   bd:'rgba(180,83,9,0.22)'   },
+];
+
+function _initTlDate() {
+  var el = document.getElementById('tl-date');
+  if (el) el.value = new Date().toISOString().slice(0,10);
+}
+
+function saveTlMargin() {
+  var v = document.getElementById('tl-margin') && document.getElementById('tl-margin').value;
+  if (v) { localStorage.setItem('margin_per_trade', v); loadTimeline(); }
+}
+
+function setTlVenue(v) {
+  tlVenue = v;
+  ['all','hl','mexc'].forEach(function(x) {
+    var el = document.getElementById('tl-vchip-' + x);
+    if (!el) return;
+    el.className = 'venue-chip' + (x === v ? ' active-all' : '');
+  });
+  loadTimeline();
+}
+
+async function loadTimeline() {
+  var d   = (document.getElementById('tl-date') || {}).value || new Date().toISOString().slice(0,10);
+  var mgn = parseInt(localStorage.getItem('margin_per_trade') || (document.getElementById('tl-margin') || {value:'2000'}).value, 10);
+  try {
+    var res = await fetch('/api/timeline?date=' + d + '&venue=' + tlVenue + '&margin=' + mgn);
+    if (!res.ok) return;
+    tlData = await res.json();
+    var mEl = document.getElementById('tl-margin');
+    if (mEl && document.activeElement !== mEl) mEl.value = mgn;
+    renderTlPill();
+    var sc = document.getElementById('tl-scrim');
+    if (sc && sc.classList.contains('open')) renderTlSheet();
+  } catch(e) { console.error('loadTimeline:', e); }
+}
+
+function renderTlPill() {
+  var el = document.getElementById('tl-pill');
+  if (!el) return;
+  if (!tlData) { el.innerHTML = '<div class="empty">No data</div>'; return; }
+  var clust = tlData.cluster_count || 0;
+  var color = clust > 0 ? C.amber : C.green;
+  el.innerHTML = '<div class="exc-pill" onclick="openTlSheet()">'
+    + '<div class="exc-pill-left">SESSION TIMELINE &middot; ' + tlData.date + '</div>'
+    + '<div class="exc-pill-right">'
+    + '<span class="exc-pill-glance" style="color:' + color + '">' + clust + ' CLUSTER' + (clust !== 1 ? 'S' : '') + ' &nbsp;&middot;&nbsp; PEAK ' + fmtDollar(tlData.peak_margin) + '</span>'
+    + '<span class="exc-chevron">&#9660;</span>'
+    + '</div></div>';
+}
+
+function openTlSheet() {
+  document.getElementById('tl-scrim').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderTlSheet();
+}
+function closeTlSheet() {
+  document.getElementById('tl-scrim').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function _tlAssignRows(trades) {
+  var ends = [], rows = [];
+  for (var i = 0; i < trades.length; i++) {
+    var t = trades[i], placed = false;
+    for (var r = 0; r < ends.length; r++) {
+      if (t.open_ms >= ends[r]) { ends[r] = t.close_ms; rows.push(r); placed = true; break; }
+    }
+    if (!placed) { ends.push(t.close_ms); rows.push(ends.length - 1); }
+  }
+  return { rows: rows, rowCount: Math.max(1, ends.length) };
+}
+
+function renderTlSheet() {
+  var body = document.getElementById('tl-body');
+  if (!body) return;
+  var d = tlData;
+  if (!d || !d.trades) { body.innerHTML = '<div class="empty">No data</div>'; return; }
+  if (d.trade_count === 0) { body.innerHTML = '<div class="empty">No trades on this date for the selected venue.</div>'; return; }
+
+  var BAR_H = 26, BAR_GAP = 3, BAR_TOP = 2;
+  var out = '';
+
+  TL_SESSIONS.forEach(function(sess) {
+    var yr = parseInt(d.date.slice(0,4),10), mo = parseInt(d.date.slice(5,7),10)-1, dy = parseInt(d.date.slice(8,10),10);
+    var sStartMs = Date.UTC(yr, mo, dy, sess.startH);
+    var sEndMs   = Date.UTC(yr, mo, dy, sess.endH);
+    var sDur     = sEndMs - sStartMs;
+
+    var sessTrades = d.trades.filter(function(t){ return t.open_ms >= sStartMs && t.open_ms < sEndMs; });
+    var sessSeries = d.concurrency_series.filter(function(p){ return p.t_ms >= sStartMs && p.t_ms <= sEndMs; });
+    var sessClusts = d.clusters.filter(function(c){ return c.start_ms < sEndMs && c.end_ms > sStartMs; });
+    var sessDrains = d.drains.filter(function(dr){ return dr.t_ms >= sStartMs && dr.t_ms <= sEndMs; });
+    var tradeCnt   = sessTrades.length;
+
+    var sorted = sessTrades.slice().sort(function(a,b){ return a.open_ms - b.open_ms; });
+    var ra = _tlAssignRows(sorted);
+    var trackH = BAR_TOP * 2 + ra.rowCount * (BAR_H + BAR_GAP);
+
+    var gridH = '';
+    for (var h = sess.startH; h <= sess.endH; h++) {
+      var pct = (h - sess.startH) / (sess.endH - sess.startH) * 100;
+      gridH += '<div class="tl-grid-line" style="left:' + pct.toFixed(2) + '%;height:' + trackH + 'px">'
+             + '<span class="tl-grid-lbl">' + String(h).padStart(2,'0') + ':00</span></div>';
+    }
+
+    var clH = '';
+    sessClusts.forEach(function(cl) {
+      var l  = Math.max(0, (cl.start_ms - sStartMs) / sDur * 100).toFixed(2);
+      var rr = Math.max(0, (sEndMs - cl.end_ms) / sDur * 100).toFixed(2);
+      var bg2 = cl.same_direction ? 'rgba(220,38,38,0.20)'  : 'rgba(251,191,36,0.12)';
+      var bd2 = cl.same_direction ? 'rgba(220,38,38,0.55)'  : 'rgba(251,191,36,0.45)';
+      var lbl2 = '\u00d7' + cl.peak_count + ' CLUSTER' + (cl.same_direction ? ' \u00b7 SAME-DIR' : '');
+      clH += '<div class="tl-cluster-halo" style="left:' + l + '%;right:' + rr + '%;height:' + trackH + 'px;background:' + bg2 + ';border-color:' + bd2 + '">'
+           + '<span class="tl-cluster-badge">' + lbl2 + '</span></div>';
+    });
+
+    var barsH = '';
+    sorted.forEach(function(t, i) {
+      var row2   = ra.rows[i];
+      var lPct2  = Math.max(0,   (t.open_ms  - sStartMs) / sDur * 100).toFixed(2);
+      var rPct2  = Math.min(100, (t.close_ms - sStartMs) / sDur * 100).toFixed(2);
+      var wPct2  = Math.max(0.4, rPct2 - lPct2).toFixed(2);
+      var isLong2 = t.direction === 'LONG';
+      var bg3   = isLong2 ? 'rgba(0,230,118,0.65)' : 'rgba(255,77,77,0.65)';
+      var bd3   = isLong2 ? '#00e676' : '#ff4d4d';
+      var top3  = BAR_TOP + row2 * (BAR_H + BAR_GAP);
+      var ot3   = t.open_time.slice(11,16);
+      var ct3   = t.close_time.slice(11,16);
+      barsH += '<div class="tl-bar" style="left:' + lPct2 + '%;width:' + wPct2 + '%;top:' + top3 + 'px;height:' + BAR_H + 'px;background:' + bg3 + ';border-color:' + bd3 + '"'
+             + ' title="' + t.pair + ' ' + t.direction + ' | ' + ot3 + '\u2013' + ct3 + ' UTC | ' + t.result.toUpperCase() + ' | ' + t.venue.toUpperCase() + '">'
+             + '<span class="tl-bar-lbl">' + t.pair + '</span></div>';
+    });
+
+    var sparkH = '';
+    if (sessSeries.length >= 2) {
+      var W = 600, SH = 44;
+      var maxM = Math.max.apply(null, sessSeries.map(function(p){ return p.margin_deployed; }).concat([1]));
+      var ptStr = sessSeries.map(function(p){
+        var x = ((p.t_ms - sStartMs) / sDur * W).toFixed(1);
+        var y = (SH - p.margin_deployed / maxM * SH * 0.9).toFixed(1);
+        return x + ',' + y;
+      }).join(' ');
+      var last2  = sessSeries[sessSeries.length - 1];
+      var first2 = sessSeries[0];
+      var fx = ((first2.t_ms - sStartMs) / sDur * W).toFixed(1);
+      var fy = (SH - first2.margin_deployed / maxM * SH * 0.9).toFixed(1);
+      var lx = ((last2.t_ms  - sStartMs) / sDur * W).toFixed(1);
+      var area2 = 'M' + fx + ',' + fy + ' ' + sessSeries.slice(1).map(function(p){
+        return 'L' + ((p.t_ms - sStartMs) / sDur * W).toFixed(1) + ',' + (SH - p.margin_deployed / maxM * SH * 0.9).toFixed(1);
+      }).join(' ') + ' L' + lx + ',' + SH + ' L' + fx + ',' + SH + ' Z';
+
+      var peakPt2 = sessSeries.reduce(function(a,b){ return b.margin_deployed > a.margin_deployed ? b : a; });
+      var pkX = ((peakPt2.t_ms - sStartMs) / sDur * W).toFixed(1);
+      var pkY = (SH - peakPt2.margin_deployed / maxM * SH * 0.9).toFixed(1);
+      var pkT = new Date(peakPt2.t_ms).toISOString().slice(11,16);
+      var pkLbl = 'peak ' + Math.round(peakPt2.margin_deployed).toLocaleString() + ' @ ' + pkT;
+
+      var drainSvg = sessDrains.map(function(dr) {
+        var dx = ((dr.t_ms - sStartMs) / sDur * W).toFixed(1);
+        var dy2 = (SH - dr.margin_deployed / maxM * SH * 0.9).toFixed(1);
+        var dT = new Date(dr.t_ms).toISOString().slice(11,16);
+        return '<circle cx="' + dx + '" cy="' + dy2 + '" r="3.5" fill="' + C.amber + '"/>'
+             + '<text x="' + dx + '" y="' + (parseFloat(dy2)+13) + '" fill="' + C.amber + '" font-size="8" text-anchor="middle" font-weight="700">' + Math.round(dr.margin_deployed).toLocaleString() + ' @ ' + dT + '</text>';
+      }).join('');
+
+      var gradId = 'tl-sg-' + sess.key;
+      sparkH = '<div class="tl-spark-wrap">'
+        + '<svg viewBox="0 0 ' + W + ' ' + SH + '" width="100%" height="' + SH + '" preserveAspectRatio="none" class="tl-sparkline">'
+        + '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">'
+        + '<stop offset="0%" stop-color="' + C.teal + '" stop-opacity="0.45"/>'
+        + '<stop offset="100%" stop-color="' + C.teal + '" stop-opacity="0.03"/>'
+        + '</linearGradient></defs>'
+        + '<path d="' + area2 + '" fill="url(#' + gradId + ')"/>'
+        + '<polyline points="' + ptStr + '" fill="none" stroke="' + C.teal + '" stroke-width="1.5"/>'
+        + '<circle cx="' + pkX + '" cy="' + pkY + '" r="4" fill="' + C.teal + '"/>'
+        + '<text x="' + pkX + '" y="' + (parseFloat(pkY)-7) + '" fill="' + C.teal + '" font-size="8" text-anchor="middle" font-weight="700">' + pkLbl + '</text>'
+        + drainSvg
+        + '</svg>'
+        + '<div class="tl-spark-lbl">MARGIN DEPLOYED</div>'
+        + '</div>';
+    }
+
+    out += '<div class="tl-session" style="background:' + sess.bg + ';border-color:' + sess.bd + '">'
+      + '<div class="tl-session-header">'
+      + '<span class="tl-sess-name">' + sess.label + '</span>'
+      + '<span class="tl-sess-meta">' + sess.startH + ':00 &ndash; ' + sess.endH + ':00 UTC &nbsp;&middot;&nbsp; ' + tradeCnt + ' trade' + (tradeCnt !== 1 ? 's' : '') + '</span>'
+      + '</div>'
+      + '<div class="tl-track-outer"><div class="tl-track-wrap" style="height:' + trackH + 'px">'
+      + gridH + clH
+      + '<div class="tl-bars-layer" style="height:' + trackH + 'px">'
+      + (tradeCnt ? barsH : '<div class="tl-empty-sess">no trades this session</div>')
+      + '</div></div></div>'
+      + sparkH
+      + '</div>';
+  });
+
+  out += '<div class="tl-caption">MARGIN ASSUMPTION: per-trade margin (\u0024' + d.margin_per_trade.toLocaleString() + ') applied uniformly &mdash; no per-trade margin column in trade log.</div>';
+  body.innerHTML = out;
+}
+
 
 // ── render all analytics bands ──
 function renderAnalytics() {
@@ -1623,7 +1896,8 @@ function _initLogDates() {
 (async function init() {
   _initLogDates();
   _initReconDates();
-  await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist()]);
+  _initTlDate();
+  await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist(), loadTimeline()]);
   setInterval(loadLive,      30_000);
   setInterval(loadAnalytics, 300_000);
 })();
@@ -1900,6 +2174,29 @@ function _initLogDates() {
     }
     
 </script>
+
+    <!-- SESSION TIMELINE overlay sheet -->
+    <div id="tl-scrim" class="exc-scrim" onclick="closeTlSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title">SESSION TIMELINE</span>
+          <button class="exc-sheet-close" onclick="closeTlSheet()">&#x2715;</button>
+        </div>
+        <div class="tl-controls">
+          <div class="venue-chips">
+            <button class="venue-chip active-all" id="tl-vchip-all"  onclick="setTlVenue('all')">ALL</button>
+            <button class="venue-chip"            id="tl-vchip-hl"   onclick="setTlVenue('hl')">HL</button>
+            <button class="venue-chip"            id="tl-vchip-mexc" onclick="setTlVenue('mexc')">MEXC</button>
+          </div>
+          <input type="date" id="tl-date" class="log-date-input" onchange="loadTimeline()">
+          <div class="tl-margin-row">
+            <span class="tl-margin-lbl">$/TRADE</span>
+            <input type="number" id="tl-margin" class="tl-margin-input" value="2000" step="100" min="100" onchange="saveTlMargin()">
+          </div>
+        </div>
+        <div id="tl-body"><div class="empty">loading&#x2026;</div></div>
+      </div>
+    </div>
 
     <!-- EXCURSION overlay sheet -->
     <div id="exc-scrim" class="exc-scrim" onclick="closeExcSheet()">

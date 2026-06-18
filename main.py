@@ -876,6 +876,157 @@ async def api_reconstruct(
             "window_end_pct":   _pct(favorable_s + roundtrip_s),
         })
 
+
+  # ─────────────────────────── timeline endpoint ───────────────────────────
+
+  def _session_for_utc(dt: datetime) -> str:
+      h = dt.hour + dt.minute / 60.0
+      if h < 8:   return "ASIA"
+      if h < 14:  return "EU"
+      if h < 22:  return "US"
+      return "OFF"
+
+
+  def _tl_finalise(cur: dict, clusters: list) -> None:
+      dirs = sorted(cur["directions"] - {""})
+      clusters.append({
+          "start_ms":       cur["start_ms"],
+          "end_ms":         cur["end_ms"],
+          "start_time":     datetime.fromtimestamp(cur["start_ms"] / 1000, tz=timezone.utc).isoformat(),
+          "end_time":       datetime.fromtimestamp(cur["end_ms"]   / 1000, tz=timezone.utc).isoformat(),
+          "peak_count":     cur["peak_count"],
+          "same_direction": len(dirs) == 1,
+          "directions":     dirs,
+          "trade_ids":      sorted(cur["trade_ids"]),
+      })
+
+
+  @app.get("/api/timeline")
+  async def api_timeline(
+      request: Request,
+      date:   str   = Query(default=""),
+      venue:  str   = Query(default="all"),
+      margin: float = Query(default=2000.0),
+  ) -> JSONResponse:
+      _require_auth(request)
+
+      if venue not in ("all", "hl", "mexc"):
+          raise HTTPException(400, "venue must be all | hl | mexc")
+
+      try:
+          target_date = datetime.fromisoformat(date).date() if date else datetime.now(timezone.utc).date()
+      except ValueError:
+          raise HTTPException(400, "date must be YYYY-MM-DD")
+
+      date_str = target_date.isoformat()
+      next_str = (target_date + timedelta(days=1)).isoformat()
+      filt     = {"open_time": f"lt.{next_str}T00:00:00", "close_time": f"gte.{date_str}T00:00:00"}
+
+      if venue == "hl":
+          hl_r = await _sb_fetch("hl_trade_log", filt)
+          mx_r: list = []
+      elif venue == "mexc":
+          hl_r = []
+          mx_r = await _sb_fetch("mexc_trade_log", filt)
+      else:
+          hl_r, mx_r = await asyncio.gather(
+              _sb_fetch("hl_trade_log",   filt),
+              _sb_fetch("mexc_trade_log", filt),
+          )
+
+      raw = [{"_venue": "hl",   **r} for r in hl_r] + \
+            [{"_venue": "mexc", **r} for r in mx_r]
+
+      trades: list[dict] = []
+      for r in raw:
+          ot = _parse_open_utc(r.get("open_time"))
+          ct = _parse_open_utc(r.get("close_time"))
+          if not ot or not ct:
+              continue
+          pnl      = _f(r.get("pnl_dollars")) or 0.0
+          exit_rsn = str(r.get("exit_reason") or "").upper()
+          is_win   = exit_rsn in ("TRAILBLAZER", "TP1") or (exit_rsn == "MANUAL" and pnl > 0)
+          trades.append({
+              "id":             r.get("id"),
+              "venue":          r["_venue"],
+              "pair":           str(r.get("pair") or r.get("symbol") or ""),
+              "direction":      str(r.get("direction") or "").upper(),
+              "exit_reason":    exit_rsn,
+              "result":         "win" if is_win else "loss",
+              "open_time":      ot.isoformat(),
+              "close_time":     ct.isoformat(),
+              "open_ms":        int(ot.timestamp() * 1000),
+              "close_ms":       int(ct.timestamp() * 1000),
+              "session_opened": _session_for_utc(ot),
+              "pnl_dollars":    pnl,
+          })
+      trades.sort(key=lambda t: t["open_ms"])
+
+      # Concurrency series at every open/close event
+      event_ms = sorted({ms for t in trades for ms in (t["open_ms"], t["close_ms"])})
+      series: list[dict] = []
+      for ev in event_ms:
+          c = sum(1 for t in trades if t["open_ms"] <= ev < t["close_ms"])
+          series.append({"t_ms": ev, "count": c, "margin_deployed": round(c * margin, 2)})
+
+      # Cluster zones (count >= 3)
+      clusters: list[dict] = []
+      cur: Optional[dict] = None
+      for i, pt in enumerate(series):
+          nxt = series[i + 1]["t_ms"] if i + 1 < len(series) else pt["t_ms"]
+          if pt["count"] >= 3:
+              active = [t for t in trades if t["open_ms"] <= pt["t_ms"] < t["close_ms"]]
+              if cur is None:
+                  cur = {"start_ms": pt["t_ms"], "end_ms": nxt,
+                         "peak_count": pt["count"],
+                         "trade_ids":  {t["id"] for t in active},
+                         "directions": {t["direction"] for t in active}}
+              else:
+                  cur["end_ms"]     = nxt
+                  cur["peak_count"] = max(cur["peak_count"], pt["count"])
+                  cur["trade_ids"].update(t["id"] for t in active)
+                  cur["directions"].update(t["direction"] for t in active)
+          else:
+              if cur is not None:
+                  _tl_finalise(cur, clusters)
+                  cur = None
+      if cur is not None:
+          _tl_finalise(cur, clusters)
+
+      # Drain annotations: margin drops >30 % from a local peak
+      drains: list[dict] = []
+      local_peak = 0.0
+      for pt in series:
+          m = pt["margin_deployed"]
+          if m > local_peak:
+              local_peak = m
+          elif local_peak > 0 and m < local_peak * 0.70:
+              drains.append({
+                  "t_ms":            pt["t_ms"],
+                  "time":            datetime.fromtimestamp(pt["t_ms"] / 1000, tz=timezone.utc).isoformat(),
+                  "margin_deployed": m,
+                  "drained_from":    local_peak,
+              })
+              local_peak = m
+
+      peak_pt = max(series, key=lambda x: x["margin_deployed"]) if series else None
+
+      return JSONResponse({
+          "date":               date_str,
+          "venue_filter":       venue,
+          "margin_per_trade":   margin,
+          "trade_count":        len(trades),
+          "trades":             trades,
+          "concurrency_series": series,
+          "peak_concurrent":    peak_pt["count"]             if peak_pt else 0,
+          "peak_margin":        peak_pt["margin_deployed"]   if peak_pt else 0.0,
+          "peak_margin_time":   datetime.fromtimestamp(peak_pt["t_ms"] / 1000, tz=timezone.utc).isoformat()
+                                if peak_pt else None,
+          "clusters":           clusters,
+          "cluster_count":      len(clusters),
+          "drains":             drains,
+      })
+  
 # ─────────────────────────── entry point ───────────────────────────
 if __name__ == "__main__":
   import uvicorn
