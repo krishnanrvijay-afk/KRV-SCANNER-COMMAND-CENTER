@@ -1738,7 +1738,7 @@ function _initLogDates() {
   async function reconstructOne(venue, tradeId, key) {
     if (rcResults[key] && !rcResults[key]._loading) {
       // Already loaded — just re-render
-      const safeKey = key.replace(/|/g, '__');
+      const safeKey = key.replace(/\|/g, '__');
       const el = document.getElementById('rcr-' + safeKey);
       if (el) el.innerHTML = _renderReconResult(key);
       return;
@@ -1757,7 +1757,7 @@ function _initLogDates() {
   }
 
   function _refreshReconRow(key) {
-    const safeKey = key.replace(/|/g, '__');
+    const safeKey = key.replace(/\|/g, '__');
     const el = document.getElementById('rcr-' + safeKey);
     if (el) { el.innerHTML = _renderReconResult(key); el.style.display = ''; }
   }
