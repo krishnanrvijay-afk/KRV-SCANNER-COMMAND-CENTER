@@ -6,12 +6,12 @@ import asyncio
 import os
 import pathlib
 import time
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
 import httpx
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
@@ -541,7 +541,344 @@ async def api_schema(request: Request) -> JSONResponse:
         "mexc_columns": sorted(mx_s[0].keys())  if mx_s  else [],
     })
 
-# ─────────────────────────── entry point ───────────────────────────
+
+  # ─────────────────────────── reconstruct helpers ───────────────────────────
+
+  HL_API_URL      = "https://api.hyperliquid.xyz/info"
+  MEXC_KLINE_BASE = "https://contract.mexc.com/api/v1/contract/kline"
+
+  # HL internal-symbol -> API coin name (add new pairs here as discovered)
+  HL_COIN_MAP: dict[str, str] = {
+      "@107": "HYPE",
+  }
+
+
+  def _hl_coin(pair: str) -> str:
+      return HL_COIN_MAP.get(pair, pair)
+
+
+  def _rl_price(entry: float, sl: float, r: float, direction: str) -> float:
+      if direction.upper() == "LONG":
+          return entry + r * (entry - sl)
+      return entry - r * (sl - entry)
+
+
+  async def _fetch_hl_candles_1m(coin: str, start_ms: int, end_ms: int) -> list[dict]:
+      payload = {"type": "candleSnapshot", "req": {"coin": coin, "interval": "1m",
+                 "startTime": start_ms, "endTime": end_ms}}
+      async with httpx.AsyncClient(timeout=30.0) as client:
+          try:
+              resp = await client.post(HL_API_URL, json=payload)
+              resp.raise_for_status()
+              data = resp.json()
+              if not isinstance(data, list):
+                  return []
+              candles: list[dict] = []
+              for c in data:
+                  if isinstance(c, (list, tuple)) and len(c) >= 5:
+                      candles.append({"time_ms": int(c[0]),
+                                      "high": float(c[2]), "low": float(c[3])})
+                  elif isinstance(c, dict):
+                      t = c.get("t") or c.get("T") or c.get("time") or 0
+                      candles.append({"time_ms": int(t),
+                                      "high": float(c.get("h") or c.get("high") or 0),
+                                      "low":  float(c.get("l") or c.get("low")  or 0)})
+              return sorted(candles, key=lambda x: x["time_ms"])
+          except Exception as exc:
+              print(f"[RECONSTRUCT] HL candle error: {exc}")
+              return []
+
+
+  async def _fetch_mexc_candles_1m(symbol: str, start_s: int, end_s: int) -> list[dict]:
+      async with httpx.AsyncClient(timeout=30.0) as client:
+          try:
+              resp = await client.get(f"{MEXC_KLINE_BASE}/{symbol}",
+                                      params={"interval": "Min1", "start": start_s, "end": end_s})
+              resp.raise_for_status()
+              d = resp.json().get("data") or {}
+              times = d.get("time", []);  highs = d.get("high", []);  lows = d.get("low", [])
+              candles = [{"time_ms": int(times[i]) * 1000,
+                          "high": float(highs[i]), "low": float(lows[i])}
+                         for i in range(min(len(times), len(highs), len(lows)))]
+              return sorted(candles, key=lambda x: x["time_ms"])
+          except Exception as exc:
+              print(f"[RECONSTRUCT] MEXC candle error: {exc}")
+              return []
+
+
+  def _find_crossing(candles: list[dict], target: float, up: bool,
+                     sl_dist: float, after_ms: int = 0) -> Optional[dict]:
+      """Find first candle after after_ms where price comes within 0.15R of target.
+      up=True  -> looking for HIGH >= target - gap  (adverse SHORT / favorable LONG).
+      up=False -> looking for LOW  <= target + gap  (adverse LONG  / favorable SHORT).
+      Returns dict with time_ms, gap_r, tag (confirmed | near-miss), or None.
+      """
+      gap_price = 0.15 * sl_dist
+      for c in candles:
+          if c["time_ms"] < after_ms:
+              continue
+          if up:
+              boundary = c["high"]
+              dist = target - boundary           # <= 0 if crossed
+          else:
+              boundary = c["low"]
+              dist = boundary - target           # <= 0 if crossed
+          if dist <= gap_price:
+              gap_r = max(dist, 0.0) / sl_dist if sl_dist > 0 else 0.0
+              return {
+                  "time_ms":  c["time_ms"],
+                  "boundary": round(boundary, 8),
+                  "gap_r":    round(gap_r, 4),
+                  "tag":      "confirmed" if dist <= 0 else "near-miss",
+              }
+      return None
+
+
+  def _parse_open_utc(ts_str: str) -> Optional[datetime]:
+      if not ts_str:
+          return None
+      try:
+          s = str(ts_str).strip().replace("Z", "+00:00")
+          if "+" not in s[10:] and "-" not in s[10:]:
+              s += "+00:00"
+          return datetime.fromisoformat(s).astimezone(timezone.utc)
+      except Exception:
+          return None
+
+
+  # ─────────────────────────── reconstruct endpoints ───────────────────────────
+
+  @app.get("/api/reconstruct/shortlist")
+  async def api_reconstruct_shortlist(
+      request: Request,
+      venue:       str   = "all",
+      exit_reason: str   = "all",
+      from_date:   Optional[str]   = Query(None, alias="from"),
+      to:          Optional[str]   = None,
+      min_mae:     float = 0.0,
+      min_mfe:     float = 0.0,
+  ) -> JSONResponse:
+      _require_auth(request)
+
+      hl_rows, mexc_rows = await asyncio.gather(
+          _sb_fetch("hl_trade_log",   {"order": "close_time.desc", "limit": "1000"}) if venue in ("all", "hl")   else asyncio.coroutine(lambda: [])(),
+          _sb_fetch("mexc_trade_log", {"order": "close_time.desc", "limit": "1000"}) if venue in ("all", "mexc") else asyncio.coroutine(lambda: [])(),
+      )
+      rows = ([{"_venue": "hl",   **r} for r in hl_rows   if r.get("close_time")] +
+              [{"_venue": "mexc", **r} for r in mexc_rows if r.get("close_time")])
+
+      if exit_reason != "all":
+          er = exit_reason.upper()
+          rows = [r for r in rows if (r.get("exit_reason") or "").upper() == er]
+
+      if from_date:
+          from_dt = _parse_open_utc(from_date + "T00:00:00")
+          if from_dt:
+              rows = [r for r in rows
+                      if (_parse_open_utc(r.get("close_time")) or datetime.min.replace(tzinfo=timezone.utc)) >= from_dt]
+      if to:
+          to_dt = _parse_open_utc(to + "T23:59:59")
+          if to_dt:
+              rows = [r for r in rows
+                      if (_parse_open_utc(r.get("close_time")) or datetime.max.replace(tzinfo=timezone.utc)) <= to_dt]
+
+      if min_mae > 0:
+          rows = [r for r in rows if (_f(r.get("mae_r")) or 0) <= -min_mae]
+      if min_mfe > 0:
+          rows = [r for r in rows if (_f(r.get("mfe_r")) or 0) >= min_mfe]
+
+      rows.sort(key=lambda r: str(r.get("close_time") or ""), reverse=True)
+
+      return JSONResponse([{
+          "id":          r.get("id"),
+          "venue":       r["_venue"],
+          "pair":        r.get("pair"),
+          "direction":   r.get("direction"),
+          "exit_reason": r.get("exit_reason"),
+          "mae_r":       _f(r.get("mae_r")),
+          "mfe_r":       _f(r.get("mfe_r")),
+          "open_time":   r.get("open_time"),
+          "close_time":  r.get("close_time"),
+          "entry_price": _f(r.get("entry_price")),
+          "sl":          _f(r.get("sl")),
+      } for r in rows])
+
+
+  @app.get("/api/reconstruct/{venue}/{trade_id}")
+  async def api_reconstruct(
+      request: Request,
+      venue:    str,
+      trade_id: int,
+  ) -> JSONResponse:
+      _require_auth(request)
+
+      if venue not in ("hl", "mexc"):
+          raise HTTPException(400, "venue must be hl or mexc")
+
+      table = "hl_trade_log" if venue == "hl" else "mexc_trade_log"
+      rows  = await _sb_fetch(table, {"id": f"eq.{trade_id}"})
+      if not rows:
+          raise HTTPException(404, "trade not found")
+      row = rows[0]
+
+      entry     = _f(row.get("entry_price"))
+      sl_val    = _f(row.get("sl"))
+      mae_r_val = _f(row.get("mae_r"))
+      mfe_r_val = _f(row.get("mfe_r"))
+      direction = str(row.get("direction") or "").upper()
+      exit_rsn  = str(row.get("exit_reason") or "").upper()
+      open_ts   = row.get("open_time")
+      close_ts  = row.get("close_time")
+      pair      = str(row.get("pair") or "")
+
+      if not all([entry is not None, sl_val is not None,
+                  mae_r_val is not None, mfe_r_val is not None,
+                  direction, open_ts, close_ts]):
+          return JSONResponse({"status": "error", "msg": "missing required fields in DB row"})
+
+      if exit_rsn not in ("TRAILBLAZER", "SL"):
+          return JSONResponse({"status": "unsupported",
+                               "msg": f"reconstruction not yet supported for exit_reason={row.get('exit_reason')}"})
+
+      open_utc  = _parse_open_utc(open_ts)
+      close_utc = _parse_open_utc(close_ts)
+      if not open_utc or not close_utc:
+          return JSONResponse({"status": "error", "msg": "could not parse timestamps"})
+
+      open_ms   = int(open_utc.timestamp()  * 1000)
+      close_ms  = int(close_utc.timestamp() * 1000)
+      open_s    = int(open_utc.timestamp())
+      close_s   = int(close_utc.timestamp())
+      total_sec = (close_utc - open_utc).total_seconds()
+
+      # HL 5-day retention check
+      if venue == "hl":
+          age_days = (datetime.now(timezone.utc) - open_utc).total_seconds() / 86400
+          if age_days > 5:
+              return JSONResponse({
+                  "status": "outside_retention",
+                  "msg": f"HL candleSnapshot retains ~5 days of 1m history; trade is {age_days:.1f} days old",
+              })
+
+      # SL distance and R-level prices
+      if direction == "LONG":
+          sl_dist = entry - sl_val
+      else:
+          sl_dist = sl_val - entry
+
+      if sl_dist <= 0:
+          return JSONResponse({"status": "error", "msg": f"invalid sl_dist={sl_dist} (entry={entry} sl={sl_val})"})
+
+      mae_price = _rl_price(entry, sl_val, mae_r_val, direction)
+      mfe_price = _rl_price(entry, sl_val, mfe_r_val, direction)
+
+      # Fetch 1-minute candles
+      if venue == "hl":
+          candles = await _fetch_hl_candles_1m(_hl_coin(pair), open_ms - 60000, close_ms + 60000)
+      else:
+          sym = pair if "_USDT" in pair else pair + "_USDT"
+          candles = await _fetch_mexc_candles_1m(sym, open_s - 60, close_s + 60)
+
+      if not candles:
+          return JSONResponse({"status": "error", "msg": "no candles returned from exchange API"})
+
+      # Direction of crossing for each R-level
+      # SHORT adverse = price UP (H >= mae_price); SHORT favorable = price DOWN (L <= mfe_price)
+      # LONG  adverse = price DOWN (L <= mae_price); LONG  favorable = price UP (H >= mfe_price)
+      mae_up = direction == "SHORT"
+      mfe_up = direction == "LONG"
+
+      def _ts_iso(ms: int) -> str:
+          return datetime.fromtimestamp(ms / 1000, tz=timezone.utc).isoformat()
+
+      def _pct(secs: float) -> float:
+          return round(secs / total_sec * 100, 1) if total_sec > 0 else 0.0
+
+      if exit_rsn == "TRAILBLAZER":
+          # Group a: entry -> MAE -> MFE -> close
+          mae_hit = _find_crossing(candles, mae_price, mae_up,  sl_dist, after_ms=open_ms)
+          if not mae_hit:
+              # mae_r=0 means no adverse move; set MAE to entry time
+              if mae_r_val == 0:
+                  mae_hit = {"time_ms": open_ms, "boundary": round(entry, 8), "gap_r": 0.0, "tag": "confirmed"}
+              else:
+                  return JSONResponse({"status": "no_crossing", "msg": "MAE crossing not found in 1m candles",
+                                       "mae_price": round(mae_price, 6), "mfe_price": round(mfe_price, 6)})
+          mfe_hit = _find_crossing(candles, mfe_price, mfe_up, sl_dist, after_ms=mae_hit["time_ms"] + 1)
+          if not mfe_hit:
+              return JSONResponse({"status": "no_crossing", "msg": "MFE crossing not found after MAE in 1m candles",
+                                   "mae_timestamp": _ts_iso(mae_hit["time_ms"]),
+                                   "mae_price": round(mae_price, 6), "mfe_price": round(mfe_price, 6)})
+
+          adverse_s  = (mae_hit["time_ms"] - open_ms) / 1000
+          recovery_s = (mfe_hit["time_ms"] - mae_hit["time_ms"]) / 1000
+
+          return JSONResponse({
+              "status": "ok", "group": "a",
+              "exit_reason": exit_rsn, "direction": direction, "pair": pair, "venue": venue,
+              "entry_price": round(entry, 6), "sl": round(sl_val, 6), "sl_dist": round(sl_dist, 6),
+              "mae_r": mae_r_val, "mfe_r": mfe_r_val,
+              "mae_price": round(mae_price, 6), "mfe_price": round(mfe_price, 6),
+              "open_time": open_ts, "close_time": close_ts,
+              "total_seconds": round(total_sec),
+              "mae_timestamp":          _ts_iso(mae_hit["time_ms"]),
+              "mfe_timestamp":          _ts_iso(mfe_hit["time_ms"]),
+              "mae_candle_boundary":    mae_hit["boundary"],
+              "mfe_candle_boundary":    mfe_hit["boundary"],
+              "mae_tag":                mae_hit["tag"],
+              "mfe_tag":                mfe_hit["tag"],
+              "mae_gap_r":              mae_hit["gap_r"],
+              "mfe_gap_r":              mfe_hit["gap_r"],
+              "time_to_mae_seconds":    round(adverse_s),
+              "mae_to_mfe_seconds":     round(recovery_s),
+              "pct_of_duration_adverse":  _pct(adverse_s),
+              "pct_of_duration_recovery": _pct(recovery_s),
+              "window_start_pct":  _pct(adverse_s),
+              "window_end_pct":    _pct(adverse_s + recovery_s),
+          })
+
+      else:  # SL — group b: entry -> MFE -> MAE/SL -> close
+          mfe_hit = _find_crossing(candles, mfe_price, mfe_up, sl_dist, after_ms=open_ms)
+          if not mfe_hit:
+              if mfe_r_val == 0:
+                  mfe_hit = {"time_ms": open_ms, "boundary": round(entry, 8), "gap_r": 0.0, "tag": "confirmed"}
+              else:
+                  return JSONResponse({"status": "no_crossing", "msg": "MFE crossing not found in 1m candles",
+                                       "mfe_price": round(mfe_price, 6), "mae_price": round(mae_price, 6)})
+          mae_hit = _find_crossing(candles, mae_price, mae_up, sl_dist, after_ms=mfe_hit["time_ms"] + 1)
+          if not mae_hit:
+              return JSONResponse({"status": "no_crossing", "msg": "MAE/SL crossing not found after MFE peak in 1m candles",
+                                   "mfe_timestamp": _ts_iso(mfe_hit["time_ms"]),
+                                   "mae_price": round(mae_price, 6)})
+
+          favorable_s  = (mfe_hit["time_ms"] - open_ms) / 1000
+          roundtrip_s  = (mae_hit["time_ms"] - mfe_hit["time_ms"]) / 1000
+
+          return JSONResponse({
+              "status": "ok", "group": "b",
+              "exit_reason": exit_rsn, "direction": direction, "pair": pair, "venue": venue,
+              "entry_price": round(entry, 6), "sl": round(sl_val, 6), "sl_dist": round(sl_dist, 6),
+              "mae_r": mae_r_val, "mfe_r": mfe_r_val,
+              "mae_price": round(mae_price, 6), "mfe_price": round(mfe_price, 6),
+              "open_time": open_ts, "close_time": close_ts,
+              "total_seconds": round(total_sec),
+              "mfe_timestamp":         _ts_iso(mfe_hit["time_ms"]),
+              "sl_timestamp":          _ts_iso(mae_hit["time_ms"]),
+              "mfe_candle_boundary":   mfe_hit["boundary"],
+              "sl_candle_boundary":    mae_hit["boundary"],
+              "mfe_tag":               mfe_hit["tag"],
+              "sl_tag":                mae_hit["tag"],
+              "mfe_gap_r":             mfe_hit["gap_r"],
+              "sl_gap_r":              mae_hit["gap_r"],
+              "time_to_mfe_seconds":   round(favorable_s),
+              "mfe_to_sl_seconds":     round(roundtrip_s),
+              "pct_of_duration_favorable":  _pct(favorable_s),
+              "pct_of_duration_roundtrip":  _pct(roundtrip_s),
+              "window_start_pct": _pct(favorable_s),
+              "window_end_pct":   _pct(favorable_s + roundtrip_s),
+          })
+
+  # ─────────────────────────── entry point ───────────────────────────
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)

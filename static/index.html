@@ -491,7 +491,34 @@ body {
   .page { padding: 0 10px 48px; }
   .range-btns button { padding: 5px 9px; font-size: .8rem; }
 }
-</style>
+
+  /* ── Reconstruct ── */
+  .recon-filters { padding: 18px 0 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .recon-toolbar { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 10px; flex-wrap: wrap; gap: 8px; }
+  .recon-count-num { font-family: var(--display); font-size: 2.2rem; color: #fff; line-height: 1; }
+  .recon-count-lbl { font-size: 10px; color: #ffffff; letter-spacing: .15em; font-weight: 700; }
+  .recon-count-wrap { display: flex; align-items: baseline; gap: 7px; }
+  .recon-btn { border: 1px solid #22d3ee55; background: transparent; color: var(--teal); padding: 5px 16px; border-radius: 999px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; cursor: pointer; -webkit-appearance: none; transition: background .12s; }
+  .recon-btn:hover { background: #22d3ee10; }
+  .recon-num-input { background: #070707; border: 1px solid #222; color: #fff; padding: 4px 8px; font-family: var(--mono); font-size: 11px; font-weight: 700; border-radius: 3px; width: 70px; outline: none; color-scheme: dark; -webkit-appearance: none; }
+  .recon-num-input:focus { border-color: #333; }
+  .exit-tag { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+  .exit-tag.trailblazer { background: #22d3ee14; border: 1px solid #22d3ee38; color: var(--teal); }
+  .exit-tag.sl { background: #ff4d4d14; border: 1px solid #ff4d4d38; color: var(--red); }
+  .recon-row-wrap { border-bottom: 1px solid #0c0c0c; }
+  .recon-row { display: flex; align-items: center; gap: 8px; padding: 8px 4px; cursor: pointer; flex-wrap: wrap; }
+  .recon-row:hover { background: #060606; }
+  .recon-pair { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .04em; min-width: 60px; }
+  .recon-rvals { display: flex; gap: 8px; font-size: 11px; font-weight: 700; }
+  .recon-result { padding: 10px 12px; background: #030303; }
+  .recon-loading { font-size: 11px; color: #555; font-weight: 700; padding: 6px 0; letter-spacing: .08em; }
+  .timeline-wrap { margin: 6px 0 4px; }
+  .timeline-lbl { font-size: 10px; color: #ffffff; font-weight: 700; letter-spacing: .1em; margin-bottom: 6px; }
+  .tl-track { position: relative; height: 10px; background: #0d0d0d; border-radius: 2px; }
+  .tl-seg { position: absolute; top: 0; height: 100%; border-radius: 2px; }
+  .tl-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #fff; border-radius: 1px; z-index: 2; }
+  .recon-meta { font-size: 10px; font-weight: 700; color: #ffffff; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 7px; letter-spacing: .04em; }
+  </style>
 </head>
 <body>
 <div class="page">
@@ -574,7 +601,51 @@ body {
       <div id="excursion"></div>
     </div>
 
-  </div><!-- /panel-insights -->
+
+      <!-- I. RECONSTRUCT -->
+      <div class="band">
+        <div class="band-title">RECONSTRUCT</div>
+        <div class="recon-filters">
+          <div class="log-filter-group">
+            <span class="log-filter-label">VENUE</span>
+            <div class="venue-chips">
+              <button class="venue-chip active-all" id="rc-vchip-all"  onclick="setReconVenue('all')">ALL</button>
+              <button class="venue-chip"            id="rc-vchip-hl"   onclick="setReconVenue('hl')">HL</button>
+              <button class="venue-chip"            id="rc-vchip-mexc" onclick="setReconVenue('mexc')">MEXC</button>
+            </div>
+          </div>
+          <div class="log-filter-group">
+            <span class="log-filter-label">TYPE</span>
+            <div class="venue-chips">
+              <button class="venue-chip active-all" id="rc-echip-all" onclick="setReconExit('all')">ALL</button>
+              <button class="venue-chip"            id="rc-echip-tb"  onclick="setReconExit('trailblazer')">TRAILBLAZER</button>
+              <button class="venue-chip"            id="rc-echip-sl"  onclick="setReconExit('sl')">SL</button>
+            </div>
+          </div>
+          <div class="log-filter-group">
+            <span class="log-filter-label">FROM</span>
+            <input type="date" id="rc-from" class="log-date-input" onchange="loadReconShortlist()">
+            <span class="log-filter-label">TO</span>
+            <input type="date" id="rc-to"   class="log-date-input" onchange="loadReconShortlist()">
+          </div>
+          <div class="log-filter-group">
+            <span class="log-filter-label">MIN |MAE|</span>
+            <input type="number" id="rc-mae" class="recon-num-input" value="0.3" step="0.1" min="0" onchange="loadReconShortlist()">
+            <span class="log-filter-label">MIN MFE</span>
+            <input type="number" id="rc-mfe" class="recon-num-input" value="0.5" step="0.1" min="0" onchange="loadReconShortlist()">
+          </div>
+        </div>
+        <div class="recon-toolbar">
+          <div class="recon-count-wrap">
+            <div class="recon-count-num" id="rc-count">--</div>
+            <div class="recon-count-lbl">QUALIFY</div>
+          </div>
+          <button class="recon-btn" id="rc-all-btn" onclick="reconstructAll()" style="display:none">RECONSTRUCT ALL (<span id="rc-all-n">0</span>)</button>
+        </div>
+        <div id="rc-shortlist"></div>
+      </div>
+
+    </div><!-- /panel-insights -->
 
   <!-- ═══ TAB 2: SCORECARD ═══ -->
   <div id="panel-scorecard" style="display:none">
@@ -1486,6 +1557,228 @@ function _initLogDates() {
   setInterval(loadLive,      30_000);
   setInterval(loadAnalytics, 300_000);
 })();
+
+  // ===========================================================
+  // RECONSTRUCT BAND
+  // ===========================================================
+
+  let rcVenue     = 'all';
+  let rcExit      = 'all';
+  let rcShortlist = [];
+  let rcResults   = {};
+
+  function _initReconDates() {
+    const d    = new Date();
+    const yest = new Date(d.getTime() - 86400000);
+    const fmt  = x => x.toISOString().slice(0, 10);
+    const fe = document.getElementById('rc-from');
+    const te = document.getElementById('rc-to');
+    if (fe) fe.value = fmt(yest);
+    if (te) te.value = fmt(yest);
+  }
+
+  function setReconVenue(v) {
+    rcVenue = v;
+    ['all','hl','mexc'].forEach(x => {
+      const el = document.getElementById('rc-vchip-' + x);
+      if (!el) return;
+      el.className = 'venue-chip' + (x === v ? ' active-' + x : '');
+    });
+    loadReconShortlist();
+  }
+
+  function setReconExit(v) {
+    rcExit = v;
+    [['all','all'],['tb','trailblazer'],['sl','sl']].forEach(([id, key]) => {
+      const el = document.getElementById('rc-echip-' + id);
+      if (!el) return;
+      el.className = 'venue-chip' + (v === key ? ' active-all' : '');
+    });
+    loadReconShortlist();
+  }
+
+  async function loadReconShortlist() {
+    const from   = document.getElementById('rc-from')?.value || '';
+    const to     = document.getElementById('rc-to')?.value   || '';
+    const minMae = parseFloat(document.getElementById('rc-mae')?.value) || 0;
+    const minMfe = parseFloat(document.getElementById('rc-mfe')?.value) || 0;
+
+    const p = new URLSearchParams({ venue: rcVenue, exit_reason: rcExit,
+                                     min_mae: minMae, min_mfe: minMfe });
+    if (from) p.set('from', from);
+    if (to)   p.set('to',   to);
+
+    document.getElementById('rc-count').textContent    = '...';
+    document.getElementById('rc-shortlist').innerHTML  = '<div class="empty">Loading...</div>';
+
+    try {
+      const res = await fetch('/api/reconstruct/shortlist?' + p.toString());
+      if (!res.ok) throw new Error(res.statusText);
+      rcShortlist = await res.json();
+      rcResults   = {};
+
+      const n = rcShortlist.length;
+      document.getElementById('rc-count').textContent = n;
+      const btn = document.getElementById('rc-all-btn');
+      document.getElementById('rc-all-n').textContent = n;
+      btn.style.display = n > 0 ? '' : 'none';
+      renderReconShortlist();
+    } catch (e) {
+      document.getElementById('rc-count').textContent   = '!';
+      document.getElementById('rc-shortlist').innerHTML = '<div class="empty">Error loading shortlist</div>';
+      console.error('recon shortlist', e);
+    }
+  }
+
+  function renderReconShortlist() {
+    const el = document.getElementById('rc-shortlist');
+    if (!rcShortlist.length) {
+      el.innerHTML = '<div class="empty" style="padding:10px 0">No qualifying trades for these filters</div>';
+      return;
+    }
+    el.innerHTML = rcShortlist.map(t => {
+      const key     = t.venue + '|' + t.id;
+      const vtag    = t.venue === 'hl'
+        ? '<span class="venue-tag hl">HL</span>'
+        : '<span class="venue-tag mexc">MEXC</span>';
+      const dtag    = (t.direction||'').toUpperCase() === 'LONG'
+        ? '<span class="dir-tag long">LONG</span>'
+        : '<span class="dir-tag short">SHORT</span>';
+      const exitKey = (t.exit_reason||'').toUpperCase();
+      const ecls    = exitKey === 'TRAILBLAZER' ? 'trailblazer' : 'sl';
+      const etag    = '<span class="exit-tag ' + ecls + '">' + exitKey + '</span>';
+      const maeV    = t.mae_r != null ? parseFloat(t.mae_r) : null;
+      const mfeV    = t.mfe_r != null ? parseFloat(t.mfe_r) : null;
+      const maeStr  = maeV != null ? (maeV >= 0 ? '+' : '') + maeV.toFixed(2) + 'R' : '--';
+      const mfeStr  = mfeV != null ? (mfeV > 0 ? '+' : '') + mfeV.toFixed(2) + 'R' : '--';
+      const maeCol  = maeV != null && maeV < 0 ? C.red : '#ffffff';
+      const mfeCol  = mfeV != null && mfeV > 0 ? C.green : '#ffffff';
+      const ots     = (t.open_time || '').slice(0, 16).replace('T', ' ') + ' UTC';
+      const safeKey = key.replace(/|/g, '__');
+      return '<div class="recon-row-wrap"><div class="recon-row" onclick="rcRowClick('' + key + '')">'
+        + vtag + dtag + etag
+        + '<span class="recon-pair">' + (t.pair || '--') + '</span>'
+        + '<div class="recon-rvals">'
+        +   '<span style="color:' + maeCol + '">MAE ' + maeStr + '</span>'
+        +   '<span style="color:' + mfeCol + '">MFE ' + mfeStr + '</span>'
+        + '</div>'
+        + '<span style="font-size:10px;color:#444;font-weight:700;margin-left:auto">' + ots + '</span>'
+        + '</div>'
+        + '<div id="rcr-' + safeKey + '" class="recon-result" style="display:none"></div>'
+        + '</div>';
+    }).join('');
+  }
+
+  function rcRowClick(key) {
+    const safeKey = key.replace(/|/g, '__');
+    const el = document.getElementById('rcr-' + safeKey);
+    if (!el) return;
+    // If already loaded and visible — toggle
+    if (el.style.display !== 'none' && rcResults[key] && !rcResults[key]._loading) {
+      el.style.display = 'none'; return;
+    }
+    el.style.display = '';
+    const [venue, idStr] = key.split('|');
+    reconstructOne(venue, parseInt(idStr), key);
+  }
+
+  function _renderReconResult(key) {
+    const r = rcResults[key];
+    if (!r) return '';
+    if (r._loading) return '<div class="recon-loading">RECONSTRUCTING...</div>';
+    if (r.status === 'outside_retention') return '<div class="recon-loading" style="color:' + C.amber + '">OUTSIDE HL 5-DAY RETENTION WINDOW</div>';
+    if (r.status === 'unsupported')  return '<div class="recon-loading" style="color:#555">' + r.msg + '</div>';
+    if (r.status === 'no_crossing')  return '<div class="recon-loading" style="color:' + C.amber + '">NO CROSSING FOUND -- ' + r.msg + '</div>';
+    if (r.status === 'error')        return '<div class="recon-loading" style="color:' + C.red   + '">ERROR -- ' + r.msg + '</div>';
+    if (r.status !== 'ok')           return '<div class="recon-loading" style="color:#555">status: ' + r.status + '</div>';
+
+    const isTB     = r.group === 'a';
+    const segColor = isTB ? '#22d3ee' : C.red;
+    const ws       = r.window_start_pct.toFixed(1);
+    const we       = r.window_end_pct.toFixed(1);
+    const ww       = (parseFloat(we) - parseFloat(ws)).toFixed(1);
+
+    let metaItems = [];
+    if (isTB) {
+      const maeT = new Date(r.mae_timestamp).toISOString().slice(11, 16);
+      const mfeT = new Date(r.mfe_timestamp).toISOString().slice(11, 16);
+      metaItems = [
+        'MAE @ ' + maeT + ' UTC [' + r.mae_tag + ', gap=' + r.mae_gap_r + 'R]',
+        'MFE @ ' + mfeT + ' UTC [' + r.mfe_tag + ', gap=' + r.mfe_gap_r + 'R]',
+        'Adverse ' + r.time_to_mae_seconds + 's (' + r.pct_of_duration_adverse + '%)  '
+          + 'Recovery ' + r.mae_to_mfe_seconds + 's (' + r.pct_of_duration_recovery + '%)',
+        'Trade total ' + r.total_seconds + 's',
+      ];
+    } else {
+      const mfeT = new Date(r.mfe_timestamp).toISOString().slice(11, 16);
+      const slT  = new Date(r.sl_timestamp).toISOString().slice(11, 16);
+      metaItems = [
+        'Peak @ ' + mfeT + ' UTC [' + r.mfe_tag + ', gap=' + r.mfe_gap_r + 'R]',
+        'SL   @ ' + slT  + ' UTC [' + r.sl_tag  + ', gap=' + r.sl_gap_r  + 'R]',
+        'To peak ' + r.time_to_mfe_seconds + 's (' + r.pct_of_duration_favorable + '%)  '
+          + 'Round-trip ' + r.mfe_to_sl_seconds + 's (' + r.pct_of_duration_roundtrip + '%)',
+        'Trade total ' + r.total_seconds + 's',
+      ];
+    }
+
+    return '<div class="timeline-wrap">'
+      + '<div class="timeline-lbl">'
+      + (isTB ? 'MAE → MFE RECOVERY WINDOW' : 'PEAK → SL ROUND-TRIP WINDOW') + '</div>'
+      + '<div class="tl-track">'
+      +   '<div class="tl-seg" style="left:' + ws + '%;width:' + ww + '%;background:' + segColor + ';opacity:.8"></div>'
+      +   '<div class="tl-tick" style="left:' + ws + '%"></div>'
+      +   '<div class="tl-tick" style="left:' + we + '%"></div>'
+      + '</div></div>'
+      + '<div class="recon-meta">'
+      + metaItems.map(m => '<span>' + m + '</span>').join('')
+      + '</div>';
+  }
+
+  async function reconstructOne(venue, tradeId, key) {
+    if (rcResults[key] && !rcResults[key]._loading) {
+      // Already loaded — just re-render
+      const safeKey = key.replace(/|/g, '__');
+      const el = document.getElementById('rcr-' + safeKey);
+      if (el) el.innerHTML = _renderReconResult(key);
+      return;
+    }
+    rcResults[key] = { _loading: true };
+    _refreshReconRow(key);
+
+    try {
+      const res  = await fetch('/api/reconstruct/' + venue + '/' + tradeId);
+      const data = await res.json();
+      rcResults[key] = data;
+    } catch (e) {
+      rcResults[key] = { status: 'error', msg: String(e) };
+    }
+    _refreshReconRow(key);
+  }
+
+  function _refreshReconRow(key) {
+    const safeKey = key.replace(/|/g, '__');
+    const el = document.getElementById('rcr-' + safeKey);
+    if (el) { el.innerHTML = _renderReconResult(key); el.style.display = ''; }
+  }
+
+  async function reconstructAll() {
+    const pending = rcShortlist.filter(t => {
+      const key = t.venue + '|' + t.id;
+      return !rcResults[key] || rcResults[key]._loading;
+    });
+    // Show loading placeholders for all first
+    pending.forEach(t => {
+      const key = t.venue + '|' + t.id;
+      rcResults[key] = { _loading: true };
+      _refreshReconRow(key);
+    });
+    // Fetch all in parallel
+    await Promise.all(pending.map(t => {
+      const key = t.venue + '|' + t.id;
+      return reconstructOne(t.venue, t.id, key);
+    }));
+  }
+  
 </script>
 </body>
 </html>
