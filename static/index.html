@@ -1553,7 +1553,8 @@ function _initLogDates() {
 // ── boot ──
 (async function init() {
   _initLogDates();
-  await Promise.all([loadAnalytics(), loadLive()]);
+  _initReconDates();
+  await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist()]);
   setInterval(loadLive,      30_000);
   setInterval(loadAnalytics, 300_000);
 })();
@@ -1654,8 +1655,8 @@ function _initLogDates() {
       const maeCol  = maeV != null && maeV < 0 ? C.red : '#ffffff';
       const mfeCol  = mfeV != null && mfeV > 0 ? C.green : '#ffffff';
       const ots     = (t.open_time || '').slice(0, 16).replace('T', ' ') + ' UTC';
-      const safeKey = key.replace(/|/g, '__');
-      return '<div class="recon-row-wrap"><div class="recon-row" onclick="rcRowClick('' + key + '')">'
+      const safeKey = key.replace(/\|/g, '__');
+      return '<div class="recon-row-wrap"><div class="recon-row" onclick="rcRowClick(\'' + key + '\')">'
         + vtag + dtag + etag
         + '<span class="recon-pair">' + (t.pair || '--') + '</span>'
         + '<div class="recon-rvals">'
@@ -1670,7 +1671,7 @@ function _initLogDates() {
   }
 
   function rcRowClick(key) {
-    const safeKey = key.replace(/|/g, '__');
+    const safeKey = key.replace(/\|/g, '__');
     const el = document.getElementById('rcr-' + safeKey);
     if (!el) return;
     // If already loaded and visible — toggle
