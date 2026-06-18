@@ -641,6 +641,7 @@ body {
             <div class="recon-count-lbl">QUALIFY</div>
           </div>
           <button class="recon-btn" id="rc-all-btn" onclick="reconstructAll()" style="display:none">RECONSTRUCT ALL (<span id="rc-all-n">0</span>)</button>
+          <button class="recon-btn" id="rc-export-btn" onclick="exportReconResults()" style="display:none">EXPORT RESULTS</button>
         </div>
         <div id="rc-shortlist"></div>
       </div>
@@ -1623,6 +1624,7 @@ function _initLogDates() {
       const btn = document.getElementById('rc-all-btn');
       document.getElementById('rc-all-n').textContent = n;
       btn.style.display = n > 0 ? '' : 'none';
+      document.getElementById('rc-export-btn').style.display = n > 0 ? '' : 'none';
       renderReconShortlist();
     } catch (e) {
       document.getElementById('rc-count').textContent   = '!';
@@ -1779,7 +1781,56 @@ function _initLogDates() {
       return reconstructOne(t.venue, t.id, key);
     }));
   }
-  
+
+    function exportReconResults() {
+      const done = rcShortlist.filter(t => {
+        const key = t.venue + '|' + t.id;
+        const r   = rcResults[key];
+        return r && !r._loading;
+      });
+      if (!done.length) {
+        const btn  = document.getElementById('rc-export-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'NOTHING TO EXPORT YET';
+        setTimeout(() => { btn.textContent = orig; }, 2200);
+        return;
+      }
+      const hdr = ['venue','pair','direction','exit_reason','mae_r','mfe_r',
+                   'mae_timestamp','mfe_timestamp','elapsed_minutes',
+                   'pct_of_duration','confirmation_tag','outside_retention'];
+      const csvRows = done.map(t => {
+        const key  = t.venue + '|' + t.id;
+        const r    = rcResults[key];
+        const ok   = r.status === 'ok';
+        const isTB = ok && r.group === 'a';
+        const maeTs = ok && isTB  ? (r.mae_timestamp || '') : '';
+        const mfeTs = ok          ? (r.mfe_timestamp  || '') : '';
+        const elap  = ok && r.total_seconds != null ? (r.total_seconds / 60).toFixed(2) : '';
+        const pct   = ok ? (isTB ? (r.pct_of_duration_recovery  || '')
+                                 : (r.pct_of_duration_roundtrip || '')) : '';
+        const tag1  = ok ? (isTB ? r.mae_tag : r.mfe_tag) : '';
+        const tag2  = ok ? (isTB ? r.mfe_tag : r.sl_tag)  : '';
+        const conf  = ok ? ((tag1 === 'near-miss' || tag2 === 'near-miss') ? 'near-miss' : 'confirmed') : '';
+        const oret  = r.status === 'outside_retention' ? 'true' : 'false';
+        const cols  = [
+          t.venue, t.pair, t.direction, t.exit_reason,
+          t.mae_r != null ? t.mae_r : '',
+          t.mfe_r != null ? t.mfe_r : '',
+          maeTs, mfeTs, elap, pct, conf, oret,
+        ];
+        return cols.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',');
+      });
+      const csv  = [hdr.join(','), ...csvRows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'reconstruct_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+    }
+    
 </script>
 </body>
 </html>
