@@ -18,8 +18,8 @@
   --card:   #060606;
   --border: #161616;
   --dim:    #333;
-  --text:   #d8d8d8;
-  --sub:    #555;
+  --text:   #ffffff;
+  --sub:    #ffffff;
   --mono:   'JetBrains Mono', monospace;
   --display:'Bebas Neue', sans-serif;
 }
@@ -76,7 +76,7 @@ body {
 .range-btns button {
   background: transparent;
   border: 1px solid #222;
-  color: #555;
+  color: #ffffff;
   padding: 5px 14px;
   font-family: var(--display);
   font-size: 18px;
@@ -87,7 +87,7 @@ body {
   -webkit-appearance: none;
 }
 .range-btns button.active  { border-color: var(--teal); color: var(--teal); background: #22d3ee12; }
-.range-btns button:hover:not(.active) { border-color: #2a2a2a; color: #888; }
+.range-btns button:hover:not(.active) { border-color: #2a2a2a; color: #ffffff; }
 
 .badge-paper {
   background: #120d00;
@@ -110,7 +110,7 @@ body {
 .tab-btn {
   background: transparent;
   border: 1px solid #1c1c1c;
-  color: #444;
+  color: #ffffff;
   padding: 6px 18px;
   font-family: var(--mono);
   font-size: 11px;
@@ -126,7 +126,7 @@ body {
   color: var(--teal);
   background: #22d3ee0d;
 }
-.tab-btn:hover:not(.active) { border-color: #2a2a2a; color: #666; }
+.tab-btn:hover:not(.active) { border-color: #2a2a2a; color: #ffffff; }
 
 /* ── Progress bars ── */
 .pb-wrap { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
@@ -165,14 +165,14 @@ body {
 .jleg-sq     { display:inline-block; width:6px; height:6px; border-radius:1px; border:1.5px solid; background:transparent; flex-shrink:0; }
 .jmap-toggle { display:flex; gap:3px; }
 .jmap-btn {
-  background:#111; border:1px solid #2a2a2a; color:#444;
+  background:#111; border:1px solid #2a2a2a; color:#ffffff;
   padding:3px 10px; font-family:var(--mono); font-size:10px; font-weight:700;
   letter-spacing:.1em; cursor:pointer; border-radius:2px; -webkit-appearance:none;
   transition:all .1s;
 }
 .jmap-btn.active { background:#12122a; border-color:#b388ff; color:#ffffff; }
 .j-rail-block { margin-bottom:30px; }
-.j-rail-label { font-family:var(--display); font-size:13px; letter-spacing:.15em; color:#aaaaaa; font-weight:400; margin-bottom:6px; }
+.j-rail-label { font-family:var(--display); font-size:13px; letter-spacing:.15em; color:#ffffff; font-weight:700; margin-bottom:6px; }
 .j-rail {
   position: relative;
   height: 52px;
@@ -188,8 +188,8 @@ body {
 .j-axis {
   position:absolute; bottom:-18px; left:0; right:0;
   display:flex; justify-content:space-between;
-  font-size:11px; color:#aaaaaa; padding:0 2px;
-  pointer-events:none; font-weight:400;
+  font-size:11px; color:#ffffff; padding:0 2px;
+  pointer-events:none; font-weight:700;
 }
 .j-tag {
   position:absolute;
@@ -289,14 +289,14 @@ body {
 .cut-label { font-size: 18px; color: #ffffff; font-weight: 700; letter-spacing: .15em; margin-bottom: 8px; }
 .cut-row   { display: flex; gap: 24px; flex-wrap: wrap; align-items: baseline; font-size: 18px; color: #ffffff; font-weight: 700; }
 .cut-verdict { font-family: var(--display); font-size: 2rem; letter-spacing: .1em; margin-left: auto; }
-.cut-skip { font-size: 13px; color: #aaaaaa; margin-top: 6px; font-weight: 400; }
+.cut-skip { font-size: 13px; color: #ffffff; margin-top: 6px; font-weight: 700; }
 
 /* ── Footer ── */
 .footer {
   padding: 14px 0;
   font-size: 13px;
-  font-weight: 400;
-  color: #aaaaaa;
+  font-weight: 700;
+  color: #ffffff;
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
@@ -309,7 +309,7 @@ body {
 .dot-err { background: var(--red); }
 
 /* ── Skeleton / empty ── */
-.empty { color: #aaaaaa; font-size: 13px; font-weight: 400; padding: 10px 0; }
+.empty { color: #ffffff; font-size: 13px; font-weight: 700; padding: 10px 0; }
 
 /* ── LOG TAB ── */
 .log-filters {
@@ -329,7 +329,7 @@ body {
 }
 .log-filter-label {
   font-size: 10px;
-  color: #444;
+  color: #ffffff;
   letter-spacing: .12em;
   font-weight: 700;
 }
@@ -338,7 +338,7 @@ body {
   border-radius: 999px;
   border: 1px solid #222;
   background: transparent;
-  color: #444;
+  color: #ffffff;
   padding: 4px 12px;
   font-family: var(--mono);
   font-size: 10px;
@@ -351,7 +351,7 @@ body {
 .venue-chip.active-all  { background: #22d3ee15; border-color: var(--teal);   color: var(--teal); }
 .venue-chip.active-hl   { background: #a855f715; border-color: #a855f7;       color: #a855f7; }
 .venue-chip.active-mexc { background: #f9731615; border-color: #f97316;       color: #f97316; }
-.venue-chip:hover:not([class*="active"]) { border-color: #333; color: #666; }
+.venue-chip:hover:not([class*="active"]) { border-color: #333; color: #ffffff; }
 .log-date-input {
   background: #070707;
   border: 1px solid #222;
@@ -398,7 +398,7 @@ body {
 }
 .log-count-lbl {
   font-size: 10px;
-  color: #444;
+  color: #ffffff;
   letter-spacing: .15em;
   font-weight: 700;
 }
@@ -423,7 +423,7 @@ body {
   padding: 7px 10px;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  color: #444;
+  color: #ffffff;
   font-size: 10px;
   letter-spacing: .12em;
   white-space: nowrap;
@@ -435,7 +435,7 @@ body {
   background: #000;
   z-index: 2;
 }
-.log-table th:hover { color: #888; }
+.log-table th:hover { color: #ffffff; }
 .log-table th.sort-active { color: var(--teal); }
 .log-table td {
   padding: 6px 10px;
@@ -595,7 +595,7 @@ body {
           <span class="jleg-item"><span class="jleg-dot" style="background:#555555"></span>NEUTRAL</span>
           <span class="jleg-item"><span class="jleg-sq"  style="border-color:#b388ff"></span>HYPERLIQUID</span>
           <span class="jleg-item"><span class="jleg-sq"  style="border-color:#ff9100"></span>MEXC</span>
-          <span class="jleg-item" style="color:#aaaaaa">✦ CONFIRMED</span>
+          <span class="jleg-item" style="color:#ffffff;font-weight:700">✦ CONFIRMED</span>
         </div>
         <div class="jmap-toggle">
           <button class="jmap-btn"        id="jbtn-15m"  onclick="setJView('15m')">15M</button>
@@ -629,7 +629,7 @@ body {
           <div class="j-axis"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span></div>
         </div>
       </div>
-      <div id="jmap-status" style="font-size:13px;color:#aaaaaa;font-weight:400;margin-top:20px">Awaiting live state…</div>
+      <div id="jmap-status" style="font-size:13px;color:#ffffff;font-weight:700;margin-top:20px">Awaiting live state…</div>
     </div>
 
     <!-- D. EXCHANGE DUEL -->
@@ -700,7 +700,7 @@ body {
     <div id="foot-rows">—</div>
     <div id="foot-health">—</div>
     <form action="/logout" method="POST" style="margin:0">
-      <button type="submit" style="background:none;border:none;color:#aaaaaa;font-family:var(--mono);font-size:13px;font-weight:400;cursor:pointer;padding:0;letter-spacing:.05em">LOGOUT</button>
+      <button type="submit" style="background:none;border:none;color:#ffffff;font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer;padding:0;letter-spacing:.05em">LOGOUT</button>
     </form>
   </div>
 
@@ -971,7 +971,7 @@ function paintRail(railId, tags) {
     const el = document.createElement('div');
     el.className = 'j-tag';
 
-    const labelColor = t.jv <= 20 ? '#00dc64' : t.jv >= 80 ? '#ff4646' : '#3a3a3a';
+    const labelColor = t.jv <= 20 ? '#00dc64' : t.jv >= 80 ? '#ff4646' : '#ffffff';
     el.style.color = labelColor;
 
     const hasHL   = t.venues.includes('hl');
@@ -1149,7 +1149,7 @@ function renderExcursion() {
       <div class="exc-card">
         <div class="exc-lbl">DEEP MAE WINNERS</div>
         <div class="exc-val" style="color:${C.amber}">${e.deep_mae_winner_count}</div>
-        <div style="font-size:13px;color:#aaaaaa;font-weight:400;margin-top:2px">mae &le; &minus;0.5R</div>
+        <div style="font-size:13px;color:#ffffff;font-weight:700;margin-top:2px">mae &le; &minus;0.5R</div>
       </div>
     </div>
     <div class="cut-box">
@@ -1270,7 +1270,7 @@ function renderLog() {
   ];
 
   const arrowHTML = (col) => {
-    if (logSort.col !== col) return '<span style="color:#282828;margin-left:3px">&#8597;</span>';
+    if (logSort.col !== col) return '<span style="color:#ffffff;margin-left:3px">&#8597;</span>';
     return logSort.dir === 'asc'
       ? '<span style="color:#22d3ee;margin-left:3px">&#8593;</span>'
       : '<span style="color:#22d3ee;margin-left:3px">&#8595;</span>';
@@ -1299,10 +1299,10 @@ function renderLog() {
           : '—';
         const pnlV   = r.pnl_dollars != null ? parseFloat(r.pnl_dollars) : null;
         const pnlStr = pnlV != null ? fmtDollar(pnlV) : '—';
-        const pnlCol = pnlV != null ? pnlColor(pnlV) : '#555';
+        const pnlCol = pnlV != null ? pnlColor(pnlV) : '#ffffff';
         const rvV    = r.r_value != null ? parseFloat(r.r_value) : null;
         const rvStr  = rvV != null ? fmtR(rvV) : '—';
-        const rvCol  = rvV != null ? (rvV >= 0 ? C.green : C.red) : '#555';
+        const rvCol  = rvV != null ? (rvV >= 0 ? C.green : C.red) : '#ffffff';
         const dur    = fmtDur(r.duration_seconds);
         const exitStr = r.exit_reason || '—';
         const tier    = r.tier || '—';
@@ -1310,12 +1310,12 @@ function renderLog() {
           <td>${venue}</td>
           <td style="color:#fff;font-weight:700;letter-spacing:.04em">${r.pair || '—'}</td>
           <td>${dirTag}</td>
-          <td style="color:#555;font-size:11px">${tier}</td>
-          <td style="color:#666;font-size:11px">${closeFmt}</td>
-          <td style="color:#555;font-size:11px;letter-spacing:.03em">${exitStr}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px">${tier}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px">${closeFmt}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px;letter-spacing:.03em">${exitStr}</td>
           <td style="color:${pnlCol};font-weight:700">${pnlStr}</td>
           <td style="color:${rvCol};font-weight:700">${rvStr}</td>
-          <td style="color:#666;font-size:11px">${dur}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px">${dur}</td>
         </tr>`;
       }).join('');
 
