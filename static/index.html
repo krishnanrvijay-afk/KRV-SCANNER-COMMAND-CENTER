@@ -291,6 +291,44 @@ body {
 .cut-verdict { font-family: var(--display); font-size: 2rem; letter-spacing: .1em; margin-left: auto; }
 .cut-skip { font-size: 13px; color: #ffffff; margin-top: 6px; font-weight: 700; }
 
+  /* ── Excursion pill ── */
+  .exc-pill {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 2px; padding: 10px 14px;
+    cursor: pointer; user-select: none; transition: border-color .12s;
+  }
+  .exc-pill:hover { border-color: #2a2a2a; }
+  .exc-pill-left  { font-family: var(--display); font-size: 15px; letter-spacing: .15em; color: #ffffff; }
+  .exc-pill-right { display: flex; align-items: center; gap: 10px; }
+  .exc-pill-glance { font-family: var(--display); font-size: 1.4rem; letter-spacing: .08em; }
+  .exc-chevron { color: #555; font-size: 14px; }
+  /* ── Excursion overlay ── */
+  .exc-scrim {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.65); z-index: 500; align-items: flex-end;
+  }
+  .exc-scrim.open { display: flex; }
+  .exc-sheet {
+    width: 100%; max-height: 85vh; overflow-y: auto;
+    background: var(--bg); border-top: 1px solid var(--border);
+    border-radius: 4px 4px 0 0; padding: 16px;
+    animation: excSlideUp .2s ease;
+  }
+  @keyframes excSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .exc-sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .exc-sheet-title  { font-family: var(--display); font-size: 18px; letter-spacing: .2em; color: #ffffff; }
+  .exc-sheet-close  {
+    background: none; border: 1px solid var(--border); border-radius: 2px;
+    color: #ffffff; font-size: 14px; padding: 4px 9px; cursor: pointer; font-weight: 700;
+  }
+  .exc-sheet-close:hover { border-color: #555; }
+  .exc-caution {
+    border: 1px solid #ffb300; border-radius: 2px; padding: 12px 14px;
+    margin-top: 14px; font-size: 13px; color: #ffb300; font-weight: 700; line-height: 1.5;
+  }
+  .exc-caution-hdr { font-size: 12px; letter-spacing: .12em; margin-bottom: 6px; }
+
 /* ── Footer ── */
 .footer {
   padding: 14px 0;
@@ -1208,43 +1246,73 @@ function renderLeague() {
 }
 
 // ── H. Excursion ──
-function renderExcursion() {
-  const e = analytics.excursion;
-  if (!e) { document.getElementById('excursion').innerHTML = '<div class="empty">No data</div>'; return; }
-  const verdictColor = e.verdict === 'HOLD' ? C.amber : C.green;
+  function renderExcursion() {
+    const e = analytics.excursion;
+    const rangeLabel = range === 'today' ? 'TODAY' : range === 'week' ? 'WEEK' : 'ALL';
+    if (!e) {
+      document.getElementById('excursion').innerHTML = '<div class="empty">No data</div>';
+      document.getElementById('exc-sheet-body').innerHTML = '';
+      return;
+    }
+    const verdictColor = e.verdict === 'HOLD' ? C.amber : C.green;
 
-  document.getElementById('excursion').innerHTML = `
-    <div class="exc-grid">
-      <div class="exc-card">
-        <div class="exc-lbl">WINNERS AVG MAE</div>
-        <div class="exc-val" style="color:${C.amber}">${e.winners_avg_mae != null ? e.winners_avg_mae.toFixed(2)+'R' : '—'}</div>
+    // Compact pill (always visible in band)
+    document.getElementById('excursion').innerHTML = `
+      <div class="exc-pill" onclick="openExcSheet()">
+        <div class="exc-pill-left">MAE/MFE &middot; ${rangeLabel}</div>
+        <div class="exc-pill-right">
+          <span class="exc-pill-glance" style="color:${verdictColor}">${e.verdict} &nbsp;${fmtDollar(e.net)}</span>
+          <span class="exc-chevron">&#9660;</span>
+        </div>
       </div>
-      <div class="exc-card">
-        <div class="exc-lbl">LOSERS AVG MAE</div>
-        <div class="exc-val" style="color:${C.red}">${e.losers_avg_mae != null ? e.losers_avg_mae.toFixed(2)+'R' : '—'}</div>
+    `;
+
+    // Full detail (rendered into overlay sheet body)
+    document.getElementById('exc-sheet-body').innerHTML = `
+      <div class="exc-grid">
+        <div class="exc-card">
+          <div class="exc-lbl">WINNERS AVG MAE</div>
+          <div class="exc-val" style="color:${C.amber}">${e.winners_avg_mae != null ? e.winners_avg_mae.toFixed(2)+'R' : '—'}</div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-lbl">LOSERS AVG MAE</div>
+          <div class="exc-val" style="color:${C.red}">${e.losers_avg_mae != null ? e.losers_avg_mae.toFixed(2)+'R' : '—'}</div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-lbl">AVG MFE CAPTURE</div>
+          <div class="exc-val" style="color:${C.green}">${e.avg_mfe_capture != null ? (e.avg_mfe_capture*100).toFixed(1)+'%' : '—'}</div>
+        </div>
+        <div class="exc-card">
+          <div class="exc-lbl">DEEP MAE WINNERS</div>
+          <div class="exc-val" style="color:${C.amber}">${e.deep_mae_winner_count}</div>
+          <div style="font-size:13px;color:#ffffff;font-weight:700;margin-top:2px">mae &le; &minus;0.5R</div>
+        </div>
       </div>
-      <div class="exc-card">
-        <div class="exc-lbl">AVG MFE CAPTURE</div>
-        <div class="exc-val" style="color:${C.green}">${e.avg_mfe_capture != null ? (e.avg_mfe_capture*100).toFixed(1)+'%' : '—'}</div>
+      <div class="cut-box">
+        <div class="cut-label">EARLY-CUT READ</div>
+        <div class="cut-row">
+          <div><span style="color:#ffffff;font-weight:700">FORGONE </span><span style="color:${C.red};font-weight:700">${fmtDollar(e.forgone)}</span></div>
+          <div><span style="color:#ffffff;font-weight:700">SAVED </span><span style="color:${C.green};font-weight:700">${fmtDollar(e.saved)}</span></div>
+          <div><span style="color:#ffffff;font-weight:700">NET </span><span style="color:${pnlColor(e.net)};font-weight:700">${fmtDollar(e.net)}</span></div>
+          <div class="cut-verdict" style="color:${verdictColor}">${e.verdict}</div>
+        </div>
+        ${e.skipped > 0 ? `<div class="cut-skip">${e.skipped} row${e.skipped !== 1 ? 's' : ''} skipped &mdash; null mae_r</div>` : ''}
       </div>
-      <div class="exc-card">
-        <div class="exc-lbl">DEEP MAE WINNERS</div>
-        <div class="exc-val" style="color:${C.amber}">${e.deep_mae_winner_count}</div>
-        <div style="font-size:13px;color:#ffffff;font-weight:700;margin-top:2px">mae &le; &minus;0.5R</div>
+      <div class="exc-caution">
+        <div class="exc-caution-hdr">CAUTION &mdash; NOT YET ALIGNED</div>
+        SAVED currently assumes every losing trade gets cut at a flat &minus;0.5R, which is not the exit rule actually designed or agreed on (Peak Protection is peak-dollar-decay based, not a fixed MAE cut). This verdict reflects that placeholder assumption, not a validated rule. Revisit and re-align before acting on HOLD/SHIP.
       </div>
-    </div>
-    <div class="cut-box">
-      <div class="cut-label">EARLY-CUT READ</div>
-      <div class="cut-row">
-        <div><span style="color:#ffffff;font-weight:700">FORGONE </span><span style="color:${C.red};font-weight:700">${fmtDollar(e.forgone)}</span></div>
-        <div><span style="color:#ffffff;font-weight:700">SAVED </span><span style="color:${C.green};font-weight:700">${fmtDollar(e.saved)}</span></div>
-        <div><span style="color:#ffffff;font-weight:700">NET </span><span style="color:${pnlColor(e.net)};font-weight:700">${fmtDollar(e.net)}</span></div>
-        <div class="cut-verdict" style="color:${verdictColor}">${e.verdict}</div>
-      </div>
-      ${e.skipped > 0 ? `<div class="cut-skip">${e.skipped} row${e.skipped !== 1 ? 's' : ''} skipped &mdash; null mae_r</div>` : ''}
-    </div>
-  `;
-}
+    `;
+  }
+
+  function openExcSheet() {
+    document.getElementById('exc-scrim').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeExcSheet() {
+    document.getElementById('exc-scrim').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
 // ── I. Footer ──
 function renderFooter() {
@@ -1832,5 +1900,16 @@ function _initLogDates() {
     }
     
 </script>
-</body>
+
+    <!-- EXCURSION overlay sheet -->
+    <div id="exc-scrim" class="exc-scrim" onclick="closeExcSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title">EXCURSION</span>
+          <button class="exc-sheet-close" onclick="closeExcSheet()">&#x2715;</button>
+        </div>
+        <div id="exc-sheet-body"></div>
+      </div>
+    </div>
+  </body>
 </html>
