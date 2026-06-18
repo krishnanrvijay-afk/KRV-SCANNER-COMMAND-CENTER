@@ -1028,14 +1028,14 @@ async def api_timeline(
     })
 
 
-  # ─────────────────────────── peak protection ───────────────────────────
-  @app.get("/api/peak-protection")
-  async def api_peak_protection(request: Request) -> JSONResponse:
-      _require_auth(request)
-      rows = await _sb_fetch("peak_protection_shadow")
-      return JSONResponse({"row_count": len(rows), "rows": rows})
+# ─────────────────────────── peak protection ───────────────────────────
+@app.get("/api/peak-protection")
+async def api_peak_protection(request: Request) -> JSONResponse:
+    _require_auth(request)
+    rows = await _sb_fetch("peak_protection_shadow")
+    return JSONResponse({"row_count": len(rows), "rows": rows})
 
-  
+
 # ─────────────────────────── entry point ───────────────────────────
 if __name__ == "__main__":
   import uvicorn
