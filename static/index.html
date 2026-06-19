@@ -89,6 +89,15 @@ body {
 .range-btns button.active  { border-color: var(--teal); color: var(--teal); background: #22d3ee12; }
 .range-btns button:hover:not(.active) { border-color: #2a2a2a; color: #ffffff; }
 
+  .fetch-status {
+    font-size: 9px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: .05em;
+    font-family: var(--display);
+    white-space: nowrap;
+  }
+
 .badge-paper {
   background: #120d00;
   border: 1px solid #ffb30030;
@@ -696,7 +705,8 @@ body {
         <button id="btn-week"  onclick="setRange('week')">WEEK</button>
         <button id="btn-all"   onclick="setRange('all')">ALL</button>
       </div>
-      <div class="badge-paper">PAPER</div>
+      <div id="analytics-status" class="fetch-status"></div>
+        <div class="badge-paper">PAPER</div>
     </div>
   </div>
 
@@ -811,6 +821,7 @@ body {
           <button class="jmap-btn"        id="jbtn-1h"   onclick="setJView('1h')">1H</button>
           <button class="jmap-btn active" id="jbtn-both" onclick="setJView('both')">BOTH</button>
         </div>
+        <span id="live-status" class="fetch-status" style="margin-left:8px"></span>
       </div>
       <div id="jrail-wrap-15m" class="j-rail-block">
         <div class="j-rail-label">J 15M</div>
@@ -931,6 +942,10 @@ const C = {
 
 // ── state ──
 let range     = 'today';
+  let _analyticsTs   = null;
+  let _analyticsFail = false;
+  let _liveTs        = null;
+  let _liveFail      = false;
 let analytics = null;
 let live      = null;
 
@@ -1004,25 +1019,76 @@ function setRange(r) {
   if (logLoaded) loadLog();
 }
 
+// ── fetch status helpers ──
+function _fmtTs(ts) {
+  if (!ts) return '';
+  var secs = Math.floor((Date.now() - ts) / 1000);
+  if (secs < 120) return 'Updated ' + secs + 's ago';
+  var d = new Date(ts);
+  var h = d.getHours(), m = d.getMinutes();
+  var ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return 'Updated ' + h + ':' + String(m).padStart(2,'0') + ' ' + ap;
+}
+function _setFetchStatus(elId, ok, ts) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  if (ok) {
+    el.style.color = '#ffffff';
+    el.textContent = _fmtTs(ts);
+  } else {
+    el.style.color = '#f59e0b';
+    el.textContent = 'refresh failed, retrying...';
+  }
+}
+setInterval(function() {
+  if (!_analyticsFail && _analyticsTs) _setFetchStatus('analytics-status', true, _analyticsTs);
+  if (!_liveFail      && _liveTs)      _setFetchStatus('live-status',      true, _liveTs);
+}, 10000);
+
 // ── fetch analytics ──
 async function loadAnalytics() {
   try {
     const res = await fetch('/api/analytics?range=' + range);
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error('analytics fetch', res.status, res.statusText);
+      _analyticsFail = true;
+      _setFetchStatus('analytics-status', false, null);
+      return;
+    }
     analytics = await res.json();
+    _analyticsFail = false;
+    _analyticsTs   = Date.now();
+    _setFetchStatus('analytics-status', true, _analyticsTs);
     renderAnalytics();
     renderFooter();
-  } catch (e) { console.error('analytics', e); }
+  } catch (e) {
+    console.error('analytics', e);
+    _analyticsFail = true;
+    _setFetchStatus('analytics-status', false, null);
+  }
 }
 
 async function loadLive() {
   try {
     const res = await fetch('/api/live');
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error('live fetch', res.status, res.statusText);
+      _liveFail = true;
+      _setFetchStatus('live-status', false, null);
+      return;
+    }
     live = await res.json();
+    _liveFail = false;
+    _liveTs   = Date.now();
+    _setFetchStatus('live-status', true, _liveTs);
     renderJMap();
     renderFooter();
-  } catch (e) { console.error('live', e); }
+  } catch (e) {
+    console.error('live', e);
+    _liveFail = true;
+    _setFetchStatus('live-status', false, null);
+  }
 }
 
 // ── B. Fleet ──
