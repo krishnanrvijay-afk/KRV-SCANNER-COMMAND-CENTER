@@ -265,6 +265,8 @@ body {
   font-weight: 700; white-space: nowrap;
 }
 .sess-table td { padding: 8px 10px; border-bottom: 1px solid #0c0c0c; color: #ffffff; font-weight: 700; font-size: 18px; }
+.sess-total-row td { border-top:2px solid rgba(34,211,238,0.5); background:rgba(34,211,238,0.05); font-size:20px; font-weight:700; color:#ffffff; border-bottom:none; }
+.sess-pnl-note { font-size:11px; font-weight:700; color:var(--teal); margin-top:8px; letter-spacing:0.04em; line-height:1.5; }
 .sess-table th:first-child, .sess-table td:first-child { padding-left: 16px; }
 .heat-cell { border-radius: 2px; text-align: right; font-variant-numeric: tabular-nums; color: #ffffff; font-weight: 700; }
 
@@ -631,10 +633,10 @@ body {
 
     /* ── Intelligence Pill Row ── */
     .intel-pill-row {
-      display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 16px 0;
     }
     .intel-pill {
-      position: relative; flex: 1; min-width: 130px;
+      position: relative;
       background: #060606; border: 1px solid #1a1a1a; border-radius: 6px;
       padding: 12px 14px 28px; cursor: pointer; user-select: none;
       overflow: hidden; transition: border-color .15s, transform .15s, box-shadow .15s;
@@ -769,7 +771,10 @@ body {
     .fl-beam-particle.p3 { animation-delay:1.4s; background:var(--mexc); box-shadow:0 0 8px 3px rgba(255,145,0,0.8); }
     @keyframes fl-travel { 0%{ left:0%; opacity:0; } 10%{ opacity:1; } 90%{ opacity:1; } 100%{ left:100%; opacity:0; } }
     .fl-beam-label { font-size:7px; font-weight:700; letter-spacing:0.1em; color:var(--text); opacity:0.4; text-align:center; white-space:nowrap; }
-    .fl-beam-sync { font-size:15px; color:var(--teal); text-align:center; margin-top:2px; font-family:var(--display); line-height:1; text-shadow:0 0 10px rgba(34,211,238,0.5); }
+    .fl-beam-pnl { font-size:34px; font-family:var(--display); text-align:center; line-height:1; color:#ffffff; margin-top:2px; }
+    .fl-beam-pnl.pos { color:#22c55e; text-shadow:0 0 12px rgba(34,197,94,0.7); }
+    .fl-beam-pnl.neg { color:#ef4444; text-shadow:0 0 12px rgba(239,68,68,0.7); }
+    .fl-beam-secondary { font-size:8px; font-weight:700; color:#ffffff; text-align:center; letter-spacing:0.06em; margin-top:4px; }
     .fl-footer { display:flex; align-items:center; gap:14px; margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); position:relative; z-index:2; }
     .fl-foot-item { display:flex; align-items:center; gap:5px; }
     .fl-foot-label { font-size:8px; font-weight:700; color:var(--text); opacity:0.5; }
@@ -836,9 +841,9 @@ body {
           <div class="fl-beam-particle p2"></div>
           <div class="fl-beam-particle p3"></div>
         </div>
-        <div class="fl-beam-label">FLEET SYNC</div>
-        <div class="fl-beam-sync" id="fl-beam-scans">&#x2014;</div>
-        <div class="fl-beam-label">COMBINED SCANS</div>
+        <div class="fl-beam-label">COMBINED DAILY P&amp;L</div>
+        <div class="fl-beam-pnl" id="fl-beam-pnl">&#x2014;</div>
+        <div class="fl-beam-secondary" id="fl-beam-secondary">OPEN &#x2014; &middot; SCANS &#x2014;</div>
       </div>
       <div class="fl-vessel fl-mx" id="fl-vessel-mx">
         <div class="fl-v-top">
@@ -903,8 +908,10 @@ body {
               </tr>
             </thead>
             <tbody id="sess-body"></tbody>
+            <tfoot id="sess-tfoot"></tfoot>
           </table>
         </div>
+        <div id="sess-pnl-note" class="sess-pnl-note"></div>
       </div>
 
       <!-- Six intelligence pills -->
@@ -1113,6 +1120,7 @@ let range     = 'today';
   let _liveTs        = null;
   let _liveFail      = false;
 let _flTs          = { hl: null, mx: null };
+var _flCombinedPnl  = null;
 let analytics = null;
 let live      = null;
 
@@ -1312,7 +1320,11 @@ function renderFleetLink() {
   el=document.getElementById("fl-mx-open");   if(el) el.textContent=mxOpen;
   el=document.getElementById("fl-hl-scans");  if(el) el.textContent=hlScans;
   el=document.getElementById("fl-mx-scans");  if(el) el.textContent=mxScans;
-  el=document.getElementById("fl-beam-scans");if(el) el.textContent=hlScans+mxScans;
+  var bpEl=document.getElementById("fl-beam-pnl");
+  if(bpEl){bpEl.textContent=_flFmt(flPnl);bpEl.className="fl-beam-pnl"+(flPnl!=null?(flPnl>=0?" pos":" neg"):"");}
+  var bsEl=document.getElementById("fl-beam-secondary");
+  if(bsEl) bsEl.textContent="OPEN "+(hlOpen+mxOpen)+" · SCANS "+(hlScans+mxScans);
+  _flCombinedPnl=flPnl;
   var flPnl = (hlPnl!=null||mxPnl!=null) ? (hlPnl||0)+(mxPnl||0) : null;
   var fpEl = document.getElementById("fl-fleet-pnl");
   if (fpEl) { fpEl.textContent=_flFmt(flPnl); fpEl.className="fl-foot-val"+(flPnl!=null?(flPnl>=0?" pos":" neg"):""); }
@@ -1619,21 +1631,64 @@ function renderTwins() {
 
 // ── F. Sessions ──
 function renderSessions() {
-  const sessions = analytics.sessions || [];
-  document.getElementById('sess-body').innerHTML = sessions.map(s => {
-    const lpColor = pnlColor(s.long_pnl),  spColor = pnlColor(s.short_pnl);
-    const lwColor = s.long_wr  != null && s.long_wr  >= 0.65 ? C.green : '#ffffff';
-    const swColor = s.short_wr != null && s.short_wr >= 0.65 ? C.green : '#ffffff';
-    return `<tr>
-      <td style="color:#ffffff;font-weight:700;letter-spacing:.07em">${s.session}</td>
-      <td class="heat-cell" style="background:${heatBg(s.long_pnl)};color:${lpColor}">${fmtDollar(s.long_pnl)}</td>
-      <td style="color:#ffffff;font-weight:700">${s.long_trades}</td>
-      <td style="color:${lwColor};font-weight:700">${s.long_wr != null ? fmtPct(s.long_wr) : '—'}</td>
-      <td class="heat-cell" style="background:${heatBg(s.short_pnl)};color:${spColor}">${fmtDollar(s.short_pnl)}</td>
-      <td style="color:#ffffff;font-weight:700">${s.short_trades}</td>
-      <td style="color:${swColor};font-weight:700">${s.short_wr != null ? fmtPct(s.short_wr) : '—'}</td>
-    </tr>`;
+  var sessions = analytics.sessions || [];
+  document.getElementById('sess-body').innerHTML = sessions.map(function(s) {
+    var lpColor = pnlColor(s.long_pnl), spColor = pnlColor(s.short_pnl);
+    var lwColor = s.long_wr  != null && s.long_wr  >= 0.65 ? C.green : '#ffffff';
+    var swColor = s.short_wr != null && s.short_wr >= 0.65 ? C.green : '#ffffff';
+    return '<tr>' +
+      '<td style="color:#ffffff;font-weight:700;letter-spacing:.07em">' + s.session + '</td>' +
+      '<td class="heat-cell" style="background:' + heatBg(s.long_pnl) + ';color:' + lpColor + '">' + fmtDollar(s.long_pnl) + '</td>' +
+      '<td style="color:#ffffff;font-weight:700">' + s.long_trades + '</td>' +
+      '<td style="color:' + lwColor + ';font-weight:700">' + (s.long_wr  != null ? fmtPct(s.long_wr)  : '—') + '</td>' +
+      '<td class="heat-cell" style="background:' + heatBg(s.short_pnl) + ';color:' + spColor + '">' + fmtDollar(s.short_pnl) + '</td>' +
+      '<td style="color:#ffffff;font-weight:700">' + s.short_trades + '</td>' +
+      '<td style="color:' + swColor + ';font-weight:700">' + (s.short_wr != null ? fmtPct(s.short_wr) : '—') + '</td>' +
+      '</tr>';
   }).join('');
+  // TOTAL row
+  var totLp=0, totSp=0, totLt=0, totSt=0, totLw=0, totSw=0;
+  sessions.forEach(function(s) {
+    totLp += (s.long_pnl  || 0);
+    totSp += (s.short_pnl || 0);
+    totLt += (s.long_trades  || 0);
+    totSt += (s.short_trades || 0);
+    if (s.long_wr  != null && s.long_trades)  totLw += Math.round(s.long_wr  * s.long_trades);
+    if (s.short_wr != null && s.short_trades) totSw += Math.round(s.short_wr * s.short_trades);
+  });
+  totLp = Math.round(totLp * 100) / 100;
+  totSp = Math.round(totSp * 100) / 100;
+  var totLwr = totLt ? totLw / totLt : null;
+  var totSwr = totSt ? totSw / totSt : null;
+  var totLpCol = pnlColor(totLp), totSpCol = pnlColor(totSp);
+  var totLwCol = totLwr != null && totLwr >= 0.65 ? C.green : '#ffffff';
+  var totSwCol = totSwr != null && totSwr >= 0.65 ? C.green : '#ffffff';
+  var tfootEl = document.getElementById('sess-tfoot');
+  if (tfootEl) {
+    tfootEl.innerHTML = '<tr class="sess-total-row">' +
+      '<td style="color:var(--teal);letter-spacing:.07em;font-weight:700">TOTAL</td>' +
+      '<td class="heat-cell" style="background:' + heatBg(totLp) + ';color:' + totLpCol + '">' + fmtDollar(totLp) + '</td>' +
+      '<td style="color:#ffffff;font-weight:700">' + totLt + '</td>' +
+      '<td style="color:' + totLwCol + ';font-weight:700">' + (totLwr != null ? fmtPct(totLwr) : '—') + '</td>' +
+      '<td class="heat-cell" style="background:' + heatBg(totSp) + ';color:' + totSpCol + '">' + fmtDollar(totSp) + '</td>' +
+      '<td style="color:#ffffff;font-weight:700">' + totSt + '</td>' +
+      '<td style="color:' + totSwCol + ';font-weight:700">' + (totSwr != null ? fmtPct(totSwr) : '—') + '</td>' +
+      '</tr>';
+  }
+  var sessCombined = Math.round((totLp + totSp) * 100) / 100;
+  var noteEl = document.getElementById('sess-pnl-note');
+  if (noteEl) {
+    var lAbs = Math.abs(totLp).toFixed(2);
+    var sAbs = Math.abs(totSp).toFixed(2);
+    var cAbs = Math.abs(sessCombined).toFixed(2);
+    var lSign = totLp >= 0 ? '+' : '-';
+    var sSign = totSp >= 0 ? '+' : '-';
+    var cSign = sessCombined >= 0 ? '+' : '-';
+    var flStr = _flCombinedPnl != null ? ((_flCombinedPnl >= 0 ? '+' : '-') + '$' + Math.abs(_flCombinedPnl).toFixed(2)) : '—';
+    var match = _flCombinedPnl != null && Math.abs(sessCombined - _flCombinedPnl) < 0.01;
+    var suffix = match ? ' — matches FLEET LINK (' + flStr + ')' : ' — FLEET LINK: ' + flStr;
+    noteEl.textContent = 'TOTAL: ' + lSign + '$' + lAbs + ' + ' + sSign + '$' + sAbs + ' = ' + cSign + '$' + cAbs + suffix;
+  }
 }
 
 // ── G. Pair League ──
