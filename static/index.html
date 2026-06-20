@@ -690,7 +690,14 @@ body {
       margin-bottom: 16px; font-size: 13px; color: #f59e0b; font-weight: 700; line-height: 1.5;
     }
     .peak-caution-hdr { font-size: 11px; letter-spacing: .12em; margin-bottom: 6px; }
-    .peak-placeholder { font-size: 13px; color: #333; font-weight: 700; padding: 12px 0; }
+    .peak-thresh-table { width:100%; border-collapse:collapse; margin:14px 0; }
+    .peak-thresh-table th { color:#ffffff; font-weight:700; font-size:11px; letter-spacing:.12em; padding:6px 8px; text-align:left; border-bottom:1px solid #161616; }
+    .peak-thresh-table td { padding:7px 8px; border-bottom:1px solid #0c0c0c; color:#ffffff; font-weight:700; font-size:13px; font-family:var(--mono); }
+    .peak-thresh-table tr:last-child td { border-bottom:none; }
+    .peak-saved-box { background:#050505; border:1px solid #161616; border-radius:2px; padding:12px 14px; margin-top:14px; }
+    .peak-saved-hdr { font-size:11px; letter-spacing:.12em; color:#ffffff; font-weight:700; margin-bottom:6px; }
+    .peak-saved-val { font-family:var(--display); font-size:2rem; color:#22c55e; }
+    .peak-saved-note { font-size:12px; color:#ffffff; font-weight:700; margin-top:6px; line-height:1.5; }
     </style>
 </head>
 <body>
@@ -776,7 +783,7 @@ body {
         <div class="intel-pill peak" id="peak-pill-open" onclick="openPeakSheet()">
           <div class="intel-pill-name">PEAK PROTECTION</div>
           <div class="intel-pill-value" id="peak-pill-val">0</div>
-          <div class="intel-pill-sub">QUALIFYING<br>ROWS</div>
+          <div class="intel-pill-sub" id="peak-pill-sub">DECAY<br>ANALYSIS</div>
           <span class="intel-chevron">&#x203A;</span>
         </div>
       </div>
@@ -2343,16 +2350,59 @@ function _initLogDates() {
   }
 
   async function loadPeakProtection() {
-    var rowsEl = document.getElementById('peak-rows-state');
+    var inner = document.getElementById('peak-body-inner');
     try {
       var res = await fetch('/api/peak-protection');
       if (!res.ok) throw new Error(res.statusText);
-      var data = await res.json();
-      var n = data.row_count != null ? data.row_count : 0;
+      var d    = await res.json();
+      var n    = d.clean_sample_count || 0;
+      var excl = d.excluded_contaminated_count || 0;
+      var t20  = (d.thresholds && d.thresholds['20']) || {};
+      var t30  = (d.thresholds && d.thresholds['30']) || {};
+      var t40  = (d.thresholds && d.thresholds['40']) || {};
+
       _setPillVal('peak-pill-val', n);
-      if (rowsEl) rowsEl.textContent = n + ' qualifying row' + (n !== 1 ? 's' : '');
+      var fg20  = t20.forgone_dollars != null ? Math.round(Math.abs(t20.forgone_dollars)) : null;
+      var subEl = document.getElementById('peak-pill-sub');
+      if (subEl) subEl.innerHTML = n + ' CLEAN' + (fg20 != null ? ' &middot; $' + fg20 + ' FORGONE' : '');
+
+      function _gb(v) { return v != null ? v.toFixed(1) + '%' : '&#x2014;'; }
+      function _fg(v) {
+        if (v == null) return '&#x2014;';
+        return (v < 0 ? '&#x2212;$' : '+$') + Math.abs(v).toFixed(0);
+      }
+      function _tr(t) { return t.triggered_count != null ? t.triggered_count + ' / ' + n : '&#x2014;'; }
+
+      var cautionHtml = '<div class="peak-caution">'
+        + '<div class="peak-caution-hdr">DATA QUALITY NOTICE</div>'
+        + n + ' clean trades in sample.'
+        + (excl > 0
+            ? ' ' + excl + ' contaminated trade' + (excl !== 1 ? 's' : '') + ' excluded (resurrection duplicates from a now-fixed persistence bug).'
+            : ' No contaminated trades detected.')
+        + ' Shadow logging is active &#x2014; sample grows automatically as trades close.'
+        + '</div>';
+
+      var tableHtml = '<table class="peak-thresh-table">'
+        + '<thead><tr><th>RULE</th><th>TRIGGERED</th><th>AVG GIVE-BACK</th><th>FORGONE IF CUT</th></tr></thead>'
+        + '<tbody>'
+        + '<tr><td>20% DECAY</td><td>' + _tr(t20) + '</td><td>' + _gb(t20.avg_giveback_pct) + '</td><td>' + _fg(t20.forgone_dollars) + '</td></tr>'
+        + '<tr><td>30% DECAY</td><td>' + _tr(t30) + '</td><td>' + _gb(t30.avg_giveback_pct) + '</td><td>' + _fg(t30.forgone_dollars) + '</td></tr>'
+        + '<tr><td>40% DECAY</td><td>' + _tr(t40) + '</td><td>' + _gb(t40.avg_giveback_pct) + '</td><td>' + _fg(t40.forgone_dollars) + '</td></tr>'
+        + '</tbody></table>';
+
+      var saved = d.saved_side_count || 0;
+      var savedHtml = '<div class="peak-saved-box">'
+        + '<div class="peak-saved-hdr">SAVED-SIDE EVIDENCE</div>'
+        + '<div class="peak-saved-val">' + saved + '</div>'
+        + '<div class="peak-saved-note">'
+        + (saved === 0
+            ? 'Structurally $0 &#x2014; no clean trade peaked at &ge;$20 then closed at a loss. This isn\'t evidence the rule wouldn\'t help; it means the data needed to prove it doesn\'t exist yet. Every future trade that peaks meaningfully then fully reverses will populate this.'
+            : saved + ' trade' + (saved !== 1 ? 's' : '') + ' peaked at &ge;$20 and closed at a loss &#x2014; these are the exact cases peak protection is designed to catch.')
+        + '</div></div>';
+
+      if (inner) inner.innerHTML = cautionHtml + tableHtml + savedHtml;
     } catch(e) {
-      if (rowsEl) rowsEl.textContent = 'error loading peak data';
+      if (inner) inner.innerHTML = '<div style="font-size:12px;color:#ff4d4d;font-weight:700;padding:12px 0">error loading peak protection data</div>';
       console.error('peak-protection', e);
     }
   }
@@ -2472,12 +2522,7 @@ function _initLogDates() {
             <button class="exc-sheet-close" onclick="closePeakSheet()">&#x2715;</button>
           </div>
           <div id="peak-sheet-body">
-            <div class="peak-caution">
-              <div class="peak-caution-hdr">DATASET BUILDING</div>
-              Target 20+ qualifying trades per pair family before the 20%/30%/40% decay comparison renders. Shadow logging is active &#x2014; rows accumulate automatically as trades close.
-            </div>
-            <div id="peak-comparison-placeholder" class="peak-placeholder">20% / 30% / 40% decay comparison will appear here once threshold is met.</div>
-            <div id="peak-rows-state" style="font-size:12px;color:#555;font-weight:700;margin-top:14px;letter-spacing:.06em">0 qualifying rows</div>
+            <div id="peak-body-inner"><div style="font-size:12px;color:#555;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
           </div>
         </div>
       </div>
