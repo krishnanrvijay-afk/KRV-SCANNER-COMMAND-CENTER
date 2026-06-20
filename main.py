@@ -167,15 +167,64 @@ def _filter_by_range(rows: list, start: Optional[datetime]) -> list:
             out.append(r)
     return out
 
+TERMINAL_REASONS: frozenset = frozenset({"TRAILBLAZER", "TRAIL", "SL", "MANUAL"})
+
+
+def _group_logical_trades(rows: list) -> tuple[list, list]:
+    """Return (terminal_rows, all_pnl_rows).
+
+    Groups rows by (pair, direction, open_time).  For each group the
+    *terminal* row is whichever one has an exit_reason in TERMINAL_REASONS
+    (i.e. the final close, not a TP1 partial).  If no terminal row is found
+    the last row by close_time is used as fallback.  Single-row groups pass
+    through unchanged.
+
+    terminal_rows -- one per logical trade, used for trade_count / win_rate.
+    all_pnl_rows  -- every row with non-null pnl_dollars, used for PnL sums.
+    """
+    groups: dict[tuple, list] = {}
+    for r in rows:
+        pair = r.get("pair") or r.get("symbol") or ""
+        dr   = str(r.get("direction") or "").upper()
+        ot   = str(r.get("open_time") or "")
+        groups.setdefault((pair, dr, ot), []).append(r)
+
+    terminal_rows: list = []
+    for grp in groups.values():
+        if len(grp) == 1:
+            if _f(grp[0].get("pnl_dollars")) is not None:
+                terminal_rows.append(grp[0])
+        else:
+            terminal = [r for r in grp
+                        if str(r.get("exit_reason") or "").upper() in TERMINAL_REASONS]
+            if terminal:
+                terminal.sort(key=lambda r: str(r.get("close_time") or ""))
+                chosen = terminal[-1]
+            else:
+                chosen = sorted(grp, key=lambda r: str(r.get("close_time") or ""))[-1]
+            if _f(chosen.get("pnl_dollars")) is not None:
+                terminal_rows.append(chosen)
+
+    all_pnl_rows = [r for r in rows if _f(r.get("pnl_dollars")) is not None]
+    return terminal_rows, all_pnl_rows
+
+
 def _venue_metrics(rows: list) -> dict:
-    pnls   = [_f(r.get("pnl_dollars")) for r in rows]
-    pnls   = [p for p in pnls if p is not None]
-    wins   = [p for p in pnls if p > 0]
-    losses = [p for p in pnls if p <= 0]
-    gross_profit = sum(wins)   if wins   else 0.0
-    gross_loss   = abs(sum(losses)) if losses else 0.0
+    # Group by logical trade (pair+direction+open_time) so TP1 partial-close
+    # rows are NOT counted as separate trades.  PnL sum still uses all rows.
+    terminal_rows, all_pnl_rows = _group_logical_trades(rows)
+
+    # Dollar totals -- include TP1 partials + final closes
+    all_pnls     = [_f(r.get("pnl_dollars")) for r in all_pnl_rows]
+    gross_profit = sum(p for p in all_pnls if p > 0)
+    gross_loss   = abs(sum(p for p in all_pnls if p <= 0))
     pf = gross_profit / gross_loss if gross_loss else (999.0 if gross_profit else 0.0)
-    wr = len(wins) / len(pnls) if pnls else 0.0
+
+    # Trade counts / win-rate -- one entry per logical trade (terminal row)
+    t_pnls = [_f(r.get("pnl_dollars")) for r in terminal_rows]
+    wins   = [p for p in t_pnls if p > 0]
+    losses = [p for p in t_pnls if p <= 0]
+    wr     = len(wins) / len(t_pnls) if t_pnls else 0.0
 
     r_vals  = [v for v in (_f(r.get("r_value")) for r in rows) if v is not None]
     avg_r   = sum(r_vals) / len(r_vals) if r_vals else 0.0
@@ -198,8 +247,8 @@ def _venue_metrics(rows: list) -> dict:
     avg_runner_r = sum(runner_r) / len(runner_r) if runner_r else None
 
     return {
-        "pnl": round(sum(pnls), 2),
-        "trade_count": len(pnls),
+        "pnl": round(sum(all_pnls), 2),
+        "trade_count": len(t_pnls),
         "win_rate": round(wr, 4),
         "profit_factor": round(min(pf, 999.0), 2),
         "avg_r": round(avg_r, 3),
@@ -263,7 +312,9 @@ def _compute_sessions(all_rows: list) -> list:
     }
     data: dict[str, dict] = {s: {"lp": 0.0, "sp": 0.0, "lt": 0, "st": 0, "lw": 0, "sw": 0}
                               for s in SESSIONS}
-    for r in all_rows:
+    terminal_rows, all_pnl_rows = _group_logical_trades(all_rows)
+    # PnL sums -- include all rows (TP1 partials + final closes)
+    for r in all_pnl_rows:
         sess = str(r.get("session_opened") or r.get("session") or "").upper().strip()
         sess = SESSION_MAP.get(sess, sess)
         if sess not in data:
@@ -273,10 +324,24 @@ def _compute_sessions(all_rows: list) -> list:
         if pnl is None:
             continue
         if dr == "LONG":
-            data[sess]["lp"] += pnl; data[sess]["lt"] += 1
+            data[sess]["lp"] += pnl
+        elif dr == "SHORT":
+            data[sess]["sp"] += pnl
+    # Trade counts / win-rate -- one per logical trade (terminal row only)
+    for r in terminal_rows:
+        sess = str(r.get("session_opened") or r.get("session") or "").upper().strip()
+        sess = SESSION_MAP.get(sess, sess)
+        if sess not in data:
+            sess = "OFF"
+        dr  = str(r.get("direction", "")).upper()
+        pnl = _f(r.get("pnl_dollars"))
+        if pnl is None:
+            continue
+        if dr == "LONG":
+            data[sess]["lt"] += 1
             if pnl > 0: data[sess]["lw"] += 1
         elif dr == "SHORT":
-            data[sess]["sp"] += pnl; data[sess]["st"] += 1
+            data[sess]["st"] += 1
             if pnl > 0: data[sess]["sw"] += 1
     return [
         {
@@ -293,16 +358,26 @@ def _compute_sessions(all_rows: list) -> list:
 
 def _compute_pair_league(all_rows: list) -> list:
     stats: dict[str, dict] = {}
-    for r in all_rows:
+    terminal_rows, all_pnl_rows = _group_logical_trades(all_rows)
+    # PnL sums and avg_r -- include all rows (TP1 partials + final closes)
+    for r in all_pnl_rows:
         pair = r.get("pair") or r.get("symbol") or "UNKNOWN"
         pnl  = _f(r.get("pnl_dollars"))
         rv   = _f(r.get("r_value"))
         if pnl is None:
             continue
         s = stats.setdefault(pair, {"pnl": 0.0, "count": 0, "r_sum": 0.0, "r_n": 0})
-        s["pnl"] += pnl; s["count"] += 1
+        s["pnl"] += pnl
         if rv is not None:
             s["r_sum"] += rv; s["r_n"] += 1
+    # Trade count -- one per logical trade (terminal row only)
+    for r in terminal_rows:
+        pair = r.get("pair") or r.get("symbol") or "UNKNOWN"
+        pnl  = _f(r.get("pnl_dollars"))
+        if pnl is None:
+            continue
+        s = stats.setdefault(pair, {"pnl": 0.0, "count": 0, "r_sum": 0.0, "r_n": 0})
+        s["count"] += 1
     return sorted(
         [{"pair": p, "pnl": round(v["pnl"], 2), "trade_count": v["count"],
           "avg_r": round(v["r_sum"] / v["r_n"], 3) if v["r_n"] else None}
