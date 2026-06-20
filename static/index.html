@@ -265,10 +265,11 @@ body {
   font-weight: 700; white-space: nowrap;
 }
 .sess-table td { padding: 8px 10px; border-bottom: 1px solid #0c0c0c; color: #ffffff; font-weight: 700; font-size: 18px; }
+.sess-table th:not(:first-child), .sess-table td:not(:first-child) { text-align: center; }
 .sess-total-row td { border-top:2px solid rgba(34,211,238,0.5); background:rgba(34,211,238,0.05); font-size:20px; font-weight:700; color:#ffffff; border-bottom:none; }
 .sess-pnl-note { font-size:11px; font-weight:700; color:var(--teal); margin-top:8px; letter-spacing:0.04em; line-height:1.5; }
 .sess-table th:first-child, .sess-table td:first-child { padding-left: 16px; }
-.heat-cell { border-radius: 2px; text-align: right; font-variant-numeric: tabular-nums; color: #ffffff; font-weight: 700; }
+.heat-cell { border-radius: 2px; text-align: center; font-variant-numeric: tabular-nums; color: #ffffff; font-weight: 700; }
 
 /* ── Pair league ── */
 .league-table { width: 100%; border-collapse: collapse; font-size: 18px; }
@@ -313,7 +314,7 @@ body {
   .exc-pill-left  { font-family: var(--display); font-size: 15px; letter-spacing: .15em; color: #ffffff; }
   .exc-pill-right { display: flex; align-items: center; gap: 10px; }
   .exc-pill-glance { font-family: var(--display); font-size: 1.4rem; letter-spacing: .08em; }
-  .exc-chevron { color: #555; font-size: 14px; }
+  .exc-chevron { color: #ffffff; font-size: 14px; }
   /* ── Excursion overlay ── */
   .exc-scrim {
     display: none; position: fixed; inset: 0;
@@ -368,7 +369,7 @@ body {
     border-left: 1px solid rgba(255,255,255,0.05); pointer-events: none; z-index: 0;
   }
   .tl-grid-lbl {
-    position: absolute; bottom: -17px; font-size: 9px; color: #444; font-weight: 700;
+    position: absolute; bottom: -17px; font-size: 9px; color: #ffffff; font-weight: 700;
     transform: translateX(-50%); white-space: nowrap; letter-spacing: .04em;
   }
   .tl-cluster-halo {
@@ -389,12 +390,12 @@ body {
     font-size: 9px; font-weight: 700; color: rgba(0,0,0,0.85); padding: 2px 3px;
     display: block; overflow: hidden; white-space: nowrap; line-height: 1.5;
   }
-  .tl-empty-sess { font-size: 12px; color: #333; font-weight: 700; padding: 10px 0; }
+  .tl-empty-sess { font-size: 12px; color: #ffffff; font-weight: 700; padding: 10px 0; }
   .tl-spark-wrap { margin-top: 22px; }
   .tl-sparkline  { display: block; overflow: visible; }
-  .tl-spark-lbl  { font-size: 9px; color: #444; font-weight: 700; letter-spacing: .1em; margin-top: 2px; }
+  .tl-spark-lbl  { font-size: 9px; color: #ffffff; font-weight: 700; letter-spacing: .1em; margin-top: 2px; }
   .tl-caption {
-    font-size: 11px; color: #555; font-weight: 700; padding: 10px 0 4px;
+    font-size: 11px; color: #ffffff; font-weight: 700; padding: 10px 0 4px;
     border-top: 1px solid var(--border); margin-top: 8px; line-height: 1.6;
   }
   
@@ -487,7 +488,7 @@ body {
   outline: none;
 }
 .log-pair-input:focus { border-color: #333; }
-.log-pair-input::placeholder { color: #2a2a2a; }
+.log-pair-input::placeholder { color: #ffffff; }
 .log-toolbar {
   display: flex;
   justify-content: space-between;
@@ -618,7 +619,7 @@ body {
   .recon-pair { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .04em; min-width: 60px; }
   .recon-rvals { display: flex; gap: 8px; font-size: 11px; font-weight: 700; }
   .recon-result { padding: 10px 12px; background: #030303; }
-  .recon-loading { font-size: 11px; color: #555; font-weight: 700; padding: 6px 0; letter-spacing: .08em; }
+  .recon-loading { font-size: 11px; color: #ffffff; font-weight: 700; padding: 6px 0; letter-spacing: .08em; }
   .timeline-wrap { margin: 6px 0 4px; }
   .timeline-lbl { font-size: 10px; color: #ffffff; font-weight: 700; letter-spacing: .1em; margin-bottom: 6px; }
   .tl-track { position: relative; height: 10px; background: #0d0d0d; border-radius: 2px; }
@@ -653,8 +654,8 @@ body {
     .intel-pill:hover .intel-chevron { transform: translateX(3px); }
     .intel-pill-name  { font-size: 8px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
     .intel-pill-value { font-family: var(--display); font-size: 28px; line-height: 1; color: #ffffff; margin-bottom: 4px; }
-    .intel-pill-sub   { font-size: 8.5px; font-weight: 700; color: #555; line-height: 1.5; }
-    .intel-chevron    { position: absolute; bottom: 8px; right: 12px; font-size: 18px; color: #333; transition: transform .15s; font-style: normal; }
+    .intel-pill-sub   { font-size: 8.5px; font-weight: 700; color: #ffffff; line-height: 1.5; }
+    .intel-chevron    { position: absolute; bottom: 8px; right: 12px; font-size: 18px; color: #ffffff; transition: transform .15s; font-style: normal; }
 
     .intel-pill.twin      { border-color: #a855f730; color: #a855f7; }
     .intel-pill.twin:hover      { border-color: #a855f7; box-shadow: 0 4px 20px #a855f715; }
@@ -716,7 +717,7 @@ body {
       pointer-events:none;
     }
     .fl-header { display:flex; align-items:center; gap:8px; margin-bottom:14px; position:relative; z-index:2; }
-    .fl-title { font-size:9px; font-weight:700; letter-spacing:0.16em; color:var(--text); opacity:0.55; }
+    .fl-title { font-size:9px; font-weight:700; letter-spacing:0.16em; color:var(--text); opacity:1; }
     .fl-live-tag {
       display:flex; align-items:center; gap:5px; font-size:8px; font-weight:700; letter-spacing:0.08em;
       color:var(--green); background:rgba(0,230,118,0.08);
@@ -748,9 +749,9 @@ body {
     .fl-v-callsign { font-size:16px; letter-spacing:0.03em; font-family:var(--display); line-height:1; }
     .fl-vessel.fl-hl .fl-v-callsign { color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-callsign { color:var(--mexc); }
-    .fl-v-fullname { font-size:8px; font-weight:700; letter-spacing:0.06em; color:var(--text); opacity:0.5; }
+    .fl-v-fullname { font-size:8px; font-weight:700; letter-spacing:0.06em; color:var(--text); opacity:1; }
     .fl-v-contact { margin-left:auto; text-align:right; }
-    .fl-v-contact-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:0.45; }
+    .fl-v-contact-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:1; }
     .fl-v-contact-val { font-size:10px; font-weight:700; color:var(--green); }
     .fl-v-ecg { height:22px; margin-bottom:10px; position:relative; z-index:2; }
     .fl-v-ecg svg { width:100%; height:100%; }
@@ -760,7 +761,7 @@ body {
     @keyframes fl-ecgdraw { 0%{ stroke-dashoffset:120; } 50%{ stroke-dashoffset:0; } 100%{ stroke-dashoffset:-120; } }
     .fl-v-vitals { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; position:relative; z-index:2; }
     .fl-vit { display:flex; flex-direction:column; gap:2px; }
-    .fl-vit-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:0.45; }
+    .fl-vit-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:1; }
     .fl-vit-val { font-size:13px; font-weight:700; color:var(--text); }
     .fl-vit-val.pos { color:var(--green); }
     .fl-vit-val.neg { color:var(--red); }
@@ -770,14 +771,14 @@ body {
     .fl-beam-particle.p2 { animation-delay:.7s; background:var(--hl); box-shadow:0 0 8px 3px rgba(179,136,255,0.8); }
     .fl-beam-particle.p3 { animation-delay:1.4s; background:var(--mexc); box-shadow:0 0 8px 3px rgba(255,145,0,0.8); }
     @keyframes fl-travel { 0%{ left:0%; opacity:0; } 10%{ opacity:1; } 90%{ opacity:1; } 100%{ left:100%; opacity:0; } }
-    .fl-beam-label { font-size:7px; font-weight:700; letter-spacing:0.1em; color:var(--text); opacity:0.4; text-align:center; white-space:nowrap; }
+    .fl-beam-label { font-size:7px; font-weight:700; letter-spacing:0.1em; color:var(--text); opacity:1; text-align:center; white-space:nowrap; }
     .fl-beam-pnl { font-size:34px; font-family:var(--display); text-align:center; line-height:1; color:#ffffff; margin-top:2px; }
     .fl-beam-pnl.pos { color:#22c55e; text-shadow:0 0 12px rgba(34,197,94,0.7); }
     .fl-beam-pnl.neg { color:#ef4444; text-shadow:0 0 12px rgba(239,68,68,0.7); }
     .fl-beam-secondary { font-size:8px; font-weight:700; color:#ffffff; text-align:center; letter-spacing:0.06em; margin-top:4px; }
     .fl-footer { display:flex; align-items:center; gap:14px; margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); position:relative; z-index:2; }
     .fl-foot-item { display:flex; align-items:center; gap:5px; }
-    .fl-foot-label { font-size:8px; font-weight:700; color:var(--text); opacity:0.5; }
+    .fl-foot-label { font-size:8px; font-weight:700; color:var(--text); opacity:1; }
     .fl-foot-val { font-size:10.5px; font-weight:700; color:var(--text); }
     .fl-foot-val.pos { color:var(--green); }
     .fl-foot-val.neg { color:var(--red); }
@@ -786,7 +787,14 @@ body {
       .fl-beam-col { flex-direction:row; gap:8px; padding:8px 0; }
       .fl-beam-track { width:60px; margin-bottom:0; }
     }
-    </style>
+    .log-summary { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:10px; padding:10px 14px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:4px; }
+  .log-summary:empty { display:none; }
+  .log-summary-item { display:flex; flex-direction:column; gap:2px; }
+  .log-summary-lbl { font-size:8.5px; font-weight:700; letter-spacing:.1em; color:#ffffff; }
+  .log-summary-val { font-size:18px; font-family:var(--display); line-height:1; color:#ffffff; }
+  .log-summary-val.pos { color:#22c55e; }
+  .log-summary-val.neg { color:#ef4444; }
+  </style>
 </head>
 <body>
 <div class="page">
@@ -899,10 +907,10 @@ body {
             <thead>
               <tr>
                 <th>SESSION</th>
-                <th style="color:#00e67666">&#x2191; LONG P&amp;L</th>
+                <th style="color:#00e676;font-size:20px">&#x2191; LONG P&amp;L</th>
                 <th>TRADES</th>
                 <th>WR</th>
-                <th style="color:#ff4d4d66">&#x2193; SHORT P&amp;L</th>
+                <th style="color:#ff4d4d;font-size:20px">&#x2193; SHORT P&amp;L</th>
                 <th>TRADES</th>
                 <th>WR</th>
               </tr>
@@ -1073,6 +1081,9 @@ body {
       </div>
       <button class="export-btn" onclick="exportCSV()">EXPORT CSV</button>
     </div>
+
+    <!-- Summary -->
+    <div id="log-summary" class="log-summary"></div>
 
     <!-- Table -->
     <div class="log-wrap">
@@ -1320,12 +1331,12 @@ function renderFleetLink() {
   el=document.getElementById("fl-mx-open");   if(el) el.textContent=mxOpen;
   el=document.getElementById("fl-hl-scans");  if(el) el.textContent=hlScans;
   el=document.getElementById("fl-mx-scans");  if(el) el.textContent=mxScans;
+  var flPnl = (hlPnl!=null||mxPnl!=null) ? (hlPnl||0)+(mxPnl||0) : null;
   var bpEl=document.getElementById("fl-beam-pnl");
   if(bpEl){bpEl.textContent=_flFmt(flPnl);bpEl.className="fl-beam-pnl"+(flPnl!=null?(flPnl>=0?" pos":" neg"):"");}
   var bsEl=document.getElementById("fl-beam-secondary");
   if(bsEl) bsEl.textContent="OPEN "+(hlOpen+mxOpen)+" · SCANS "+(hlScans+mxScans);
   _flCombinedPnl=flPnl;
-  var flPnl = (hlPnl!=null||mxPnl!=null) ? (hlPnl||0)+(mxPnl||0) : null;
   var fpEl = document.getElementById("fl-fleet-pnl");
   if (fpEl) { fpEl.textContent=_flFmt(flPnl); fpEl.className="fl-foot-val"+(flPnl!=null?(flPnl>=0?" pos":" neg"):""); }
   el=document.getElementById("fl-fleet-open"); if(el) el.textContent=hlOpen+mxOpen;
@@ -2046,11 +2057,13 @@ function fmtNum(v, dec) {
   return n.toFixed(dec != null ? dec : 2);
 }
 
-async function loadLog() {
+async function loadLog(fromDate, toDate) {
   document.getElementById('log-count').textContent = '…';
   _expandedRows.clear();
   try {
-    const res = await fetch('/api/log?range=' + range);
+    let url = '/api/log?range=' + range;
+    if (fromDate && toDate) url = '/api/log?from_date=' + encodeURIComponent(fromDate) + '&to_date=' + encodeURIComponent(toDate);
+    const res = await fetch(url);
     if (!res.ok) return;
     logData   = await res.json();
     logLoaded = true;
@@ -2137,6 +2150,43 @@ function detailHTML(r) {
 function renderLog() {
   const rows = getLogFiltered();
   document.getElementById('log-count').textContent = rows.length;
+  // ── log summary ──
+  (function() {
+    const summaryEl = document.getElementById('log-summary');
+    if (!summaryEl) return;
+    if (!rows.length) { summaryEl.innerHTML = ''; return; }
+    const grpMap = new Map();
+    for (const r of rows) {
+      const k = (r.pair||'')+'|'+(r.direction||'')+'|'+(r.open_time||'');
+      if (!grpMap.has(k)) grpMap.set(k, []);
+      grpMap.get(k).push(r);
+    }
+    let tradeCount = 0;
+    for (const grp of grpMap.values()) {
+      const sorted = [...grp].sort((a,b) => String(a.close_time||'')<String(b.close_time||'')?-1:1);
+      const term = sorted.find(r => !/^tp.?1$/i.test(r.exit_reason||'')) || sorted[sorted.length-1];
+      if (term && term.pnl_dollars != null) tradeCount++;
+    }
+    let longPnl = 0, shortPnl = 0;
+    for (const r of rows) {
+      const v = r.pnl_dollars != null ? parseFloat(r.pnl_dollars) : 0;
+      if ((r.direction||'').toUpperCase() === 'LONG') longPnl += v; else shortPnl += v;
+    }
+    longPnl  = Math.round(longPnl  * 100) / 100;
+    shortPnl = Math.round(shortPnl * 100) / 100;
+    const totPnl = Math.round((longPnl + shortPnl) * 100) / 100;
+    const fP = v => (v >= 0 ? '+' : '-') + '$' + Math.abs(v).toFixed(2);
+    const cl = v => v >= 0 ? 'pos' : 'neg';
+    summaryEl.innerHTML =
+      '<div class="log-summary-item"><div class="log-summary-lbl">TRADES</div>' +
+        '<div class="log-summary-val">' + tradeCount + '</div></div>' +
+      '<div class="log-summary-item"><div class="log-summary-lbl">LONG P&L</div>' +
+        '<div class="log-summary-val ' + cl(longPnl)  + '">' + fP(longPnl)  + '</div></div>' +
+      '<div class="log-summary-item"><div class="log-summary-lbl">SHORT P&L</div>' +
+        '<div class="log-summary-val ' + cl(shortPnl) + '">' + fP(shortPnl) + '</div></div>' +
+      '<div class="log-summary-item"><div class="log-summary-lbl">TOTAL P&L</div>' +
+        '<div class="log-summary-val ' + cl(totPnl)   + '">' + fP(totPnl)   + '</div></div>';
+  })();
 
   const COL_DEFS = [
     { key: '_chv',             label: '',      noSort: true },
@@ -2256,7 +2306,13 @@ function setVenueChip(v) {
 }
 
 function onLogFilterChange() {
-  renderLog();
+  const fromVal = (document.getElementById('log-from')?.value || '').trim();
+  const toVal   = (document.getElementById('log-to')?.value   || '').trim();
+  if (fromVal && toVal) {
+    loadLog(fromVal, toVal);
+  } else {
+    renderLog();
+  }
 }
 
 function exportCSV() {
@@ -2409,7 +2465,7 @@ function _initLogDates() {
         +   '<span style="color:' + maeCol + '">MAE ' + maeStr + '</span>'
         +   '<span style="color:' + mfeCol + '">MFE ' + mfeStr + '</span>'
         + '</div>'
-        + '<span style="font-size:10px;color:#444;font-weight:700;margin-left:auto">' + ots + '</span>'
+        + '<span style="font-size:10px;color:#ffffff;font-weight:700;margin-left:auto">' + ots + '</span>'
         + '</div>'
         + '<div id="rcr-' + safeKey + '" class="recon-result" style="display:none"></div>'
         + '</div>';
@@ -2434,10 +2490,10 @@ function _initLogDates() {
       if (!r) return '';
       if (r._loading) return '<div class="recon-loading">RECONSTRUCTING...</div>';
       if (r.status === 'outside_retention') return '<div class="recon-loading" style="color:' + C.amber + '">OUTSIDE HL 5-DAY RETENTION WINDOW</div>';
-      if (r.status === 'unsupported')  return '<div class="recon-loading" style="color:#555">' + r.msg + '</div>';
+      if (r.status === 'unsupported')  return '<div class="recon-loading" style="color:#ffffff">' + r.msg + '</div>';
       if (r.status === 'no_crossing')  return '<div class="recon-loading" style="color:' + C.amber + '">NO CROSSING FOUND -- ' + r.msg + '</div>';
       if (r.status === 'error')        return '<div class="recon-loading" style="color:' + C.red   + '">ERROR -- ' + r.msg + '</div>';
-      if (r.status !== 'ok')           return '<div class="recon-loading" style="color:#555">status: ' + r.status + '</div>';
+      if (r.status !== 'ok')           return '<div class="recon-loading" style="color:#ffffff">status: ' + r.status + '</div>';
 
       const isTB = r.group === 'a';
       const ws   = parseFloat(r.window_start_pct).toFixed(1);
@@ -2472,7 +2528,7 @@ function _initLogDates() {
         const bevT = new Date(r.breakeven_timestamp).toISOString().slice(11, 16);
         bevStatHtml = '<span>BREAKEVEN AT <span style="color:#fbbf24">' + bevT + ' UTC</span> [' + r.breakeven_tag + ', gap=' + r.breakeven_gap_r + 'R]</span>';
       } else {
-        bevStatHtml = '<span>BREAKEVEN AT <span style="color:#555">&#8212;</span></span>';
+        bevStatHtml = '<span>BREAKEVEN AT <span style="color:#ffffff">&#8212;</span></span>';
       }
 
       let metaItems = [bevStatHtml];
@@ -2714,7 +2770,7 @@ function _initLogDates() {
           <div class="exc-sheet-header">
             <div>
               <div class="exc-sheet-title">TWIN SIGNALS</div>
-              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIRS TRADED ON BOTH VENUES</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIRS TRADED ON BOTH VENUES</div>
             </div>
             <button class="exc-sheet-close" onclick="closeTwinSheet()">&#x2715;</button>
           </div>
@@ -2733,7 +2789,7 @@ function _initLogDates() {
           <div class="exc-sheet-header">
             <div>
               <div class="exc-sheet-title">PAIR LEAGUE</div>
-              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">RANKED BY CUMULATIVE P&amp;L</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">RANKED BY CUMULATIVE P&amp;L</div>
             </div>
             <button class="exc-sheet-close" onclick="closeLeagueSheet()">&#x2715;</button>
           </div>
@@ -2762,7 +2818,7 @@ function _initLogDates() {
           <div class="exc-sheet-header">
             <div>
               <div class="exc-sheet-title">RECONSTRUCT</div>
-              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">REPLAY TRADE TIMING WINDOWS</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">REPLAY TRADE TIMING WINDOWS</div>
             </div>
             <button class="exc-sheet-close" onclick="closeReconSheet()">&#x2715;</button>
           </div>
@@ -2816,12 +2872,12 @@ function _initLogDates() {
           <div class="exc-sheet-header">
             <div>
               <div class="exc-sheet-title">PEAK PROTECTION</div>
-              <div style="font-size:11px;color:#555;font-weight:700;letter-spacing:.08em;margin-top:2px">PEAK-DOLLAR DECAY ANALYSIS</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PEAK-DOLLAR DECAY ANALYSIS</div>
             </div>
             <button class="exc-sheet-close" onclick="closePeakSheet()">&#x2715;</button>
           </div>
           <div id="peak-sheet-body">
-            <div id="peak-body-inner"><div style="font-size:12px;color:#555;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
+            <div id="peak-body-inner"><div style="font-size:12px;color:#ffffff;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
           </div>
         </div>
       </div>
