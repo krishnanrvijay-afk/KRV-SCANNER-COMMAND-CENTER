@@ -460,6 +460,10 @@ body {
 .venue-chip.active-hl   { background: #a855f715; border-color: #a855f7;       color: #a855f7; }
 .venue-chip.active-mexc { background: #f9731615; border-color: #f97316;       color: #f97316; }
 .venue-chip:hover:not([class*="active"]) { border-color: #333; color: #ffffff; }
+.er-chips { display: flex; gap: 3px; flex-wrap: wrap; }
+.er-chip  { border-radius: 999px; border: 1px solid #222; background: transparent; color: #ffffff; padding: 4px 12px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; cursor: pointer; -webkit-appearance: none; transition: all .12s; }
+.er-chip.active           { background: #22d3ee15; border-color: var(--teal); color: var(--teal); }
+.er-chip:hover:not(.active) { border-color: #333; color: #ffffff; }
 .log-date-input {
   background: #070707;
   border: 1px solid #222;
@@ -1070,6 +1074,18 @@ body {
       </div>
       <div class="log-filter-group">
         <input type="text" id="log-pair" class="log-pair-input" placeholder="PAIR FILTER" oninput="onLogFilterChange()">
+        <div class="log-filter-group">
+        <span class="log-filter-label">EXIT</span>
+        <div class="er-chips" id="er-chips">
+          <button class="er-chip active" onclick="setExitChip('all')">ALL</button>
+        </div>
+      </div>
+    </div>
+      <div class="log-filter-group">
+        <span class="log-filter-label">EXIT</span>
+        <div class="er-chips" id="er-chips">
+          <button class="er-chip active" onclick="setExitChip('all')">ALL</button>
+        </div>
       </div>
     </div>
 
@@ -2037,6 +2053,7 @@ let logData       = null;
 let logLoaded     = false;
 let logSort       = { col: 'close_time', dir: 'desc' };
 let logVenue      = 'all';
+let logExitReason = 'all';
 let _expandedRows = new Set();
 
 function fmtSess(v) {
@@ -2095,6 +2112,10 @@ function getLogFiltered() {
     rows = rows.filter(r => r.close_time && new Date(r.close_time) <= to);
   }
 
+  if (logExitReason !== 'all') {
+    rows = rows.filter(r => (r.exit_reason || '').toUpperCase() === logExitReason);
+  }
+
   rows = [...rows].sort((a, b) => {
     let av = a[logSort.col], bv = b[logSort.col];
     if (av == null) av = logSort.dir === 'asc' ? '\uFFFF' : '';
@@ -2148,6 +2169,7 @@ function detailHTML(r) {
 }
 
 function renderLog() {
+  buildExitChips();
   const rows = getLogFiltered();
   document.getElementById('log-count').textContent = rows.length;
   // ── log summary ──
@@ -2302,6 +2324,37 @@ function setVenueChip(v) {
     if (!el) return;
     el.className = 'venue-chip' + (x === v ? ' active-' + x : '');
   });
+  renderLog();
+}
+
+function fmtExitLabel(s) {
+  if (!s) return s;
+  const decay = s.match(/^PEAK_DECAY_(\d+)$/i);
+  if (decay) return 'Peak Decay ' + decay[1] + '%';
+  return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function buildExitChips() {
+  const wrap = document.getElementById('er-chips');
+  if (!wrap) return;
+  const seen = new Set();
+  if (logData) {
+    for (const r of logData) {
+      const v = (r.exit_reason || '').toUpperCase().trim();
+      if (v) seen.add(v);
+    }
+  }
+  const reasons = [...seen].sort();
+  let html = `<button class="er-chip${logExitReason === 'all' ? ' active' : ''}" onclick="setExitChip('all')">ALL</button>`;
+  for (const v of reasons) {
+    const active = logExitReason === v ? ' active' : '';
+    html += `<button class="er-chip${active}" onclick="setExitChip('${v}')">${fmtExitLabel(v)}</button>`;
+  }
+  wrap.innerHTML = html;
+}
+
+function setExitChip(v) {
+  logExitReason = v;
   renderLog();
 }
 
