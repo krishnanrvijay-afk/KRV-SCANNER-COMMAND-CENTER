@@ -698,6 +698,89 @@ body {
     .peak-saved-hdr { font-size:11px; letter-spacing:.12em; color:#ffffff; font-weight:700; margin-bottom:6px; }
     .peak-saved-val { font-family:var(--display); font-size:2rem; color:#22c55e; }
     .peak-saved-note { font-size:12px; color:#ffffff; font-weight:700; margin-top:6px; line-height:1.5; }
+
+    /* ── FLEET LINK ── */
+    .fleet-link-section {
+      position:relative;
+      background:radial-gradient(ellipse at 50% 0%, rgba(179,136,255,0.06), transparent 60%),
+                  radial-gradient(ellipse at 50% 100%, rgba(255,145,0,0.05), transparent 60%),
+                  #0d0d10;
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:16px; padding:18px 20px 16px; margin:10px 16px 12px; overflow:hidden;
+    }
+    .fleet-link-section::before {
+      content:""; position:absolute; inset:0;
+      background:repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px);
+      pointer-events:none;
+    }
+    .fl-header { display:flex; align-items:center; gap:8px; margin-bottom:14px; position:relative; z-index:2; }
+    .fl-title { font-size:9px; font-weight:700; letter-spacing:0.16em; color:var(--text); opacity:0.55; }
+    .fl-live-tag {
+      display:flex; align-items:center; gap:5px; font-size:8px; font-weight:700; letter-spacing:0.08em;
+      color:var(--green); background:rgba(0,230,118,0.08);
+      border:1px solid rgba(0,230,118,0.3); border-radius:5px; padding:2px 7px; margin-left:auto;
+    }
+    .fl-live-dot { width:5px; height:5px; border-radius:50%; background:var(--green); animation:fl-livedot 1.4s ease-in-out infinite; }
+    @keyframes fl-livedot { 0%,100%{ opacity:1; box-shadow:0 0 4px 1px rgba(0,230,118,0.8); } 50%{ opacity:0.4; box-shadow:0 0 2px 0 rgba(0,230,118,0.3); } }
+    .fl-grid { display:grid; grid-template-columns:1fr 110px 1fr; align-items:center; gap:8px; position:relative; z-index:2; }
+    .fl-vessel { position:relative; background:#0a0a0c; border-radius:12px; padding:14px 16px; overflow:hidden; }
+    .fl-vessel.fl-hl { border:1px solid rgba(179,136,255,0.3); }
+    .fl-vessel.fl-mx { border:1px solid rgba(255,145,0,0.3); }
+    .fl-vessel::after { content:""; position:absolute; top:0; left:0; right:0; height:60px; pointer-events:none; }
+    .fl-vessel.fl-hl::after { background:radial-gradient(ellipse at 20% 0%, rgba(179,136,255,0.12), transparent 70%); }
+    .fl-vessel.fl-mx::after { background:radial-gradient(ellipse at 80% 0%, rgba(255,145,0,0.12), transparent 70%); }
+    .fl-v-top { display:flex; align-items:center; gap:9px; margin-bottom:10px; position:relative; z-index:2; }
+    .fl-v-ring { position:relative; width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .fl-v-ring-pulse { position:absolute; inset:0; border-radius:50%; border:1.5px solid currentColor; animation:fl-ringpulse 1.8s ease-out infinite; }
+    .fl-vessel.fl-hl .fl-v-ring-pulse { color:var(--hl); }
+    .fl-vessel.fl-mx .fl-v-ring-pulse { color:var(--mexc); }
+    .fl-vessel.fl-ring-amber .fl-v-ring-pulse { color:var(--amber) !important; animation-duration:3s; }
+    .fl-vessel.fl-ring-red   .fl-v-ring-pulse { color:var(--red)   !important; animation-duration:6s; }
+    @keyframes fl-ringpulse { 0%{ transform:scale(0.5); opacity:0.9; } 100%{ transform:scale(1.6); opacity:0; } }
+    .fl-v-ring-core { width:9px; height:9px; border-radius:50%; box-shadow:0 0 8px 2px currentColor; }
+    .fl-vessel.fl-hl .fl-v-ring-core { background:var(--hl); color:var(--hl); }
+    .fl-vessel.fl-mx .fl-v-ring-core { background:var(--mexc); color:var(--mexc); }
+    .fl-vessel.fl-ring-amber .fl-v-ring-core { background:var(--amber) !important; color:var(--amber) !important; }
+    .fl-vessel.fl-ring-red   .fl-v-ring-core { background:var(--red)   !important; color:var(--red)   !important; }
+    .fl-v-id { display:flex; flex-direction:column; gap:1px; }
+    .fl-v-callsign { font-size:16px; letter-spacing:0.03em; font-family:var(--display); line-height:1; }
+    .fl-vessel.fl-hl .fl-v-callsign { color:var(--hl); }
+    .fl-vessel.fl-mx .fl-v-callsign { color:var(--mexc); }
+    .fl-v-fullname { font-size:8px; font-weight:700; letter-spacing:0.06em; color:var(--text); opacity:0.5; }
+    .fl-v-contact { margin-left:auto; text-align:right; }
+    .fl-v-contact-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:0.45; }
+    .fl-v-contact-val { font-size:10px; font-weight:700; color:var(--green); }
+    .fl-v-ecg { height:22px; margin-bottom:10px; position:relative; z-index:2; }
+    .fl-v-ecg svg { width:100%; height:100%; }
+    .fl-v-ecg-path { fill:none; stroke-width:1.5; stroke-dasharray:120; stroke-dashoffset:120; animation:fl-ecgdraw 2.4s linear infinite; }
+    .fl-vessel.fl-hl .fl-v-ecg-path { stroke:var(--hl); }
+    .fl-vessel.fl-mx .fl-v-ecg-path { stroke:var(--mexc); }
+    @keyframes fl-ecgdraw { 0%{ stroke-dashoffset:120; } 50%{ stroke-dashoffset:0; } 100%{ stroke-dashoffset:-120; } }
+    .fl-v-vitals { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; position:relative; z-index:2; }
+    .fl-vit { display:flex; flex-direction:column; gap:2px; }
+    .fl-vit-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:0.45; }
+    .fl-vit-val { font-size:13px; font-weight:700; color:var(--text); }
+    .fl-vit-val.pos { color:var(--green); }
+    .fl-vit-val.neg { color:var(--red); }
+    .fl-beam-col { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; position:relative; }
+    .fl-beam-track { position:relative; width:100%; height:3px; background:linear-gradient(90deg,var(--hl),var(--teal),var(--mexc)); border-radius:2px; opacity:0.35; margin-bottom:8px; }
+    .fl-beam-particle { position:absolute; top:50%; width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px 3px rgba(34,211,238,0.8); transform:translateY(-50%); animation:fl-travel 2.2s linear infinite; }
+    .fl-beam-particle.p2 { animation-delay:.7s; background:var(--hl); box-shadow:0 0 8px 3px rgba(179,136,255,0.8); }
+    .fl-beam-particle.p3 { animation-delay:1.4s; background:var(--mexc); box-shadow:0 0 8px 3px rgba(255,145,0,0.8); }
+    @keyframes fl-travel { 0%{ left:0%; opacity:0; } 10%{ opacity:1; } 90%{ opacity:1; } 100%{ left:100%; opacity:0; } }
+    .fl-beam-label { font-size:7px; font-weight:700; letter-spacing:0.1em; color:var(--text); opacity:0.4; text-align:center; white-space:nowrap; }
+    .fl-beam-sync { font-size:15px; color:var(--teal); text-align:center; margin-top:2px; font-family:var(--display); line-height:1; text-shadow:0 0 10px rgba(34,211,238,0.5); }
+    .fl-footer { display:flex; align-items:center; gap:14px; margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); position:relative; z-index:2; }
+    .fl-foot-item { display:flex; align-items:center; gap:5px; }
+    .fl-foot-label { font-size:8px; font-weight:700; color:var(--text); opacity:0.5; }
+    .fl-foot-val { font-size:10.5px; font-weight:700; color:var(--text); }
+    .fl-foot-val.pos { color:var(--green); }
+    .fl-foot-val.neg { color:var(--red); }
+    @media (max-width:600px) {
+      .fl-grid { grid-template-columns:1fr; }
+      .fl-beam-col { flex-direction:row; gap:8px; padding:8px 0; }
+      .fl-beam-track { width:60px; margin-bottom:0; }
+    }
     </style>
 </head>
 <body>
@@ -714,6 +797,82 @@ body {
       </div>
       <div id="analytics-status" class="fetch-status"></div>
         <div class="badge-paper">PAPER</div>
+    </div>
+  </div>
+
+  <!-- FLEET LINK -->
+  <div class="fleet-link-section">
+    <div class="fl-header">
+      <span class="fl-title">FLEET LINK</span>
+      <div class="fl-live-tag" id="fl-live-tag"><span class="fl-live-dot"></span><span id="fl-live-text">BOTH VESSELS REPORTING</span></div>
+    </div>
+    <div class="fl-grid">
+      <div class="fl-vessel fl-hl" id="fl-vessel-hl">
+        <div class="fl-v-top">
+          <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
+          <div class="fl-v-id">
+            <span class="fl-v-callsign">HL-1</span>
+            <span class="fl-v-fullname">HYPERLIQUID</span>
+          </div>
+          <div class="fl-v-contact">
+            <div class="fl-v-contact-label">LAST CONTACT</div>
+            <div class="fl-v-contact-val" id="fl-contact-hl">&#x2014;</div>
+          </div>
+        </div>
+        <div class="fl-v-ecg">
+          <svg viewBox="0 0 200 24" preserveAspectRatio="none">
+            <path class="fl-v-ecg-path" d="M0,12 L40,12 L48,4 L56,20 L64,12 L80,12 L88,2 L96,22 L104,12 L200,12"/>
+          </svg>
+        </div>
+        <div class="fl-v-vitals">
+          <div class="fl-vit"><span class="fl-vit-label">DAILY P&amp;L</span><span class="fl-vit-val" id="fl-hl-pnl">&#x2014;</span></div>
+          <div class="fl-vit"><span class="fl-vit-label">OPEN</span><span class="fl-vit-val" id="fl-hl-open">&#x2014;</span></div>
+          <div class="fl-vit"><span class="fl-vit-label">SCANS</span><span class="fl-vit-val" id="fl-hl-scans">&#x2014;</span></div>
+        </div>
+      </div>
+      <div class="fl-beam-col">
+        <div class="fl-beam-track">
+          <div class="fl-beam-particle"></div>
+          <div class="fl-beam-particle p2"></div>
+          <div class="fl-beam-particle p3"></div>
+        </div>
+        <div class="fl-beam-label">FLEET SYNC</div>
+        <div class="fl-beam-sync" id="fl-beam-scans">&#x2014;</div>
+        <div class="fl-beam-label">COMBINED SCANS</div>
+      </div>
+      <div class="fl-vessel fl-mx" id="fl-vessel-mx">
+        <div class="fl-v-top">
+          <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
+          <div class="fl-v-id">
+            <span class="fl-v-callsign">MEXC-1</span>
+            <span class="fl-v-fullname">MEXC FUTURES</span>
+          </div>
+          <div class="fl-v-contact">
+            <div class="fl-v-contact-label">LAST CONTACT</div>
+            <div class="fl-v-contact-val" id="fl-contact-mx">&#x2014;</div>
+          </div>
+        </div>
+        <div class="fl-v-ecg">
+          <svg viewBox="0 0 200 24" preserveAspectRatio="none">
+            <path class="fl-v-ecg-path" d="M0,12 L40,12 L48,4 L56,20 L64,12 L80,12 L88,2 L96,22 L104,12 L200,12"/>
+          </svg>
+        </div>
+        <div class="fl-v-vitals">
+          <div class="fl-vit"><span class="fl-vit-label">DAILY P&amp;L</span><span class="fl-vit-val" id="fl-mx-pnl">&#x2014;</span></div>
+          <div class="fl-vit"><span class="fl-vit-label">OPEN</span><span class="fl-vit-val" id="fl-mx-open">&#x2014;</span></div>
+          <div class="fl-vit"><span class="fl-vit-label">SCANS</span><span class="fl-vit-val" id="fl-mx-scans">&#x2014;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="fl-footer">
+      <div class="fl-foot-item">
+        <span class="fl-foot-label">FLEET DAILY P&amp;L</span>
+        <span class="fl-foot-val" id="fl-fleet-pnl">&#x2014;</span>
+      </div>
+      <div class="fl-foot-item">
+        <span class="fl-foot-label">FLEET OPEN</span>
+        <span class="fl-foot-val" id="fl-fleet-open">&#x2014;</span>
+      </div>
     </div>
   </div>
 
@@ -953,6 +1112,7 @@ let range     = 'today';
   let _analyticsFail = false;
   let _liveTs        = null;
   let _liveFail      = false;
+let _flTs          = { hl: null, mx: null };
 let analytics = null;
 let live      = null;
 
@@ -1091,12 +1251,96 @@ async function loadLive() {
     _setFetchStatus('live-status', true, _liveTs);
     renderJMap();
     renderFooter();
+    renderFleetLink();
   } catch (e) {
     console.error('live', e);
     _liveFail = true;
     _setFetchStatus('live-status', false, null);
   }
 }
+
+// -- FLEET LINK render --
+function renderFleetLink() {
+  if (!live) return;
+  function _flOpen(st) {
+    if (!st) return 0;
+    var ot = st.open_trades;
+    if (ot && typeof ot === "object") return Array.isArray(ot) ? ot.length : Object.keys(ot).length;
+    var ps = st.pair_states;
+    if (Array.isArray(ps)) return ps.filter(function(p){ return p && p.in_trade; }).length;
+    return 0;
+  }
+  function _flScans(st) {
+    if (!st) return 0;
+    var ps = st.pair_states;
+    return Array.isArray(ps) ? ps.length : 0;
+  }
+  function _flPnl(st) {
+    if (!st) return null;
+    var d = st.daily;
+    if (d && d.pnl != null) return parseFloat(d.pnl);
+    if (st.daily_pnl != null) return parseFloat(st.daily_pnl);
+    return null;
+  }
+  function _flFmt(v) {
+    if (v == null) return "—";
+    var sign = v >= 0 ? "+" : "-";
+    return sign + "$" + Math.abs(v).toFixed(2);
+  }
+  function _flFreshCls(tsMs) {
+    if (!tsMs) return "fl-ring-red";
+    var s = (Date.now() - tsMs) / 1000;
+    if (s < 15)  return "";
+    if (s < 90)  return "fl-ring-amber";
+    return "fl-ring-red";
+  }
+  if (live.hl_ok)   _flTs.hl = Date.now();
+  if (live.mexc_ok) _flTs.mx = Date.now();
+  var hlOpen  = _flOpen(live.hl),  mxOpen  = _flOpen(live.mexc);
+  var hlScans = _flScans(live.hl), mxScans = _flScans(live.mexc);
+  var hlPnl   = _flPnl(live.hl),  mxPnl   = _flPnl(live.mexc);
+  var hlV = document.getElementById("fl-vessel-hl");
+  var mxV = document.getElementById("fl-vessel-mx");
+  if (hlV) { hlV.classList.remove("fl-ring-amber","fl-ring-red"); var hc=_flFreshCls(_flTs.hl); if(hc) hlV.classList.add(hc); }
+  if (mxV) { mxV.classList.remove("fl-ring-amber","fl-ring-red"); var mc=_flFreshCls(_flTs.mx); if(mc) mxV.classList.add(mc); }
+  var hpEl = document.getElementById("fl-hl-pnl");
+  if (hpEl) { hpEl.textContent = _flFmt(hlPnl); hpEl.className = "fl-vit-val" + (hlPnl!=null?(hlPnl>=0?" pos":" neg"):""); }
+  var mpEl = document.getElementById("fl-mx-pnl");
+  if (mpEl) { mpEl.textContent = _flFmt(mxPnl); mpEl.className = "fl-vit-val" + (mxPnl!=null?(mxPnl>=0?" pos":" neg"):""); }
+  var el;
+  el=document.getElementById("fl-hl-open");   if(el) el.textContent=hlOpen;
+  el=document.getElementById("fl-mx-open");   if(el) el.textContent=mxOpen;
+  el=document.getElementById("fl-hl-scans");  if(el) el.textContent=hlScans;
+  el=document.getElementById("fl-mx-scans");  if(el) el.textContent=mxScans;
+  el=document.getElementById("fl-beam-scans");if(el) el.textContent=hlScans+mxScans;
+  var flPnl = (hlPnl!=null||mxPnl!=null) ? (hlPnl||0)+(mxPnl||0) : null;
+  var fpEl = document.getElementById("fl-fleet-pnl");
+  if (fpEl) { fpEl.textContent=_flFmt(flPnl); fpEl.className="fl-foot-val"+(flPnl!=null?(flPnl>=0?" pos":" neg"):""); }
+  el=document.getElementById("fl-fleet-open"); if(el) el.textContent=hlOpen+mxOpen;
+  var txtEl = document.getElementById("fl-live-text");
+  var tagEl = document.getElementById("fl-live-tag");
+  if (txtEl && tagEl) {
+    var both = live.hl_ok && live.mexc_ok;
+    var one  = live.hl_ok || live.mexc_ok;
+    txtEl.textContent = both ? "BOTH VESSELS REPORTING" : one ? (live.hl_ok ? "HL REPORTING" : "MEXC REPORTING") : "NO CONTACT";
+    var gc  = both ? "var(--green)" : one ? "var(--amber)" : "var(--red)";
+    var gbd = both ? "rgba(0,230,118,0.3)"  : one ? "rgba(255,179,0,0.3)"  : "rgba(255,77,77,0.3)";
+    var gbg = both ? "rgba(0,230,118,0.08)" : one ? "rgba(255,179,0,0.08)" : "rgba(255,77,77,0.08)";
+    tagEl.style.color=gc; tagEl.style.borderColor=gbd; tagEl.style.background=gbg;
+    var dot=tagEl.querySelector(".fl-live-dot"); if(dot) dot.style.background=gc;
+  }
+}
+setInterval(function() {
+  function _flRel(tsMs) {
+    if (!tsMs) return "NO SIGNAL";
+    var s = Math.floor((Date.now()-tsMs)/1000);
+    if (s < 60)   return s + "s ago";
+    if (s < 3600) return Math.floor(s/60) + "m ago";
+    return Math.floor(s/3600) + "h ago";
+  }
+  var h=document.getElementById("fl-contact-hl"); if(h) h.textContent=_flRel(_flTs.hl);
+  var m=document.getElementById("fl-contact-mx"); if(m) m.textContent=_flRel(_flTs.mx);
+}, 1000);
 
 // ── B. Fleet ──
 function renderFleet() {
