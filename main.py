@@ -586,17 +586,34 @@ async def api_analytics(request: Request, range: str = "today") -> JSONResponse:
     return JSONResponse(data)
 
 @app.get("/api/log")
-async def api_log(request: Request, range: str = "all") -> JSONResponse:
+async def api_log(
+    request: Request,
+    range: str = "all",
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+) -> JSONResponse:
     _require_auth(request)
-    if range not in ("today", "week", "all"):
-        raise HTTPException(400, "range must be: today | week | all")
     hl_rows, mexc_rows = await asyncio.gather(
         _sb_fetch("hl_trade_log",   {"order": "close_time.desc", "limit": "2000"}),
         _sb_fetch("mexc_trade_log", {"order": "close_time.desc", "limit": "2000"}),
     )
-    start    = _range_start(range)
-    hl_f     = _filter_by_range(hl_rows,   start)
-    mexc_f   = _filter_by_range(mexc_rows, start)
+    if from_date and to_date:
+        try:
+            start = _et_midnight(date.fromisoformat(from_date))
+            end   = _et_midnight(date.fromisoformat(to_date)) + timedelta(days=1)
+        except ValueError:
+            raise HTTPException(400, "Invalid date format; use YYYY-MM-DD")
+        def _in_range(r: dict) -> bool:
+            ct = _to_et(r.get("close_time"))
+            return bool(ct and start <= ct < end)
+        hl_f   = [r for r in hl_rows   if _in_range(r)]
+        mexc_f = [r for r in mexc_rows if _in_range(r)]
+    else:
+        if range not in ("today", "week", "all"):
+            raise HTTPException(400, "range must be: today | week | all")
+        start_r = _range_start(range)
+        hl_f    = _filter_by_range(hl_rows,   start_r)
+        mexc_f  = _filter_by_range(mexc_rows, start_r)
     all_rows = (
         [{"_venue": "hl",   **r} for r in hl_f   if r.get("close_time")]
       + [{"_venue": "mexc", **r} for r in mexc_f if r.get("close_time")]
