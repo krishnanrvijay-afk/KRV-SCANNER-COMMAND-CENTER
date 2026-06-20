@@ -1046,12 +1046,58 @@ async def api_timeline(
     })
 
 
-# ─────────────────────────── peak protection ───────────────────────────
+# ─────────────────────────────── peak protection ───────────────────────────────
 @app.get("/api/peak-protection")
 async def api_peak_protection(request: Request) -> JSONResponse:
     _require_auth(request)
     rows = await _sb_fetch("peak_protection_shadow")
-    return JSONResponse({"row_count": len(rows), "rows": rows})
+
+    # Dedup: group by (venue, pair, direction, open_time).
+    # Any group with count > 1 is a resurrection duplicate — exclude entirely.
+    group_counts: dict = {}
+    for r in rows:
+        key = (r.get("venue"), r.get("pair"), r.get("direction"), r.get("open_time"))
+        group_counts[key] = group_counts.get(key, 0) + 1
+
+    clean = [
+        r for r in rows
+        if group_counts[(r.get("venue"), r.get("pair"), r.get("direction"), r.get("open_time"))] == 1
+    ]
+    excluded_contaminated_count = sum(1 for v in group_counts.values() if v > 1)
+
+    def _threshold(at_key: str, pnl_key: str) -> dict:
+        triggered = [r for r in clean if r.get(at_key) is not None]
+        gb_vals = [
+            (r["peak_pnl_usd"] - r[pnl_key]) / r["peak_pnl_usd"] * 100
+            for r in triggered
+            if (r.get("peak_pnl_usd") or 0) > 0
+        ]
+        fg_vals = [
+            (r["pnl_dollars"] - r[pnl_key])
+            for r in triggered
+            if r.get("pnl_dollars") is not None
+        ]
+        return {
+            "triggered_count":  len(triggered),
+            "avg_giveback_pct": round(sum(gb_vals) / len(gb_vals), 1) if gb_vals else None,
+            "forgone_dollars":  round(sum(fg_vals), 2) if fg_vals else None,
+        }
+
+    saved_side_count = sum(
+        1 for r in clean
+        if (r.get("peak_pnl_usd") or 0) >= 20 and (r.get("pnl_dollars") or 0) < 0
+    )
+
+    return JSONResponse({
+        "clean_sample_count":          len(clean),
+        "excluded_contaminated_count": excluded_contaminated_count,
+        "thresholds": {
+            "20": _threshold("decay20_triggered_at", "decay20_pnl_at_trigger"),
+            "30": _threshold("decay30_triggered_at", "decay30_pnl_at_trigger"),
+            "40": _threshold("decay40_triggered_at", "decay40_pnl_at_trigger"),
+        },
+        "saved_side_count": saved_side_count,
+    })
 
 
 # ─────────────────────────── entry point ───────────────────────────
