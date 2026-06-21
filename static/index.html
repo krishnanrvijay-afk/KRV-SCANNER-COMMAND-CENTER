@@ -1763,7 +1763,7 @@ function renderSessions() {
 function renderLeague() {
   const league = analytics.pair_league || [];
   document.getElementById('league-body').innerHTML = league.length === 0
-    ? '<tr><td colspan="5" class="empty" style="padding:10px 8px">No data</td></tr>'
+    ? '<tr><td colspan="8" class="empty" style="padding:10px 8px">No data</td></tr>'
     : league.map((p, i) => {
         const rc = parseFloat(p.avg_r) >= 0 ? C.green : C.red;
         return `<tr>
@@ -1772,6 +1772,9 @@ function renderLeague() {
           <td style="color:${pnlColor(p.pnl)};font-weight:700">${fmtDollar(p.pnl)}</td>
           <td style="color:#ffffff;font-weight:700">${p.trade_count}</td>
           <td style="color:${p.avg_r != null ? rc : '#ffffff'};font-weight:700">${fmtR(p.avg_r)}</td>
+          <td style="color:#ffffff;font-weight:700">${fmtDur(p.avg_duration_sec)}</td>
+          <td style="color:#ffffff;font-weight:700">${fmtDur(p.avg_duration_sec_winners)}</td>
+          <td style="color:#ffffff;font-weight:700">${fmtDur(p.avg_duration_sec_losers)}</td>
         </tr>`;
       }).join('');
 }
@@ -2901,6 +2904,9 @@ function _initLogDates() {
                     <th>P&amp;L</th>
                     <th>TRADES</th>
                     <th>AVG R</th>
+                    <th>AVG DUR</th>
+                    <th>WIN DUR</th>
+                    <th>LOSS DUR</th>
                   </tr>
                 </thead>
                 <tbody id="league-body"></tbody>

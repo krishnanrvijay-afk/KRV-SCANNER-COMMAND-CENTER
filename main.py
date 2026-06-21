@@ -359,6 +359,10 @@ def _compute_sessions(all_rows: list) -> list:
 def _compute_pair_league(all_rows: list) -> list:
     stats: dict[str, dict] = {}
     terminal_rows, all_pnl_rows = _group_logical_trades(all_rows)
+    _empty = {"pnl": 0.0, "count": 0, "r_sum": 0.0, "r_n": 0,
+              "dur_sum": 0.0, "dur_n": 0,
+              "dur_w_sum": 0.0, "dur_w_n": 0,
+              "dur_l_sum": 0.0, "dur_l_n": 0}
     # PnL sums and avg_r -- include all rows (TP1 partials + final closes)
     for r in all_pnl_rows:
         pair = r.get("pair") or r.get("symbol") or "UNKNOWN"
@@ -366,21 +370,32 @@ def _compute_pair_league(all_rows: list) -> list:
         rv   = _f(r.get("r_value"))
         if pnl is None:
             continue
-        s = stats.setdefault(pair, {"pnl": 0.0, "count": 0, "r_sum": 0.0, "r_n": 0})
+        s = stats.setdefault(pair, dict(_empty))
         s["pnl"] += pnl
         if rv is not None:
             s["r_sum"] += rv; s["r_n"] += 1
-    # Trade count -- one per logical trade (terminal row only)
+    # Trade count + duration -- one per logical trade (terminal row only)
     for r in terminal_rows:
         pair = r.get("pair") or r.get("symbol") or "UNKNOWN"
         pnl  = _f(r.get("pnl_dollars"))
         if pnl is None:
             continue
-        s = stats.setdefault(pair, {"pnl": 0.0, "count": 0, "r_sum": 0.0, "r_n": 0})
+        s = stats.setdefault(pair, dict(_empty))
         s["count"] += 1
+        ds = _f(r.get("duration_seconds"))
+        if ds is not None:
+            s["dur_sum"] += ds; s["dur_n"] += 1
+            if pnl > 0:
+                s["dur_w_sum"] += ds; s["dur_w_n"] += 1
+            else:
+                s["dur_l_sum"] += ds; s["dur_l_n"] += 1
+    def _avg(sm, n): return round(sm / n) if n else None
     return sorted(
         [{"pair": p, "pnl": round(v["pnl"], 2), "trade_count": v["count"],
-          "avg_r": round(v["r_sum"] / v["r_n"], 3) if v["r_n"] else None}
+          "avg_r":                    round(v["r_sum"] / v["r_n"], 3) if v["r_n"] else None,
+          "avg_duration_sec":         _avg(v["dur_sum"],   v["dur_n"]),
+          "avg_duration_sec_winners": _avg(v["dur_w_sum"], v["dur_w_n"]),
+          "avg_duration_sec_losers":  _avg(v["dur_l_sum"], v["dur_l_n"])}
          for p, v in stats.items()],
         key=lambda x: x["pnl"], reverse=True,
     )
