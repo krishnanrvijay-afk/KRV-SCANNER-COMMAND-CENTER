@@ -1267,10 +1267,11 @@ function _fmtTs(ts) {
   var secs = Math.floor((Date.now() - ts) / 1000);
   if (secs < 120) return 'Updated ' + secs + 's ago';
   var d = new Date(ts);
-  var h = d.getHours(), m = d.getMinutes();
-  var ap = h >= 12 ? 'PM' : 'AM';
-  h = h % 12 || 12;
-  return 'Updated ' + h + ':' + String(m).padStart(2,'0') + ' ' + ap;
+  var et = d.toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+  return 'Updated ' + et + ' ET';
 }
 function _setFetchStatus(elId, ok, ts) {
   var el = document.getElementById(elId);
@@ -2025,13 +2026,13 @@ function renderTlSheet() {
       var peakPt2 = sessSeries.reduce(function(a,b){ return b.margin_deployed > a.margin_deployed ? b : a; });
       var pkX = ((peakPt2.t_ms - sStartMs) / sDur * W).toFixed(1);
       var pkY = (SH - peakPt2.margin_deployed / maxM * SH * 0.9).toFixed(1);
-      var pkT = new Date(peakPt2.t_ms).toISOString().slice(11,16);
+      var pkT = new Date(peakPt2.t_ms).toISOString().slice(11,16) + ' UTC';
       var pkLbl = 'peak ' + Math.round(peakPt2.margin_deployed).toLocaleString() + ' @ ' + pkT;
 
       var drainSvg = sessDrains.map(function(dr) {
         var dx = ((dr.t_ms - sStartMs) / sDur * W).toFixed(1);
         var dy2 = (SH - dr.margin_deployed / maxM * SH * 0.9).toFixed(1);
-        var dT = new Date(dr.t_ms).toISOString().slice(11,16);
+        var dT = new Date(dr.t_ms).toISOString().slice(11,16) + ' UTC';
         return '<circle cx="' + dx + '" cy="' + dy2 + '" r="3.5" fill="' + C.amber + '"/>'
              + '<text x="' + dx + '" y="' + (parseFloat(dy2)+13) + '" fill="' + C.amber + '" font-size="8" text-anchor="middle" font-weight="700">' + Math.round(dr.margin_deployed).toLocaleString() + ' @ ' + dT + '</text>';
       }).join('');
@@ -2406,11 +2407,19 @@ function onLogFilterChange() {
 
 function exportCSV() {
   const rows = getLogFiltered();
-  const headers = ['venue','pair','direction','tier','session_opened','close_time','exit_reason','pnl_dollars','r_value','mae_r','mfe_r','duration_seconds','score','adx1h'];
+  const headers = ['venue','pair','direction','tier','session_opened','close_time_et','exit_reason','pnl_dollars','r_value','mae_r','mfe_r','duration_seconds','score','adx1h'];
   const lines = [headers.join(',')];
   for (const r of rows) {
     lines.push(headers.map(h => {
-      const v = h === 'venue' ? (r._venue || '') : (r[h] ?? '');
+      const v = h === 'venue' ? (r._venue || '')
+              : h === 'close_time_et' ? (r.close_time
+                  ? new Date(r.close_time).toLocaleString('en-US', {
+                      timeZone: 'America/New_York',
+                      month: 'numeric', day: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
+                    })
+                  : '')
+              : (r[h] ?? '');
       const s = String(v);
       return s.includes(',') || s.includes('"') || s.includes('\n')
         ? '"' + s.replace(/"/g, '""') + '"'
@@ -2726,7 +2735,7 @@ function _initLogDates() {
         return;
       }
       const hdr = ['venue','pair','direction','exit_reason','mae_r','mfe_r',
-                   'mae_timestamp','mfe_timestamp','elapsed_minutes',
+                   'mae_timestamp_utc','mfe_timestamp_utc','elapsed_minutes',
                    'pct_of_duration','confirmation_tag','outside_retention'];
       const csvRows = done.map(t => {
         const key  = t.venue + '|' + t.id;
