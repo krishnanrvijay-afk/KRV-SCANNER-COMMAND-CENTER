@@ -450,104 +450,104 @@ def _compute_excursion(all_rows: list) -> dict:
 
 
 
-  # ─────────────────────────── sentinel coverage ───────────────────────────
+# ─────────────────────────── sentinel coverage ───────────────────────────
 
-  SENTINEL_RETIRED_PAIRS: dict[str, list[str]] = {
-      "hl":   ["HYPE", "LINK", "ZEC"],
-      "mexc": ["ZEC_USDT", "XAUT_USDT"],
-  }
-  SENTINEL_LIVE_ACTION: dict[str, list[str]] = {
-      "hl":   ["NEAR"],
-      "mexc": ["NEAR_USDT"],
-  }
+SENTINEL_RETIRED_PAIRS: dict[str, list[str]] = {
+    "hl":   ["HYPE", "LINK", "ZEC"],
+    "mexc": ["ZEC_USDT", "XAUT_USDT"],
+}
+SENTINEL_LIVE_ACTION: dict[str, list[str]] = {
+    "hl":   ["NEAR"],
+    "mexc": ["NEAR_USDT"],
+}
 
 
-  def _compute_sentinel_coverage(hl_rows: list, mexc_rows: list) -> dict:
-      """
-      Classify non-retired pairs by sentinel eligibility tier.
-      Gate: mfe_r >= 0.5 (trade showed meaningful upside).
-      Banked  = terminal pnl > 0
-      Bleeder = terminal pnl <= 0
+def _compute_sentinel_coverage(hl_rows: list, mexc_rows: list) -> dict:
+    """
+    Classify non-retired pairs by sentinel eligibility tier.
+    Gate: mfe_r >= 0.5 (trade showed meaningful upside).
+    Banked  = terminal pnl > 0
+    Bleeder = terminal pnl <= 0
 
-      T1: bleeder_n >= 2 AND bleeder_pnl <= -100 AND avg_dur_bleeder <= avg_dur_banked
-      T2: bleeder_n >= 1 AND avg_dur_bleeder > avg_dur_banked
-      T3: everything else
-      """
-      venue_pair_rows: dict[tuple, list] = {}
-      for venue, rows in [("hl", hl_rows), ("mexc", mexc_rows)]:
-          retired  = set(SENTINEL_RETIRED_PAIRS.get(venue, []))
-          tagged   = [{**r, "_venue": venue} for r in rows]
-          terminal_rows, _ = _group_logical_trades(tagged)
-          for r in terminal_rows:
-              pair = r.get("pair") or r.get("symbol") or "UNKNOWN"
-              if pair in retired:
-                  continue
-              venue_pair_rows.setdefault((venue, pair), []).append(r)
+    T1: bleeder_n >= 2 AND bleeder_pnl <= -100 AND avg_dur_bleeder <= avg_dur_banked
+    T2: bleeder_n >= 1 AND avg_dur_bleeder > avg_dur_banked
+    T3: everything else
+    """
+    venue_pair_rows: dict[tuple, list] = {}
+    for venue, rows in [("hl", hl_rows), ("mexc", mexc_rows)]:
+        retired  = set(SENTINEL_RETIRED_PAIRS.get(venue, []))
+        tagged   = [{**r, "_venue": venue} for r in rows]
+        terminal_rows, _ = _group_logical_trades(tagged)
+        for r in terminal_rows:
+            pair = r.get("pair") or r.get("symbol") or "UNKNOWN"
+            if pair in retired:
+                continue
+            venue_pair_rows.setdefault((venue, pair), []).append(r)
 
-      results: list[dict] = []
-      for (venue, pair), rows in sorted(venue_pair_rows.items()):
-          qualifying = [r for r in rows if (_f(r.get("mfe_r")) or 0.0) >= 0.5]
-          q_n = len(qualifying)
-          if q_n == 0:
-              results.append({
-                  "venue": venue, "pair": pair,
-                  "qualifying_trades": 0,
-                  "banked_n": 0, "bleeder_n": 0,
-                  "banked_pnl": 0.0, "bleeder_pnl": 0.0,
-                  "avg_duration_min_banked": None,
-                  "avg_duration_min_bleeder": None,
-                  "tier": 3,
-                  "live_action": pair in SENTINEL_LIVE_ACTION.get(venue, []),
-              })
-              continue
+    results: list[dict] = []
+    for (venue, pair), rows in sorted(venue_pair_rows.items()):
+        qualifying = [r for r in rows if (_f(r.get("mfe_r")) or 0.0) >= 0.5]
+        q_n = len(qualifying)
+        if q_n == 0:
+            results.append({
+                "venue": venue, "pair": pair,
+                "qualifying_trades": 0,
+                "banked_n": 0, "bleeder_n": 0,
+                "banked_pnl": 0.0, "bleeder_pnl": 0.0,
+                "avg_duration_min_banked": None,
+                "avg_duration_min_bleeder": None,
+                "tier": 3,
+                "live_action": pair in SENTINEL_LIVE_ACTION.get(venue, []),
+            })
+            continue
 
-          banked  = [r for r in qualifying if (_f(r.get("pnl_dollars")) or 0) > 0]
-          bleeder = [r for r in qualifying if (_f(r.get("pnl_dollars")) or 0) <= 0]
+        banked  = [r for r in qualifying if (_f(r.get("pnl_dollars")) or 0) > 0]
+        bleeder = [r for r in qualifying if (_f(r.get("pnl_dollars")) or 0) <= 0]
 
-          def _avg_dur_min(rr: list) -> Optional[float]:
-              durs = [_f(r.get("duration_seconds")) for r in rr]
-              durs = [d for d in durs if d is not None]
-              if not durs:
-                  return None
-              return round(sum(durs) / len(durs) / 60.0, 1)
+        def _avg_dur_min(rr: list) -> Optional[float]:
+            durs = [_f(r.get("duration_seconds")) for r in rr]
+            durs = [d for d in durs if d is not None]
+            if not durs:
+                return None
+            return round(sum(durs) / len(durs) / 60.0, 1)
 
-          avg_dur_b   = _avg_dur_min(banked)
-          avg_dur_l   = _avg_dur_min(bleeder)
-          banked_pnl  = round(sum(_f(r.get("pnl_dollars")) or 0 for r in banked),  2)
-          bleeder_pnl = round(sum(_f(r.get("pnl_dollars")) or 0 for r in bleeder), 2)
+        avg_dur_b   = _avg_dur_min(banked)
+        avg_dur_l   = _avg_dur_min(bleeder)
+        banked_pnl  = round(sum(_f(r.get("pnl_dollars")) or 0 for r in banked),  2)
+        bleeder_pnl = round(sum(_f(r.get("pnl_dollars")) or 0 for r in bleeder), 2)
 
-          if (len(bleeder) >= 2 and bleeder_pnl <= -100
-                  and avg_dur_l is not None and avg_dur_b is not None
-                  and avg_dur_l <= avg_dur_b):
-              tier = 1
-          elif (len(bleeder) >= 1
+        if (len(bleeder) >= 2 and bleeder_pnl <= -100
                 and avg_dur_l is not None and avg_dur_b is not None
-                and avg_dur_l > avg_dur_b):
-              tier = 2
-          else:
-              tier = 3
+                and avg_dur_l <= avg_dur_b):
+            tier = 1
+        elif (len(bleeder) >= 1
+              and avg_dur_l is not None and avg_dur_b is not None
+              and avg_dur_l > avg_dur_b):
+            tier = 2
+        else:
+            tier = 3
 
-          results.append({
-              "venue": venue, "pair": pair,
-              "qualifying_trades": q_n,
-              "banked_n": len(banked), "bleeder_n": len(bleeder),
-              "banked_pnl": banked_pnl, "bleeder_pnl": bleeder_pnl,
-              "avg_duration_min_banked":  avg_dur_b,
-              "avg_duration_min_bleeder": avg_dur_l,
-              "tier": tier,
-              "live_action": pair in SENTINEL_LIVE_ACTION.get(venue, []),
-          })
+        results.append({
+            "venue": venue, "pair": pair,
+            "qualifying_trades": q_n,
+            "banked_n": len(banked), "bleeder_n": len(bleeder),
+            "banked_pnl": banked_pnl, "bleeder_pnl": bleeder_pnl,
+            "avg_duration_min_banked":  avg_dur_b,
+            "avg_duration_min_bleeder": avg_dur_l,
+            "tier": tier,
+            "live_action": pair in SENTINEL_LIVE_ACTION.get(venue, []),
+        })
 
-      t1 = [r for r in results if r["tier"] == 1]
-      t2 = [r for r in results if r["tier"] == 2]
-      t3 = [r for r in results if r["tier"] == 3]
-      return {
-          "tier1_count": len(t1),
-          "tier2_count": len(t2),
-          "tier3_count": len(t3),
-          "pairs": results,
-      }
-  
+    t1 = [r for r in results if r["tier"] == 1]
+    t2 = [r for r in results if r["tier"] == 2]
+    t3 = [r for r in results if r["tier"] == 3]
+    return {
+        "tier1_count": len(t1),
+        "tier2_count": len(t2),
+        "tier3_count": len(t3),
+        "pairs": results,
+    }
+
 
 def _live_open(state: Any) -> Optional[int]:
     if not state or not isinstance(state, dict):
@@ -1312,18 +1312,18 @@ async def api_peak_protection(request: Request) -> JSONResponse:
 
 
 
-  # ─────────────────────────── sentinel coverage endpoint ───────────────────────────
-  @app.get("/api/sentinel-coverage")
-  async def api_sentinel_coverage(request: Request) -> JSONResponse:
-      _require_auth(request)
-      hl_r, mx_r = await asyncio.gather(
-          _sb_fetch("hl_trade_log"),
-          _sb_fetch("mexc_trade_log"),
-      )
-      return JSONResponse(_compute_sentinel_coverage(hl_r, mx_r))
+# ─────────────────────────── sentinel coverage endpoint ───────────────────────────
+@app.get("/api/sentinel-coverage")
+async def api_sentinel_coverage(request: Request) -> JSONResponse:
+    _require_auth(request)
+    hl_r, mx_r = await asyncio.gather(
+        _sb_fetch("hl_trade_log"),
+        _sb_fetch("mexc_trade_log"),
+    )
+    return JSONResponse(_compute_sentinel_coverage(hl_r, mx_r))
 
 
-  # ─────────────────────────── entry point ───────────────────────────
+# ─────────────────────────── entry point ───────────────────────────
 if __name__ == "__main__":
   import uvicorn
   uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)
