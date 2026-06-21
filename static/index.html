@@ -730,6 +730,14 @@ body {
     .intel-pill.peak      .intel-pill-value { text-shadow: 0 0 20px rgba(34,197,94,0.6); }
     .intel-pill.peak      .intel-chevron    { color: #22c55ecc; }
     .intel-pill.peak::before      { animation-delay: 2.5s; }
+      .intel-pill.sentinel  { border: 1.5px solid rgba(59,130,246,0.35); border-left: 5px solid #3b82f6; color: #3b82f6;
+                              box-shadow: -6px 0 28px -4px rgba(59,130,246,0.5), 0 10px 30px rgba(0,0,0,0.6); }
+      .intel-pill.sentinel:hover  { border-color: rgba(59,130,246,0.7); border-left-color: #3b82f6;
+                                    box-shadow: -8px 0 40px -2px rgba(59,130,246,0.75), 0 16px 40px rgba(0,0,0,0.8); }
+      .intel-pill.sentinel  .intel-pill-name  { color: #3b82f6; }
+      .intel-pill.sentinel  .intel-pill-value { text-shadow: 0 0 20px rgba(59,130,246,0.6); }
+      .intel-pill.sentinel  .intel-chevron    { color: #3b82f6cc; }
+      .intel-pill.sentinel::before  { animation-delay: 3.0s; }
 
     /* ── Peak Protection overlay ── */
     .peak-caution {
@@ -1012,7 +1020,18 @@ body {
         </div>
       </div>
 
-      <!-- Hidden sinks so existing JS render functions still find their targets -->
+        <!-- Sentinel Coverage pill (7th pill, full-width row) -->
+        <div style="display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px">
+          <div class="intel-pill sentinel" id="sentinel-pill-open" onclick="openSentinelSheet()">
+            <svg class="intel-pill-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L13.5 4.5V9C13.5 11.8 11 13.8 8 15C5 13.8 2.5 11.8 2.5 9V4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><line x1="5.5" y1="8" x2="7" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="9.5" x2="10.5" y2="6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="intel-pill-name">SENTINEL COVERAGE</div>
+            <div class="intel-pill-value" id="sentinel-pill-val">&#x2014;</div>
+            <div class="intel-pill-sub" id="sentinel-pill-sub">PAIRS ELIGIBLE<br>FOR ACTIVE WATCH</div>
+            <span class="intel-chevron">&#x203A;</span>
+          </div>
+        </div>
+
+        <!-- Hidden sinks so existing JS render functions still find their targets -->
       <div id="excursion" style="display:none"></div>
       <div id="tl-pill"   style="display:none"></div>
 
@@ -2455,7 +2474,7 @@ function _initLogDates() {
   _initLogDates();
   _initReconDates();
   _initTlDate();
-  await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist(), loadTimeline()]);
+  await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist(), loadTimeline(), loadSentinelCoverage()]);
   setInterval(loadLive,      30_000);
   setInterval(loadAnalytics, 300_000);
 })();
@@ -2862,6 +2881,429 @@ function _initLogDates() {
       console.error('peak-protection', e);
     }
   }
+  
+    function openSentinelSheet()  { document.getElementById('sentinel-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; }
+    function closeSentinelSheet() { document.getElementById('sentinel-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+
+    async function loadSentinelCoverage() {
+      var inner = document.getElementById('sentinel-body-inner');
+      try {
+        var res = await fetch('/api/sentinel-coverage');
+        if (!res.ok) throw new Error(res.statusText);
+        var d = await res.json();
+
+        var t1 = d.tier1_count || 0, t2 = d.tier2_count || 0, t3 = d.tier3_count || 0;
+        _setPillVal('sentinel-pill-val', t1);
+        var subEl = document.getElementById('sentinel-pill-sub');
+        if (subEl) subEl.innerHTML = 'T1 ELIGIBLE &middot; ' + t2 + ' T2 &middot; ' + t3 + ' T3';
+
+        if (!inner) return;
+
+        var pairs = d.pairs || [];
+        function _tierRows(tier) { return pairs.filter(function(p) { return p.tier === tier; }); }
+
+        function _fmtDurMin(v) {
+          if (v == null) return '&#x2014;';
+          var h = Math.floor(v / 60), m = Math.round(v % 60);
+          return h > 0 ? h + 'h ' + m + 'm' : v.toFixed(1) + 'm';
+        }
+        function _fmtPnl(v) {
+          if (v == null) return '&#x2014;';
+          var n = parseFloat(v);
+          if (n === 0) return '$0';
+          return (n >= 0 ? '+
+      <div id="twin-scrim" class="exc-scrim" onclick="closeTwinSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">TWIN SIGNALS</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIRS TRADED ON BOTH VENUES</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeTwinSheet()">&#x2715;</button>
+          </div>
+          <div id="twin-sheet-body">
+            <div class="twins-hdr">
+              <div><strong id="twin-count">&#x2014;</strong> twins &middot; venue edge <strong id="twin-edge">&#x2014;</strong></div>
+            </div>
+            <div id="twins-list"><div class="empty">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAIR LEAGUE overlay sheet -->
+      <div id="league-scrim" class="exc-scrim" onclick="closeLeagueSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">PAIR LEAGUE</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">RANKED BY CUMULATIVE P&amp;L</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeLeagueSheet()">&#x2715;</button>
+          </div>
+          <div id="league-sheet-body">
+            <div style="overflow-x:auto">
+              <table class="league-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>PAIR</th>
+                    <th>P&amp;L</th>
+                    <th>TRADES</th>
+                    <th>AVG R</th>
+                    <th>AVG DUR</th>
+                    <th>WIN DUR</th>
+                    <th>LOSS DUR</th>
+                  </tr>
+                </thead>
+                <tbody id="league-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECONSTRUCT overlay sheet -->
+      <div id="recon-scrim" class="exc-scrim" onclick="closeReconSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">RECONSTRUCT</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">REPLAY TRADE TIMING WINDOWS</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeReconSheet()">&#x2715;</button>
+          </div>
+          <div id="recon-sheet-body">
+            <div class="recon-filters">
+              <div class="log-filter-group">
+                <span class="log-filter-label">VENUE</span>
+                <div class="venue-chips">
+                  <button class="venue-chip active-all" id="rc-vchip-all"  onclick="setReconVenue('all')">ALL</button>
+                  <button class="venue-chip"            id="rc-vchip-hl"   onclick="setReconVenue('hl')">HL</button>
+                  <button class="venue-chip"            id="rc-vchip-mexc" onclick="setReconVenue('mexc')">MEXC</button>
+                </div>
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">TYPE</span>
+                <div class="venue-chips">
+                  <button class="venue-chip active-all" id="rc-echip-all" onclick="setReconExit('all')">ALL</button>
+                  <button class="venue-chip"            id="rc-echip-tb"  onclick="setReconExit('trailblazer')">TRAILBLAZER</button>
+                  <button class="venue-chip"            id="rc-echip-sl"  onclick="setReconExit('sl')">SL</button>
+                </div>
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">FROM</span>
+                <input type="date" id="rc-from" class="log-date-input" onchange="loadReconShortlist()">
+                <span class="log-filter-label">TO</span>
+                <input type="date" id="rc-to"   class="log-date-input" onchange="loadReconShortlist()">
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">MIN |MAE|</span>
+                <input type="number" id="rc-mae" class="recon-num-input" value="0.3" step="0.1" min="0" onchange="loadReconShortlist()">
+                <span class="log-filter-label">MIN MFE</span>
+                <input type="number" id="rc-mfe" class="recon-num-input" value="0.5" step="0.1" min="0" onchange="loadReconShortlist()">
+              </div>
+            </div>
+            <div class="recon-toolbar">
+              <div class="recon-count-wrap">
+                <div class="recon-count-num" id="rc-count">--</div>
+                <div class="recon-count-lbl">QUALIFY</div>
+              </div>
+              <button class="recon-btn" id="rc-all-btn" onclick="reconstructAll()" style="display:none">RECONSTRUCT ALL (<span id="rc-all-n">0</span>)</button>
+              <button class="recon-btn" id="rc-export-btn" onclick="exportReconResults()" style="display:none">EXPORT RESULTS</button>
+            </div>
+            <div id="rc-shortlist"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEAK PROTECTION overlay sheet -->
+      <div id="peak-scrim" class="exc-scrim" onclick="closePeakSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">PEAK PROTECTION</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PEAK-DOLLAR DECAY ANALYSIS</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closePeakSheet()">&#x2715;</button>
+          </div>
+          <div id="peak-sheet-body">
+            <div id="peak-body-inner"><div style="font-size:12px;color:#ffffff;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+
+  
+    <!-- SESSION TIMELINE overlay sheet -->
+    <div id="tl-scrim" class="exc-scrim" onclick="closeTlSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title">SESSION TIMELINE</span>
+          <button class="exc-sheet-close" onclick="closeTlSheet()">&#x2715;</button>
+        </div>
+        <div class="tl-controls">
+          <div class="venue-chips">
+            <button class="venue-chip active-all" id="tl-vchip-all"  onclick="setTlVenue('all')">ALL</button>
+            <button class="venue-chip"            id="tl-vchip-hl"   onclick="setTlVenue('hl')">HL</button>
+            <button class="venue-chip"            id="tl-vchip-mexc" onclick="setTlVenue('mexc')">MEXC</button>
+          </div>
+          <input type="date" id="tl-date" class="log-date-input" onchange="loadTimeline()">
+          <div class="tl-margin-row">
+            <span class="tl-margin-lbl">$/TRADE</span>
+            <input type="number" id="tl-margin" class="tl-margin-input" value="2000" step="100" min="100" onchange="saveTlMargin()">
+          </div>
+        </div>
+        <div id="tl-body"><div class="empty">loading&#x2026;</div></div>
+      </div>
+    </div>
+
+    <!-- EXCURSION overlay sheet -->
+    <div id="exc-scrim" class="exc-scrim" onclick="closeExcSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title">EXCURSION</span>
+          <button class="exc-sheet-close" onclick="closeExcSheet()">&#x2715;</button>
+        </div>
+        <div id="exc-sheet-body"></div>
+      </div>
+    </div>
+
+      <!-- SENTINEL COVERAGE overlay sheet -->
+      <div id="sentinel-scrim" class="exc-scrim" onclick="closeSentinelSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">SENTINEL COVERAGE</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIR ELIGIBILITY BY TIER</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeSentinelSheet()">&#x2715;</button>
+          </div>
+          <div id="sentinel-sheet-body">
+            <div id="sentinel-body-inner"><div style="font-size:12px;color:#ffffff;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
+ : '&#x2212;
+      <div id="twin-scrim" class="exc-scrim" onclick="closeTwinSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">TWIN SIGNALS</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIRS TRADED ON BOTH VENUES</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeTwinSheet()">&#x2715;</button>
+          </div>
+          <div id="twin-sheet-body">
+            <div class="twins-hdr">
+              <div><strong id="twin-count">&#x2014;</strong> twins &middot; venue edge <strong id="twin-edge">&#x2014;</strong></div>
+            </div>
+            <div id="twins-list"><div class="empty">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAIR LEAGUE overlay sheet -->
+      <div id="league-scrim" class="exc-scrim" onclick="closeLeagueSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">PAIR LEAGUE</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">RANKED BY CUMULATIVE P&amp;L</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeLeagueSheet()">&#x2715;</button>
+          </div>
+          <div id="league-sheet-body">
+            <div style="overflow-x:auto">
+              <table class="league-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>PAIR</th>
+                    <th>P&amp;L</th>
+                    <th>TRADES</th>
+                    <th>AVG R</th>
+                    <th>AVG DUR</th>
+                    <th>WIN DUR</th>
+                    <th>LOSS DUR</th>
+                  </tr>
+                </thead>
+                <tbody id="league-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECONSTRUCT overlay sheet -->
+      <div id="recon-scrim" class="exc-scrim" onclick="closeReconSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">RECONSTRUCT</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">REPLAY TRADE TIMING WINDOWS</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeReconSheet()">&#x2715;</button>
+          </div>
+          <div id="recon-sheet-body">
+            <div class="recon-filters">
+              <div class="log-filter-group">
+                <span class="log-filter-label">VENUE</span>
+                <div class="venue-chips">
+                  <button class="venue-chip active-all" id="rc-vchip-all"  onclick="setReconVenue('all')">ALL</button>
+                  <button class="venue-chip"            id="rc-vchip-hl"   onclick="setReconVenue('hl')">HL</button>
+                  <button class="venue-chip"            id="rc-vchip-mexc" onclick="setReconVenue('mexc')">MEXC</button>
+                </div>
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">TYPE</span>
+                <div class="venue-chips">
+                  <button class="venue-chip active-all" id="rc-echip-all" onclick="setReconExit('all')">ALL</button>
+                  <button class="venue-chip"            id="rc-echip-tb"  onclick="setReconExit('trailblazer')">TRAILBLAZER</button>
+                  <button class="venue-chip"            id="rc-echip-sl"  onclick="setReconExit('sl')">SL</button>
+                </div>
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">FROM</span>
+                <input type="date" id="rc-from" class="log-date-input" onchange="loadReconShortlist()">
+                <span class="log-filter-label">TO</span>
+                <input type="date" id="rc-to"   class="log-date-input" onchange="loadReconShortlist()">
+              </div>
+              <div class="log-filter-group">
+                <span class="log-filter-label">MIN |MAE|</span>
+                <input type="number" id="rc-mae" class="recon-num-input" value="0.3" step="0.1" min="0" onchange="loadReconShortlist()">
+                <span class="log-filter-label">MIN MFE</span>
+                <input type="number" id="rc-mfe" class="recon-num-input" value="0.5" step="0.1" min="0" onchange="loadReconShortlist()">
+              </div>
+            </div>
+            <div class="recon-toolbar">
+              <div class="recon-count-wrap">
+                <div class="recon-count-num" id="rc-count">--</div>
+                <div class="recon-count-lbl">QUALIFY</div>
+              </div>
+              <button class="recon-btn" id="rc-all-btn" onclick="reconstructAll()" style="display:none">RECONSTRUCT ALL (<span id="rc-all-n">0</span>)</button>
+              <button class="recon-btn" id="rc-export-btn" onclick="exportReconResults()" style="display:none">EXPORT RESULTS</button>
+            </div>
+            <div id="rc-shortlist"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEAK PROTECTION overlay sheet -->
+      <div id="peak-scrim" class="exc-scrim" onclick="closePeakSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">PEAK PROTECTION</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PEAK-DOLLAR DECAY ANALYSIS</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closePeakSheet()">&#x2715;</button>
+          </div>
+          <div id="peak-sheet-body">
+            <div id="peak-body-inner"><div style="font-size:12px;color:#ffffff;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+
+  
+    <!-- SESSION TIMELINE overlay sheet -->
+    <div id="tl-scrim" class="exc-scrim" onclick="closeTlSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title">SESSION TIMELINE</span>
+          <button class="exc-sheet-close" onclick="closeTlSheet()">&#x2715;</button>
+        </div>
+        <div class="tl-controls">
+          <div class="venue-chips">
+            <button class="venue-chip active-all" id="tl-vchip-all"  onclick="setTlVenue('all')">ALL</button>
+            <button class="venue-chip"            id="tl-vchip-hl"   onclick="setTlVenue('hl')">HL</button>
+            <button class="venue-chip"            id="tl-vchip-mexc" onclick="setTlVenue('mexc')">MEXC</button>
+          </div>
+          <input type="date" id="tl-date" class="log-date-input" onchange="loadTimeline()">
+          <div class="tl-margin-row">
+            <span class="tl-margin-lbl">$/TRADE</span>
+            <input type="number" id="tl-margin" class="tl-margin-input" value="2000" step="100" min="100" onchange="saveTlMargin()">
+          </div>
+        </div>
+        <div id="tl-body"><div class="empty">loading&#x2026;</div></div>
+      </div>
+    </div>
+
+    <!-- EXCURSION overlay sheet -->
+    <div id="exc-scrim" class="exc-scrim" onclick="closeExcSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title">EXCURSION</span>
+          <button class="exc-sheet-close" onclick="closeExcSheet()">&#x2715;</button>
+        </div>
+        <div id="exc-sheet-body"></div>
+      </div>
+    </div>
+  </body>
+</html>
+) + Math.abs(n).toFixed(2);
+        }
+
+        function _pairRow(p) {
+          var vtag = p.venue === 'hl'
+            ? '<span class="venue-tag hl">HL</span>'
+            : '<span class="venue-tag mexc">MEXC</span>';
+          var liveTag = p.live_action
+            ? ' <span style="background:rgba(59,130,246,0.18);color:#3b82f6;font-size:8px;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:2px;border:1px solid rgba(59,130,246,0.4)">LIVE</span>'
+            : '';
+          var bPnl = parseFloat(p.banked_pnl  || 0);
+          var lPnl = parseFloat(p.bleeder_pnl || 0);
+          return '<tr>'
+            + '<td>' + vtag + ' <span style="color:#ffffff;font-weight:700">' + p.pair + '</span>' + liveTag + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + (p.qualifying_trades || 0) + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + (p.banked_n  || 0) + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + (p.bleeder_n || 0) + '</td>'
+            + '<td style="color:' + (bPnl >= 0 ? C.green : C.red) + ';font-weight:700;text-align:right">' + _fmtPnl(p.banked_pnl)  + '</td>'
+            + '<td style="color:' + (lPnl < 0 ? C.red : '#ffffff') + ';font-weight:700;text-align:right">' + _fmtPnl(p.bleeder_pnl) + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + _fmtDurMin(p.avg_duration_min_banked)  + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + _fmtDurMin(p.avg_duration_min_bleeder) + '</td>'
+            + '</tr>';
+        }
+
+        function _tierSection(label, color, desc, rows) {
+          if (!rows.length) return '';
+          return '<div style="margin-bottom:20px">'
+            + '<div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:' + color + ';margin-bottom:5px">' + label + '</div>'
+            + '<div style="font-size:11px;font-weight:700;color:#ffffff;margin-bottom:10px;line-height:1.5">' + desc + '</div>'
+            + '<div style="overflow-x:auto"><table class="peak-thresh-table" style="font-size:11px">'
+            + '<thead><tr><th>PAIR</th><th style="text-align:right">Q</th>'
+            + '<th style="text-align:right">BANKED</th><th style="text-align:right">BLEED</th>'
+            + '<th style="text-align:right">BANKED P&amp;L</th><th style="text-align:right">BLEEDER P&amp;L</th>'
+            + '<th style="text-align:right">DUR BANK</th><th style="text-align:right">DUR BLEED</th>'
+            + '</tr></thead><tbody>'
+            + rows.map(_pairRow).join('')
+            + '</tbody></table></div></div>';
+        }
+
+        var noticeHtml = '<div class="peak-caution" style="border-color:#3b82f6;color:#3b82f6;margin-bottom:16px">'
+          + '<div class="peak-caution-hdr">SENTINEL METHODOLOGY</div>'
+          + 'Gate: mfe_r ≥ 0.5 (trade showed meaningful upside). '
+          + 'Banked = closed pnl > 0. Bleeder = closed pnl ≤ 0. '
+          + 'Retired pairs excluded: HYPE, LINK, ZEC (HL) · ZEC_USDT, XAUT_USDT (MEXC). '
+          + '<strong style="color:#ffffff">Q</strong> = qualifying trades through the mfe_r gate.'
+          + '</div>';
+
+        inner.innerHTML = noticeHtml
+          + _tierSection('TIER 1 — ELIGIBLE', '#3b82f6',
+              'bleeder_n ≥ 2 · bleeder_pnl ≤ −$100 · avg bleed duration ≤ avg banked duration. Strongest case for sentinel entry rules.',
+              _tierRows(1))
+          + _tierSection('TIER 2 — BACKSTOP ONLY', '#f59e0b',
+              'bleeder_n ≥ 1 · avg bleed duration > avg banked duration. Bleeder trades run longer before closing. Monitor; sentinel time gate may help.',
+              _tierRows(2))
+          + _tierSection('TIER 3 — WATCHING', '#22c55e',
+              'All qualifying trades banked, or insufficient bleeder data. No sentinel action warranted. Pairs remain eligible for re-scoring as data grows.',
+              _tierRows(3));
+
+      } catch(e) {
+        if (inner) inner.innerHTML = '<div style="font-size:12px;color:#ff4d4d;font-weight:700;padding:12px 0">error loading sentinel coverage data</div>';
+        console.error('sentinel-coverage', e);
+      }
+    }
   
 </script>
 
