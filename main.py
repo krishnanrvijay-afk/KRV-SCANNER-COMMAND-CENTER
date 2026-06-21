@@ -502,7 +502,10 @@ def _compute_analytics(hl_rows: list, mexc_rows: list, range_key: str) -> dict:
         "twin_count":  len(twins),
         "venue_edge":  venue_edge,
         "sessions":    _compute_sessions(all_r),
-        "pair_league": _compute_pair_league(all_r),
+        "pair_league": _compute_pair_league(
+            [{"_venue": "hl",   **r} for r in hl_rows] +
+            [{"_venue": "mexc", **r} for r in mexc_rows]
+        ),
         "excursion":   _compute_excursion(all_r),
         "row_counts":  {"hl": len(hl_rows), "mexc": len(mexc_rows)},
     }
