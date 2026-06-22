@@ -1018,18 +1018,14 @@ body {
           <div class="intel-pill-sub" id="peak-pill-sub">DECAY<br>ANALYSIS</div>
           <span class="intel-chevron">&#x203A;</span>
         </div>
-      </div>
-
-        <!-- Sentinel Coverage pill (7th pill, full-width row) -->
-        <div style="display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px">
-          <div class="intel-pill sentinel" id="sentinel-pill-open" onclick="openSentinelSheet()">
-            <svg class="intel-pill-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L13.5 4.5V9C13.5 11.8 11 13.8 8 15C5 13.8 2.5 11.8 2.5 9V4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><line x1="5.5" y1="8" x2="7" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="9.5" x2="10.5" y2="6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <div class="intel-pill-name">SENTINEL COVERAGE</div>
-            <div class="intel-pill-value" id="sentinel-pill-val">&#x2014;</div>
-            <div class="intel-pill-sub" id="sentinel-pill-sub">PAIRS ELIGIBLE<br>FOR ACTIVE WATCH</div>
-            <span class="intel-chevron">&#x203A;</span>
-          </div>
+        <div class="intel-pill sentinel" id="sentinel-pill-open" onclick="openSentinelSheet()">
+          <svg class="intel-pill-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L13.5 4.5V9C13.5 11.8 11 13.8 8 15C5 13.8 2.5 11.8 2.5 9V4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><line x1="5.5" y1="8" x2="7" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="9.5" x2="10.5" y2="6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="intel-pill-name">SENTINEL COVERAGE</div>
+          <div class="intel-pill-value" id="sentinel-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub" id="sentinel-pill-sub">PAIRS ELIGIBLE<br>FOR ACTIVE WATCH</div>
+          <span class="intel-chevron">&#x203A;</span>
         </div>
+      </div>
 
         <!-- Hidden sinks so existing JS render functions still find their targets -->
       <div id="excursion" style="display:none"></div>
@@ -2882,7 +2878,7 @@ function _initLogDates() {
     }
   }
   
-    function openSentinelSheet()  { document.getElementById('sentinel-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; }
+    function openSentinelSheet()  { document.getElementById('sentinel-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; loadSentinelCoverage(); }
     function closeSentinelSheet() { document.getElementById('sentinel-scrim').classList.remove('open'); document.body.style.overflow = ''; }
 
     async function loadSentinelCoverage() {
@@ -2914,16 +2910,19 @@ function _initLogDates() {
           return (n >= 0 ? '+$' : '-$') + Math.abs(n).toFixed(2);
         }
 
-        function _pairRow(p) {
+        function _pairRow(p, tier) {
           var vtag = p.venue === 'hl'
             ? '<span class="venue-tag hl">HL</span>'
             : '<span class="venue-tag mexc">MEXC</span>';
-          var liveTag = p.live_action
-            ? ' <span style="background:rgba(59,130,246,0.18);color:#3b82f6;font-size:8px;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:2px;border:1px solid rgba(59,130,246,0.4)">LIVE</span>'
-            : '';
+          var liveTag = '';
+          if (p.live_action) {
+            liveTag = tier === 1
+              ? ' <span style="background:rgba(59,130,246,0.18);color:#3b82f6;font-size:8px;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:2px;border:1px solid rgba(59,130,246,0.4)">LIVE</span>'
+              : ' <span style="background:rgba(251,191,36,0.15);color:#fbbf24;font-size:8px;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:2px;border:1px solid rgba(251,191,36,0.4)">⚠ LIVE — monitor</span>';
+          }
           var bPnl = parseFloat(p.banked_pnl  || 0);
           var lPnl = parseFloat(p.bleeder_pnl || 0);
-          return '<tr>'
+          var row = '<tr>'
             + '<td>' + vtag + ' <span style="color:#ffffff;font-weight:700">' + p.pair + '</span>' + liveTag + '</td>'
             + '<td style="color:#ffffff;font-weight:700;text-align:right">' + (p.qualifying_trades || 0) + '</td>'
             + '<td style="color:#ffffff;font-weight:700;text-align:right">' + (p.banked_n  || 0) + '</td>'
@@ -2931,22 +2930,56 @@ function _initLogDates() {
             + '<td style="color:' + (bPnl >= 0 ? C.green : C.red) + ';font-weight:700;text-align:right">' + _fmtPnl(p.banked_pnl)  + '</td>'
             + '<td style="color:' + (lPnl < 0 ? C.red : '#ffffff') + ';font-weight:700;text-align:right">' + _fmtPnl(p.bleeder_pnl) + '</td>'
             + '<td style="color:#ffffff;font-weight:700;text-align:right">' + _fmtDurMin(p.avg_duration_min_banked)  + '</td>'
-            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + _fmtDurMin(p.avg_duration_min_bleeder) + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + _fmtDurMin(p.avg_duration_min_bleeder) + '</td>';
+          if (tier === 2) {
+            var why = '';
+            if (p.avg_duration_min_bleeder != null && p.avg_duration_min_banked != null
+                && p.avg_duration_min_bleeder > p.avg_duration_min_banked) {
+              why = 'bleed duration > banked duration';
+            } else if ((p.bleeder_n || 0) < 2) {
+              why = 'insufficient sample';
+            }
+            row += '<td style="color:#f59e0b;font-weight:700;font-size:10px">' + why + '</td>';
+          }
+          row += '</tr>';
+          return row;
+        }
+
+        function _tier3Row(p) {
+          var vtag = p.venue === 'hl'
+            ? '<span class="venue-tag hl">HL</span>'
+            : '<span class="venue-tag mexc">MEXC</span>';
+          var status = (p.bleeder_n || 0) === 0 ? 'zero bleeders observed' : 'sample too thin';
+          var liveTag = p.live_action
+            ? ' <span style="background:rgba(251,191,36,0.15);color:#fbbf24;font-size:8px;font-weight:700;letter-spacing:.08em;padding:2px 5px;border-radius:2px;border:1px solid rgba(251,191,36,0.4)">⚠ LIVE — monitor</span>'
+            : '';
+          return '<tr>'
+            + '<td>' + vtag + ' <span style="color:#ffffff;font-weight:700">' + p.pair + '</span>' + liveTag + '</td>'
+            + '<td style="color:#ffffff;font-weight:700;text-align:right">' + (p.qualifying_trades || 0) + '</td>'
+            + '<td style="color:#ffffff;font-weight:700">' + status + '</td>'
             + '</tr>';
         }
 
-        function _tierSection(label, color, desc, rows) {
+        function _tierSection(label, color, desc, rows, tier) {
           if (!rows.length) return '';
+          var hdrCells, rowFn;
+          if (tier === 3) {
+            hdrCells = '<th>PAIR</th><th style="text-align:right">Q</th><th>STATUS</th>';
+            rowFn = _tier3Row;
+          } else {
+            hdrCells = '<th>PAIR</th><th style="text-align:right">Q</th>'
+              + '<th style="text-align:right">BANKED</th><th style="text-align:right">BLEED</th>'
+              + '<th style="text-align:right">BANKED P&amp;L</th><th style="text-align:right">BLEEDER P&amp;L</th>'
+              + '<th style="text-align:right">DUR BANK</th><th style="text-align:right">DUR BLEED</th>'
+              + (tier === 2 ? '<th>WHY EXCLUDED</th>' : '');
+            rowFn = function(p) { return _pairRow(p, tier); };
+          }
           return '<div style="margin-bottom:20px">'
             + '<div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:' + color + ';margin-bottom:5px">' + label + '</div>'
             + '<div style="font-size:11px;font-weight:700;color:#ffffff;margin-bottom:10px;line-height:1.5">' + desc + '</div>'
             + '<div style="overflow-x:auto"><table class="peak-thresh-table" style="font-size:11px">'
-            + '<thead><tr><th>PAIR</th><th style="text-align:right">Q</th>'
-            + '<th style="text-align:right">BANKED</th><th style="text-align:right">BLEED</th>'
-            + '<th style="text-align:right">BANKED P&amp;L</th><th style="text-align:right">BLEEDER P&amp;L</th>'
-            + '<th style="text-align:right">DUR BANK</th><th style="text-align:right">DUR BLEED</th>'
-            + '</tr></thead><tbody>'
-            + rows.map(_pairRow).join('')
+            + '<thead><tr>' + hdrCells + '</tr></thead><tbody>'
+            + rows.map(rowFn).join('')
             + '</tbody></table></div></div>';
         }
 
@@ -2961,13 +2994,13 @@ function _initLogDates() {
         inner.innerHTML = noticeHtml
           + _tierSection('TIER 1 — ELIGIBLE', '#3b82f6',
               'bleeder_n ≥ 2 · bleeder_pnl ≤ −$100 · avg bleed duration ≤ avg banked duration. Strongest case for sentinel entry rules.',
-              _tierRows(1))
+              _tierRows(1), 1)
           + _tierSection('TIER 2 — BACKSTOP ONLY', '#f59e0b',
               'bleeder_n ≥ 1 · avg bleed duration > avg banked duration. Bleeder trades run longer before closing. Monitor; sentinel time gate may help.',
-              _tierRows(2))
+              _tierRows(2), 2)
           + _tierSection('TIER 3 — WATCHING', '#22c55e',
               'All qualifying trades banked, or insufficient bleeder data. No sentinel action warranted. Pairs remain eligible for re-scoring as data grows.',
-              _tierRows(3));
+              _tierRows(3), 3);
 
       } catch(e) {
         if (inner) inner.innerHTML = '<div style="font-size:12px;color:#ff4d4d;font-weight:700;padding:12px 0">error loading sentinel coverage data</div>';
@@ -3099,6 +3132,22 @@ function _initLogDates() {
       </div>
 
   
+      <!-- SENTINEL COVERAGE overlay sheet -->
+      <div id="sentinel-scrim" class="exc-scrim" onclick="closeSentinelSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()">
+          <div class="exc-sheet-header">
+            <div>
+              <div class="exc-sheet-title">SENTINEL COVERAGE</div>
+              <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">PAIRS ELIGIBLE FOR ACTIVE WATCH</div>
+            </div>
+            <button class="exc-sheet-close" onclick="closeSentinelSheet()">&#x2715;</button>
+          </div>
+          <div id="sentinel-sheet-body">
+            <div id="sentinel-body-inner"><div style="font-size:12px;color:#ffffff;font-weight:700;padding:12px 0">loading&#x2026;</div></div>
+          </div>
+        </div>
+      </div>
+
     <!-- SESSION TIMELINE overlay sheet -->
     <div id="tl-scrim" class="exc-scrim" onclick="closeTlSheet()">
       <div class="exc-sheet" onclick="event.stopPropagation()">
