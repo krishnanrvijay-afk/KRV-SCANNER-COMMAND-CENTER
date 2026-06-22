@@ -167,7 +167,7 @@ def _filter_by_range(rows: list, start: Optional[datetime]) -> list:
             out.append(r)
     return out
 
-TERMINAL_REASONS: frozenset = frozenset({"TRAILBLAZER", "TRAIL", "SL", "MANUAL", "PEAK_DECAY_20", "RUNNER_DECAY_10"})
+TERMINAL_REASONS: frozenset = frozenset({"TRAILBLAZER", "TRAIL", "SL", "MANUAL", "PEAK_DECAY_20", "RUNNER_DECAY_10", "ADVERSE_CUT"})
 
 
 def _group_logical_trades(rows: list) -> tuple[list, list]:
