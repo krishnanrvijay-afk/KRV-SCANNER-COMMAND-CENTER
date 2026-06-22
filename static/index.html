@@ -846,7 +846,103 @@ body {
   .log-summary-val { font-size:18px; font-family:var(--display); line-height:1; color:#ffffff; }
   .log-summary-val.pos { color:#22c55e; }
   .log-summary-val.neg { color:#ef4444; }
-  </style>
+  
+    /* ── P&L RAIL ── */
+    .pnl-rail {
+      background: linear-gradient(180deg, #0d0d10 0%, #080809 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      margin: 0 16px 12px;
+      padding: 14px 18px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pnl-rail::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.008) 3px, rgba(255,255,255,0.008) 4px);
+      pointer-events: none;
+    }
+    .pnl-rail-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; position: relative; z-index: 2; }
+    .pnl-rail-title { font-size: 8px; font-weight: 700; letter-spacing: .16em; color: #ffffff; opacity: 0.5; }
+    .pnl-rail-today { font-family: var(--display); font-size: 38px; line-height: 1; }
+    .pnl-rail-today.pos { color: #00e676; text-shadow: 0 0 24px rgba(0,230,118,0.55); }
+    .pnl-rail-today.neg { color: #ff4d4d; text-shadow: 0 0 24px rgba(255,77,77,0.55); }
+    .pnl-rail-today.zero { color: #ffffff; }
+    .pnl-rail-sub { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; position: relative; z-index: 2; }
+    .pnl-rail-sub-item { display: flex; flex-direction: column; gap: 1px; }
+    .pnl-rail-sub-lbl { font-size: 7px; font-weight: 700; letter-spacing: .12em; color: #ffffff; opacity: 0.45; }
+    .pnl-rail-sub-val { font-size: 13px; font-weight: 700; color: #ffffff; }
+    .pnl-rail-sub-val.pos { color: #00e676; }
+    .pnl-rail-sub-val.neg { color: #ff4d4d; }
+    .pnl-rail-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.10); flex-shrink: 0; }
+    .pnl-rail-sess { display: flex; gap: 12px; }
+    .pnl-rail-sess-item { display: flex; flex-direction: column; gap: 1px; min-width: 52px; }
+    .pnl-rail-sess-name { font-size: 7px; font-weight: 700; letter-spacing: .12em; color: #ffffff; opacity: 0.45; }
+    .pnl-rail-sess-pnl { font-size: 12px; font-weight: 700; }
+    .pnl-rail-ld { display: flex; gap: 8px; align-items: center; margin-top: 10px; position: relative; z-index: 2; }
+    .pnl-rail-ld-bar { flex: 1; height: 4px; background: #111; border-radius: 2px; overflow: hidden; position: relative; }
+    .pnl-rail-ld-long  { position: absolute; left: 0; top: 0; height: 100%; background: #00e676; border-radius: 2px; transition: width .4s; }
+    .pnl-rail-ld-short { position: absolute; right: 0; top: 0; height: 100%; background: #ff4d4d; border-radius: 2px; transition: width .4s; }
+    .pnl-rail-ld-lbl { font-size: 9px; font-weight: 700; letter-spacing: .06em; }
+
+    /* ── REDESIGNED TABS ── */
+    .tab-bar {
+      display: flex; gap: 6px;
+      padding: 6px 16px 0;
+      background: transparent;
+      position: relative; z-index: 10;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px 9px;
+      border: 1.5px solid rgba(255,255,255,0.10);
+      border-radius: 10px 10px 0 0;
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.45);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+      -webkit-appearance: none;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .tab-btn:hover { color: rgba(255,255,255,0.80); }
+    .tab-btn#tab-insights:hover  { background: rgba(168,85,247,0.10); border-color: rgba(168,85,247,0.35); }
+    .tab-btn#tab-scorecard:hover { background: rgba(34,211,238,0.08); border-color: rgba(34,211,238,0.30); }
+    .tab-btn#tab-log:hover       { background: rgba(34,197,94,0.08);  border-color: rgba(34,197,94,0.30); }
+    .tab-btn.active {
+      background: linear-gradient(180deg, rgba(34,211,238,0.18) 0%, rgba(34,211,238,0.06) 100%);
+      border-color: rgba(34,211,238,0.60);
+      color: #22d3ee;
+      box-shadow: 0 -3px 14px rgba(34,211,238,0.28), inset 0 1px 0 rgba(34,211,238,0.20);
+    }
+    .tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      background: rgba(34,211,238,0.20); border: 1px solid rgba(34,211,238,0.45);
+      border-radius: 999px; font-size: 8px; font-weight: 700; color: #22d3ee;
+      line-height: 1;
+    }
+    .tab-btn.active .tab-badge { background: rgba(34,211,238,0.30); }
+
+    /* ── SESSION×DIRECTION pill 8 styles ── */
+    .intel-pill.sess-dir { border: 1.5px solid rgba(99,102,241,0.35); border-left: 5px solid #6366f1; color: #6366f1;
+                           box-shadow: -6px 0 28px -4px rgba(99,102,241,0.5), 0 10px 30px rgba(0,0,0,0.6); }
+    .intel-pill.sess-dir:hover { border-color: rgba(99,102,241,0.7); border-left-color: #6366f1;
+                                  box-shadow: -8px 0 40px -2px rgba(99,102,241,0.75), 0 16px 40px rgba(0,0,0,0.8); }
+    .intel-pill.sess-dir .intel-pill-name { color: #6366f1; }
+    .intel-pill.sess-dir .intel-pill-value { text-shadow: 0 0 20px rgba(99,102,241,0.6); }
+    .intel-pill.sess-dir .intel-chevron { color: #6366f1cc; }
+    .intel-pill.sess-dir::before { animation-delay: 3.5s; }
+    .sess-dir-sheet-table { width: 100%; border-collapse: collapse; }
+    .sess-dir-sheet-table th { color: #ffffff; font-weight: 700; font-size: 11px; letter-spacing: .12em; padding: 7px 8px; text-align: left; border-bottom: 1px solid #161616; }
+    .sess-dir-sheet-table td { padding: 8px 8px; border-bottom: 1px solid #0c0c0c; font-weight: 700; font-size: 13px; font-family: var(--mono); color: #ffffff; }
+    .sess-dir-sheet-table tr:last-child td { border-bottom: none; }
+    .sess-dir-total-row td { color: #22d3ee; }
+
+</style>
 </head>
 <body>
 <div class="page">
@@ -941,40 +1037,70 @@ body {
     </div>
   </div>
 
+
+  <!-- P&L RAIL -->
+  <div class="pnl-rail" id="pnl-rail">
+    <div style="position:relative;z-index:2">
+      <div class="pnl-rail-header">
+        <div class="pnl-rail-title">TODAY P&amp;L</div>
+      </div>
+      <div class="pnl-rail-today zero" id="pr-today">&#x2014;</div>
+    </div>
+    <div class="pnl-rail-sub" style="margin-top:8px">
+      <div class="pnl-rail-sub-item">
+        <div class="pnl-rail-sub-lbl">MTD</div>
+        <div class="pnl-rail-sub-val" id="pr-mtd">&#x2014;</div>
+      </div>
+      <div class="pnl-rail-sub-item">
+        <div class="pnl-rail-sub-lbl">YTD</div>
+        <div class="pnl-rail-sub-val" id="pr-ytd">&#x2014;</div>
+      </div>
+      <div class="pnl-rail-divider"></div>
+      <div class="pnl-rail-sess" id="pr-sess">
+        <div class="pnl-rail-sess-item">
+          <div class="pnl-rail-sess-name">ASIA</div>
+          <div class="pnl-rail-sess-pnl" id="pr-asia">&#x2014;</div>
+        </div>
+        <div class="pnl-rail-sess-item">
+          <div class="pnl-rail-sess-name">EU</div>
+          <div class="pnl-rail-sess-pnl" id="pr-eu">&#x2014;</div>
+        </div>
+        <div class="pnl-rail-sess-item">
+          <div class="pnl-rail-sess-name">US</div>
+          <div class="pnl-rail-sess-pnl" id="pr-us">&#x2014;</div>
+        </div>
+      </div>
+      <div class="pnl-rail-divider"></div>
+      <div class="pnl-rail-sub-item">
+        <div class="pnl-rail-sub-lbl">LONG</div>
+        <div class="pnl-rail-sub-val" id="pr-long">&#x2014;</div>
+      </div>
+      <div class="pnl-rail-sub-item">
+        <div class="pnl-rail-sub-lbl">SHORT</div>
+        <div class="pnl-rail-sub-val" id="pr-short">&#x2014;</div>
+      </div>
+    </div>
+    <div class="pnl-rail-ld">
+      <div class="pnl-rail-ld-lbl" style="color:#00e676;min-width:30px;text-align:right" id="pr-ld-long-pct">L</div>
+      <div class="pnl-rail-ld-bar">
+        <div class="pnl-rail-ld-long"  id="pr-ld-long-bar"  style="width:0%"></div>
+        <div class="pnl-rail-ld-short" id="pr-ld-short-bar" style="width:0%"></div>
+      </div>
+      <div class="pnl-rail-ld-lbl" style="color:#ff4d4d;min-width:30px" id="pr-ld-short-pct">S</div>
+    </div>
+  </div>
+
   <!-- TAB BAR -->
   <div class="tab-bar">
-    <button class="tab-btn active" id="tab-insights"  onclick="setTab('insights')">INSIGHTS</button>
-    <button class="tab-btn"        id="tab-scorecard" onclick="setTab('scorecard')">SCORECARD</button>
-    <button class="tab-btn"        id="tab-log"       onclick="setTab('log')">LOG</button>
+    <button class="tab-btn active" id="tab-insights"  onclick="setTab('insights')">&#x26A1; INSIGHTS</button>
+    <button class="tab-btn"        id="tab-scorecard" onclick="setTab('scorecard')">&#x1F4CA; SCORECARD <span class="tab-badge" id="tab-scorecard-badge">7</span></button>
+    <button class="tab-btn"        id="tab-log"       onclick="setTab('log')">&#x1F4CB; LOG <span class="tab-badge" id="tab-log-badge">&#x2014;</span></button>
   </div>
 
   <!-- TAB 1: INSIGHTS -->
     <div id="panel-insights">
 
-      <!-- SESSION x DIRECTION (always-visible band) -->
-      <div class="band">
-        <div class="band-title">SESSION x DIRECTION</div>
-        <div style="overflow-x:auto">
-          <table class="sess-table">
-            <thead>
-              <tr>
-                <th>SESSION</th>
-                <th style="color:#00e676;font-size:20px">&#x2191; LONG P&amp;L</th>
-                <th>TRADES</th>
-                <th>WR</th>
-                <th style="color:#ff4d4d;font-size:20px">&#x2193; SHORT P&amp;L</th>
-                <th>TRADES</th>
-                <th>WR</th>
-              </tr>
-            </thead>
-            <tbody id="sess-body"></tbody>
-            <tfoot id="sess-tfoot"></tfoot>
-          </table>
-        </div>
-        <div id="sess-pnl-note" class="sess-pnl-note"></div>
-      </div>
-
-      <!-- Six intelligence pills -->
+      <!-- Eight intelligence pills (SESSION x DIRECTION moved to pill 8) -->
       <div class="intel-pill-row">
         <div class="intel-pill twin" id="twin-pill-open" onclick="openTwinSheet()">
           <svg class="intel-pill-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="2" y1="5" x2="14" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="4" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1025,11 +1151,19 @@ body {
           <div class="intel-pill-sub" id="sentinel-pill-sub">PAIRS ELIGIBLE<br>FOR ACTIVE WATCH</div>
           <span class="intel-chevron">&#x203A;</span>
         </div>
+        <div class="intel-pill sess-dir" id="sess-dir-pill-open" onclick="openSessDirSheet()">
+          <svg class="intel-pill-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="2" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+          <div class="intel-pill-name">SESSION &times; DIR</div>
+          <div class="intel-pill-value" id="sess-dir-pill-val">&#x2014;</div>
+          <div class="intel-pill-sub" id="sess-dir-pill-sub">LONG vs SHORT<br>BY SESSION</div>
+          <span class="intel-chevron">&#x203A;</span>
+        </div>
       </div>
 
         <!-- Hidden sinks so existing JS render functions still find their targets -->
       <div id="excursion" style="display:none"></div>
       <div id="tl-pill"   style="display:none"></div>
+
 
     </div><!-- /panel-insights -->
 
@@ -1264,6 +1398,22 @@ function setTab(name) {
     document.getElementById('tab-' + t).classList.toggle('active', t === name);
   });
   if (name === 'log' && !logLoaded) loadLog();
+}
+function _updateLogBadge() {
+  var el = document.getElementById('tab-log-badge');
+  if (!el) return;
+  if (!logData) { el.textContent = '—'; return; }
+  // count today's trades (close_time within current ET day)
+  var now = new Date();
+  var etStr = now.toLocaleDateString('en-US', { timeZone: 'America/New_York', month: '2-digit', day: '2-digit', year: 'numeric' });
+  var count = 0;
+  for (var r of logData) {
+    if (!r.close_time) continue;
+    var d = new Date(r.close_time);
+    var dStr = d.toLocaleDateString('en-US', { timeZone: 'America/New_York', month: '2-digit', day: '2-digit', year: 'numeric' });
+    if (dStr === etStr) count++;
+  }
+  el.textContent = count > 0 ? count : '—';
 }
 
 // ── range selector ──
@@ -2102,6 +2252,7 @@ function renderAnalytics() {
   renderExcursion();
   renderFooter();
   _updatePillValues();
+  renderPnlRail();
 }
 
 // ═══════════════════════════════════════
@@ -2364,6 +2515,7 @@ function renderLog() {
 
   document.getElementById('log-table').innerHTML =
     `<thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody>`;
+  _updateLogBadge();
 }
 
 function sortLog(col) {
@@ -2789,7 +2941,86 @@ function _initLogDates() {
     }
     
 
-  // ── Intelligence Dashboard — open/close handlers ──
+  
+// ── P&L RAIL ──────────────────────────────────────────────────────────────────
+function renderPnlRail() {
+  if (!analytics) return;
+  var f = analytics.fleet;
+  // TODAY P&L from fleet (range=today gives daily pnl)
+  var today = f && f.pnl != null ? parseFloat(f.pnl) : null;
+  var todayEl = document.getElementById('pr-today');
+  if (todayEl) {
+    todayEl.textContent = today != null ? fmtDollar(today) : '—';
+    todayEl.className = 'pnl-rail-today ' + (today == null ? 'zero' : today >= 0 ? 'pos' : 'neg');
+  }
+  // MTD / YTD — not available from single range fetch; show combined pnl label context
+  var mtdEl  = document.getElementById('pr-mtd');
+  var ytdEl  = document.getElementById('pr-ytd');
+  if (mtdEl) { mtdEl.textContent = '—'; mtdEl.className = 'pnl-rail-sub-val'; }
+  if (ytdEl) { ytdEl.textContent = '—'; ytdEl.className = 'pnl-rail-sub-val'; }
+
+  // Sessions from analytics.sessions
+  var sessions = analytics.sessions || [];
+  function _sessPnl(key) {
+    var map = { ASIA: ['ASIA','ASIA_EARLY','ASIA_LATE'], EU: ['EU','LONDON'], US: ['US','NY','NEW_YORK','NEWYORK'] };
+    var keys = map[key] || [key];
+    var tot = 0;
+    sessions.forEach(function(s) {
+      var sk = (s.session || '').toUpperCase().trim();
+      if (keys.indexOf(sk) >= 0) { tot += (s.long_pnl || 0) + (s.short_pnl || 0); }
+    });
+    return tot;
+  }
+  var sessKeys = ['ASIA','EU','US'];
+  var sessIds  = ['pr-asia','pr-eu','pr-us'];
+  sessKeys.forEach(function(k, i) {
+    var el = document.getElementById(sessIds[i]);
+    if (!el) return;
+    var v = _sessPnl(k);
+    el.textContent = fmtDollar(v);
+    el.style.color = v >= 0 ? '#00e676' : '#ff4d4d';
+  });
+
+  // Long / Short split
+  var longPnl = 0, shortPnl = 0;
+  sessions.forEach(function(s) {
+    longPnl  += (s.long_pnl  || 0);
+    shortPnl += (s.short_pnl || 0);
+  });
+  var longEl  = document.getElementById('pr-long');
+  var shortEl = document.getElementById('pr-short');
+  if (longEl)  { longEl.textContent  = fmtDollar(longPnl);  longEl.className  = 'pnl-rail-sub-val' + (longPnl  >= 0 ? ' pos' : ' neg'); }
+  if (shortEl) { shortEl.textContent = fmtDollar(shortPnl); shortEl.className = 'pnl-rail-sub-val' + (shortPnl >= 0 ? ' pos' : ' neg'); }
+
+  // Long/Short bar split
+  var totalAbs = Math.abs(longPnl) + Math.abs(shortPnl);
+  var longPct  = totalAbs > 0 ? (Math.abs(longPnl)  / totalAbs * 100).toFixed(1) : '50';
+  var shortPct = totalAbs > 0 ? (Math.abs(shortPnl) / totalAbs * 100).toFixed(1) : '50';
+  var lb = document.getElementById('pr-ld-long-bar');
+  var sb = document.getElementById('pr-ld-short-bar');
+  var ll = document.getElementById('pr-ld-long-pct');
+  var sl2 = document.getElementById('pr-ld-short-pct');
+  if (lb)  lb.style.width  = longPct  + '%';
+  if (sb)  sb.style.width  = shortPct + '%';
+  if (ll)  ll.textContent  = 'L ' + longPct  + '%';
+  if (sl2) sl2.textContent = shortPct + '% S';
+
+  // Pill 8 value: total combined sessions P&L
+  var sessTot = Math.round((longPnl + shortPnl) * 100) / 100;
+  _setPillVal('sess-dir-pill-val', fmtDollar(sessTot));
+  var subEl = document.getElementById('sess-dir-pill-sub');
+  if (subEl) {
+    var lt = 0, st = 0;
+    sessions.forEach(function(s){ lt += (s.long_trades||0); st += (s.short_trades||0); });
+    subEl.innerHTML = 'L ' + lt + ' TRADES &nbsp;/&nbsp; S ' + st + ' TRADES';
+  }
+}
+
+// ── SESSION×DIR overlay ──
+function openSessDirSheet()  { document.getElementById('sess-dir-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; }
+function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+
+// ── Intelligence Dashboard — open/close handlers ──
   function openTwinSheet()   { document.getElementById('twin-scrim').classList.add('open');   document.body.style.overflow = 'hidden'; }
   function closeTwinSheet()  { document.getElementById('twin-scrim').classList.remove('open'); document.body.style.overflow = ''; }
   function openLeagueSheet() { document.getElementById('league-scrim').classList.add('open'); document.body.style.overflow = 'hidden'; }
@@ -2813,6 +3044,7 @@ function _initLogDates() {
     _setPillVal('league-pill-val', league.length || '0');
     var e = analytics.excursion;
     _setPillVal('excursion-pill-val', e ? (e.verdict || '--') : '--');
+    renderPnlRail();
   }
 
   function _updateTimelinePill() {
@@ -3181,5 +3413,39 @@ function _initLogDates() {
         <div id="exc-sheet-body"></div>
       </div>
     </div>
+
+    <!-- SESSION x DIRECTION overlay sheet -->
+    <div id="sess-dir-scrim" class="exc-scrim" onclick="closeSessDirSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()">
+        <div class="exc-sheet-header">
+          <div>
+            <div class="exc-sheet-title">SESSION &times; DIRECTION</div>
+            <div style="font-size:11px;color:#ffffff;font-weight:700;letter-spacing:.08em;margin-top:2px">LONG vs SHORT P&amp;L BY SESSION</div>
+          </div>
+          <button class="exc-sheet-close" onclick="closeSessDirSheet()">&#x2715;</button>
+        </div>
+        <div id="sess-dir-sheet-body">
+          <div style="overflow-x:auto">
+            <table class="sess-dir-sheet-table">
+              <thead>
+                <tr>
+                  <th>SESSION</th>
+                  <th style="color:#00e676">&#x2191; LONG P&amp;L</th>
+                  <th>TRADES</th>
+                  <th>WR</th>
+                  <th style="color:#ff4d4d">&#x2193; SHORT P&amp;L</th>
+                  <th>TRADES</th>
+                  <th>WR</th>
+                </tr>
+              </thead>
+              <tbody id="sess-body"></tbody>
+              <tfoot id="sess-tfoot"></tfoot>
+            </table>
+          </div>
+          <div id="sess-pnl-note" class="sess-pnl-note" style="margin-top:10px;font-size:11px;font-weight:700;color:#ffffff;letter-spacing:.04em"></div>
+        </div>
+      </div>
+    </div>
+
   </body>
 </html>
