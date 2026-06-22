@@ -167,7 +167,7 @@ def _filter_by_range(rows: list, start: Optional[datetime]) -> list:
             out.append(r)
     return out
 
-TERMINAL_REASONS: frozenset = frozenset({"TRAILBLAZER", "TRAIL", "SL", "MANUAL"})
+TERMINAL_REASONS: frozenset = frozenset({"TRAILBLAZER", "TRAIL", "SL", "MANUAL", "PEAK_DECAY_20", "RUNNER_DECAY_10"})
 
 
 def _group_logical_trades(rows: list) -> tuple[list, list]:
@@ -242,7 +242,7 @@ def _venue_metrics(rows: list) -> dict:
     avg_hold = sum(holds) / len(holds) if holds else 0.0
 
     runner_r = [v for r in rows
-                if str(r.get("exit_reason", "")).upper() in ("TRAILBLAZER", "TRAIL")
+                if str(r.get("exit_reason", "")).upper() in ("TRAILBLAZER", "TRAIL", "RUNNER_DECAY_10")
                 if (v := _f(r.get("r_value"))) is not None]
     avg_runner_r = sum(runner_r) / len(runner_r) if runner_r else None
 
@@ -413,7 +413,7 @@ def _compute_excursion(all_rows: list) -> dict:
     for r in all_rows:
         rv   = _f(r.get("r_value"))
         mfev = _f(r.get("mfe_r"))
-        if rv is not None and mfev and mfev > 0 and str(r.get("exit_reason", "")).upper() in ("TRAILBLAZER", "TRAIL"):
+        if rv is not None and mfev and mfev > 0 and str(r.get("exit_reason", "")).upper() in ("TRAILBLAZER", "TRAIL", "RUNNER_DECAY_10"):
             mfe_caps.append(rv / mfev)
     avg_mfe = (sum(mfe_caps) / len(mfe_caps)) if mfe_caps else None
 
@@ -1175,6 +1175,7 @@ async def api_timeline(
         pnl      = _f(r.get("pnl_dollars")) or 0.0
         exit_rsn = str(r.get("exit_reason") or "").upper()
         is_win   = exit_rsn in ("TRAILBLAZER", "TP1") or (exit_rsn == "MANUAL" and pnl > 0)
+        is_win   = is_win or (exit_rsn in ("PEAK_DECAY_20", "RUNNER_DECAY_10") and pnl > 0)
         trades.append({
             "id":             r.get("id"),
             "venue":          r["_venue"],
