@@ -1324,6 +1324,88 @@ async def api_sentinel_coverage(request: Request) -> JSONResponse:
     return JSONResponse(_compute_sentinel_coverage(hl_r, mx_r))
 
 
+
+
+# ─────────────────────────── ops caches ───────────────────────────
+_ops_hourly_cache: dict = {"data": None, "updated_at": 0.0}
+_ops_exit_cache:   dict = {"data": None, "updated_at": 0.0}
+_OPS_CACHE_TTL = 60.0  # seconds
+
+async def _compute_hourly_activity() -> list:
+    """Signal count per ET hour for today, from both trade log tables."""
+    today_et = datetime.now(ET).date()
+    today_iso = today_et.isoformat()
+    hl_rows, mexc_rows = await asyncio.gather(
+        _sb_fetch("hl_trade_log",   {"open_time": f"gte.{today_iso}T00:00:00+00:00", "select": "open_time"}),
+        _sb_fetch("mexc_trade_log", {"open_time": f"gte.{today_iso}T00:00:00+00:00", "select": "open_time"}),
+    )
+    buckets: dict[int, dict] = {h: {"hour": h, "hl": 0, "mexc": 0} for h in range(24)}
+    for row in hl_rows:
+        dt = _to_et(row.get("open_time"))
+        if dt and dt.date() == today_et:
+            buckets[dt.hour]["hl"] += 1
+    for row in mexc_rows:
+        dt = _to_et(row.get("open_time"))
+        if dt and dt.date() == today_et:
+            buckets[dt.hour]["mexc"] += 1
+    return [buckets[h] for h in range(24)]
+
+async def _compute_exit_breakdown() -> list:
+    """Exit reasons grouped with win/loss + P&L for today ET."""
+    today_et = datetime.now(ET).date()
+    today_iso = today_et.isoformat()
+    hl_rows, mexc_rows = await asyncio.gather(
+        _sb_fetch("hl_trade_log",   {"close_time": f"gte.{today_iso}T00:00:00+00:00"}),
+        _sb_fetch("mexc_trade_log", {"close_time": f"gte.{today_iso}T00:00:00+00:00"}),
+    )
+    buckets: dict[str, dict] = {}
+    for row in list(hl_rows) + list(mexc_rows):
+        reason = str(row.get("exit_reason") or "UNKNOWN")
+        pnl    = _f(row.get("pnl")) or 0.0
+        if reason not in buckets:
+            buckets[reason] = {"exit_reason": reason, "trades": 0, "wins": 0, "net_pnl": 0.0}
+        buckets[reason]["trades"] += 1
+        if pnl > 0:
+            buckets[reason]["wins"] += 1
+        buckets[reason]["net_pnl"] = round(buckets[reason]["net_pnl"] + pnl, 2)
+    ORDER = ["PEAK_DECAY_20", "TP1", "RUNNER_DECAY_10", "ADVERSE_CUT", "SL"]
+    for v in buckets.values():
+        v["avg_pnl"] = round(v["net_pnl"] / v["trades"], 2) if v["trades"] else 0.0
+    result = sorted(buckets.values(),
+                    key=lambda x: ORDER.index(x["exit_reason"]) if x["exit_reason"] in ORDER else 99)
+    return result
+
+
+# ─────────────────────────── operations endpoints ───────────────────────────
+@app.get("/api/hourly_activity")
+async def api_hourly_activity(request: Request) -> JSONResponse:
+    _require_auth(request)
+    now = time.time()
+    if _ops_hourly_cache["data"] is None or now - _ops_hourly_cache["updated_at"] > _OPS_CACHE_TTL:
+        _ops_hourly_cache["data"]       = await _compute_hourly_activity()
+        _ops_hourly_cache["updated_at"] = now
+    return JSONResponse(_ops_hourly_cache["data"])
+
+@app.get("/api/exit_breakdown")
+async def api_exit_breakdown(request: Request) -> JSONResponse:
+    _require_auth(request)
+    now = time.time()
+    if _ops_exit_cache["data"] is None or now - _ops_exit_cache["updated_at"] > _OPS_CACHE_TTL:
+        _ops_exit_cache["data"]       = await _compute_exit_breakdown()
+        _ops_exit_cache["updated_at"] = now
+    return JSONResponse(_ops_exit_cache["data"])
+
+@app.get("/api/gate_activity")
+async def api_gate_activity(request: Request) -> JSONResponse:
+    _require_auth(request)
+    today_iso = datetime.now(ET).date().isoformat()
+    rows = await _sb_fetch("gate_activity_log", {
+        "fired_at": f"gte.{today_iso}T00:00:00+00:00",
+        "order":    "fired_at.desc",
+        "limit":    "50",
+    })
+    return JSONResponse(rows)
+
 # ─────────────────────────── entry point ───────────────────────────
 if __name__ == "__main__":
   import uvicorn
