@@ -942,6 +942,128 @@ body {
     .sess-dir-sheet-table tr:last-child td { border-bottom: none; }
     .sess-dir-total-row td { color: #22d3ee; }
 
+
+  /* ── OPERATIONS TAB ─────────────────────────────────────── */
+  .tab-btn#tab-operations { }
+  .tab-btn#tab-operations:hover { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.35); }
+  .tab-btn#tab-operations.active {
+    background: linear-gradient(180deg,rgba(249,115,22,0.22) 0%,rgba(249,115,22,0.07) 100%);
+    border-color: rgba(249,115,22,0.70);
+    color:#f97316; box-shadow:0 0 18px rgba(249,115,22,0.30);
+  }
+  .tab-btn#tab-operations.active .tab-badge { background:rgba(249,115,22,0.30); }
+  #panel-operations { position:relative; overflow:hidden; padding:0 0 40px; }
+  /* nebula orbs */
+  .ops-orb { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; opacity:.22; }
+  .ops-orb1 { width:420px;height:420px;background:#f97316;top:-120px;right:-80px; animation:opsOrb1 18s ease-in-out infinite alternate; }
+  .ops-orb2 { width:320px;height:320px;background:#a855f7;bottom:10%;left:-60px; animation:opsOrb2 22s ease-in-out infinite alternate; }
+  .ops-orb3 { width:260px;height:260px;background:#f97316;top:40%;right:20%; animation:opsOrb3 26s ease-in-out infinite alternate; }
+  @keyframes opsOrb1 { from{transform:translate(0,0)} to{transform:translate(30px,40px)} }
+  @keyframes opsOrb2 { from{transform:translate(0,0)} to{transform:translate(-20px,30px)} }
+  @keyframes opsOrb3 { from{transform:translate(0,0)} to{transform:translate(25px,-20px)} }
+  /* section */
+  .ops-section { position:relative; z-index:1; margin:24px 16px; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:20px; overflow:hidden; }
+  .ops-section-accent { height:2px; background:linear-gradient(90deg,#f97316,#a855f7,transparent); border-radius:1px; margin:-20px -20px 16px; animation:opsAccentSlide 4s linear infinite; background-size:200%; }
+  @keyframes opsAccentSlide { from{background-position:0%} to{background-position:200%} }
+  .ops-section-title { font-family:"Bebas Neue",sans-serif; font-size:18px; letter-spacing:.12em; color:#fff; margin:0 0 16px; }
+  /* venue scorecards */
+  .ops-venue-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .ops-venue-card { position:relative; border-radius:10px; padding:18px; overflow:hidden; border:1px solid rgba(255,255,255,0.10); }
+  .ops-hl-card   { background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(168,85,247,0.04)); border-color:rgba(168,85,247,0.35); }
+  .ops-mexc-card { background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(249,115,22,0.04)); border-color:rgba(249,115,22,0.35); }
+  .ops-venue-shine { position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);animation:opsShine 5s ease-in-out infinite; }
+  .ops-hl-card   .ops-venue-shine { animation-delay:0s; }
+  .ops-mexc-card .ops-venue-shine { animation-delay:2.5s; }
+  @keyframes opsShine { 0%{left:-100%} 60%{left:150%} 100%{left:150%} }
+  .ops-venue-header { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .ops-venue-name { font-family:"Bebas Neue",sans-serif; font-size:16px; letter-spacing:.1em; color:#fff; }
+  .ops-live-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; animation:opsLiveDot 1.6s ease-in-out infinite; }
+  .ops-hl-card   .ops-live-dot { background:#a855f7; }
+  .ops-mexc-card .ops-live-dot { background:#f97316; }
+  @keyframes opsLiveDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} }
+  .ops-venue-stat { margin-bottom:8px; }
+  .ops-venue-stat-label { font-size:10px; font-weight:700; color:rgba(255,255,255,0.55); letter-spacing:.08em; }
+  .ops-venue-stat-val { font-size:22px; font-weight:700; color:#fff; line-height:1.1; }
+  .ops-venue-pnl-pos { color:#4ade80; }
+  .ops-venue-pnl-neg { color:#f87171; }
+  .ops-venue-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin-top:10px; }
+  .ops-venue-mini-label { font-size:10px; font-weight:600; color:rgba(255,255,255,0.45); }
+  .ops-venue-mini-val   { font-size:14px; font-weight:700; color:#fff; }
+  /* racetrack */
+  .ops-racetrack { position:relative; border-radius:8px; overflow:hidden; padding:8px 0; }
+  .ops-racetrack-rail { height:2px; background:linear-gradient(90deg,#f97316,#a855f7,#f97316); background-size:200%; border-radius:1px; margin-bottom:12px; animation:opsRailSlide 3s linear infinite; }
+  @keyframes opsRailSlide { from{background-position:0%} to{background-position:200%} }
+  .ops-lane { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+  .ops-lane:last-child { border-bottom:none; }
+  .ops-lane-label { font-size:11px; font-weight:700; color:#fff; width:90px; flex-shrink:0; letter-spacing:.04em; }
+  .ops-lane-dir   { font-size:9px; font-weight:700; padding:2px 5px; border-radius:3px; flex-shrink:0; }
+  .ops-lane-dir-short { background:rgba(248,113,113,0.20); color:#f87171; }
+  .ops-lane-dir-long  { background:rgba(74,222,128,0.20); color:#4ade80; }
+  .ops-lane-bar-wrap { flex:1; height:12px; background:rgba(255,255,255,0.06); border-radius:6px; overflow:hidden; position:relative; }
+  .ops-lane-bar { height:100%; border-radius:6px; position:relative; min-width:8px; transition:width .3s ease; }
+  .ops-lane-bar-hl   { background:linear-gradient(90deg,rgba(168,85,247,0.6),#a855f7); }
+  .ops-lane-bar-mexc { background:linear-gradient(90deg,rgba(249,115,22,0.6),#f97316); }
+  .ops-lane-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-left:-5px;position:relative;z-index:1; animation:opsHorseDot 1.2s ease-in-out infinite; }
+  .ops-lane-bar-hl   + .ops-lane-dot { background:#a855f7; box-shadow:0 0 8px #a855f7; }
+  .ops-lane-bar-mexc + .ops-lane-dot { background:#f97316; box-shadow:0 0 8px #f97316; }
+  @keyframes opsHorseDot { 0%,100%{box-shadow:0 0 6px currentColor;opacity:1} 50%{box-shadow:0 0 14px currentColor;opacity:.7} }
+  .ops-lane-pnl { font-size:11px; font-weight:700; width:64px; text-align:right; flex-shrink:0; }
+  .ops-no-positions { text-align:center; padding:28px; font-size:13px; font-weight:700; color:rgba(255,255,255,0.35); letter-spacing:.1em; }
+  /* hourly chart */
+  .ops-hourly-chart { display:flex; align-items:flex-end; gap:3px; height:80px; padding-bottom:20px; position:relative; }
+  .ops-hour-col { display:flex; flex-direction:column; align-items:center; flex:1; gap:1px; position:relative; height:100%; justify-content:flex-end; }
+  .ops-hour-bar-hl   { width:100%; background:rgba(168,85,247,0.7); border-radius:2px 2px 0 0; min-height:2px; }
+  .ops-hour-bar-mexc { width:100%; background:rgba(249,115,22,0.7); border-radius:2px 2px 0 0; min-height:2px; }
+  .ops-hour-label { position:absolute; bottom:-18px; font-size:8px; font-weight:600; color:rgba(255,255,255,0.35); }
+  .ops-hour-col.ops-now .ops-hour-bar-hl   { background:#a855f7; filter:drop-shadow(0 0 4px #a855f7); animation:opsNowGlow 1.5s ease-in-out infinite alternate; }
+  .ops-hour-col.ops-now .ops-hour-bar-mexc { background:#f97316; filter:drop-shadow(0 0 4px #f97316); }
+  @keyframes opsNowGlow { from{filter:drop-shadow(0 0 3px #a855f7)} to{filter:drop-shadow(0 0 9px #a855f7)} }
+  .ops-hourly-legend { display:flex; gap:16px; margin-top:24px; }
+  .ops-legend-item { display:flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:rgba(255,255,255,0.55); }
+  .ops-legend-dot { width:8px;height:8px;border-radius:2px; }
+  /* exit breakdown */
+  .ops-exit-row { margin-bottom:10px; }
+  .ops-exit-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .ops-exit-name { font-size:11px; font-weight:700; color:#fff; letter-spacing:.05em; }
+  .ops-exit-stats { font-size:10px; color:rgba(255,255,255,0.45); }
+  .ops-exit-bar-wrap { height:10px; background:rgba(255,255,255,0.06); border-radius:5px; overflow:hidden; }
+  .ops-exit-bar { height:100%; border-radius:5px; transition:width .6s ease; }
+  .ops-exit-bar-pos { background:linear-gradient(90deg,rgba(74,222,128,0.5),#4ade80); }
+  .ops-exit-bar-neg { background:linear-gradient(90deg,rgba(248,113,113,0.5),#f87171); }
+  .ops-exit-total { margin-top:12px; font-size:13px; font-weight:700; color:#fff; text-align:right; animation:opsNetPnlBreathe 2.5s ease-in-out infinite; }
+  @keyframes opsNetPnlBreathe { 0%,100%{text-shadow:0 0 8px rgba(74,222,128,0.4)} 50%{text-shadow:0 0 18px rgba(74,222,128,0.8)} }
+  /* gate feed */
+  .ops-pills-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .ops-pill { padding:5px 12px; border-radius:16px; font-size:10px; font-weight:700; letter-spacing:.06em; display:flex; align-items:center; gap:6px; }
+  .ops-pill-adx   { background:rgba(251,191,36,0.15);  border:1px solid rgba(251,191,36,0.40);  color:#fbbf24; }
+  .ops-pill-j1h   { background:rgba(96,165,250,0.15);  border:1px solid rgba(96,165,250,0.40);  color:#60a5fa; }
+  .ops-pill-stoch { background:rgba(168,85,247,0.15);  border:1px solid rgba(168,85,247,0.40);  color:#a855f7; }
+  .ops-pill-cool  { background:rgba(248,113,113,0.15); border:1px solid rgba(248,113,113,0.40); color:#f87171; animation:opsCoolPulse 2s ease-in-out infinite; }
+  @keyframes opsCoolPulse { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 8px rgba(248,113,113,0.5)} }
+  .ops-pill-count { font-size:13px; }
+  .ops-gate-feed { max-height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+  .ops-gate-feed::-webkit-scrollbar { width:4px; }
+  .ops-gate-feed::-webkit-scrollbar-track { background:rgba(255,255,255,0.04); }
+  .ops-gate-feed::-webkit-scrollbar-thumb { background:rgba(249,115,22,0.4); border-radius:2px; }
+  .ops-feed-item { display:flex; align-items:center; gap:8px; padding:7px 10px; background:rgba(255,255,255,0.03); border-radius:6px; border:1px solid rgba(255,255,255,0.05); font-size:11px; animation:opsFeedIn .3s ease; }
+  @keyframes opsFeedIn { from{transform:translateX(-12px);opacity:0} to{transform:translateX(0);opacity:1} }
+  .ops-feed-time   { color:rgba(255,255,255,0.40); font-size:10px; flex-shrink:0; width:42px; }
+  .ops-feed-venue  { font-size:9px; font-weight:700; padding:2px 6px; border-radius:3px; flex-shrink:0; }
+  .ops-feed-venue-hl   { background:rgba(168,85,247,0.25); color:#a855f7; }
+  .ops-feed-venue-mexc { background:rgba(249,115,22,0.25);  color:#f97316; }
+  .ops-feed-gate  { font-size:9px; font-weight:700; padding:2px 6px; border-radius:3px; flex-shrink:0; }
+  .ops-feed-gate-adx   { background:rgba(251,191,36,0.20);  color:#fbbf24; }
+  .ops-feed-gate-j1h   { background:rgba(96,165,250,0.20);  color:#60a5fa; }
+  .ops-feed-gate-stoch { background:rgba(168,85,247,0.20);  color:#a855f7; }
+  .ops-feed-gate-cool  { background:rgba(248,113,113,0.20); color:#f87171; }
+  .ops-feed-gate-fade  { background:rgba(156,163,175,0.20); color:#9ca3af; }
+  .ops-feed-pair   { color:#fff; font-weight:700; flex-shrink:0; }
+  .ops-feed-reason { color:rgba(255,255,255,0.45); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ops-feed-dir-s { color:#f87171; font-size:9px; font-weight:700; }
+  .ops-feed-dir-l { color:#4ade80; font-size:9px; font-weight:700; }
+  .ops-header-time { font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-left:auto; }
+  @media(max-width:600px) { .ops-venue-row{grid-template-columns:1fr;} }
+  
 </style>
 </head>
 <body>
@@ -1095,6 +1217,7 @@ body {
     <button class="tab-btn active" id="tab-insights"  onclick="setTab('insights')">&#x26A1; INSIGHTS</button>
     <button class="tab-btn"        id="tab-scorecard" onclick="setTab('scorecard')">&#x1F4CA; SCORECARD <span class="tab-badge" id="tab-scorecard-badge">7</span></button>
     <button class="tab-btn"        id="tab-log"       onclick="setTab('log')">&#x1F4CB; LOG <span class="tab-badge" id="tab-log-badge">&#x2014;</span></button>
+    <button class="tab-btn" id="tab-operations" onclick="setTab('operations')">&#x2699; OPERATIONS <span class="tab-badge" id="tab-ops-badge">0</span></button>
   </div>
 
   <!-- TAB 1: INSIGHTS -->
@@ -1393,11 +1516,12 @@ function fmtDur(secs) {
 
 // ── tab switching ──
 function setTab(name) {
-  ['insights','scorecard','log'].forEach(t => {
+  ['insights','scorecard','log','operations'].forEach(t => {
     document.getElementById('panel-' + t).style.display = t === name ? '' : 'none';
     document.getElementById('tab-' + t).classList.toggle('active', t === name);
   });
   if (name === 'log' && !logLoaded) loadLog();
+  if (name === 'operations') { _opsActive=true; _opsStartTimers(); } else { _opsActive=false; _opsStopTimers(); }
 }
 function _updateLogBadge() {
   var el = document.getElementById('tab-log-badge');
@@ -3240,6 +3364,244 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       }
     }
   
+
+  // ── OPERATIONS TAB ──────────────────────────────────────────
+  var _opsActive    = false;
+  var _opsClockTmr  = null;
+  var _opsHorseTmr  = null;
+  var _opsPnlTmr    = null;
+  var _opsGateTmr   = null;
+  var _opsLiveData  = null;
+  var _opsGateData  = [];
+  var _opsHorsePhase = {};
+
+  function _opsFmt(v, digits) {
+    if (v === null || v === undefined || isNaN(v)) return '--';
+    return (v >= 0 ? '+' : '') + Number(v).toFixed(digits !== undefined ? digits : 2);
+  }
+  function _opsPct(w, t) { return t > 0 ? Math.round(w/t*100) + '%' : '--'; }
+
+  function _opsSetEl(id, html) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  function _opsUpdateClock() {
+    var el = document.getElementById('ops-clock');
+    if (!el) return;
+    el.textContent = new Date().toLocaleTimeString('en-US', {timeZone:'America/New_York', hour12:false});
+  }
+
+  function _opsUpdateVenueCards(analytics, live) {
+    if (!analytics) return;
+    var hl = analytics.hl || {}, mx = analytics.mexc || {};
+    var hlPnl = (hl.realized_pnl||0) + (hl.unrealized_pnl||0);
+    var mxPnl = (mx.realized_pnl||0) + (mx.unrealized_pnl||0);
+    var cls = function(v) { return v >= 0 ? 'ops-venue-pnl-pos' : 'ops-venue-pnl-neg'; };
+    _opsSetEl('ops-hl-pnl',     '<span class="' + cls(hlPnl) + '">$' + _opsFmt(hlPnl) + '</span>');
+    _opsSetEl('ops-hl-signals', hl.total_trades || 0);
+    _opsSetEl('ops-hl-closed',  hl.closed_count || 0);
+    _opsSetEl('ops-hl-wr',      _opsPct(hl.wins||0, hl.closed_count||0));
+    _opsSetEl('ops-hl-open',    hl.open_count||0);
+    _opsSetEl('ops-mx-pnl',     '<span class="' + cls(mxPnl) + '">$' + _opsFmt(mxPnl) + '</span>');
+    _opsSetEl('ops-mx-signals', mx.total_trades || 0);
+    _opsSetEl('ops-mx-closed',  mx.closed_count || 0);
+    _opsSetEl('ops-mx-wr',      _opsPct(mx.wins||0, mx.closed_count||0));
+    _opsSetEl('ops-mx-open',    mx.open_count||0);
+  }
+
+  function _opsUpdateRacetrack(live) {
+    var el = document.getElementById('ops-racetrack-lanes');
+    if (!el || !live) return;
+    var hlOpen   = (live.hl   && live.hl.open_trades)   ? live.hl.open_trades   : [];
+    var mxOpen   = (live.mexc && live.mexc.open_trades)  ? live.mexc.open_trades : [];
+    var allTrades = hlOpen.map(function(t){return{t:t,venue:'hl'};})
+                  .concat(mxOpen.map(function(t){return{t:t,venue:'mexc'};}));
+    if (allTrades.length === 0) {
+      el.innerHTML = '<div class="ops-no-positions">NO OPEN POSITIONS &#x2014; FLEET SCANNING</div>';
+      return;
+    }
+    var MAX_DUR = 14400;
+    el.innerHTML = allTrades.map(function(item){
+      var t = item.t;
+      var sym = t.symbol || t.pair || '?';
+      var dir = (t.direction||'').toUpperCase();
+      var pnl = parseFloat(t.pnl||t.unrealized_pnl||0);
+      var openAt = t.opened_at || t.open_time;
+      var elapsed = openAt ? Math.min((Date.now()/1000 - new Date(openAt).getTime()/1000), MAX_DUR) : 0;
+      var pct = Math.max(5, Math.min(95, Math.round(elapsed/MAX_DUR*100)));
+      var venue = item.venue;
+      var barCls = venue === 'hl' ? 'ops-lane-bar-hl' : 'ops-lane-bar-mexc';
+      var dirCls = dir === 'SHORT' ? 'ops-lane-dir-short' : 'ops-lane-dir-long';
+      var pnlCls = pnl >= 0 ? 'ops-venue-pnl-pos' : 'ops-venue-pnl-neg';
+      var key = sym + dir + venue;
+      _opsHorsePhase[key] = _opsHorsePhase[key] || Math.random() * Math.PI * 2;
+      return '<div class="ops-lane" data-key="' + key + '" data-base="' + pct + '">'
+        + '<span class="ops-lane-label">' + sym + '</span>'
+        + '<span class="ops-lane-dir ' + dirCls + '">' + dir + '</span>'
+        + '<div class="ops-lane-bar-wrap"><div class="ops-lane-bar ' + barCls + '" style="width:' + pct + '%" id="horse-' + key + '"></div></div>'
+        + '<div class="ops-lane-dot ' + barCls + '"></div>'
+        + '<span class="ops-lane-pnl ' + pnlCls + '">$' + _opsFmt(pnl,2) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function _opsAnimateHorses() {
+    if (!_opsActive) return;
+    var now = Date.now() / 1000;
+    document.querySelectorAll('.ops-lane').forEach(function(lane){
+      var key   = lane.getAttribute('data-key');
+      var base  = parseFloat(lane.getAttribute('data-base') || 50);
+      var phase = _opsHorsePhase[key] || 0;
+      var wave  = Math.sin(now * 0.5 + phase) * 2.5;
+      var bar   = document.getElementById('horse-' + key);
+      if (bar) bar.style.width = Math.max(5, Math.min(97, base + wave)) + '%';
+    });
+  }
+
+  function _opsUpdateHourly(data) {
+    var el = document.getElementById('ops-hourly-chart');
+    if (!el || !data || !data.length) return;
+    var maxCount = Math.max(1, Math.max.apply(null, data.map(function(d){return (d.hl||0)+(d.mexc||0);})));
+    var nowHour  = new Date().toLocaleString('en-US',{timeZone:'America/New_York',hour:'numeric',hour12:false}) | 0;
+    el.innerHTML = data.map(function(d){
+      var total = (d.hl||0) + (d.mexc||0);
+      var hlH   = Math.max(2, Math.round((d.hl||0)/maxCount*70));
+      var mxH   = Math.max(2, Math.round((d.mexc||0)/maxCount*70));
+      var isNow = d.hour === nowHour;
+      return '<div class="ops-hour-col' + (isNow?' ops-now':'') + '">'
+        + (d.hl>0 ? '<div class="ops-hour-bar-hl" style="height:'+hlH+'px"></div>' : '')
+        + (d.mexc>0 ? '<div class="ops-hour-bar-mexc" style="height:'+mxH+'px"></div>' : '')
+        + '<span class="ops-hour-label">' + (d.hour%6===0 ? d.hour : '') + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function _opsUpdateExitBreakdown(data) {
+    var el = document.getElementById('ops-exit-breakdown');
+    if (!el) return;
+    if (!data || !data.length) { el.innerHTML = '<div class="ops-no-positions" style="padding:12px">NO EXITS TODAY</div>'; return; }
+    var maxAbs = Math.max(1, Math.max.apply(null, data.map(function(d){return Math.abs(d.net_pnl||0);})));
+    var totalPnl = data.reduce(function(s,d){return s+(d.net_pnl||0);},0);
+    el.innerHTML = data.map(function(d){
+      var pct = Math.max(4, Math.round(Math.abs(d.net_pnl||0)/maxAbs*100));
+      var pos = (d.net_pnl||0) >= 0;
+      var barCls = pos ? 'ops-exit-bar-pos' : 'ops-exit-bar-neg';
+      var pnlStr = (pos?'+':'') + '$' + (d.net_pnl||0).toFixed(2);
+      return '<div class="ops-exit-row">'
+        + '<div class="ops-exit-header">'
+        + '<span class="ops-exit-name">' + (d.exit_reason||'?') + '</span>'
+        + '<span class="ops-exit-stats">' + (d.trades||0) + ' trades &middot; ' + _opsPct(d.wins||0,d.trades||0) + ' W &middot; ' + pnlStr + '</span>'
+        + '</div>'
+        + '<div class="ops-exit-bar-wrap"><div class="ops-exit-bar ' + barCls + '" style="width:'+pct+'%"></div></div>'
+        + '</div>';
+    }).join('') + '<div class="ops-exit-total">NET: ' + (totalPnl>=0?'+':'') + '$' + totalPnl.toFixed(2) + '</div>';
+  }
+
+  function _opsGateCls(gt) {
+    var g = (gt||'').toUpperCase();
+    if (g.includes('ADX_G') || g.includes('ADX_GATE')) return 'ops-feed-gate-adx';
+    if (g.includes('J1H'))   return 'ops-feed-gate-j1h';
+    if (g.includes('STOCH') || g.includes('FAST_STOCH')) return 'ops-feed-gate-stoch';
+    if (g.includes('COOL'))  return 'ops-feed-gate-cool';
+    return 'ops-feed-gate-fade';
+  }
+
+  function _opsUpdateGateFeed(data) {
+    _opsGateData = data || [];
+    var el = document.getElementById('ops-gate-feed');
+    if (!el) return;
+    var cntAdx=0, cntJ1h=0, cntStoch=0, cntCool=0;
+    _opsGateData.forEach(function(d){
+      var gt = (d.gate_type||'').toUpperCase();
+      if (gt.includes('ADX_G')) cntAdx++;
+      else if (gt.includes('J1H')) cntJ1h++;
+      else if (gt.includes('STOCH') || gt.includes('FAST_STOCH')) cntStoch++;
+      else if (gt.includes('COOL')) cntCool++;
+    });
+    _opsSetEl('ops-cnt-adx',   cntAdx);
+    _opsSetEl('ops-cnt-j1h',   cntJ1h);
+    _opsSetEl('ops-cnt-stoch', cntStoch);
+    _opsSetEl('ops-cnt-cool',  cntCool);
+    var totalGates = cntAdx + cntJ1h + cntStoch + cntCool;
+    _opsSetEl('tab-ops-badge', totalGates || '0');
+    if (!_opsGateData.length) { el.innerHTML = '<div class="ops-no-positions" style="padding:10px">NO GATE EVENTS TODAY</div>'; return; }
+    el.innerHTML = _opsGateData.map(function(d){
+      var t    = d.fired_at ? new Date(d.fired_at).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false}) : '';
+      var dir  = (d.direction||'').toUpperCase();
+      var vCls = (d.venue||'').toUpperCase()==='HL' ? 'ops-feed-venue-hl' : 'ops-feed-venue-mexc';
+      var gCls = _opsGateCls(d.gate_type);
+      var dCls = dir==='SHORT' ? 'ops-feed-dir-s' : 'ops-feed-dir-l';
+      return '<div class="ops-feed-item">'
+        + '<span class="ops-feed-time">' + t + '</span>'
+        + '<span class="ops-feed-venue ' + vCls + '">' + (d.venue||'?') + '</span>'
+        + '<span class="ops-feed-gate '  + gCls + '">' + (d.gate_type||'?') + '</span>'
+        + '<span class="ops-feed-pair">'  + (d.pair||'?') + '</span>'
+        + '<span class="' + dCls + '">'  + dir + '</span>'
+        + '<span class="ops-feed-reason">' + (d.reason||'') + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  async function _opsRefreshGate() {
+    try {
+      var r = await fetch('/api/gate_activity', {credentials:'include'});
+      if (r.ok) _opsUpdateGateFeed(await r.json());
+    } catch(e) {}
+  }
+
+  async function _opsRefresh() {
+    if (!_opsActive) return;
+    try {
+      var [anaRes, hourlyRes, exitRes] = await Promise.all([
+        fetch('/api/analytics?range=today', {credentials:'include'}),
+        fetch('/api/hourly_activity',       {credentials:'include'}),
+        fetch('/api/exit_breakdown',        {credentials:'include'}),
+      ]);
+      if (anaRes.ok)    _opsUpdateVenueCards(await anaRes.json(), _opsLiveData);
+      if (hourlyRes.ok) _opsUpdateHourly(await hourlyRes.json());
+      if (exitRes.ok)   _opsUpdateExitBreakdown(await exitRes.json());
+    } catch(e) {}
+    var liveEl = document.getElementById('ops-hl-open');
+    if (liveEl && typeof _live !== 'undefined') {
+      var hlOpen = (_live.hl && _live.hl.open_trades) ? _live.hl.open_trades.length : 0;
+      var mxOpen = (_live.mexc && _live.mexc.open_trades) ? _live.mexc.open_trades.length : 0;
+      _opsSetEl('ops-hl-open', hlOpen);
+      _opsSetEl('ops-mx-open', mxOpen);
+      _opsUpdateRacetrack(_live);
+    }
+  }
+
+  function _opsStartTimers() {
+    _opsUpdateClock();
+    _opsClockTmr = setInterval(_opsUpdateClock, 1000);
+    _opsHorseTmr = setInterval(_opsAnimateHorses, 50);
+    _opsGateTmr  = setInterval(_opsRefreshGate, 10000);
+    _opsRefresh();
+    _opsRefreshGate();
+  }
+
+  function _opsStopTimers() {
+    clearInterval(_opsClockTmr);
+    clearInterval(_opsHorseTmr);
+    clearInterval(_opsGateTmr);
+  }
+
+  document.addEventListener('mousemove', function(e) {
+    if (!_opsActive) return;
+    var orbs = [
+      {el:document.getElementById('ops-orb1'), d:0.015},
+      {el:document.getElementById('ops-orb2'), d:0.010},
+      {el:document.getElementById('ops-orb3'), d:0.020},
+    ];
+    orbs.forEach(function(o){
+      if (!o.el) return;
+      var x = (e.clientX - window.innerWidth/2)  * o.d;
+      var y = (e.clientY - window.innerHeight/2) * o.d;
+      o.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    });
+  });
+  
 </script>
 
     <!-- TWIN SIGNALS overlay sheet -->
@@ -3447,5 +3809,129 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       </div>
     </div>
 
+
+    <!-- TAB 4: OPERATIONS -->
+    <div id="panel-operations" style="display:none">
+      <div class="ops-orb ops-orb1" id="ops-orb1"></div>
+      <div class="ops-orb ops-orb2" id="ops-orb2"></div>
+      <div class="ops-orb ops-orb3" id="ops-orb3"></div>
+
+      <!-- Section 1: Venue Scorecards -->
+      <section class="ops-section">
+        <div class="ops-section-accent"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <h2 class="ops-section-title" style="margin-bottom:0">VENUE SCORECARDS</h2>
+          <span class="ops-header-time" id="ops-clock">--:--:--</span>
+        </div>
+        <div class="ops-venue-row">
+          <div class="ops-venue-card ops-hl-card">
+            <div class="ops-venue-shine"></div>
+            <div class="ops-venue-header">
+              <span class="ops-venue-name">HYPERLIQUID</span>
+              <div class="ops-live-dot"></div>
+            </div>
+            <div class="ops-venue-stat">
+              <div class="ops-venue-stat-label">TODAY P&amp;L</div>
+              <div class="ops-venue-stat-val" id="ops-hl-pnl">--</div>
+            </div>
+            <div class="ops-venue-grid">
+              <div>
+                <div class="ops-venue-mini-label">SIGNALS</div>
+                <div class="ops-venue-mini-val" id="ops-hl-signals">--</div>
+              </div>
+              <div>
+                <div class="ops-venue-mini-label">CLOSED</div>
+                <div class="ops-venue-mini-val" id="ops-hl-closed">--</div>
+              </div>
+              <div>
+                <div class="ops-venue-mini-label">WIN RATE</div>
+                <div class="ops-venue-mini-val" id="ops-hl-wr">--</div>
+              </div>
+              <div>
+                <div class="ops-venue-mini-label">OPEN</div>
+                <div class="ops-venue-mini-val" id="ops-hl-open">--</div>
+              </div>
+            </div>
+          </div>
+          <div class="ops-venue-card ops-mexc-card">
+            <div class="ops-venue-shine"></div>
+            <div class="ops-venue-header">
+              <span class="ops-venue-name">MEXC</span>
+              <div class="ops-live-dot"></div>
+            </div>
+            <div class="ops-venue-stat">
+              <div class="ops-venue-stat-label">TODAY P&amp;L</div>
+              <div class="ops-venue-stat-val" id="ops-mx-pnl">--</div>
+            </div>
+            <div class="ops-venue-grid">
+              <div>
+                <div class="ops-venue-mini-label">SIGNALS</div>
+                <div class="ops-venue-mini-val" id="ops-mx-signals">--</div>
+              </div>
+              <div>
+                <div class="ops-venue-mini-label">CLOSED</div>
+                <div class="ops-venue-mini-val" id="ops-mx-closed">--</div>
+              </div>
+              <div>
+                <div class="ops-venue-mini-label">WIN RATE</div>
+                <div class="ops-venue-mini-val" id="ops-mx-wr">--</div>
+              </div>
+              <div>
+                <div class="ops-venue-mini-label">OPEN</div>
+                <div class="ops-venue-mini-val" id="ops-mx-open">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Racetrack -->
+      <section class="ops-section">
+        <div class="ops-section-accent"></div>
+        <h2 class="ops-section-title">OPEN POSITIONS &#x2014; THE RACETRACK</h2>
+        <div class="ops-racetrack">
+          <div class="ops-racetrack-rail"></div>
+          <div id="ops-racetrack-lanes">
+            <div class="ops-no-positions">NO OPEN POSITIONS &#x2014; FLEET SCANNING</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Hourly Activity -->
+      <section class="ops-section">
+        <div class="ops-section-accent"></div>
+        <h2 class="ops-section-title">HOURLY ACTIVITY &#x2014; TODAY ET</h2>
+        <div class="ops-hourly-chart" id="ops-hourly-chart"></div>
+        <div class="ops-hourly-legend">
+          <div class="ops-legend-item"><div class="ops-legend-dot" style="background:#a855f7"></div>HYPERLIQUID</div>
+          <div class="ops-legend-item"><div class="ops-legend-dot" style="background:#f97316"></div>MEXC</div>
+        </div>
+      </section>
+
+      <!-- Section 4: Exit Breakdown -->
+      <section class="ops-section">
+        <div class="ops-section-accent"></div>
+        <h2 class="ops-section-title">EXIT BREAKDOWN &#x2014; TODAY</h2>
+        <div id="ops-exit-breakdown">
+          <div class="ops-no-positions" style="padding:12px">LOADING...</div>
+        </div>
+      </section>
+
+      <!-- Section 5: Gate Activity Feed -->
+      <section class="ops-section">
+        <div class="ops-section-accent"></div>
+        <h2 class="ops-section-title">GATE ACTIVITY FEED</h2>
+        <div class="ops-pills-row">
+          <div class="ops-pill ops-pill-adx">ADX &lt;15 <span class="ops-pill-count" id="ops-cnt-adx">0</span></div>
+          <div class="ops-pill ops-pill-j1h">J1H FLOOR <span class="ops-pill-count" id="ops-cnt-j1h">0</span></div>
+          <div class="ops-pill ops-pill-stoch">STOCH BLOCK <span class="ops-pill-count" id="ops-cnt-stoch">0</span></div>
+          <div class="ops-pill ops-pill-cool">COOLDOWN <span class="ops-pill-count" id="ops-cnt-cool">0</span></div>
+        </div>
+        <div class="ops-gate-feed" id="ops-gate-feed">
+          <div class="ops-no-positions" style="padding:10px">AWAITING GATE EVENTS...</div>
+        </div>
+      </section>
+    </div>
+  
   </body>
 </html>
