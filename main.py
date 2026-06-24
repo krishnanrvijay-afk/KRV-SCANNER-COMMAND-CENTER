@@ -1353,10 +1353,12 @@ async def _compute_hourly_activity() -> list:
 async def _compute_exit_breakdown() -> list:
     """Exit reasons grouped with win/loss + P&L for today ET."""
     today_et = datetime.now(ET).date()
-    today_iso = today_et.isoformat()
+    et_midnight = _et_midnight(today_et)
+    utc_midnight = et_midnight.astimezone(timezone.utc)
+    utc_iso = utc_midnight.strftime('%Y-%m-%dT%H:%M:%S+00:00')
     hl_rows, mexc_rows = await asyncio.gather(
-        _sb_fetch("hl_trade_log",   {"close_time": f"gte.{today_iso}T00:00:00+00:00"}),
-        _sb_fetch("mexc_trade_log", {"close_time": f"gte.{today_iso}T00:00:00+00:00"}),
+        _sb_fetch("hl_trade_log",   {"close_time": f"gte.{utc_iso}"}),
+        _sb_fetch("mexc_trade_log", {"close_time": f"gte.{utc_iso}"}),
     )
     buckets: dict[str, dict] = {}
     for row in list(hl_rows) + list(mexc_rows):
