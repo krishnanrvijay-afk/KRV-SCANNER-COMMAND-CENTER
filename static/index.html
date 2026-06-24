@@ -3395,19 +3395,21 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   function _opsUpdateVenueCards(analytics, live) {
     if (!analytics) return;
     var hl = analytics.hl || {}, mx = analytics.mexc || {};
-    var hlPnl = (hl.realized_pnl||0) + (hl.unrealized_pnl||0);
-    var mxPnl = (mx.realized_pnl||0) + (mx.unrealized_pnl||0);
+    var hlPnl = hl.pnl || 0;
+    var mxPnl = mx.pnl || 0;
     var cls = function(v) { return v >= 0 ? 'ops-venue-pnl-pos' : 'ops-venue-pnl-neg'; };
+    var hlOpen = (typeof _live !== 'undefined' && _live.hl && _live.hl.open_trades) ? _live.hl.open_trades.length : 0;
+    var mxOpen = (typeof _live !== 'undefined' && _live.mexc && _live.mexc.open_trades) ? _live.mexc.open_trades.length : 0;
     _opsSetEl('ops-hl-pnl',     '<span class="' + cls(hlPnl) + '">$' + _opsFmt(hlPnl) + '</span>');
-    _opsSetEl('ops-hl-signals', hl.total_trades || 0);
-    _opsSetEl('ops-hl-closed',  hl.closed_count || 0);
-    _opsSetEl('ops-hl-wr',      _opsPct(hl.wins||0, hl.closed_count||0));
-    _opsSetEl('ops-hl-open',    hl.open_count||0);
+    _opsSetEl('ops-hl-signals', hl.trade_count || 0);
+    _opsSetEl('ops-hl-closed',  hl.trade_count || 0);
+    _opsSetEl('ops-hl-wr',      Math.round((hl.win_rate || 0) * 100) + '%');
+    _opsSetEl('ops-hl-open',    hlOpen);
     _opsSetEl('ops-mx-pnl',     '<span class="' + cls(mxPnl) + '">$' + _opsFmt(mxPnl) + '</span>');
-    _opsSetEl('ops-mx-signals', mx.total_trades || 0);
-    _opsSetEl('ops-mx-closed',  mx.closed_count || 0);
-    _opsSetEl('ops-mx-wr',      _opsPct(mx.wins||0, mx.closed_count||0));
-    _opsSetEl('ops-mx-open',    mx.open_count||0);
+    _opsSetEl('ops-mx-signals', mx.trade_count || 0);
+    _opsSetEl('ops-mx-closed',  mx.trade_count || 0);
+    _opsSetEl('ops-mx-wr',      Math.round((mx.win_rate || 0) * 100) + '%');
+    _opsSetEl('ops-mx-open',    mxOpen);
   }
 
   function _opsUpdateRacetrack(live) {
