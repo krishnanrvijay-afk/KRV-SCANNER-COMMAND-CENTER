@@ -1386,7 +1386,7 @@ async def _compute_exit_breakdown() -> list:
     buckets: dict[str, dict] = {}
     for row in list(hl_rows) + list(mexc_rows):
         reason = str(row.get("exit_reason") or "UNKNOWN")
-        pnl    = _f(row.get("pnl_dollars")) or 0.0
+        pnl    = float(row.get("pnl_dollars") or 0)
         if reason not in buckets:
             buckets[reason] = {"exit_reason": reason, "trades": 0, "wins": 0, "net_pnl": 0.0}
         buckets[reason]["trades"] += 1
