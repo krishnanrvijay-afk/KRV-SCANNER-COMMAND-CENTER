@@ -1652,6 +1652,7 @@ async function loadLive() {
     renderJMap();
     renderFooter();
     renderFleetLink();
+    if (typeof _opsActive !== 'undefined' && _opsActive) _opsRefresh();
   } catch (e) {
     console.error('live', e);
     _liveFail = true;
@@ -3417,6 +3418,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     return (v >= 0 ? '+' : '') + Number(v).toFixed(digits !== undefined ? digits : 2);
   }
   function _opsPct(w, t) { return t > 0 ? Math.round(w/t*100) + '%' : '--'; }
+  function _opsOpenLen(st) { var ot = st && st.open_trades; return Array.isArray(ot) ? ot.length : (ot && typeof ot === 'object' ? Object.keys(ot).length : 0); }
 
   function _opsSetEl(id, html) {
     var el = document.getElementById(id);
@@ -3450,9 +3452,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var lp = s.long_pnl || 0, sp = s.short_pnl || 0, tot = lp + sp;
         if (lp === 0 && sp === 0) return '';
         var col  = tot >= 0 ? '#22c55e' : '#ef4444';
-        var sign = tot >= 0 ? '+' : '';
         var name = MAP[s.session] || (s.session||'').toUpperCase();
-        return '<span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:' + col + '">' + name + ' ' + sign + '$' + _opsFmt(tot) + '</span>';
+        return '<span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:' + col + '">' + name + ' $' + Math.abs(tot).toFixed(2) + '</span>';
       }).join('');
     }
     function updateLsBar(lc, sc, prefix) {
@@ -3465,8 +3466,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     }
     var hlPnl = hl.pnl || 0;
     var mxPnl = mx.pnl || 0;
-    var hlOpen = (live && live.hl && live.hl.open_trades) ? live.hl.open_trades.length : 0;
-    var mxOpen = (live && live.mexc && live.mexc.open_trades) ? live.mexc.open_trades.length : 0;
+    var hlOpen = live ? _opsOpenLen(live.hl)   : 0;
+    var mxOpen = live ? _opsOpenLen(live.mexc) : 0;
     _opsSetEl('ops-hl-pnl',      pnlHtml(hlPnl));
     _opsSetEl('ops-hl-signals',  hl.trade_count || 0);
     _opsSetEl('ops-hl-closed',   hl.trade_count || 0);
@@ -3520,7 +3521,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         + '<span class="ops-lane-dir ' + dirCls + '">' + dir + '</span>'
         + '<div class="ops-lane-bar-wrap"><div class="ops-lane-bar ' + barCls + '" style="width:' + pct + '%" id="horse-' + key + '"></div></div>'
         + '<div class="ops-lane-dot ' + barCls + '"></div>'
-        + '<span class="ops-lane-pnl ' + pnlCls + '">$' + _opsFmt(pnl,2) + '</span>'
+        + '<span class="ops-lane-pnl ' + pnlCls + '">$' + Math.abs(pnl).toFixed(2) + '</span>'
         + '</div>';
     }).join('');
   }
@@ -3633,7 +3634,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var dotClr  = venue === "hl" ? "#a855f7" : "#f97316";
         var dirCls  = dir === "SHORT" ? "radar-dir-short" : "radar-dir-long";
         var pnlCls  = pnl >= 0 ? "ops-venue-pnl-pos" : "ops-venue-pnl-neg";
-        var pnlStr  = (pnl >= 0 ? "+" : "-") + "$" + Math.abs(pnl).toFixed(2);
+        var pnlStr  = "$" + Math.abs(pnl).toFixed(2);
         var hrs = Math.floor(elapsed/3600), mins = Math.floor((elapsed%3600)/60);
         var durStr  = hrs > 0 ? hrs + "h " + mins + "m" : mins + "m";
         h += '<div class="radar-card radar-card-intrade ' + brdCls + '">' +
@@ -3782,6 +3783,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
   async function _opsRefresh() {
     if (!_opsActive) return;
+    if (!live) { setTimeout(function(){ if (_opsActive) _opsRefresh(); }, 1500); return; }
     try {
       var [anaRes, hourlyRes, exitRes] = await Promise.all([
         fetch('/api/analytics?range=today', {credentials:'include'}),
@@ -3794,8 +3796,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     } catch(e) {}
     var liveEl = document.getElementById('ops-hl-open');
     if (liveEl && live !== null && typeof live !== 'undefined') {
-      var hlOpen = (live.hl && live.hl.open_trades) ? live.hl.open_trades.length : 0;
-      var mxOpen = (live.mexc && live.mexc.open_trades) ? live.mexc.open_trades.length : 0;
+      var hlOpen = _opsOpenLen(live.hl);
+      var mxOpen = _opsOpenLen(live.mexc);
       _opsSetEl('ops-hl-open', hlOpen);
       _opsSetEl('ops-mx-open', mxOpen);
       _opsUpdateRacetrack(live);
