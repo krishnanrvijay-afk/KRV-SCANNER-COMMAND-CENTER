@@ -1556,7 +1556,7 @@ function setTab(name) {
     document.getElementById('tab-' + t).classList.toggle('active', t === name);
   });
   if (name === 'log' && !logLoaded) loadLog();
-  if (name === 'operations') { _opsActive=true; _opsStartTimers(); } else { _opsActive=false; _opsStopTimers(); }
+  if (name === 'operations') { _opsActive=true; _opsStartTimers(); if (typeof live !== 'undefined' && live) _opsRefresh(); } else { _opsActive=false; _opsStopTimers(); }
 }
 function _updateLogBadge() {
   var el = document.getElementById('tab-log-badge');
@@ -3580,6 +3580,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   }
 
   function _opsUpdateRadar(live) {
+    console.log('[_opsUpdateRadar] live keys:', live ? Object.keys(live) : 'null', 'hl pair_states:', live && live.hl ? (live.hl.pair_states||[]).length : 'n/a', 'mexc pair_states:', live && live.mexc ? (live.mexc.pair_states||[]).length : 'n/a');
     var el = document.getElementById("ops-radar-content");
     if (!el || !live) return;
     var hlPs = (live.hl   && Array.isArray(live.hl.pair_states))   ? live.hl.pair_states   : [];
@@ -3783,7 +3784,9 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
   async function _opsRefresh() {
     if (!_opsActive) return;
-    if (!live) { setTimeout(function(){ if (_opsActive) _opsRefresh(); }, 1500); return; }
+    var _opsPanelEl = document.getElementById('panel-operations');
+    if (!_opsPanelEl || _opsPanelEl.style.display === 'none') return;
+    if (!live) return;
     try {
       var [anaRes, hourlyRes, exitRes] = await Promise.all([
         fetch('/api/analytics?range=today', {credentials:'include'}),
@@ -3810,7 +3813,6 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     _opsClockTmr = setInterval(_opsUpdateClock, 1000);
     _opsHorseTmr = setInterval(_opsAnimateHorses, 50);
     _opsGateTmr  = setInterval(_opsRefreshGate, 10000);
-    _opsRefresh();
     _opsRefreshGate();
   }
 
