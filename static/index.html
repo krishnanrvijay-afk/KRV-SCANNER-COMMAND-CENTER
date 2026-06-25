@@ -3409,8 +3409,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     var fleet = analytics.fleet || {};
     function pnlHtml(v) {
       if (!v || v === 0) return '<span style="color:#ffffff;opacity:0.4">$0.00</span>';
-      if (v > 0) return '<span style="color:#22c55e;text-shadow:0 0 20px rgba(34,197,94,0.8),0 0 40px rgba(34,197,94,0.4)">+$' + _opsFmt(v) + '</span>';
-      return '<span style="color:#ef4444;text-shadow:0 0 20px rgba(239,68,68,0.8),0 0 40px rgba(239,68,68,0.4)">-$' + _opsFmt(Math.abs(v)) + '</span>';
+      if (v > 0) return '<span style="color:#22c55e;text-shadow:0 0 20px rgba(34,197,94,0.8),0 0 40px rgba(34,197,94,0.4)">$' + Math.abs(v).toFixed(2) + '</span>';
+      return '<span style="color:#ef4444;text-shadow:0 0 20px rgba(239,68,68,0.8),0 0 40px rgba(239,68,68,0.4)">$' + Math.abs(v).toFixed(2) + '</span>';
     }
     function wrHtml(wr, tc) {
       var pct = Math.round((wr || 0) * 100);
@@ -3438,8 +3438,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     }
     var hlPnl = hl.pnl || 0;
     var mxPnl = mx.pnl || 0;
-    var hlOpen = (typeof _live !== 'undefined' && _live.hl && _live.hl.open_trades) ? _live.hl.open_trades.length : 0;
-    var mxOpen = (typeof _live !== 'undefined' && _live.mexc && _live.mexc.open_trades) ? _live.mexc.open_trades.length : 0;
+    var hlOpen = (live && live.hl && live.hl.open_trades) ? live.hl.open_trades.length : 0;
+    var mxOpen = (live && live.mexc && live.mexc.open_trades) ? live.mexc.open_trades.length : 0;
     _opsSetEl('ops-hl-pnl',      pnlHtml(hlPnl));
     _opsSetEl('ops-hl-signals',  hl.trade_count || 0);
     _opsSetEl('ops-hl-closed',   hl.trade_count || 0);
@@ -3539,7 +3539,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       var pct = Math.max(4, Math.round(Math.abs(d.net_pnl||0)/maxAbs*100));
       var pos = (d.net_pnl||0) >= 0;
       var barCls = pos ? 'ops-exit-bar-pos' : 'ops-exit-bar-neg';
-      var pnlStr = (pos?'+':'') + '$' + (d.net_pnl||0).toFixed(2);
+      var pnlStr = '$' + Math.abs(d.net_pnl||0).toFixed(2);
       return '<div class="ops-exit-row">'
         + '<div class="ops-exit-header">'
         + '<span class="ops-exit-name">' + (d.exit_reason||'?') + '</span>'
@@ -3547,7 +3547,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         + '</div>'
         + '<div class="ops-exit-bar-wrap"><div class="ops-exit-bar ' + barCls + '" style="width:'+pct+'%"></div></div>'
         + '</div>';
-    }).join('') + '<div class="ops-exit-total">NET: ' + (totalPnl>=0?'+':'') + '$' + totalPnl.toFixed(2) + '</div>';
+    }).join('') + '<div class="ops-exit-total">NET: $' + Math.abs(totalPnl).toFixed(2) + '</div>';
   }
 
   function _opsGateCls(gt) {
@@ -3633,17 +3633,17 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         fetch('/api/hourly_activity',       {credentials:'include'}),
         fetch('/api/exit_breakdown',        {credentials:'include'}),
       ]);
-      if (anaRes.ok)    _opsUpdateVenueCards(await anaRes.json(), _opsLiveData);
+      if (anaRes.ok)    _opsUpdateVenueCards(await anaRes.json(), live);
       if (hourlyRes.ok) _opsUpdateHourly(await hourlyRes.json());
       if (exitRes.ok)   _opsUpdateExitBreakdown(await exitRes.json());
     } catch(e) {}
     var liveEl = document.getElementById('ops-hl-open');
-    if (liveEl && typeof _live !== 'undefined') {
-      var hlOpen = (_live.hl && _live.hl.open_trades) ? _live.hl.open_trades.length : 0;
-      var mxOpen = (_live.mexc && _live.mexc.open_trades) ? _live.mexc.open_trades.length : 0;
+    if (liveEl && live !== null && typeof live !== 'undefined') {
+      var hlOpen = (live.hl && live.hl.open_trades) ? live.hl.open_trades.length : 0;
+      var mxOpen = (live.mexc && live.mexc.open_trades) ? live.mexc.open_trades.length : 0;
       _opsSetEl('ops-hl-open', hlOpen);
       _opsSetEl('ops-mx-open', mxOpen);
-      _opsUpdateRacetrack(_live);
+      _opsUpdateRacetrack(live);
     }
   }
 
