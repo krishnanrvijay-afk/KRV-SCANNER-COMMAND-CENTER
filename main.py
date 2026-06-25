@@ -594,6 +594,27 @@ def _compute_analytics(hl_rows: list, mexc_rows: list, range_key: str) -> dict:
     fleet_m["short_distinct"]= _distinct(all_r, "SHORT")
     fleet_m["daily_target"]  = 1000
 
+    # MTD and YTD P&L from all unfiltered rows
+    _now_et = datetime.now(ET)
+    _mtd_start = _et_midnight(_now_et.date().replace(day=1))
+    _ytd_start = _et_midnight(_now_et.date().replace(month=1, day=1))
+    _all_raw = list(hl_rows) + list(mexc_rows)
+    _mtd_pnl = 0.0
+    _ytd_pnl = 0.0
+    for _r in _all_raw:
+        _ct = _to_et(_r.get("close_time"))
+        if _ct is None:
+            continue
+        _pnl = _f(_r.get("pnl_dollars"))
+        if _pnl is None:
+            continue
+        if _ct >= _mtd_start:
+            _mtd_pnl += _pnl
+        if _ct >= _ytd_start:
+            _ytd_pnl += _pnl
+    mtd_pnl = round(_mtd_pnl, 2)
+    ytd_pnl = round(_ytd_pnl, 2)
+
     return {
         "range":       range_key,
         "fleet":       fleet_m,
@@ -609,6 +630,8 @@ def _compute_analytics(hl_rows: list, mexc_rows: list, range_key: str) -> dict:
         ),
         "excursion":   _compute_excursion(all_r),
         "row_counts":  {"hl": len(hl_rows), "mexc": len(mexc_rows)},
+        "mtd_pnl":     mtd_pnl,
+        "ytd_pnl":     ytd_pnl,
     }
 
 # ─────────────────────────── login HTML ───────────────────────────
