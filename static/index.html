@@ -986,6 +986,12 @@ body {
   .ops-venue-stat-val { font-size:22px; font-weight:700; color:#fff; line-height:1.1; }
   .ops-venue-pnl-pos { color:#4ade80; }
   .ops-venue-pnl-neg { color:#f87171; }
+  .ops-venue-pnl-big { font-family:"Bebas Neue",sans-serif; font-size:32px; font-weight:700; line-height:1; }
+  .ops-wr-line { font-size:10px; font-weight:700; margin-top:4px; margin-bottom:6px; }
+  .ops-session-pills-row { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+  .ops-ls-bar-wrap { height:4px; border-radius:2px; overflow:hidden; background:rgba(255,255,255,0.08); margin-top:10px; }
+  .ops-ls-bar-long { height:100%; background:#22c55e; }
+  .ops-ls-label { font-size:7px; font-weight:600; color:rgba(255,255,255,0.45); margin-top:3px; }
   .ops-venue-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin-top:10px; }
   .ops-venue-mini-label { font-size:10px; font-weight:600; color:rgba(255,255,255,0.45); }
   .ops-venue-mini-val   { font-size:14px; font-weight:700; color:#fff; }
@@ -1059,8 +1065,12 @@ body {
   .ops-feed-gate-fade  { background:rgba(156,163,175,0.20); color:#9ca3af; }
   .ops-feed-pair   { color:#fff; font-weight:700; flex-shrink:0; }
   .ops-feed-reason { color:rgba(255,255,255,0.45); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .ops-feed-dir-s { color:#f87171; font-size:9px; font-weight:700; }
-  .ops-feed-dir-l { color:#4ade80; font-size:9px; font-weight:700; }
+  .ops-feed-dir-s { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); font-size:9px; font-weight:700; padding:2px 5px; border-radius:3px; flex-shrink:0; }
+  .ops-feed-dir-l { background:rgba(34,197,94,0.15);  color:#22c55e; border:1px solid rgba(34,197,94,0.3);  font-size:9px; font-weight:700; padding:2px 5px; border-radius:3px; flex-shrink:0; }
+  .ops-feed-plain { font-style:italic; font-size:8px; color:rgba(255,255,255,0.6); }
+  .ops-feed-high-sev { border-left:3px solid rgba(239,68,68,0.8); animation:redpulse 1.5s ease-in-out infinite; }
+  @keyframes redpulse { 0%,100%{border-left-color:rgba(239,68,68,0.8)} 50%{border-left-color:rgba(239,68,68,0.3)} }
+  .ops-pill-subtitle { font-size:7px; font-weight:600; opacity:0.45; letter-spacing:.04em; }
   .ops-header-time { font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-left:auto; }
   @media(max-width:600px) { .ops-venue-row{grid-template-columns:1fr;} }
   
@@ -3395,21 +3405,61 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   function _opsUpdateVenueCards(analytics, live) {
     if (!analytics) return;
     var hl = analytics.hl || {}, mx = analytics.mexc || {};
+    var sessions = analytics.sessions || [];
+    var fleet = analytics.fleet || {};
+    function pnlHtml(v) {
+      if (!v || v === 0) return '<span style="color:#ffffff;opacity:0.4">$0.00</span>';
+      if (v > 0) return '<span style="color:#22c55e;text-shadow:0 0 20px rgba(34,197,94,0.8),0 0 40px rgba(34,197,94,0.4)">+$' + _opsFmt(v) + '</span>';
+      return '<span style="color:#ef4444;text-shadow:0 0 20px rgba(239,68,68,0.8),0 0 40px rgba(239,68,68,0.4)">-$' + _opsFmt(Math.abs(v)) + '</span>';
+    }
+    function wrHtml(wr, tc) {
+      var pct = Math.round((wr || 0) * 100);
+      var col = pct >= 65 ? '#22c55e' : (pct >= 50 ? '#fbbf24' : '#ef4444');
+      return '<span style="color:' + col + '">' + pct + '% WR &middot; ' + (tc || 0) + ' trades</span>';
+    }
+    function sessHtml(sess) {
+      var MAP = {asia:'ASIA', eu:'EU', us:'US', overnight:'NITE'};
+      return sess.map(function(s) {
+        var lp = s.long_pnl || 0, sp = s.short_pnl || 0, tot = lp + sp;
+        if (lp === 0 && sp === 0) return '';
+        var col  = tot >= 0 ? '#22c55e' : '#ef4444';
+        var sign = tot >= 0 ? '+' : '';
+        var name = MAP[s.session] || (s.session||'').toUpperCase();
+        return '<span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:' + col + '">' + name + ' ' + sign + '$' + _opsFmt(tot) + '</span>';
+      }).join('');
+    }
+    function updateLsBar(lc, sc, prefix) {
+      var total = (lc || 0) + (sc || 0);
+      var lPct = total > 0 ? Math.round((lc || 0) / total * 100) : 50;
+      var sPct = 100 - lPct;
+      var longEl = document.getElementById(prefix + '-ls-long');
+      if (longEl) longEl.style.width = lPct + '%';
+      _opsSetEl(prefix + '-ls-label', 'L ' + lPct + '% &middot; S ' + sPct + '%');
+    }
     var hlPnl = hl.pnl || 0;
     var mxPnl = mx.pnl || 0;
-    var cls = function(v) { return v >= 0 ? 'ops-venue-pnl-pos' : 'ops-venue-pnl-neg'; };
     var hlOpen = (typeof _live !== 'undefined' && _live.hl && _live.hl.open_trades) ? _live.hl.open_trades.length : 0;
     var mxOpen = (typeof _live !== 'undefined' && _live.mexc && _live.mexc.open_trades) ? _live.mexc.open_trades.length : 0;
-    _opsSetEl('ops-hl-pnl',     '<span class="' + cls(hlPnl) + '">$' + _opsFmt(hlPnl) + '</span>');
-    _opsSetEl('ops-hl-signals', hl.trade_count || 0);
-    _opsSetEl('ops-hl-closed',  hl.trade_count || 0);
-    _opsSetEl('ops-hl-wr',      Math.round((hl.win_rate || 0) * 100) + '%');
-    _opsSetEl('ops-hl-open',    hlOpen);
-    _opsSetEl('ops-mx-pnl',     '<span class="' + cls(mxPnl) + '">$' + _opsFmt(mxPnl) + '</span>');
-    _opsSetEl('ops-mx-signals', mx.trade_count || 0);
-    _opsSetEl('ops-mx-closed',  mx.trade_count || 0);
-    _opsSetEl('ops-mx-wr',      Math.round((mx.win_rate || 0) * 100) + '%');
-    _opsSetEl('ops-mx-open',    mxOpen);
+    _opsSetEl('ops-hl-pnl',      pnlHtml(hlPnl));
+    _opsSetEl('ops-hl-signals',  hl.trade_count || 0);
+    _opsSetEl('ops-hl-closed',   hl.trade_count || 0);
+    _opsSetEl('ops-hl-wr',       Math.round((hl.win_rate || 0) * 100) + '%');
+    _opsSetEl('ops-hl-open',     hlOpen);
+    _opsSetEl('ops-hl-wr-line',  wrHtml(hl.win_rate, hl.trade_count));
+    _opsSetEl('ops-hl-sessions', sessHtml(sessions));
+    _opsSetEl('ops-mx-pnl',      pnlHtml(mxPnl));
+    _opsSetEl('ops-mx-signals',  mx.trade_count || 0);
+    _opsSetEl('ops-mx-closed',   mx.trade_count || 0);
+    _opsSetEl('ops-mx-wr',       Math.round((mx.win_rate || 0) * 100) + '%');
+    _opsSetEl('ops-mx-open',     mxOpen);
+    _opsSetEl('ops-mx-wr-line',  wrHtml(mx.win_rate, mx.trade_count));
+    _opsSetEl('ops-mx-sessions', sessHtml(sessions));
+    var hlL = hl.long_count  != null ? hl.long_count  : (fleet.long_count  || 0);
+    var hlS = hl.short_count != null ? hl.short_count : (fleet.short_count || 0);
+    var mxL = mx.long_count  != null ? mx.long_count  : (fleet.long_count  || 0);
+    var mxS = mx.short_count != null ? mx.short_count : (fleet.short_count || 0);
+    updateLsBar(hlL, hlS, 'ops-hl');
+    updateLsBar(mxL, mxS, 'ops-mx');
   }
 
   function _opsUpdateRacetrack(live) {
@@ -3528,19 +3578,42 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     var totalGates = cntAdx + cntJ1h + cntStoch + cntCool;
     _opsSetEl('tab-ops-badge', totalGates || '0');
     if (!_opsGateData.length) { el.innerHTML = '<div class="ops-no-positions" style="padding:10px">NO GATE EVENTS TODAY</div>'; return; }
+    function _plainReason(gt, reason, d) {
+      var g = gt.toUpperCase(), r = (reason||'').toLowerCase();
+      if (g.includes('ADX_G') || g === 'ADX_GATE') return 'ADX too low';
+      if (g.includes('J1H')) {
+        var j1h = parseFloat(d.j1h || 0);
+        if (r.includes('below 0') || j1h < 0) return 'J1H negative';
+        if (j1h > 100) return 'J1H overbought';
+        return 'J1H not confirmed';
+      }
+      if (g === 'FAST_STOCH_BLOCK' || g.includes('FAST_STOCH')) return 'BTC flash detected';
+      if (g === 'STOCH_BLOCK' || g.includes('STOCH')) return 'Stoch not confirmed';
+      if (g.includes('COOL')) {
+        if (g.includes('15') || r.includes('15')) return '15min pause';
+        if (g.includes('3')  || r.includes('3'))  return '3min pause';
+        return 'Cooldown active';
+      }
+      if (g === 'CLUSTER_HALT') return 'Cluster halt';
+      return '';
+    }
     el.innerHTML = _opsGateData.map(function(d){
       var t    = d.fired_at ? new Date(d.fired_at).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false}) : '';
       var dir  = (d.direction||'').toUpperCase();
+      var gt   = (d.gate_type||'').toUpperCase();
       var vCls = (d.venue||'').toUpperCase()==='HL' ? 'ops-feed-venue-hl' : 'ops-feed-venue-mexc';
       var gCls = _opsGateCls(d.gate_type);
       var dCls = dir==='SHORT' ? 'ops-feed-dir-s' : 'ops-feed-dir-l';
-      return '<div class="ops-feed-item">'
+      var plain = _plainReason(gt, d.reason, d);
+      var isHigh = gt.includes('COOLDOWN_15') || gt === 'CLUSTER_HALT';
+      var itemCls = 'ops-feed-item' + (isHigh ? ' ops-feed-high-sev' : '');
+      return '<div class="' + itemCls + '">'
         + '<span class="ops-feed-time">' + t + '</span>'
         + '<span class="ops-feed-venue ' + vCls + '">' + (d.venue||'?') + '</span>'
         + '<span class="ops-feed-gate '  + gCls + '">' + (d.gate_type||'?') + '</span>'
         + '<span class="ops-feed-pair">'  + (d.pair||'?') + '</span>'
         + '<span class="' + dCls + '">'  + dir + '</span>'
-        + '<span class="ops-feed-reason">' + (d.reason||'') + '</span>'
+        + '<span class="ops-feed-reason">' + (d.reason||'') + (plain ? '<i class="ops-feed-plain"> ' + plain + '</i>' : '') + '</span>'
         + '</div>';
     }).join('');
   }
@@ -3834,7 +3907,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
             </div>
             <div class="ops-venue-stat">
               <div class="ops-venue-stat-label">TODAY P&amp;L</div>
-              <div class="ops-venue-stat-val" id="ops-hl-pnl">--</div>
+              <div class="ops-venue-stat-val ops-venue-pnl-big" id="ops-hl-pnl">--</div>
             </div>
             <div class="ops-venue-grid">
               <div>
@@ -3854,6 +3927,10 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
                 <div class="ops-venue-mini-val" id="ops-hl-open">--</div>
               </div>
             </div>
+            <div class="ops-wr-line" id="ops-hl-wr-line">-- WR &middot; -- trades</div>
+            <div class="ops-session-pills-row" id="ops-hl-sessions"></div>
+            <div class="ops-ls-bar-wrap"><div style="height:100%;display:flex;overflow:hidden;border-radius:2px"><div class="ops-ls-bar-long" id="ops-hl-ls-long" style="width:50%;transition:width .5s ease"></div><div style="flex:1;background:#22d3ee;transition:flex .5s ease" id="ops-hl-ls-short"></div></div></div>
+            <div class="ops-ls-label" id="ops-hl-ls-label">L -- &middot; S --</div>
           </div>
           <div class="ops-venue-card ops-mexc-card">
             <div class="ops-venue-shine"></div>
@@ -3863,7 +3940,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
             </div>
             <div class="ops-venue-stat">
               <div class="ops-venue-stat-label">TODAY P&amp;L</div>
-              <div class="ops-venue-stat-val" id="ops-mx-pnl">--</div>
+              <div class="ops-venue-stat-val ops-venue-pnl-big" id="ops-mx-pnl">--</div>
             </div>
             <div class="ops-venue-grid">
               <div>
@@ -3883,6 +3960,10 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
                 <div class="ops-venue-mini-val" id="ops-mx-open">--</div>
               </div>
             </div>
+            <div class="ops-wr-line" id="ops-mx-wr-line">-- WR &middot; -- trades</div>
+            <div class="ops-session-pills-row" id="ops-mx-sessions"></div>
+            <div class="ops-ls-bar-wrap"><div style="height:100%;display:flex;overflow:hidden;border-radius:2px"><div class="ops-ls-bar-long" id="ops-mx-ls-long" style="width:50%;transition:width .5s ease"></div><div style="flex:1;background:#22d3ee;transition:flex .5s ease" id="ops-mx-ls-short"></div></div></div>
+            <div class="ops-ls-label" id="ops-mx-ls-label">L -- &middot; S --</div>
           </div>
         </div>
       </section>
@@ -3924,10 +4005,10 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         <div class="ops-section-accent"></div>
         <h2 class="ops-section-title">GATE ACTIVITY FEED</h2>
         <div class="ops-pills-row">
-          <div class="ops-pill ops-pill-adx">ADX &lt;15 <span class="ops-pill-count" id="ops-cnt-adx">0</span></div>
-          <div class="ops-pill ops-pill-j1h">J1H FLOOR <span class="ops-pill-count" id="ops-cnt-j1h">0</span></div>
-          <div class="ops-pill ops-pill-stoch">STOCH BLOCK <span class="ops-pill-count" id="ops-cnt-stoch">0</span></div>
-          <div class="ops-pill ops-pill-cool">COOLDOWN <span class="ops-pill-count" id="ops-cnt-cool">0</span></div>
+          <div class="ops-pill ops-pill-adx" style="flex-direction:column;align-items:flex-start;gap:1px"><span>ADX &lt;15 <span class="ops-pill-count" id="ops-cnt-adx">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+          <div class="ops-pill ops-pill-j1h" style="flex-direction:column;align-items:flex-start;gap:1px"><span>J1H FLOOR <span class="ops-pill-count" id="ops-cnt-j1h">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+          <div class="ops-pill ops-pill-stoch" style="flex-direction:column;align-items:flex-start;gap:1px"><span>STOCH BLOCK <span class="ops-pill-count" id="ops-cnt-stoch">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+          <div class="ops-pill ops-pill-cool" style="flex-direction:column;align-items:flex-start;gap:1px"><span>COOLDOWN <span class="ops-pill-count" id="ops-cnt-cool">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
         </div>
         <div class="ops-gate-feed" id="ops-gate-feed">
           <div class="ops-no-positions" style="padding:10px">AWAITING GATE EVENTS...</div>
