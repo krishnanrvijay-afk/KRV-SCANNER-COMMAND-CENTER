@@ -1157,70 +1157,52 @@ body {
         </div>
       </div>
     </div>
-    <div class="fl-footer">
-      <div class="fl-foot-item">
-        <span class="fl-foot-label">FLEET DAILY P&amp;L</span>
-        <span class="fl-foot-val" id="fl-fleet-pnl">&#x2014;</span>
+    <div class="pnl-rail" style="margin-top:12px">
+      <div class="pnl-rail-sub" style="margin-top:0">
+        <div class="pnl-rail-sub-item">
+          <div class="pnl-rail-sub-lbl">MTD</div>
+          <div class="pnl-rail-sub-val" id="pr-mtd">&#x2014;</div>
+        </div>
+        <div class="pnl-rail-sub-item">
+          <div class="pnl-rail-sub-lbl">YTD</div>
+          <div class="pnl-rail-sub-val" id="pr-ytd">&#x2014;</div>
+        </div>
+        <div class="pnl-rail-divider"></div>
+        <div class="pnl-rail-sess">
+          <div class="pnl-rail-sess-item">
+            <div class="pnl-rail-sess-name">ASIA</div>
+            <div class="pnl-rail-sess-pnl" id="pr-asia">&#x2014;</div>
+          </div>
+          <div class="pnl-rail-sess-item">
+            <div class="pnl-rail-sess-name">EU</div>
+            <div class="pnl-rail-sess-pnl" id="pr-eu">&#x2014;</div>
+          </div>
+          <div class="pnl-rail-sess-item">
+            <div class="pnl-rail-sess-name">US</div>
+            <div class="pnl-rail-sess-pnl" id="pr-us">&#x2014;</div>
+          </div>
+        </div>
+        <div class="pnl-rail-divider"></div>
+        <div class="pnl-rail-sub-item">
+          <div class="pnl-rail-sub-lbl">LONG</div>
+          <div class="pnl-rail-sub-val" id="pr-long">&#x2014;</div>
+        </div>
+        <div class="pnl-rail-sub-item">
+          <div class="pnl-rail-sub-lbl">SHORT</div>
+          <div class="pnl-rail-sub-val" id="pr-short">&#x2014;</div>
+        </div>
       </div>
-      <div class="fl-foot-item">
-        <span class="fl-foot-label">FLEET OPEN</span>
-        <span class="fl-foot-val" id="fl-fleet-open">&#x2014;</span>
+      <div class="pnl-rail-ld">
+        <div class="pnl-rail-ld-lbl" style="color:#00e676;min-width:30px;text-align:right" id="pr-ld-long-pct">L</div>
+        <div class="pnl-rail-ld-bar">
+          <div class="pnl-rail-ld-long"  id="pr-ld-long-bar"  style="width:0%"></div>
+          <div class="pnl-rail-ld-short" id="pr-ld-short-bar" style="width:0%"></div>
+        </div>
+        <div class="pnl-rail-ld-lbl" style="color:#ff4d4d;min-width:30px" id="pr-ld-short-pct">S</div>
       </div>
     </div>
   </div>
 
-
-  <!-- P&L RAIL -->
-  <div class="pnl-rail" id="pnl-rail">
-    <div style="position:relative;z-index:2">
-      <div class="pnl-rail-header">
-        <div class="pnl-rail-title">TODAY P&amp;L</div>
-      </div>
-      <div class="pnl-rail-today zero" id="pr-today">&#x2014;</div>
-    </div>
-    <div class="pnl-rail-sub" style="margin-top:8px">
-      <div class="pnl-rail-sub-item">
-        <div class="pnl-rail-sub-lbl">MTD</div>
-        <div class="pnl-rail-sub-val" id="pr-mtd">&#x2014;</div>
-      </div>
-      <div class="pnl-rail-sub-item">
-        <div class="pnl-rail-sub-lbl">YTD</div>
-        <div class="pnl-rail-sub-val" id="pr-ytd">&#x2014;</div>
-      </div>
-      <div class="pnl-rail-divider"></div>
-      <div class="pnl-rail-sess" id="pr-sess">
-        <div class="pnl-rail-sess-item">
-          <div class="pnl-rail-sess-name">ASIA</div>
-          <div class="pnl-rail-sess-pnl" id="pr-asia">&#x2014;</div>
-        </div>
-        <div class="pnl-rail-sess-item">
-          <div class="pnl-rail-sess-name">EU</div>
-          <div class="pnl-rail-sess-pnl" id="pr-eu">&#x2014;</div>
-        </div>
-        <div class="pnl-rail-sess-item">
-          <div class="pnl-rail-sess-name">US</div>
-          <div class="pnl-rail-sess-pnl" id="pr-us">&#x2014;</div>
-        </div>
-      </div>
-      <div class="pnl-rail-divider"></div>
-      <div class="pnl-rail-sub-item">
-        <div class="pnl-rail-sub-lbl">LONG</div>
-        <div class="pnl-rail-sub-val" id="pr-long">&#x2014;</div>
-      </div>
-      <div class="pnl-rail-sub-item">
-        <div class="pnl-rail-sub-lbl">SHORT</div>
-        <div class="pnl-rail-sub-val" id="pr-short">&#x2014;</div>
-      </div>
-    </div>
-    <div class="pnl-rail-ld">
-      <div class="pnl-rail-ld-lbl" style="color:#00e676;min-width:30px;text-align:right" id="pr-ld-long-pct">L</div>
-      <div class="pnl-rail-ld-bar">
-        <div class="pnl-rail-ld-long"  id="pr-ld-long-bar"  style="width:0%"></div>
-        <div class="pnl-rail-ld-short" id="pr-ld-short-bar" style="width:0%"></div>
-      </div>
-      <div class="pnl-rail-ld-lbl" style="color:#ff4d4d;min-width:30px" id="pr-ld-short-pct">S</div>
-    </div>
-  </div>
 
   <!-- TAB BAR -->
   <div class="tab-bar">
@@ -3090,8 +3072,10 @@ function renderPnlRail() {
   // MTD / YTD — not available from single range fetch; show combined pnl label context
   var mtdEl  = document.getElementById('pr-mtd');
   var ytdEl  = document.getElementById('pr-ytd');
-  if (mtdEl) { mtdEl.textContent = '—'; mtdEl.className = 'pnl-rail-sub-val'; }
-  if (ytdEl) { ytdEl.textContent = '—'; ytdEl.className = 'pnl-rail-sub-val'; }
+  var mtdV = (analytics && analytics.mtd_pnl != null) ? parseFloat(analytics.mtd_pnl) : null;
+  var ytdV = (analytics && analytics.ytd_pnl != null) ? parseFloat(analytics.ytd_pnl) : null;
+  if (mtdEl) { mtdEl.textContent = mtdV != null ? fmtDollar(mtdV) : '—'; mtdEl.className = 'pnl-rail-sub-val' + (mtdV != null ? (mtdV >= 0 ? ' pos' : ' neg') : ''); }
+  if (ytdEl) { ytdEl.textContent = ytdV != null ? fmtDollar(ytdV) : '—'; ytdEl.className = 'pnl-rail-sub-val' + (ytdV != null ? (ytdV >= 0 ? ' pos' : ' neg') : ''); }
 
   // Sessions from analytics.sessions
   var sessions = analytics.sessions || [];
