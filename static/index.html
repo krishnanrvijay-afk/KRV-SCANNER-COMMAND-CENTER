@@ -1074,6 +1074,49 @@ body {
   .ops-header-time { font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-left:auto; }
   @media(max-width:600px) { .ops-venue-row{grid-template-columns:1fr;} }
   
+  /* -- SIGNAL RADAR -- */
+  .radar-zone-pills{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+  .radar-zone-pill{padding:3px 10px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.08em}
+  .radar-pill-cold{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.40);border:1px solid rgba(255,255,255,0.10)}
+  .radar-pill-warming{background:rgba(255,179,0,0.12);color:#ffb300;border:1px solid rgba(255,179,0,0.28)}
+  .radar-pill-ready{background:rgba(0,230,118,0.10);color:#00e676;border:1px solid rgba(0,230,118,0.22)}
+  .radar-pill-ready-active{animation:radarReadyPulse 1.8s ease-in-out infinite}
+  @keyframes radarReadyPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 8px rgba(0,230,118,0.5)}}
+  .radar-zone-label{font-size:9px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,0.40);margin:10px 0 8px}
+  .radar-label-ready{color:#00e676}
+  .radar-label-warming{color:#ffb300}
+  .radar-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+  .radar-card{border-radius:10px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);position:relative;overflow:hidden}
+  .radar-card-hl{border-color:rgba(168,85,247,0.48);background:rgba(168,85,247,0.06)}
+  .radar-card-mx{border-color:rgba(249,115,22,0.48);background:rgba(249,115,22,0.06)}
+  .radar-card-ready{border-color:rgba(0,230,118,0.45);background:rgba(0,230,118,0.05);animation:radarCardPulse 2.2s ease-in-out infinite}
+  @keyframes radarCardPulse{0%,100%{box-shadow:0 0 0 rgba(0,230,118,0)}50%{box-shadow:0 0 14px rgba(0,230,118,0.22)}}
+  .radar-card-warming{border-color:rgba(255,179,0,0.38);background:rgba(255,179,0,0.04)}
+  .radar-card-top{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .radar-sym{font-size:12px;font-weight:700;color:#fff;letter-spacing:.04em;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .radar-venue-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+  .radar-vdot-hl{background:#a855f7}
+  .radar-vdot-mexc{background:#f97316}
+  .radar-dir-badge{font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0;letter-spacing:.04em}
+  .radar-dir-long{background:rgba(74,222,128,0.20);color:#4ade80}
+  .radar-dir-short{background:rgba(248,113,113,0.20);color:#f87171}
+  .radar-pnl{font-size:11px;font-weight:700;flex-shrink:0}
+  .radar-ring-wrap{flex-shrink:0}
+  .radar-dur-wrap{height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:visible;position:relative;margin-bottom:4px}
+  .radar-dur-bar{height:100%;border-radius:3px;position:relative;transition:width .5s ease}
+  .radar-bar-hl{background:linear-gradient(90deg,rgba(168,85,247,0.5),#a855f7)}
+  .radar-bar-mexc{background:linear-gradient(90deg,rgba(249,115,22,0.5),#f97316)}
+  .radar-dur-dot{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;animation:opsHorseDot 1.2s ease-in-out infinite}
+  .radar-dur-label{font-size:8px;font-weight:600;color:rgba(255,255,255,0.38);margin-top:2px}
+  .radar-firing-label{font-size:8px;font-weight:700;letter-spacing:.10em;margin-bottom:7px}
+  .radar-gates{display:flex;flex-direction:column;gap:4px}
+  .radar-gate-row{display:flex;align-items:center;gap:6px}
+  .radar-gate-lbl{font-size:8px;font-weight:700;color:rgba(255,255,255,0.42);width:34px;flex-shrink:0;letter-spacing:.04em}
+  .radar-gate-bar-wrap{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+  .radar-gate-bar{height:100%;border-radius:2px;transition:width .4s}
+  .radar-gate-pass{background:#00e676}
+  .radar-gate-warm{background:#ffb300}
+  .radar-gate-fail{background:rgba(255,255,255,0.13)}
 </style>
 </head>
 <body>
@@ -3495,6 +3538,134 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     });
   }
 
+  function _radarCard(item, zone) {
+    var sym   = (item.sym||"").replace("_USDT","").replace("USDT","");
+    var venue = item.venue, score = item.score, dir = item.dir;
+    var gates = item.gates, gstates = item.gateStates;
+    var cardCls = zone === "ready" ? "radar-card-ready" : "radar-card-warming";
+    var dirCls  = dir === "LONG"   ? "radar-dir-long"  : "radar-dir-short";
+    var lbl     = zone === "ready" ? "FIRING SOON" : (score >= 60 ? "CLOSE" : "DEVELOPING");
+    var lc      = zone === "ready" ? "radar-label-ready" : "radar-label-warming";
+    var rc      = zone === "ready" ? "#00e676" : "#ffb300";
+    var offset  = (125.66 * (1 - score / 100)).toFixed(2);
+    var glbls   = ["J15M","J1H","STOCH","ADX"];
+    var h = '<div class="radar-card ' + cardCls + '">' +
+            '<div class="radar-card-top">' +
+            '<span class="radar-sym">' + sym + '</span>' +
+            '<span class="radar-venue-dot radar-vdot-' + venue + '"></span>' +
+            '<span class="radar-dir-badge ' + dirCls + '">' + dir + '</span>' +
+            '<div class="radar-ring-wrap" style="margin-left:auto">' +
+            '<svg width="44" height="44" viewBox="0 0 44 44">' +
+            '<circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>' +
+            '<circle cx="22" cy="22" r="20" fill="none" stroke="' + rc + '" stroke-width="3"' +
+            ' stroke-dasharray="125.66" stroke-dashoffset="' + offset + '"' +
+            ' stroke-linecap="round" transform="rotate(-90 22 22)"' +
+            (zone === "ready" ? ' style="filter:drop-shadow(0 0 4px ' + rc + ')"' : "") +
+            '/>' +
+            '<text x="22" y="26" text-anchor="middle" font-size="10" fill="#fff" font-family="JetBrains Mono,monospace" font-weight="700">' + score + '</text>' +
+            '</svg></div></div>' +
+            '<div class="radar-firing-label ' + lc + '">' + lbl + '</div>' +
+            '<div class="radar-gates">';
+    glbls.forEach(function(gl, i) {
+      var st  = gstates[i];
+      var bc  = st === "pass" ? "radar-gate-pass" : st === "warm" ? "radar-gate-warm" : "radar-gate-fail";
+      var bw  = st === "pass" ? "100" : st === "warm" ? "55" : "20";
+      h += '<div class="radar-gate-row"><span class="radar-gate-lbl">' + gl +
+           '</span><div class="radar-gate-bar-wrap"><div class="radar-gate-bar ' + bc +
+           '" style="width:' + bw + '%"></div></div></div>';
+    });
+    h += '</div></div>';
+    return h;
+  }
+
+  function _opsUpdateRadar(live) {
+    var el = document.getElementById("ops-radar-content");
+    if (!el || !live) return;
+    var hlPs = (live.hl   && Array.isArray(live.hl.pair_states))   ? live.hl.pair_states   : [];
+    var mxPs = (live.mexc && Array.isArray(live.mexc.pair_states)) ? live.mexc.pair_states : [];
+    var all  = hlPs.map(function(p){return{p:p,venue:"hl"};}).concat(mxPs.map(function(p){return{p:p,venue:"mexc"};}));
+    if (!all.length) { el.innerHTML = '<div class="ops-no-positions">NO PAIR STATES AVAILABLE</div>'; return; }
+    var inTrade = [], ready = [], warming = [];
+    all.forEach(function(item) {
+      var p = item.p, venue = item.venue, sym = p.symbol || p.pair || "?";
+      if (p.in_trade) { inTrade.push({p:p, venue:venue, sym:sym}); return; }
+      var j15m = parseFloat(p.j15m), j1h = parseFloat(p.j1h);
+      var sk   = parseFloat(p.stoch_k_fast), sd  = parseFloat(p.stoch_d_fast);
+      var skp  = parseFloat(p.stoch_k_prev_fast), sdp = parseFloat(p.stoch_d_prev_fast);
+      var adx  = parseFloat(p.adx1h);
+      var lg0 = j15m < 20, lg1 = (j1h >= 0 && j1h < 40), lg2 = (sk < sd && skp >= sdp), lg3 = adx >= 15;
+      var la0 = !lg0 && j15m < 24, la1 = !lg1 && (j1h < 48 && j1h >= -8), la3 = !lg3 && adx >= 12;
+      var sg0 = j15m > 80, sg1 = (j1h > 60 && j1h <= 100), sg2 = (sk > sd && skp <= sdp), sg3 = adx >= 15;
+      var sa0 = !sg0 && j15m > 64, sa1 = !sg1 && j1h > 48, sa3 = !sg3 && adx >= 12;
+      var lScore = [lg0,lg1,lg2,lg3].filter(Boolean).length * 25;
+      var sScore = [sg0,sg1,sg2,sg3].filter(Boolean).length * 25;
+      var lStates = [lg0?"pass":la0?"warm":"fail", lg1?"pass":la1?"warm":"fail", lg2?"pass":"fail", lg3?"pass":la3?"warm":"fail"];
+      var sStates = [sg0?"pass":sa0?"warm":"fail", sg1?"pass":sa1?"warm":"fail", sg2?"pass":"fail", sg3?"pass":sa3?"warm":"fail"];
+      var best = Math.max(lScore, sScore);
+      if (best < 40) return;
+      var useLong = lScore >= sScore;
+      var entry = {p:p, venue:venue, sym:sym, score:best,
+                   dir:useLong?"LONG":"SHORT",
+                   gates:useLong?[lg0,lg1,lg2,lg3]:[sg0,sg1,sg2,sg3],
+                   gateStates:useLong?lStates:sStates};
+      if (best >= 75) ready.push(entry); else warming.push(entry);
+    });
+    ready.sort(function(a,b){return b.score-a.score;});
+    warming.sort(function(a,b){return b.score-a.score;});
+    var cold = Math.max(0, all.length - inTrade.length - ready.length - warming.length);
+    var h = '<div class="radar-zone-pills">';
+    h += '<span class="radar-zone-pill radar-pill-cold">COLD ' + cold + '</span>';
+    h += '<span class="radar-zone-pill radar-pill-warming">WARMING ' + warming.length + '</span>';
+    h += '<span class="radar-zone-pill radar-pill-ready' + (ready.length ? " radar-pill-ready-active" : "") + '">READY ' + ready.length + '</span>';
+    h += '</div>';
+    if (inTrade.length) {
+      h += '<div class="radar-zone-label">IN TRADE</div><div class="radar-cards">';
+      inTrade.forEach(function(item) {
+        var p = item.p, venue = item.venue;
+        var sym = (item.sym||"").replace("_USDT","").replace("USDT","");
+        var dir = (p.direction||"").toUpperCase();
+        var pnl = parseFloat(p.unrealized_pnl || p.pnl || 0);
+        var openAt  = p.opened_at || p.open_time;
+        var elapsed = openAt ? Math.max(0, Date.now()/1000 - new Date(openAt).getTime()/1000) : 0;
+        var durPct  = Math.min(100, Math.round(elapsed / 14400 * 100));
+        var barCls  = venue === "hl" ? "radar-bar-hl" : "radar-bar-mexc";
+        var brdCls  = venue === "hl" ? "radar-card-hl" : "radar-card-mx";
+        var dotClr  = venue === "hl" ? "#a855f7" : "#f97316";
+        var dirCls  = dir === "SHORT" ? "radar-dir-short" : "radar-dir-long";
+        var pnlCls  = pnl >= 0 ? "ops-venue-pnl-pos" : "ops-venue-pnl-neg";
+        var pnlStr  = (pnl >= 0 ? "+" : "-") + "$" + Math.abs(pnl).toFixed(2);
+        var hrs = Math.floor(elapsed/3600), mins = Math.floor((elapsed%3600)/60);
+        var durStr  = hrs > 0 ? hrs + "h " + mins + "m" : mins + "m";
+        h += '<div class="radar-card radar-card-intrade ' + brdCls + '">' +
+             '<div class="radar-card-top">' +
+             '<span class="radar-sym">' + sym + '</span>' +
+             '<span class="radar-venue-dot radar-vdot-' + venue + '"></span>' +
+             (dir ? '<span class="radar-dir-badge ' + dirCls + '">' + dir + '</span>' : "") +
+             '<span class="radar-pnl ' + pnlCls + '" style="margin-left:auto">' + pnlStr + '</span>' +
+             '</div>' +
+             '<div class="radar-dur-wrap"><div class="radar-dur-bar ' + barCls + '" style="width:' + durPct + '%">' +
+             '<div class="radar-dur-dot" style="background:' + dotClr + ';box-shadow:0 0 6px ' + dotClr + '"></div></div></div>' +
+             '<div class="radar-dur-label">' + durStr + ' / 4h MAX</div>' +
+             '</div>';
+      });
+      h += '</div>';
+    }
+    if (ready.length) {
+      h += '<div class="radar-zone-label radar-label-ready">READY TO FIRE</div><div class="radar-cards">';
+      ready.forEach(function(item){ h += _radarCard(item, "ready"); });
+      h += '</div>';
+    }
+    if (warming.length) {
+      h += '<div class="radar-zone-label radar-label-warming">WARMING</div><div class="radar-cards">';
+      warming.forEach(function(item){ h += _radarCard(item, "warming"); });
+      h += '</div>';
+    }
+    if (!inTrade.length && !ready.length && !warming.length) {
+      h += '<div class="ops-no-positions">ALL PAIRS COLD &#x2014; MONITORING</div>';
+    }
+    el.innerHTML = h;
+  }
+
   function _opsUpdateHourly(data) {
     var el = document.getElementById('ops-hourly-chart');
     if (!el || !data || !data.length) return;
@@ -3628,6 +3799,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       _opsSetEl('ops-hl-open', hlOpen);
       _opsSetEl('ops-mx-open', mxOpen);
       _opsUpdateRacetrack(live);
+      _opsUpdateRadar(live);
     }
   }
 
@@ -3952,7 +4124,16 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         </div>
       </section>
 
-      <!-- Section 2: Racetrack -->
+      <!-- Section 2: Signal Radar -->
+      <section class="ops-section" id="ops-radar">
+        <div class="ops-section-accent"></div>
+        <h2 class="ops-section-title" style="background:linear-gradient(90deg,#a855f7,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block">&#x26A1; SIGNAL RADAR</h2>
+        <div id="ops-radar-content">
+          <div class="ops-no-positions">AWAITING SIGNAL DATA...</div>
+        </div>
+      </section>
+
+      <!-- Section 3: Racetrack -->
       <section class="ops-section">
         <div class="ops-section-accent"></div>
         <h2 class="ops-section-title">OPEN POSITIONS &#x2014; THE RACETRACK</h2>
