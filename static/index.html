@@ -1120,6 +1120,7 @@ body {
 </style>
 </head>
 <body>
+<div id="btc-flash-banner" style="display:none;background:#cc0000;color:#ffffff;font-weight:700;font-size:1.1rem;text-align:center;padding:12px;letter-spacing:0.08em;border-bottom:2px solid #ff4444;">BTC FLASH CRASH ACTIVE -- LONG ENTRIES BLOCKED -- OPEN LONGS FORCE-CLOSING</div>
 <div class="page">
 
   <!-- A. HEADER -->
@@ -1646,6 +1647,19 @@ async function loadLive() {
       return;
     }
     live = await res.json();
+    var hlFlash = live.hl && live.hl.btc_flash_active;
+    var mxFlash = live.mexc && live.mexc.btc_flash_active;
+    var flashEl = document.getElementById("btc-flash-banner");
+    if (flashEl) {
+      if (hlFlash || mxFlash) {
+        var venues = [hlFlash ? "HL" : "", mxFlash ? "MEXC" : ""].filter(Boolean).join(" + ");
+        flashEl.style.display = "block";
+        flashEl.innerHTML = "BTC FLASH CRASH -- " + venues
+          + " -- LONG ENTRIES BLOCKED -- OPEN LONGS FORCE-CLOSING";
+      } else {
+        flashEl.style.display = "none";
+      }
+    }
     _liveFail = false;
     _liveTs   = Date.now();
     _setFetchStatus('live-status', true, _liveTs);
