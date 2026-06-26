@@ -3493,8 +3493,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   function _opsUpdateRacetrack(live) {
     var el = document.getElementById('ops-racetrack-lanes');
     if (!el || !live) return;
-    var hlOpen   = (live.hl   && live.hl.open_trades)   ? live.hl.open_trades   : [];
-    var mxOpen   = (live.mexc && live.mexc.open_trades)  ? live.mexc.open_trades : [];
+    var hlOpen   = (live.hl   && live.hl.open_trades)   ? Object.values(live.hl.open_trades)   : [];
+    var mxOpen   = (live.mexc && live.mexc.open_trades)  ? Object.values(live.mexc.open_trades)  : [];
     var allTrades = hlOpen.map(function(t){return{t:t,venue:'hl'};})
                   .concat(mxOpen.map(function(t){return{t:t,venue:'mexc'};}));
     if (allTrades.length === 0) {
