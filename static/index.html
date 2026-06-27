@@ -3788,8 +3788,6 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var d = live[v.key];
         if (!d) { regimeHtml += "<div></div>"; return; }
         var btcVal   = (d.btc_j1h != null) ? (+d.btc_j1h).toFixed(1) : "--";
-        var longMax  = (d.btc_j1h_long_max  != null) ? d.btc_j1h_long_max  : 70;
-        var shortMax = (d.btc_j1h_short_max != null) ? d.btc_j1h_short_max : 90;
         var longBlk  = !!d.regime_block_long;
         var shortBlk = !!d.regime_block_short;
         var longPill  = longBlk
@@ -3807,11 +3805,9 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
             "</div>" +
             "<div style=\"display:flex;gap:8px;align-items:center\">" +
               "<span style=\"font-size:9px;color:#64748b\">LONG</span>" + longPill +
-              "<span style=\"font-size:9px;color:#64748b;margin-left:4px\">(&gt;" + longMax + ")</span>" +
             "</div>" +
             "<div style=\"display:flex;gap:8px;align-items:center;margin-top:4px\">" +
               "<span style=\"font-size:9px;color:#64748b\">SHORT</span>" + shortPill +
-              "<span style=\"font-size:9px;color:#64748b;margin-left:4px\">(>=" + shortMax + ")</span>" +
             "</div>" +
           "</div>";
       });
@@ -3822,12 +3818,10 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       ["hl","mexc"].forEach(function(vk) {
         var d = live[vk];
         if (!d || !d.pair_states) return;
-        var longBlk  = !!d.regime_block_long;
-        var shortBlk = !!d.regime_block_short;
         d.pair_states.forEach(function(ps) {
           var sym = ps.symbol || "?";
           if (!allPairs[sym]) allPairs[sym] = {};
-          allPairs[sym][vk] = {ps: ps, longBlk: longBlk, shortBlk: shortBlk};
+          allPairs[sym][vk] = {ps: ps};
         });
       });
 
@@ -3837,16 +3831,16 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       }
       function _diagRow(sym, vk, entry) {
         var ps       = entry.ps;
-        var longBlk  = entry.longBlk;
-        var shortBlk = entry.shortBlk;
         var j1h  = ps.j1h    != null ? +ps.j1h    : 50;
         var adx  = ps.adx1h  != null ? +ps.adx1h  : 0;
         var kf   = ps.stoch_k_fast != null ? +ps.stoch_k_fast : 50;
         var df   = ps.stoch_d_fast != null ? +ps.stoch_d_fast : 50;
         var bid  = ps.bid_pct != null ? +ps.bid_pct : 0;
         var ask  = ps.ask_pct != null ? +ps.ask_pct : 0;
-        var lScore = ps.long_score  != null ? +ps.long_score  : 0;
-        var sScore = ps.short_score != null ? +ps.short_score : 0;
+        var lScore  = ps.long_score   != null ? +ps.long_score   : 0;
+        var sScore  = ps.short_score  != null ? +ps.short_score  : 0;
+        var cdLong  = ps.cooldown_long  != null ? +ps.cooldown_long  : 0;
+        var cdShort = ps.cooldown_short != null ? +ps.cooldown_short : 0;
         // Gate pass logic
         var adxLong    = adx >= 20;
         var j1hLong    = true;
@@ -3855,8 +3849,9 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var stochShort = kf > 75 && kf <= 84 && kf < df;
         var depthLong  = bid >= 55;
         var depthShort = ask >= 55;
-        var longReady  = lScore >= 4 && !longBlk;
-        var shortReady = sScore >= 4 && !shortBlk;
+        var longReady  = lScore >= 4;
+        var shortReady = sScore >= 4;
+        var killCd     = cdLong > 0 || cdShort > 0;
         // Borderline: within 5 units of threshold
         var adxBdr    = !adxLong    && adx >= 15;
         var j1hSBdr   = !j1hShort  && ((j1h >= 55 && j1h <= 60) || (j1h >= 89 && j1h <= 94));
@@ -3866,13 +3861,13 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var depthSBdr = !depthShort && ask >= 50;
         // Status
         var status, statColor;
-        if (longBlk && shortBlk)      { status = "REGIME BLK";  statColor = "#475569"; }
-        else if (longReady && shortReady) { status = "L+S READY";  statColor = "#a855f7"; }
-        else if (longReady)            { status = "LONG READY";  statColor = "#22c55e"; }
-        else if (shortReady)           { status = "SHORT READY"; statColor = "#f97316"; }
-        else if (lScore >= 2 || sScore >= 2) { status = "WATCHING"; statColor = "#f59e0b"; }
-        else                           { status = "QUIET";       statColor = "#334155"; }
-        var dimStyle = (longBlk && shortBlk) ? ";opacity:0.45" : "";
+        if (longReady && shortReady)         { status = "BOTH READY";  statColor = "#a855f7"; }
+        else if (longReady)                  { status = "LONG READY";  statColor = "#22c55e"; }
+        else if (shortReady)                 { status = "SHORT READY"; statColor = "#f97316"; }
+        else if (killCd)                     { status = "KILL CD";     statColor = "#94a3b8"; }
+        else if (lScore >= 2 || sScore >= 2) { status = "WATCHING";   statColor = "#f59e0b"; }
+        else                                 { status = "BLOCKED";     statColor = "#334155"; }
+        var dimStyle = killCd ? ";opacity:0.55" : "";
         var vTag = vk === "hl"
           ? "<span style=\"color:#a855f7;font-size:8px\">[H]</span>"
           : "<span style=\"color:#f97316;font-size:8px\">[M]</span>";
