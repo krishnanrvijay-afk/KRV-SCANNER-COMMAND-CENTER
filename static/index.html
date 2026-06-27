@@ -1022,18 +1022,6 @@ body {
   @keyframes opsHorseDot { 0%,100%{box-shadow:0 0 6px currentColor;opacity:1} 50%{box-shadow:0 0 14px currentColor;opacity:.7} }
   .ops-lane-pnl { font-size:11px; font-weight:700; width:64px; text-align:right; flex-shrink:0; }
   .ops-no-positions { text-align:center; padding:28px; font-size:13px; font-weight:700; color:rgba(255,255,255,0.35); letter-spacing:.1em; }
-  /* hourly chart */
-  .ops-hourly-chart { display:flex; align-items:flex-end; gap:3px; height:80px; padding-bottom:20px; position:relative; }
-  .ops-hour-col { display:flex; flex-direction:column; align-items:center; flex:1; gap:1px; position:relative; height:100%; justify-content:flex-end; }
-  .ops-hour-bar-hl   { width:100%; background:rgba(168,85,247,0.7); border-radius:2px 2px 0 0; min-height:2px; }
-  .ops-hour-bar-mexc { width:100%; background:rgba(249,115,22,0.7); border-radius:2px 2px 0 0; min-height:2px; }
-  .ops-hour-label { position:absolute; bottom:-18px; font-size:8px; font-weight:600; color:rgba(255,255,255,0.35); }
-  .ops-hour-col.ops-now .ops-hour-bar-hl   { background:#a855f7; filter:drop-shadow(0 0 4px #a855f7); animation:opsNowGlow 1.5s ease-in-out infinite alternate; }
-  .ops-hour-col.ops-now .ops-hour-bar-mexc { background:#f97316; filter:drop-shadow(0 0 4px #f97316); }
-  @keyframes opsNowGlow { from{filter:drop-shadow(0 0 3px #a855f7)} to{filter:drop-shadow(0 0 9px #a855f7)} }
-  .ops-hourly-legend { display:flex; gap:16px; margin-top:24px; }
-  .ops-legend-item { display:flex; align-items:center; gap:5px; font-size:10px; font-weight:700; color:rgba(255,255,255,0.55); }
-  .ops-legend-dot { width:8px;height:8px;border-radius:2px; }
   /* exit breakdown */
   .ops-exit-row { margin-bottom:10px; }
   .ops-exit-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
@@ -3665,23 +3653,6 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     el.innerHTML = h;
   }
 
-  function _opsUpdateHourly(data) {
-    var el = document.getElementById('ops-hourly-chart');
-    if (!el || !data || !data.length) return;
-    var maxCount = Math.max(1, Math.max.apply(null, data.map(function(d){return (d.hl||0)+(d.mexc||0);})));
-    var nowHour  = new Date().toLocaleString('en-US',{timeZone:'America/New_York',hour:'numeric',hour12:false}) | 0;
-    el.innerHTML = data.map(function(d){
-      var total = (d.hl||0) + (d.mexc||0);
-      var hlH   = Math.max(2, Math.round((d.hl||0)/maxCount*70));
-      var mxH   = Math.max(2, Math.round((d.mexc||0)/maxCount*70));
-      var isNow = d.hour === nowHour;
-      return '<div class="ops-hour-col' + (isNow?' ops-now':'') + '">'
-        + (d.hl>0 ? '<div class="ops-hour-bar-hl" style="height:'+hlH+'px"></div>' : '')
-        + (d.mexc>0 ? '<div class="ops-hour-bar-mexc" style="height:'+mxH+'px"></div>' : '')
-        + '<span class="ops-hour-label">' + (d.hour%6===0 ? d.hour : '') + '</span>'
-        + '</div>';
-    }).join('');
-  }
 
   function _opsUpdateExitBreakdown(data) {
     var el = document.getElementById('ops-exit-breakdown');
@@ -3785,14 +3756,12 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     if (!_opsPanelEl || _opsPanelEl.style.display === 'none') return;
     if (!live) return;
     try {
-      var [anaRes, hourlyRes, exitRes] = await Promise.all([
+      var [anaRes, exitRes] = await Promise.all([
         fetch('/api/analytics?range=today', {credentials:'include'}),
-        fetch('/api/hourly_activity',       {credentials:'include'}),
         fetch('/api/exit_breakdown',        {credentials:'include'}),
       ]);
-      if (anaRes.ok)    _opsUpdateVenueCards(await anaRes.json(), live);
-      if (hourlyRes.ok) _opsUpdateHourly(await hourlyRes.json());
-      if (exitRes.ok)   _opsUpdateExitBreakdown(await exitRes.json());
+      if (anaRes.ok)  _opsUpdateVenueCards(await anaRes.json(), live);
+      if (exitRes.ok) _opsUpdateExitBreakdown(await exitRes.json());
     } catch(e) {}
     var liveEl = document.getElementById('ops-hl-open');
     if (liveEl && live !== null && typeof live !== 'undefined') {
@@ -4072,40 +4041,31 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         </div>
       </section>
 
-      <!-- Section 3: Hourly Activity -->
-      <section class="ops-section">
-        <div class="ops-section-accent"></div>
-        <h2 class="ops-section-title">HOURLY ACTIVITY &#x2014; TODAY ET</h2>
-        <div class="ops-hourly-chart" id="ops-hourly-chart"></div>
-        <div class="ops-hourly-legend">
-          <div class="ops-legend-item"><div class="ops-legend-dot" style="background:#a855f7"></div>HYPERLIQUID</div>
-          <div class="ops-legend-item"><div class="ops-legend-dot" style="background:#f97316"></div>MEXC</div>
-        </div>
-      </section>
 
-      <!-- Section 4: Exit Breakdown -->
-      <section class="ops-section">
-        <div class="ops-section-accent"></div>
-        <h2 class="ops-section-title">EXIT BREAKDOWN &#x2014; TODAY</h2>
-        <div id="ops-exit-breakdown">
-          <div class="ops-no-positions" style="padding:12px">LOADING...</div>
-        </div>
-      </section>
-
-      <!-- Section 5: Gate Activity Feed -->
-      <section class="ops-section">
-        <div class="ops-section-accent"></div>
-        <h2 class="ops-section-title">GATE ACTIVITY FEED</h2>
-        <div class="ops-pills-row">
-          <div class="ops-pill ops-pill-adx" style="flex-direction:column;align-items:flex-start;gap:1px"><span>ADX &lt;15 <span class="ops-pill-count" id="ops-cnt-adx">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
-          <div class="ops-pill ops-pill-j1h" style="flex-direction:column;align-items:flex-start;gap:1px"><span>J1H FLOOR <span class="ops-pill-count" id="ops-cnt-j1h">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
-          <div class="ops-pill ops-pill-stoch" style="flex-direction:column;align-items:flex-start;gap:1px"><span>STOCH BLOCK <span class="ops-pill-count" id="ops-cnt-stoch">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
-          <div class="ops-pill ops-pill-cool" style="flex-direction:column;align-items:flex-start;gap:1px"><span>COOLDOWN <span class="ops-pill-count" id="ops-cnt-cool">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
-        </div>
-        <div class="ops-gate-feed" id="ops-gate-feed">
-          <div class="ops-no-positions" style="padding:10px">AWAITING GATE EVENTS...</div>
-        </div>
-      </section>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 16px">
+        <!-- Exit Breakdown -->
+        <section class="ops-section" style="margin:0">
+          <div class="ops-section-accent"></div>
+          <h2 class="ops-section-title">EXIT BREAKDOWN &#x2014; TODAY</h2>
+          <div id="ops-exit-breakdown">
+            <div class="ops-no-positions" style="padding:12px">LOADING...</div>
+          </div>
+        </section>
+        <!-- Gate Activity Feed -->
+        <section class="ops-section" style="margin:0">
+          <div class="ops-section-accent"></div>
+          <h2 class="ops-section-title">GATE ACTIVITY FEED</h2>
+          <div class="ops-pills-row">
+            <div class="ops-pill ops-pill-adx" style="flex-direction:column;align-items:flex-start;gap:1px"><span>ADX &lt;15 <span class="ops-pill-count" id="ops-cnt-adx">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+            <div class="ops-pill ops-pill-j1h" style="flex-direction:column;align-items:flex-start;gap:1px"><span>J1H FLOOR <span class="ops-pill-count" id="ops-cnt-j1h">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+            <div class="ops-pill ops-pill-stoch" style="flex-direction:column;align-items:flex-start;gap:1px"><span>STOCH BLOCK <span class="ops-pill-count" id="ops-cnt-stoch">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+            <div class="ops-pill ops-pill-cool" style="flex-direction:column;align-items:flex-start;gap:1px"><span>COOLDOWN <span class="ops-pill-count" id="ops-cnt-cool">0</span></span><span class="ops-pill-subtitle">today &middot; all scans</span></div>
+          </div>
+          <div class="ops-gate-feed" id="ops-gate-feed">
+            <div class="ops-no-positions" style="padding:10px">AWAITING GATE EVENTS...</div>
+          </div>
+        </section>
+      </div>
     </div>
   
 
