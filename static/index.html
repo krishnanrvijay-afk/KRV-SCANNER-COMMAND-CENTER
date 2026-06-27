@@ -941,6 +941,10 @@ body {
     .sess-dir-sheet-table td { padding: 8px 8px; border-bottom: 1px solid #0c0c0c; font-weight: 700; font-size: 13px; font-family: var(--mono); color: #ffffff; }
     .sess-dir-sheet-table tr:last-child td { border-bottom: none; }
     .sess-dir-total-row td { color: #22d3ee; }
+    .fl-v-stats { display:flex; gap:6px; align-items:center; margin-top:8px; flex-wrap:wrap; padding-top:8px; border-top:1px solid rgba(255,255,255,0.07); }
+    .fl-stat-wr  { font-size:11px; font-weight:700; }
+    .fl-stat-sep { color:rgba(255,255,255,0.25); font-size:10px; font-weight:600; }
+    .fl-stat-txt { font-size:11px; font-weight:600; color:#ffffff; }
 
 
   /* ── OPERATIONS TAB ─────────────────────────────────────── */
@@ -998,35 +1002,6 @@ body {
   .ops-section-accent { height:2px; background:linear-gradient(90deg,#f97316,#a855f7,transparent); border-radius:1px; margin:-20px -20px 16px; animation:opsAccentSlide 4s linear infinite; background-size:200%; }
   @keyframes opsAccentSlide { from{background-position:0%} to{background-position:200%} }
   .ops-section-title { font-family:"Bebas Neue",sans-serif; font-size:18px; letter-spacing:.12em; color:#fff; margin:0 0 16px; }
-  /* venue scorecards */
-  .ops-venue-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .ops-venue-card { position:relative; border-radius:10px; padding:18px; overflow:hidden; border:1px solid rgba(255,255,255,0.10); }
-  .ops-hl-card   { background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(168,85,247,0.04)); border-color:rgba(168,85,247,0.35); }
-  .ops-mexc-card { background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(249,115,22,0.04)); border-color:rgba(249,115,22,0.35); }
-  .ops-venue-shine { position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);animation:opsShine 5s ease-in-out infinite; }
-  .ops-hl-card   .ops-venue-shine { animation-delay:0s; }
-  .ops-mexc-card .ops-venue-shine { animation-delay:2.5s; }
-  @keyframes opsShine { 0%{left:-100%} 60%{left:150%} 100%{left:150%} }
-  .ops-venue-header { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
-  .ops-venue-name { font-family:"Bebas Neue",sans-serif; font-size:16px; letter-spacing:.1em; color:#fff; }
-  .ops-live-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; animation:opsLiveDot 1.6s ease-in-out infinite; }
-  .ops-hl-card   .ops-live-dot { background:#a855f7; }
-  .ops-mexc-card .ops-live-dot { background:#f97316; }
-  @keyframes opsLiveDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.5} }
-  .ops-venue-stat { margin-bottom:8px; }
-  .ops-venue-stat-label { font-size:10px; font-weight:700; color:rgba(255,255,255,0.55); letter-spacing:.08em; }
-  .ops-venue-stat-val { font-size:22px; font-weight:700; color:#fff; line-height:1.1; }
-  .ops-venue-pnl-pos { color:#4ade80; }
-  .ops-venue-pnl-neg { color:#f87171; }
-  .ops-venue-pnl-big { font-family:"Bebas Neue",sans-serif; font-size:32px; font-weight:700; line-height:1; }
-  .ops-wr-line { font-size:10px; font-weight:700; margin-top:4px; margin-bottom:6px; }
-  .ops-session-pills-row { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
-  .ops-ls-bar-wrap { height:4px; border-radius:2px; overflow:hidden; background:rgba(255,255,255,0.08); margin-top:10px; }
-  .ops-ls-bar-long { height:100%; background:#22c55e; }
-  .ops-ls-label { font-size:7px; font-weight:600; color:rgba(255,255,255,0.45); margin-top:3px; }
-  .ops-venue-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin-top:10px; }
-  .ops-venue-mini-label { font-size:10px; font-weight:600; color:rgba(255,255,255,0.45); }
-  .ops-venue-mini-val   { font-size:14px; font-weight:700; color:#fff; }
   /* racetrack */
   .ops-racetrack { position:relative; border-radius:8px; overflow:hidden; padding:8px 0; }
   .ops-racetrack-rail { height:2px; background:linear-gradient(90deg,#f97316,#a855f7,#f97316); background-size:200%; border-radius:1px; margin-bottom:12px; animation:opsRailSlide 3s linear infinite; }
@@ -1104,7 +1079,7 @@ body {
   @keyframes redpulse { 0%,100%{border-left-color:rgba(239,68,68,0.8)} 50%{border-left-color:rgba(239,68,68,0.3)} }
   .ops-pill-subtitle { font-size:7px; font-weight:600; opacity:0.45; letter-spacing:.04em; }
   .ops-header-time { font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:700; color:rgba(255,255,255,0.5); margin-left:auto; }
-  @media(max-width:600px) { .ops-venue-row{grid-template-columns:1fr;} }
+
   
   /* -- SIGNAL RADAR -- */
   .radar-zone-pills{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
@@ -1198,6 +1173,13 @@ body {
           <div class="fl-vit"><span class="fl-vit-label">OPEN</span><span class="fl-vit-val" id="fl-hl-open">&#x2014;</span></div>
           <div class="fl-vit"><span class="fl-vit-label">SCANS</span><span class="fl-vit-val" id="fl-hl-scans">&#x2014;</span></div>
         </div>
+        <div class="fl-v-stats">
+          <span class="fl-stat-wr" id="fl-hl-wr" style="color:#ffffff">--</span>
+          <span class="fl-stat-sep">&middot;</span>
+          <span class="fl-stat-txt" id="fl-hl-signals">-- signals</span>
+          <span class="fl-stat-sep">&middot;</span>
+          <span class="fl-stat-txt" id="fl-hl-closed">-- closed</span>
+        </div>
       </div>
       <div class="fl-beam-col">
         <div class="fl-beam-track">
@@ -1230,6 +1212,13 @@ body {
           <div class="fl-vit"><span class="fl-vit-label">DAILY P&amp;L</span><span class="fl-vit-val" id="fl-mx-pnl">&#x2014;</span></div>
           <div class="fl-vit"><span class="fl-vit-label">OPEN</span><span class="fl-vit-val" id="fl-mx-open">&#x2014;</span></div>
           <div class="fl-vit"><span class="fl-vit-label">SCANS</span><span class="fl-vit-val" id="fl-mx-scans">&#x2014;</span></div>
+        </div>
+        <div class="fl-v-stats">
+          <span class="fl-stat-wr" id="fl-mx-wr" style="color:#ffffff">--</span>
+          <span class="fl-stat-sep">&middot;</span>
+          <span class="fl-stat-txt" id="fl-mx-signals">-- signals</span>
+          <span class="fl-stat-sep">&middot;</span>
+          <span class="fl-stat-txt" id="fl-mx-closed">-- closed</span>
         </div>
       </div>
     </div>
@@ -1758,10 +1747,10 @@ function renderFleetLink() {
   var mpEl = document.getElementById("fl-mx-pnl");
   if (mpEl) { mpEl.textContent = _flFmt(mxPnl); mpEl.className = "fl-vit-val" + (mxPnl!=null?(mxPnl>=0?" pos":" neg"):""); }
   var el;
-  el=document.getElementById("fl-hl-open");   if(el) el.textContent=hlOpen;
-  el=document.getElementById("fl-mx-open");   if(el) el.textContent=mxOpen;
-  el=document.getElementById("fl-hl-scans");  if(el) el.textContent=hlScans;
-  el=document.getElementById("fl-mx-scans");  if(el) el.textContent=mxScans;
+  el=document.getElementById("fl-hl-open");   if(el) el.textContent=live.hl   ? hlOpen  : "—";
+  el=document.getElementById("fl-mx-open");   if(el) el.textContent=live.mexc ? mxOpen  : "—";
+  el=document.getElementById("fl-hl-scans");  if(el) el.textContent=live.hl   ? hlScans : "—";
+  el=document.getElementById("fl-mx-scans");  if(el) el.textContent=live.mexc ? mxScans : "—";
   var flPnl = (hlPnl!=null||mxPnl!=null) ? (hlPnl||0)+(mxPnl||0) : null;
   var bpEl=document.getElementById("fl-beam-pnl");
   if(bpEl){bpEl.textContent=_flFmt(flPnl);bpEl.className="fl-beam-pnl"+(flPnl!=null?(flPnl>=0?" pos":" neg"):"");}
@@ -1782,6 +1771,19 @@ function renderFleetLink() {
     var gbg = both ? "rgba(0,230,118,0.08)" : one ? "rgba(255,179,0,0.08)" : "rgba(255,77,77,0.08)";
     tagEl.style.color=gc; tagEl.style.borderColor=gbd; tagEl.style.background=gbg;
     var dot=tagEl.querySelector(".fl-live-dot"); if(dot) dot.style.background=gc;
+  }
+  // -- Fleet Link per-vessel stats from analytics --
+  if (typeof analytics !== 'undefined' && analytics) {
+    var _aHl = analytics.hl || {}, _aMx = analytics.mexc || {};
+    function _flWrCol(p) { return p >= 65 ? '#22c55e' : p >= 50 ? '#fbbf24' : '#ef4444'; }
+    var hwp = Math.round((_aHl.win_rate || 0) * 100);
+    var mwp = Math.round((_aMx.win_rate || 0) * 100);
+    el=document.getElementById('fl-hl-wr');      if(el){el.textContent='WR '+hwp+'%'; el.style.color=_flWrCol(hwp);}
+    el=document.getElementById('fl-hl-signals'); if(el) el.textContent=(_aHl.trade_count||0)+' signals';
+    el=document.getElementById('fl-hl-closed');  if(el) el.textContent=(_aHl.trade_count||0)+' closed';
+    el=document.getElementById('fl-mx-wr');      if(el){el.textContent='WR '+mwp+'%'; el.style.color=_flWrCol(mwp);}
+    el=document.getElementById('fl-mx-signals'); if(el) el.textContent=(_aMx.trade_count||0)+' signals';
+    el=document.getElementById('fl-mx-closed');  if(el) el.textContent=(_aMx.trade_count||0)+' closed';
   }
 }
 setInterval(function() {
@@ -1838,6 +1840,7 @@ function renderFleet() {
     ${barHTML({label:'LONG PAIRS',  fill:clamp(f.long_distinct/10,0,1),  color:C.hl,   value:f.long_distinct+'/10',  verdict:null})}
     ${barHTML({label:'SHORT PAIRS', fill:clamp(f.short_distinct/10,0,1), color:C.mexc, value:f.short_distinct+'/10', verdict:null})}
   `;
+  if (typeof live !== 'undefined' && live) renderFleetLink();
 }
 function barHTML(b) {
   const vCls = b.verdict ? (b.verdict === 'PASS' ? 'pass' : 'fail') : '';
@@ -3481,62 +3484,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   }
 
   function _opsUpdateVenueCards(analytics, live) {
-    if (!analytics) return;
-    var hl = analytics.hl || {}, mx = analytics.mexc || {};
-    var sessions = analytics.sessions || [];
-    var fleet = analytics.fleet || {};
-    function pnlHtml(v) {
-      if (!v || v === 0) return '<span style="color:#ffffff;opacity:0.4">$0.00</span>';
-      if (v > 0) return '<span style="color:#22c55e;text-shadow:0 0 20px rgba(34,197,94,0.8),0 0 40px rgba(34,197,94,0.4)">$' + Math.abs(v).toFixed(2) + '</span>';
-      return '<span style="color:#ef4444;text-shadow:0 0 20px rgba(239,68,68,0.8),0 0 40px rgba(239,68,68,0.4)">$' + Math.abs(v).toFixed(2) + '</span>';
-    }
-    function wrHtml(wr, tc) {
-      var pct = Math.round((wr || 0) * 100);
-      var col = pct >= 65 ? '#22c55e' : (pct >= 50 ? '#fbbf24' : '#ef4444');
-      return '<span style="color:' + col + '">' + pct + '% WR &middot; ' + (tc || 0) + ' trades</span>';
-    }
-    function sessHtml(sess) {
-      var MAP = {asia:'ASIA', eu:'EU', us:'US', overnight:'NITE'};
-      return sess.map(function(s) {
-        var lp = s.long_pnl || 0, sp = s.short_pnl || 0, tot = lp + sp;
-        if (lp === 0 && sp === 0) return '';
-        var col  = tot >= 0 ? '#22c55e' : '#ef4444';
-        var name = MAP[s.session] || (s.session||'').toUpperCase();
-        return '<span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:' + col + '">' + name + ' $' + Math.abs(tot).toFixed(2) + '</span>';
-      }).join('');
-    }
-    function updateLsBar(lc, sc, prefix) {
-      var total = (lc || 0) + (sc || 0);
-      var lPct = total > 0 ? Math.round((lc || 0) / total * 100) : 50;
-      var sPct = 100 - lPct;
-      var longEl = document.getElementById(prefix + '-ls-long');
-      if (longEl) longEl.style.width = lPct + '%';
-      _opsSetEl(prefix + '-ls-label', 'L ' + lPct + '% &middot; S ' + sPct + '%');
-    }
-    var hlPnl = hl.pnl || 0;
-    var mxPnl = mx.pnl || 0;
-    var hlOpen = live ? _opsOpenLen(live.hl)   : 0;
-    var mxOpen = live ? _opsOpenLen(live.mexc) : 0;
-    _opsSetEl('ops-hl-pnl',      pnlHtml(hlPnl));
-    _opsSetEl('ops-hl-signals',  hl.trade_count || 0);
-    _opsSetEl('ops-hl-closed',   hl.trade_count || 0);
-    _opsSetEl('ops-hl-wr',       Math.round((hl.win_rate || 0) * 100) + '%');
-    _opsSetEl('ops-hl-open',     hlOpen);
-    _opsSetEl('ops-hl-wr-line',  wrHtml(hl.win_rate, hl.trade_count));
-    _opsSetEl('ops-hl-sessions', sessHtml(sessions));
-    _opsSetEl('ops-mx-pnl',      pnlHtml(mxPnl));
-    _opsSetEl('ops-mx-signals',  mx.trade_count || 0);
-    _opsSetEl('ops-mx-closed',   mx.trade_count || 0);
-    _opsSetEl('ops-mx-wr',       Math.round((mx.win_rate || 0) * 100) + '%');
-    _opsSetEl('ops-mx-open',     mxOpen);
-    _opsSetEl('ops-mx-wr-line',  wrHtml(mx.win_rate, mx.trade_count));
-    _opsSetEl('ops-mx-sessions', sessHtml(sessions));
-    var hlL = hl.long_count  != null ? hl.long_count  : (fleet.long_count  || 0);
-    var hlS = hl.short_count != null ? hl.short_count : (fleet.short_count || 0);
-    var mxL = mx.long_count  != null ? mx.long_count  : (fleet.long_count  || 0);
-    var mxS = mx.short_count != null ? mx.short_count : (fleet.short_count || 0);
-    updateLsBar(hlL, hlS, 'ops-hl');
-    updateLsBar(mxL, mxS, 'ops-mx');
+    // venue scorecards section removed — per-venue stats live in Fleet Link vessel cards
   }
 
   function _opsUpdateRacetrack(live) {
@@ -4100,87 +4048,13 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       <div class="ops-orb ops-orb2" id="ops-orb2"></div>
       <div class="ops-orb ops-orb3" id="ops-orb3"></div>
 
-      <!-- Section 1: Venue Scorecards -->
-      <section class="ops-section">
-        <div class="ops-section-accent"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <h2 class="ops-section-title" style="margin-bottom:0">VENUE SCORECARDS</h2>
-          <span class="ops-header-time" id="ops-clock">--:--:--</span>
-        </div>
-        <div class="ops-venue-row">
-          <div class="ops-venue-card ops-hl-card">
-            <div class="ops-venue-shine"></div>
-            <div class="ops-venue-header">
-              <span class="ops-venue-name">HYPERLIQUID</span>
-              <div class="ops-live-dot"></div>
-            </div>
-            <div class="ops-venue-stat">
-              <div class="ops-venue-stat-label">TODAY P&amp;L</div>
-              <div class="ops-venue-stat-val ops-venue-pnl-big" id="ops-hl-pnl">--</div>
-            </div>
-            <div class="ops-venue-grid">
-              <div>
-                <div class="ops-venue-mini-label">SIGNALS</div>
-                <div class="ops-venue-mini-val" id="ops-hl-signals">--</div>
-              </div>
-              <div>
-                <div class="ops-venue-mini-label">CLOSED</div>
-                <div class="ops-venue-mini-val" id="ops-hl-closed">--</div>
-              </div>
-              <div>
-                <div class="ops-venue-mini-label">WIN RATE</div>
-                <div class="ops-venue-mini-val" id="ops-hl-wr">--</div>
-              </div>
-              <div>
-                <div class="ops-venue-mini-label">OPEN</div>
-                <div class="ops-venue-mini-val" id="ops-hl-open">--</div>
-              </div>
-            </div>
-            <div class="ops-wr-line" id="ops-hl-wr-line">-- WR &middot; -- trades</div>
-            <div class="ops-session-pills-row" id="ops-hl-sessions"></div>
-            <div class="ops-ls-bar-wrap"><div style="height:100%;display:flex;overflow:hidden;border-radius:2px"><div class="ops-ls-bar-long" id="ops-hl-ls-long" style="width:50%;transition:width .5s ease"></div><div style="flex:1;background:#22d3ee;transition:flex .5s ease" id="ops-hl-ls-short"></div></div></div>
-            <div class="ops-ls-label" id="ops-hl-ls-label">L -- &middot; S --</div>
-          </div>
-          <div class="ops-venue-card ops-mexc-card">
-            <div class="ops-venue-shine"></div>
-            <div class="ops-venue-header">
-              <span class="ops-venue-name">MEXC</span>
-              <div class="ops-live-dot"></div>
-            </div>
-            <div class="ops-venue-stat">
-              <div class="ops-venue-stat-label">TODAY P&amp;L</div>
-              <div class="ops-venue-stat-val ops-venue-pnl-big" id="ops-mx-pnl">--</div>
-            </div>
-            <div class="ops-venue-grid">
-              <div>
-                <div class="ops-venue-mini-label">SIGNALS</div>
-                <div class="ops-venue-mini-val" id="ops-mx-signals">--</div>
-              </div>
-              <div>
-                <div class="ops-venue-mini-label">CLOSED</div>
-                <div class="ops-venue-mini-val" id="ops-mx-closed">--</div>
-              </div>
-              <div>
-                <div class="ops-venue-mini-label">WIN RATE</div>
-                <div class="ops-venue-mini-val" id="ops-mx-wr">--</div>
-              </div>
-              <div>
-                <div class="ops-venue-mini-label">OPEN</div>
-                <div class="ops-venue-mini-val" id="ops-mx-open">--</div>
-              </div>
-            </div>
-            <div class="ops-wr-line" id="ops-mx-wr-line">-- WR &middot; -- trades</div>
-            <div class="ops-session-pills-row" id="ops-mx-sessions"></div>
-            <div class="ops-ls-bar-wrap"><div style="height:100%;display:flex;overflow:hidden;border-radius:2px"><div class="ops-ls-bar-long" id="ops-mx-ls-long" style="width:50%;transition:width .5s ease"></div><div style="flex:1;background:#22d3ee;transition:flex .5s ease" id="ops-mx-ls-short"></div></div></div>
-            <div class="ops-ls-label" id="ops-mx-ls-label">L -- &middot; S --</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section 2: Signal Radar -->
+      <!-- Signal Radar -->
       <section class="ops-section" id="ops-radar">
         <div class="ops-section-accent"></div>
-        <h2 class="ops-section-title" style="background:linear-gradient(90deg,#a855f7,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block">&#x26A1; SIGNAL RADAR</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <h2 class="ops-section-title" style="background:linear-gradient(90deg,#a855f7,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block;margin-bottom:0">&#x26A1; SIGNAL RADAR</h2>
+          <span class="ops-header-time" id="ops-clock">--:--:--</span>
+        </div>
         <div id="ops-radar-content">
           <div class="ops-no-positions">AWAITING SIGNAL DATA...</div>
         </div>
