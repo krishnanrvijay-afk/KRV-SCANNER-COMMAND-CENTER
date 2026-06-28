@@ -2680,7 +2680,31 @@ function renderLog() {
         const rvCol  = rvV != null ? (rvV >= 0 ? C.green : C.red) : '#ffffff';
         const dur    = fmtDur(r.duration_seconds);
         const exitStr = r.exit_reason || '—';
-        const tier    = r.tier || '—';
+          const tier    = r.tier || '—';
+
+          // Killzone pill — KILL exits
+          let kzPill = '';
+          if (r.exit_reason === 'KILL') {
+            const rd = encodeURIComponent(JSON.stringify({
+              venue: r._venue, pair: r.pair, direction: r.direction,
+              exit_reason: r.exit_reason, exit_price: r.exit_price,
+              entry_price: r.entry_price, close_time: r.close_time,
+              mfe_r: r.mfe_r, mae_r: r.mae_r, pnl_dollars: r.pnl_dollars
+            }));
+            kzPill = `<span onclick="event.stopPropagation();openKzSheet('${rd}')" style="display:inline-block;margin-left:4px;padding:1px 5px;background:#1e3a5f;color:#38bdf8;border:1px solid #38bdf8;border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.05em;font-family:'JetBrains Mono',monospace">KILLZONE</span>`;
+          }
+
+          // EJAC 10 pill — PEAK_DECAY_10 exits
+          let ejacPill = '';
+          if (r.exit_reason === 'PEAK_DECAY_10') {
+            const rd = encodeURIComponent(JSON.stringify({
+              venue: r._venue, pair: r.pair, direction: r.direction,
+              exit_reason: r.exit_reason, exit_price: r.exit_price,
+              entry_price: r.entry_price, close_time: r.close_time,
+              mfe_r: r.mfe_r, mae_r: r.mae_r, pnl_dollars: r.pnl_dollars
+            }));
+            ejacPill = `<span onclick="event.stopPropagation();openKzSheet('${rd}')" style="display:inline-block;margin-left:4px;padding:1px 5px;background:#1a1a00;color:#fbbf24;border:1px solid #fbbf24;border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.05em;font-family:'JetBrains Mono',monospace">EJAC 10</span>`;
+          }
 
         const maeV   = r.mae_r != null ? parseFloat(r.mae_r) : null;
         const maeStr = maeV != null ? fmtNum(maeV, 2) + 'R' : '—';
@@ -2698,7 +2722,7 @@ function renderLog() {
           <td style="color:#ffffff;font-weight:700;font-size:11px">${tier}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${sessStr}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${closeFmt}</td>
-          <td style="color:#ffffff;font-weight:700;font-size:11px;letter-spacing:.03em">${exitStr}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px;letter-spacing:.03em">${exitStr}${kzPill}${ejacPill}</td>
           <td style="color:${pnlCol};font-weight:700">${pnlStr}</td>
           <td style="color:${rvCol};font-weight:700">${rvStr}</td>
           <td style="color:${maeCol};font-weight:700;font-size:11px">${maeStr}</td>
@@ -3314,6 +3338,158 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   
     function openSentinelSheet()  { document.getElementById('sentinel-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; loadSentinelCoverage(); }
     function closeSentinelSheet() { document.getElementById('sentinel-scrim').classList.remove('open'); document.body.style.overflow = ''; }
+
+      function closeKzSheet() {
+        document.getElementById('kz-scrim').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      async function openKzSheet(rdEncoded) {
+        const r = JSON.parse(decodeURIComponent(rdEncoded));
+        const isKill = r.exit_reason === 'KILL';
+        const isEjac = r.exit_reason === 'PEAK_DECAY_10';
+
+        // Set title
+        const titleEl = document.getElementById('kz-sheet-title');
+        titleEl.textContent = isKill ? 'KILLZONE' : 'EJAC 10';
+        titleEl.style.color = isKill ? '#38bdf8' : '#fbbf24';
+
+        // Open sheet with loading state
+        const body = document.getElementById('kz-sheet-body');
+        body.innerHTML = '<div style="color:#666;padding:24px;text-align:center">FETCHING CANDLES...</div>';
+        document.getElementById('kz-scrim').classList.add('open');
+        document.body.style.overflow = 'hidden';
+
+        try {
+          const closeMs = new Date(r.close_time).getTime();
+          const endMs   = closeMs + 1800000;
+          let candles   = [];
+
+          if (r.venue === 'hl') {
+            // Hyperliquid public API
+            const res = await fetch('https://api.hyperliquid.xyz/info', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                type: 'candleSnapshot',
+                req: { coin: r.pair, interval: '1m', startTime: closeMs, endTime: endMs }
+              })
+            });
+            const data = await res.json();
+            candles = (data || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }));
+          } else {
+            // MEXC futures public API
+            const startSec = Math.floor(closeMs / 1000);
+            const endSec   = Math.floor(endMs   / 1000);
+            const res = await fetch(
+              'https://contract.mexc.com/api/v1/contract/kline/' + r.pair +
+              '?interval=Min1&start=' + startSec + '&end=' + endSec);
+            const data = await res.json();
+            const arr  = (data && data.data) ? data.data : [];
+            candles = arr.map(c => ({ t: +c[0] * 1000, o: +c[1], h: +c[3], l: +c[4], c: +c[2] }));
+          }
+
+          if (!candles.length) {
+            body.innerHTML = '<div style="color:#666;padding:24px;text-align:center">NO CANDLE DATA AVAILABLE</div>';
+            return;
+          }
+
+          const exitPrice = +r.exit_price || 0;
+          const isLong    = r.direction === 'LONG';
+
+          function candleAt(minutesAfter) {
+            const targetMs = closeMs + (minutesAfter * 60000);
+            const c = candles.find(x => x.t >= targetMs);
+            return c ? c.c : null;
+          }
+
+          const p2  = candleAt(2);
+          const p5  = candleAt(5);
+          const p10 = candleAt(10);
+          const p15 = candleAt(15);
+          const p30 = candleAt(30);
+
+          const low30  = Math.min(...candles.map(c => c.l));
+          const high30 = Math.max(...candles.map(c => c.h));
+
+          const dec = exitPrice < 0.01 ? 6 : exitPrice < 1 ? 5 : exitPrice < 100 ? 4 : 2;
+          function fmtPrice(price) {
+            return price == null ? '--' : price.toFixed(dec);
+          }
+          function fmtDelta(price) {
+            if (price == null) return '--';
+            const delta = price - exitPrice;
+            const pct   = (delta / exitPrice) * 100;
+            const sign  = delta >= 0 ? '+' : '';
+            const col   = isLong
+              ? (delta > 0 ? '#22c55e' : '#ef4444')
+              : (delta < 0 ? '#22c55e' : '#ef4444');
+            return '<span style="color:' + col + '">' + sign + pct.toFixed(2) + '%</span>';
+          }
+
+          const p30delta = p30 ? (p30 - exitPrice) / exitPrice : 0;
+          let verdict, verdictColor;
+          if (isKill) {
+            const killCorrect = isLong ? p30delta < -0.001 : p30delta > 0.001;
+            verdict      = killCorrect ? '✅ KILL CORRECT' : '⚠️ KILL MISS — signal was right';
+            verdictColor = killCorrect ? '#22c55e' : '#f59e0b';
+          } else {
+            const ejacCorrect = isLong ? p30delta < -0.001 : p30delta > 0.001;
+            verdict      = ejacCorrect ? '✅ EJAC OPTIMAL — reversal confirmed' : '⚠️ LEFT MONEY — price continued';
+            verdictColor = ejacCorrect ? '#22c55e' : '#f59e0b';
+          }
+
+          const bestMove = isLong
+            ? 'LOW 30m: ' + fmtPrice(low30) + ' ' + fmtDelta(low30)
+            : 'HIGH 30m: ' + fmtPrice(high30) + ' ' + fmtDelta(high30);
+          const pairLabel = r.pair.replace('_USDT', '');
+          const exitLabel = isKill ? 'KILL EXIT' : 'DECAY EXIT';
+          const pnlSign   = (+r.pnl_dollars || 0) >= 0 ? '+' : '';
+
+          body.innerHTML =
+            '<div style="margin-bottom:12px">' +
+              '<span style="color:#666;font-size:10px">' +
+                r.venue.toUpperCase() + ' · ' + pairLabel + ' · ' + r.direction +
+              '</span>' +
+              '<div style="color:#fff;font-weight:700;font-size:13px;margin-top:2px">' +
+                exitLabel + ' @ ' + fmtPrice(exitPrice) +
+              '</div>' +
+              '<div style="color:#666;font-size:10px;margin-top:2px">' +
+                'MFE ' + (r.mfe_r || 0) + 'R · PnL ' + pnlSign + '$' + (+r.pnl_dollars || 0).toFixed(2) +
+              '</div>' +
+            '</div>' +
+            '<table style="width:100%;border-collapse:collapse;margin-bottom:16px">' +
+              '<thead>' +
+                '<tr style="color:#666;font-size:10px;border-bottom:1px solid #1a1a1a">' +
+                  '<th style="text-align:left;padding:4px 0">EXIT</th>' +
+                  '<th style="text-align:right;padding:4px 0">+2m</th>' +
+                  '<th style="text-align:right;padding:4px 0">+5m</th>' +
+                  '<th style="text-align:right;padding:4px 0">+10m</th>' +
+                  '<th style="text-align:right;padding:4px 0">+15m</th>' +
+                  '<th style="text-align:right;padding:4px 0">+30m</th>' +
+                '</tr>' +
+              '</thead>' +
+              '<tbody>' +
+                '<tr style="color:#fff;font-size:11px">' +
+                  '<td style="padding:6px 0">' + fmtPrice(exitPrice) + '</td>' +
+                  '<td style="text-align:right;padding:6px 0">' + fmtDelta(p2)  + '</td>' +
+                  '<td style="text-align:right;padding:6px 0">' + fmtDelta(p5)  + '</td>' +
+                  '<td style="text-align:right;padding:6px 0">' + fmtDelta(p10) + '</td>' +
+                  '<td style="text-align:right;padding:6px 0">' + fmtDelta(p15) + '</td>' +
+                  '<td style="text-align:right;padding:6px 0">' + fmtDelta(p30) + '</td>' +
+                '</tr>' +
+              '</tbody>' +
+            '</table>' +
+            '<div style="color:#888;font-size:11px;margin-bottom:16px">' + bestMove + '</div>' +
+            '<div style="padding:10px 12px;background:#0d0d1a;border:1px solid ' + verdictColor +
+              ';border-radius:4px;color:' + verdictColor + ';font-weight:700;font-size:13px;letter-spacing:.05em">' +
+              verdict +
+            '</div>';
+
+        } catch(e) {
+          body.innerHTML = '<div style="color:#ef4444;padding:24px;text-align:center">FETCH ERROR — ' + e.message + '</div>';
+        }
+      }
 
     async function loadSentinelCoverage() {
       var inner = document.getElementById('sentinel-body-inner');
@@ -4598,5 +4774,15 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
   })();
   </script>
 
-    </body>
+    <div id="kz-scrim" class="exc-scrim" onclick="closeKzSheet()">
+        <div class="exc-sheet" onclick="event.stopPropagation()" style="max-height:90vh">
+          <div class="exc-sheet-header">
+            <span class="exc-sheet-title" id="kz-sheet-title">KILLZONE</span>
+            <button class="exc-sheet-close" onclick="closeKzSheet()">&#x2715;</button>
+          </div>
+          <div id="kz-sheet-body" style="font-family:'JetBrains Mono',monospace;font-size:12px"></div>
+        </div>
+      </div>
+
+      </body>
 </html>
