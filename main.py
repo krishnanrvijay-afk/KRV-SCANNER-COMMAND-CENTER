@@ -112,7 +112,7 @@ async def _sb_fetch(table: str, extra_params: Optional[dict] = None) -> list:
     params: dict = {"select": "*"}
     if extra_params:
         params.update(extra_params)
-    async with httpx.AsyncClient(timeout=25.0) as client:
+    async with httpx.AsyncClient(timeout=8.0) as client:
         try:
             r = await client.get(
                 f"{SUPABASE_URL}/rest/v1/{table}",
