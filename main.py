@@ -1432,6 +1432,15 @@ async def api_gate_activity(request: Request) -> JSONResponse:
     return JSONResponse(rows)
 
 # ─────────────────────────── entry point ───────────────────────────
+@app.get("/api/alert-log")
+async def api_alert_log(request: Request) -> JSONResponse:
+    _require_auth(request)
+    rows = await _sb_fetch("alert_log", {
+        "order": "created_at.desc",
+        "limit": "500",
+    })
+    return JSONResponse(rows)
+
 if __name__ == "__main__":
   import uvicorn
   uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)
