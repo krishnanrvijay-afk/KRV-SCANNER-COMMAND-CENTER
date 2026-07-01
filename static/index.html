@@ -1155,6 +1155,17 @@ body {
       .bn-item.bn-jabble .bn-icon { filter: drop-shadow(0 0 5px rgba(45,212,191,0.6)); }
       .bn-item.bn-jabble.active { background: rgba(45,212,191,0.12); color: #fff; box-shadow: 0 0 14px rgba(45,212,191,0.3); }
       .bn-item.bn-jabble.active .bn-icon { filter: drop-shadow(0 0 8px rgba(45,212,191,0.9)); }
+      .bn-item.bn-alerts { color: #06b6d4; text-shadow: 0 0 12px rgba(6,182,212,0.9); }
+      .bn-item.bn-alerts .bn-icon { filter: drop-shadow(0 0 9px rgba(6,182,212,1.0)); }
+      .bn-item.bn-alerts.active { background: rgba(6,182,212,0.15); color: #fff; box-shadow: 0 0 18px rgba(6,182,212,0.45); }
+      .bn-item.bn-alerts.active .bn-icon { filter: drop-shadow(0 0 14px rgba(6,182,212,1.0)); }
+      .al-stat { background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px 10px; text-align:center; }
+      .al-sval { font-family:var(--display); font-size:20px; font-weight:700; line-height:1.1; }
+      .al-slbl { font-family:var(--display); font-size:8px; font-weight:700; letter-spacing:.1em; color:#475569; margin-top:3px; }
+      .al-pill { font-family:var(--display); font-size:9px; font-weight:700; letter-spacing:.07em;
+                 padding:3px 8px; border-radius:10px; border:1px solid #334155; background:transparent;
+                 color:#64748b; cursor:pointer; transition:all .15s; }
+      .al-pill.active { border-color:#06b6d4; background:rgba(6,182,212,0.12); color:#06b6d4; }
       .bn-icon { font-size: 17px; line-height: 1; }
       .page { padding-bottom: 72px; }
 
@@ -1397,6 +1408,7 @@ body {
       <button class="bn-item bn-scorecard" id="bn-scorecard" onclick="bnSetTab('scorecard')"><span class="bn-icon">&#x1F4CA;</span>SCORE</button>
       <button class="bn-item bn-log" id="bn-log" onclick="bnSetTab('log')"><span class="bn-icon">&#x1F4CB;</span>LOG</button>
       <button class="bn-item bn-ops" id="bn-operations" onclick="bnSetTab('operations')"><span class="bn-icon">&#x2699;&#xFE0F;</span>OPS</button>
+      <button class="bn-item bn-alerts" id="bn-alerts" onclick="bnSetTab('alerts')"><span class="bn-icon">&#x25C9;</span>ALERTS</button>
       <button class="bn-item bn-jabble" id="bn-jabble" onclick="bnSetTab('jabble')"><span class="bn-icon">&#x1F30A;</span>JABBLE</button>
     </nav>
 
@@ -1699,12 +1711,12 @@ function setTab(name) {
     bnSetTab(name);
   }
   function bnSetTab(name) {
-    var panels = ['pairs','insights','scorecard','log','operations','jabble'];
+    var panels = ['pairs','insights','scorecard','log','operations','jabble','alerts'];
     panels.forEach(function(p) {
       var el = document.getElementById('panel-' + p);
       if (el) el.style.display = p === name ? '' : 'none';
     });
-    var items = ['home','insights','scorecard','log','operations','jabble'];
+    var items = ['home','insights','scorecard','log','operations','jabble','alerts'];
     items.forEach(function(i) {
       var el = document.getElementById('bn-' + i);
       if (el) el.classList.toggle('active', i === (name === 'pairs' ? 'home' : name));
@@ -1726,6 +1738,11 @@ function setTab(name) {
       }
     } else {
       if (typeof _jabblePause !== 'undefined') _jabblePause();
+    }
+    if (name === 'alerts') {
+      if (typeof _alertsStart !== 'undefined') _alertsStart();
+    } else {
+      if (typeof _alertsStop !== 'undefined') _alertsStop();
     }
   }
 
@@ -5083,6 +5100,268 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     });
   })();
   </script>
+
+    <!-- TAB: ALERTS -->
+    <div id="panel-alerts" style="display:none">
+      <div style="padding:12px 14px 0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-family:var(--display);font-size:13px;font-weight:700;color:#06b6d4;text-shadow:0 0 10px rgba(6,182,212,0.6);letter-spacing:.12em">&#x25C9; ALERT LOG</div>
+          <div style="font-size:10px;color:#64748b;font-family:var(--display)" id="al-last-refresh">&#x2014;</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px">
+          <div class="al-stat"><div class="al-sval" id="al-sv-total">&#x2014;</div><div class="al-slbl">TOTAL</div></div>
+          <div class="al-stat"><div class="al-sval" id="al-sv-conf" style="color:#22c55e">&#x2014;</div><div class="al-slbl">CONFIRMED</div></div>
+          <div class="al-stat"><div class="al-sval" id="al-sv-j1h" style="color:#ef4444">&#x2014;</div><div class="al-slbl">J1H BLOCKED</div></div>
+          <div class="al-stat"><div class="al-sval" id="al-sv-exp" style="color:#f59e0b">&#x2014;</div><div class="al-slbl">EXPIRED</div></div>
+          <div class="al-stat"><div class="al-sval" id="al-sv-rate" style="color:#06b6d4">&#x2014;</div><div class="al-slbl">CONFIRM RATE</div></div>
+          <div class="al-stat"><div class="al-sval" id="al-sv-avg" style="color:#a855f7">&#x2014;</div><div class="al-slbl">AVG PENDING</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <div style="flex:1;display:flex;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:9px;color:#475569;font-family:var(--display);margin-right:2px">OUTCOME</span>
+              <button class="al-pill active" id="al-f-outcome-ALL" onclick="alFilter('outcome','ALL')">ALL</button>
+              <button class="al-pill" id="al-f-outcome-CONFIRMED" onclick="alFilter('outcome','CONFIRMED')">CONFIRMED</button>
+              <button class="al-pill" id="al-f-outcome-J1H_DISCARDED" onclick="alFilter('outcome','J1H_DISCARDED')">J1H BLOCKED</button>
+              <button class="al-pill" id="al-f-outcome-EXPIRED" onclick="alFilter('outcome','EXPIRED')">EXPIRED</button>
+            </div>
+            <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:9px;color:#475569;font-family:var(--display);margin-right:2px">VENUE</span>
+              <button class="al-pill active" id="al-f-venue-ALL" onclick="alFilter('venue','ALL')">ALL</button>
+              <button class="al-pill" id="al-f-venue-HL" onclick="alFilter('venue','HL')">HL</button>
+              <button class="al-pill" id="al-f-venue-MEXC" onclick="alFilter('venue','MEXC')">MEXC</button>
+            </div>
+            <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:9px;color:#475569;font-family:var(--display);margin-right:2px">DIR</span>
+              <button class="al-pill active" id="al-f-dir-ALL" onclick="alFilter('dir','ALL')">ALL</button>
+              <button class="al-pill" id="al-f-dir-LONG" onclick="alFilter('dir','LONG')">LONG</button>
+              <button class="al-pill" id="al-f-dir-SHORT" onclick="alFilter('dir','SHORT')">SHORT</button>
+            </div>
+            <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:9px;color:#475569;font-family:var(--display);margin-right:2px">SESSION</span>
+              <button class="al-pill active" id="al-f-sess-ALL" onclick="alFilter('sess','ALL')">ALL</button>
+              <button class="al-pill" id="al-f-sess-ASIA" onclick="alFilter('sess','ASIA')">ASIA</button>
+              <button class="al-pill" id="al-f-sess-EU" onclick="alFilter('sess','EU')">EU</button>
+              <button class="al-pill" id="al-f-sess-US" onclick="alFilter('sess','US')">US</button>
+            </div>
+          </div>
+          <button onclick="alCsvExport()" style="font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.08em;color:#06b6d4;border:1px solid rgba(6,182,212,0.4);background:rgba(6,182,212,0.08);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0">&#x2193; CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;padding:0 14px 80px">
+        <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px">
+          <thead><tr id="al-header-row"></tr></thead>
+          <tbody id="al-tbody">
+            <tr><td colspan="17" style="text-align:center;padding:40px;color:#64748b;font-family:var(--display)">Loading&#x2026;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      var _alData=[],_alFiltered=[],_alActive=false,_alLoaded=false,_alTimer=null;
+      var _alFilters={outcome:'ALL',venue:'ALL',dir:'ALL',sess:'ALL'};
+      var _alSortCol='created_at',_alSortDir=-1;
+      var _alCols=[
+        {key:'created_at',               label:'TIME',       s:true},
+        {key:'venue',                    label:'VENUE',      s:true},
+        {key:'pair',                     label:'PAIR',       s:true},
+        {key:'direction',                label:'DIR',        s:true},
+        {key:'tier',                     label:'TIER',       s:true},
+        {key:'outcome',                  label:'OUTCOME',    s:true},
+        {key:'signal_price',             label:'SIGNAL PX',  s:true},
+        {key:'be_confirm_price',         label:'BE CONFIRM', s:true},
+        {key:'confirm_price',            label:'CONFIRM PX', s:true},
+        {key:'j1h_at_signal',            label:'J1H',        s:true},
+        {key:'j1h_prev_at_signal',       label:'J1H PREV',   s:true},
+        {key:'_j1h_dir',                 label:'J1H DIR',    s:false},
+        {key:'j15m_at_signal',           label:'J15M',       s:true},
+        {key:'adx',                      label:'ADX',        s:true},
+        {key:'session',                  label:'SESSION',    s:true},
+        {key:'pending_duration_seconds', label:'PENDING',    s:true},
+        {key:'score',                    label:'SCORE',      s:true}
+      ];
+      function _fmtTime(u){
+        if(!u)return'&#x2014;';
+        try{return new Date(u).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'})+' ET';}
+        catch(e){return'&#x2014;';}
+      }
+      function _fmtSig(v,sf){
+        if(v==null||v===''||isNaN(Number(v)))return'&#x2014;';
+        var n=Number(v);if(n===0)return'0';
+        var dp=Math.max(0,sf-1-Math.floor(Math.log10(Math.abs(n))));
+        return n.toFixed(dp);
+      }
+      function _fmtTier(t){
+        if(!t)return'&#x2014;';t=t.toUpperCase();
+        if(t.indexOf('HIGH')!==-1)return'HP';
+        if(t.indexOf('STRONG')!==-1)return'STR';
+        if(t.indexOf('REGULAR')!==-1)return'REG';
+        return t.slice(0,3);
+      }
+      function _outcomeHtml(o){
+        var map={
+          'CONFIRMED':     {c:'#22c55e',l:'CONFIRMED'},
+          'J1H_DISCARDED': {c:'#ef4444',l:'J1H BLOCKED'},
+          'EXPIRED_AGE':   {c:'#f59e0b',l:'EXPIRED AGE'},
+          'EXPIRED_J15M':  {c:'#f97316',l:'EXPIRED J15M'},
+          'EXPIRED_PRICE': {c:'#8b5cf6',l:'EXPIRED PRICE'}
+        };
+        var d=map[o]||{c:'#64748b',l:o||'&#x2014;'};
+        return'<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:'+d.c+'22;color:'+d.c+';border:1px solid '+d.c+'44">'+d.l+'</span>';
+      }
+      function _j1hDirHtml(r){
+        var at=parseFloat(r.j1h_at_signal),prev=parseFloat(r.j1h_prev_at_signal),v=r.j1h_prev_valid;
+        if(v===false||v==='false')return'<span style="color:#64748b">&#x2192; COLD <span style="font-size:8px;background:#1e293b;border-radius:2px;padding:0 3px">COLD</span></span>';
+        if(isNaN(at)||isNaN(prev))return'<span style="color:#64748b">&#x2014;</span>';
+        if(at>prev)return'<span style="color:#22c55e">&#x2191; RISE</span>';
+        if(at<prev)return'<span style="color:#ef4444">&#x2193; FALL</span>';
+        return'<span style="color:#64748b">&#x2192; FLAT</span>';
+      }
+      function _pendingHtml(r){
+        var o=r.outcome||'',s=parseInt(r.pending_duration_seconds)||0;
+        var cm={'CONFIRMED':'#22c55e','EXPIRED_AGE':'#f59e0b','EXPIRED_J15M':'#f97316','EXPIRED_PRICE':'#8b5cf6','J1H_DISCARDED':null};
+        var c=cm.hasOwnProperty(o)?cm[o]:'#64748b';
+        var bar=c?'<div style="margin-top:2px;height:2px;background:#1e293b;border-radius:1px;width:54px"><div style="height:100%;width:'+Math.min(100,(s/480)*100).toFixed(1)+'%;background:'+c+';border-radius:1px"></div></div>':'';
+        return'<span style="color:'+(c||'#64748b')+'">'+s+'s</span>'+bar;
+      }
+      function _renderRow(r){
+        var venue=(r.venue||'').toUpperCase();
+        var vc=venue==='HL'?'#a855f7':venue==='MEXC'?'#f97316':'#64748b';
+        var dir=(r.direction||'').toUpperCase();
+        var dc=dir==='LONG'?'#22c55e':dir==='SHORT'?'#ef4444':'#94a3b8';
+        return'<tr style="border-bottom:1px solid #0f172a">'+
+          '<td style="padding:4px 6px;white-space:nowrap;color:#94a3b8">'+_fmtTime(r.created_at)+'</td>'+
+          '<td style="padding:4px 6px;white-space:nowrap"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+vc+';vertical-align:middle;margin-right:4px"></span><span style="color:'+vc+'">'+venue+'</span></td>'+
+          '<td style="padding:4px 6px;font-weight:700;color:#fff;white-space:nowrap">'+(r.pair||'&#x2014;')+'</td>'+
+          '<td style="padding:4px 6px;color:'+dc+';font-weight:700">'+dir+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+_fmtTier(r.tier)+'</td>'+
+          '<td style="padding:4px 6px">'+_outcomeHtml(r.outcome)+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+_fmtSig(r.signal_price,5)+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+_fmtSig(r.be_confirm_price,5)+'</td>'+
+          '<td style="padding:4px 6px;color:'+(r.confirm_price?'#22c55e':'#64748b')+'">'+_fmtSig(r.confirm_price,5)+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+(r.j1h_at_signal!=null?Number(r.j1h_at_signal).toFixed(1):'&#x2014;')+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+(r.j1h_prev_at_signal!=null?Number(r.j1h_prev_at_signal).toFixed(1):'&#x2014;')+'</td>'+
+          '<td style="padding:4px 6px">'+_j1hDirHtml(r)+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+(r.j15m_at_signal!=null?Number(r.j15m_at_signal).toFixed(1):'&#x2014;')+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+(r.adx!=null?Number(r.adx).toFixed(1):'&#x2014;')+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+(r.session||'&#x2014;')+'</td>'+
+          '<td style="padding:4px 6px">'+_pendingHtml(r)+'</td>'+
+          '<td style="padding:4px 6px;color:#94a3b8">'+(r.score!=null?'<span style="color:#06b6d4;margin-right:3px">&#x25CF;</span>'+r.score:'&#x2014;')+'</td>'+
+          '</tr>';
+      }
+      function _applyFilters(){
+        _alFiltered=_alData.filter(function(r){
+          var o=r.outcome||'',fo=_alFilters.outcome;
+          if(fo!=='ALL'){if(fo==='EXPIRED'){if(o.indexOf('EXPIRED')===-1)return false;}else if(o!==fo)return false;}
+          var v=(r.venue||'').toUpperCase();
+          if(_alFilters.venue!=='ALL'&&v!==_alFilters.venue)return false;
+          var d=(r.direction||'').toUpperCase();
+          if(_alFilters.dir!=='ALL'&&d!==_alFilters.dir)return false;
+          var s=(r.session||'').toUpperCase();
+          if(_alFilters.sess!=='ALL'&&s!==_alFilters.sess)return false;
+          return true;
+        });
+        var sc=_alSortCol,sd=_alSortDir;
+        _alFiltered.sort(function(a,b){
+          var av=a[sc],bv=b[sc];
+          if(av==null)av='';if(bv==null)bv='';
+          if(typeof av==='string'&&typeof bv==='string')return sd*av.localeCompare(bv);
+          return sd*(Number(av)-Number(bv));
+        });
+      }
+      function _renderStats(){
+        var rows=_alData,total=rows.length;
+        var conf=rows.filter(function(r){return r.outcome==='CONFIRMED';}).length;
+        var j1h=rows.filter(function(r){return r.outcome==='J1H_DISCARDED';}).length;
+        var exp=rows.filter(function(r){return(r.outcome||'').indexOf('EXPIRED')!==-1;}).length;
+        var rate=total>0?(conf/total*100).toFixed(1)+'%':'&#x2014;';
+        var ps=0,pc=0;
+        rows.forEach(function(r){if(r.pending_duration_seconds!=null){ps+=Number(r.pending_duration_seconds);pc++;}});
+        var avg=pc>0?(ps/pc).toFixed(1)+'s':'&#x2014;';
+        function sv(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+        sv('al-sv-total',total);sv('al-sv-conf',conf);sv('al-sv-j1h',j1h);
+        sv('al-sv-exp',exp);sv('al-sv-rate',rate);sv('al-sv-avg',avg);
+      }
+      function _renderHeaders(){
+        var hrow=document.getElementById('al-header-row');
+        if(!hrow)return;
+        hrow.innerHTML=_alCols.map(function(c){
+          var active=_alSortCol===c.key;
+          var arrow=active?(_alSortDir===-1?' &#x25BC;':' &#x25B2;'):'';
+          var onclick=c.s?' onclick="alSort(\''+c.key+'\')"':'';
+          return'<th style="padding:5px 6px;text-align:left;border-bottom:2px solid #1e293b;'+
+            '"font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.07em;'+
+            '"color:'+(active?'#06b6d4':'#475569')+';white-space:nowrap;'+(c.s?'cursor:pointer':'')+'"+onclick+'>'+c.label+arrow+'</th>';
+        }).join('');
+      }
+      function _renderTable(){
+        var tbody=document.getElementById('al-tbody');
+        if(!tbody)return;
+        if(!_alFiltered.length){
+          var msg=_alLoaded&&!_alData.length
+            ?'<span style="font-size:14px;display:block;margin-bottom:6px">&#x25C9; NO ALERT DATA</span>Waiting for confirmation system to log outcomes.<br>Supabase table: alert_log'
+            :'No alerts match current filters';
+          tbody.innerHTML='<tr><td colspan="17" style="text-align:center;padding:40px;color:#64748b;font-family:var(--display);line-height:1.8">'+msg+'</td></tr>';
+          return;
+        }
+        tbody.innerHTML=_alFiltered.map(_renderRow).join('');
+      }
+      async function _alFetch(){
+        try{
+          var res=await fetch('/api/alert-log');
+          if(!res.ok)throw new Error(res.status);
+          _alData=await res.json();_alLoaded=true;
+          var ref=document.getElementById('al-last-refresh');
+          if(ref)ref.textContent='updated '+new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'})+' ET';
+        }catch(e){_alLoaded=true;_alData=[];}
+        _renderStats();_applyFilters();_renderHeaders();_renderTable();
+      }
+      function _alertsStart(){
+        _alActive=true;_alFetch();
+        if(_alTimer)clearInterval(_alTimer);
+        _alTimer=setInterval(function(){if(_alActive)_alFetch();},30000);
+      }
+      function _alertsStop(){
+        _alActive=false;
+        if(_alTimer){clearInterval(_alTimer);_alTimer=null;}
+      }
+      window.alFilter=function(group,val){
+        _alFilters[group]=val;
+        var opts={outcome:['ALL','CONFIRMED','J1H_DISCARDED','EXPIRED'],
+                  venue:['ALL','HL','MEXC'],dir:['ALL','LONG','SHORT'],sess:['ALL','ASIA','EU','US']};
+        (opts[group]||[]).forEach(function(v){
+          var el=document.getElementById('al-f-'+group+'-'+v);
+          if(el)el.classList.toggle('active',v===val);
+        });
+        _applyFilters();_renderTable();
+      };
+      window.alSort=function(col){
+        if(_alSortCol===col){_alSortDir*=-1;}else{_alSortCol=col;_alSortDir=-1;}
+        _applyFilters();_renderHeaders();_renderTable();
+      };
+      window.alCsvExport=function(){
+        var hdrs=_alCols.map(function(c){return c.key;});
+        var lines=[hdrs.join(',')];
+        _alFiltered.forEach(function(r){
+          lines.push(hdrs.map(function(h){
+            var v=r[h];if(v==null)return'';
+            var s=String(v);
+            if(s.indexOf(',')!==-1||s.indexOf('"')!==-1||s.indexOf('\n')!==-1)s='"'+s.replace(/"/g,'""')+'"';
+            return s;
+          }).join(','));
+        });
+        var blob=new Blob([lines.join('\n')],{type:'text/csv'});
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');
+        a.href=url;a.download='alert_log_'+new Date().toISOString().slice(0,10)+'.csv';
+        a.click();URL.revokeObjectURL(url);
+      };
+      window._alertsStart=_alertsStart;
+      window._alertsStop=_alertsStop;
+    })();
+    </script>
 
     <div id="kz-scrim" class="exc-scrim" onclick="closeKzSheet()">
         <div class="exc-sheet" onclick="event.stopPropagation()" style="max-height:90vh">
