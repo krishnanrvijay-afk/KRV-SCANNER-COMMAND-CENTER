@@ -5310,7 +5310,10 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       }
       async function _alFetch(){
         try{
-          var res=await fetch('/api/alert-log');
+          var _ctrl=new AbortController();
+          var _to=setTimeout(function(){_ctrl.abort();},11000);
+          var res=await fetch('/api/alert-log',{signal:_ctrl.signal});
+          clearTimeout(_to);
           if(!res.ok)throw new Error(res.status);
           _alData=await res.json();_alLoaded=true;
           var ref=document.getElementById('al-last-refresh');
@@ -5319,7 +5322,12 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         _renderStats();_applyFilters();_renderHeaders();_renderTable();
       }
       function _alertsStart(){
-        _alActive=true;_alFetch();
+        _alActive=true;
+        if(!_alLoaded){
+          var tb=document.getElementById('al-tbody');
+          if(tb)tb.innerHTML='<tr><td colspan="17" style="text-align:center;padding:40px;color:#64748b;font-family:var(--display)">Fetching alert data&#x2026;</td></tr>';
+        }
+        _alFetch();
         if(_alTimer)clearInterval(_alTimer);
         _alTimer=setInterval(function(){if(_alActive)_alFetch();},30000);
       }
