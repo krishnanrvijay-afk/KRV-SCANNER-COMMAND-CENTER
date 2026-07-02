@@ -4607,64 +4607,68 @@ function alFilter(f, el) {
 }
 
 function renderAlOverlay() {
-  const data = _alOverlayData;
-  if (!data || !data.length) return;
-  var pc = document.getElementById('alert-pill-count');
-  if (pc) pc.textContent = data.length;
-  const confirmed = data.filter(function(r){ return r.outcome==='CONFIRMED'; }).length;
-  const blocked   = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; }).length;
-  const rate = data.length > 0 ? Math.round(confirmed/data.length*100) : 0;
-  const sr = document.getElementById('al-stats-row');
-  if (sr) sr.innerHTML =
-    `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#06b6d4">${data.length}</div><div style="font-size:7px;color:#fff;font-weight:700">TOTAL</div></div>` +
-    `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#22c55e">${confirmed}</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRMED</div></div>` +
-    `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#ef4444">${blocked}</div><div style="font-size:7px;color:#fff;font-weight:700">BLOCKED</div></div>` +
-    `<div style="flex:1;padding:6px 8px;text-align:center"><div style="font-size:12px;font-weight:700;color:#06b6d4">${rate}%</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRM%</div></div>`;
-  let rows = data;
-  if (_alOverlayFilter === 'CONFIRMED')      rows = data.filter(function(r){ return r.outcome==='CONFIRMED'; });
-  else if (_alOverlayFilter === 'J1H_DISCARDED') rows = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; });
-  else if (_alOverlayFilter === 'EXPIRED')   rows = data.filter(function(r){ return r.outcome && r.outcome.startsWith('EXPIRED'); });
-  const badgeMap = {
-    'CONFIRMED':     'background:#052e16;color:#22c55e;border:1px solid #166534',
-    'J1H_DISCARDED': 'background:#2d1515;color:#ef4444;border:1px solid #991b1b',
-    'EXPIRED_AGE':   'background:#1c1410;color:#f59e0b;border:1px solid #92400e',
-    'EXPIRED_J15M':  'background:#1a1208;color:#f97316;border:1px solid #9a3412',
-    'EXPIRED_PRICE': 'background:#12101c;color:#8b5cf6;border:1px solid #5b21b6',
-  };
-  const labelMap = {
-    'CONFIRMED':     'CONFIRMED',
-    'J1H_DISCARDED': 'J1H BLOCKED',
-    'EXPIRED_AGE':   'EXPIRED AGE',
-    'EXPIRED_J15M':  'EXPIRED J15M',
-    'EXPIRED_PRICE': 'EXPIRED PRICE',
-  };
-  const dotColor = {'HL':'#a855f7','MEXC':'#f97316'};
-  let h2 = '';
-  rows.forEach(function(r, i) {
-    const bStyle = badgeMap[r.outcome] || '';
-    const bLabel = labelMap[r.outcome] || r.outcome;
-    const dot = dotColor[r.venue] || '#fff';
-    const dirColor = r.direction === 'LONG' ? '#22c55e' : '#ef4444';
-    const j1hDir = (r.j1h_prev_valid === false)
-      ? '<span style="color:#fff">\u2192 COLD</span>'
-      : r.j1h_at_signal > r.j1h_prev_at_signal
-        ? `<span style="color:#22c55e">\u2191 ${r.j1h_at_signal}</span>`
-        : r.j1h_at_signal < r.j1h_prev_at_signal
-          ? `<span style="color:#ef4444">\u2193 ${r.j1h_at_signal}</span>`
-          : `<span style="color:#fff">\u2192 ${r.j1h_at_signal}</span>`;
-    const t = r.created_et ? r.created_et.substring(11,16)+' UTC' : '--';
-    h2 += `<div class="al-row" onclick="alSelectRow(${i}, this)">` +
-      `<div style="display:flex;justify-content:space-between;margin-bottom:3px">` +
-      `<div style="font-weight:700;color:#fff;font-size:11px"><span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;margin-right:5px;vertical-align:middle"></span>${r.pair}</div>` +
-      `<div style="font-size:8px;font-weight:700;color:#fff">${t}</div></div>` +
-      `<div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">` +
-      `<span style="padding:2px 6px;border-radius:3px;font-size:7px;font-weight:700;${bStyle}">${bLabel}</span>` +
-      `<span style="color:${dirColor};font-size:8px;font-weight:700">${r.direction}</span>${j1hDir}</div>` +
-      `<div style="font-size:8px;font-weight:700;color:#fff">J15M ${r.j15m_at_signal||'--'} \u00B7 ADX ${r.adx||'--'} \u00B7 pend ${r.pending_duration_seconds||0}s</div></div>`;
-  });
-  const ar = document.getElementById('al-rows');
-  if (ar) ar.innerHTML = h2 || '<div style="padding:20px;text-align:center;color:#fff;font-weight:700">NO ALERTS</div>';
-  window._alFilteredRows = rows;
+  try {
+    const data = _alOverlayData;
+    if (!data || !data.length) return;
+    var pc = document.getElementById('alert-pill-count');
+    if (pc) pc.textContent = data.length;
+    const confirmed = data.filter(function(r){ return r.outcome==='CONFIRMED'; }).length;
+    const blocked   = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; }).length;
+    const rate = data.length > 0 ? Math.round(confirmed/data.length*100) : 0;
+    const sr = document.getElementById('al-stats-row');
+    if (sr) sr.innerHTML =
+      `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#06b6d4">${data.length}</div><div style="font-size:7px;color:#fff;font-weight:700">TOTAL</div></div>` +
+      `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#22c55e">${confirmed}</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRMED</div></div>` +
+      `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#ef4444">${blocked}</div><div style="font-size:7px;color:#fff;font-weight:700">BLOCKED</div></div>` +
+      `<div style="flex:1;padding:6px 8px;text-align:center"><div style="font-size:12px;font-weight:700;color:#06b6d4">${rate}%</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRM%</div></div>`;
+    let rows = data;
+    if (_alOverlayFilter === 'CONFIRMED')      rows = data.filter(function(r){ return r.outcome==='CONFIRMED'; });
+    else if (_alOverlayFilter === 'J1H_DISCARDED') rows = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; });
+    else if (_alOverlayFilter === 'EXPIRED')   rows = data.filter(function(r){ return r.outcome && r.outcome.startsWith('EXPIRED'); });
+    const badgeMap = {
+      'CONFIRMED':     'background:#052e16;color:#22c55e;border:1px solid #166534',
+      'J1H_DISCARDED': 'background:#2d1515;color:#ef4444;border:1px solid #991b1b',
+      'EXPIRED_AGE':   'background:#1c1410;color:#f59e0b;border:1px solid #92400e',
+      'EXPIRED_J15M':  'background:#1a1208;color:#f97316;border:1px solid #9a3412',
+      'EXPIRED_PRICE': 'background:#12101c;color:#8b5cf6;border:1px solid #5b21b6',
+    };
+    const labelMap = {
+      'CONFIRMED':     'CONFIRMED',
+      'J1H_DISCARDED': 'J1H BLOCKED',
+      'EXPIRED_AGE':   'EXPIRED AGE',
+      'EXPIRED_J15M':  'EXPIRED J15M',
+      'EXPIRED_PRICE': 'EXPIRED PRICE',
+    };
+    const dotColor = {'HL':'#a855f7','MEXC':'#f97316'};
+    let h2 = '';
+    rows.forEach(function(r, i) {
+      const bStyle = badgeMap[r.outcome] || '';
+      const bLabel = labelMap[r.outcome] || r.outcome;
+      const dot = dotColor[r.venue] || '#fff';
+      const dirColor = r.direction === 'LONG' ? '#22c55e' : '#ef4444';
+      const j1hDir = (r.j1h_prev_valid === false)
+        ? '<span style="color:#fff">\u2192 COLD</span>'
+        : r.j1h_at_signal > r.j1h_prev_at_signal
+          ? `<span style="color:#22c55e">\u2191 ${r.j1h_at_signal}</span>`
+          : r.j1h_at_signal < r.j1h_prev_at_signal
+            ? `<span style="color:#ef4444">\u2193 ${r.j1h_at_signal}</span>`
+            : `<span style="color:#fff">\u2192 ${r.j1h_at_signal}</span>`;
+      const t = r.created_et ? r.created_et.substring(11,16)+' UTC' : '--';
+      h2 += `<div class="al-row" onclick="alSelectRow(${i}, this)">` +
+        `<div style="display:flex;justify-content:space-between;margin-bottom:3px">` +
+        `<div style="font-weight:700;color:#fff;font-size:11px"><span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;margin-right:5px;vertical-align:middle"></span>${r.pair}</div>` +
+        `<div style="font-size:8px;font-weight:700;color:#fff">${t}</div></div>` +
+        `<div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">` +
+        `<span style="padding:2px 6px;border-radius:3px;font-size:7px;font-weight:700;${bStyle}">${bLabel}</span>` +
+        `<span style="color:${dirColor};font-size:8px;font-weight:700">${r.direction}</span>${j1hDir}</div>` +
+        `<div style="font-size:8px;font-weight:700;color:#fff">J15M ${r.j15m_at_signal||'--'} \u00B7 ADX ${r.adx||'--'} \u00B7 pend ${r.pending_duration_seconds||0}s</div></div>`;
+    });
+    const ar = document.getElementById('al-rows');
+    if (ar) ar.innerHTML = h2 || '<div style="padding:20px;text-align:center;color:#fff;font-weight:700">NO ALERTS</div>';
+    window._alFilteredRows = rows;
+  } catch(e) {
+    console.error('renderAlOverlay error:', e);
+  }
 }
 
 function alSelectRow(i, el) {
