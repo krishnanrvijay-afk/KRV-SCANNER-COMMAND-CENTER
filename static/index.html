@@ -3724,13 +3724,15 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           let verdict, verdictColor;
           if (isKill) {
             const killCorrect = isLong ? p30delta < -0.001 : p30delta > 0.001;
-            verdict      = killCorrect ? 'Ã¢ÂÂ
- KILL CORRECT' : 'Ã¢ÂÂ Ã¯Â¸Â KILL MISS Ã¢ÂÂ signal was right';
+            verdict = killCorrect
+              ? 'KILL CORRECT'
+              : 'KILL MISS - signal was right';
             verdictColor = killCorrect ? '#22c55e' : '#f59e0b';
           } else {
             const ejacCorrect = isLong ? p30delta < -0.001 : p30delta > 0.001;
-            verdict      = ejacCorrect ? 'Ã¢ÂÂ
- EJAC OPTIMAL Ã¢ÂÂ reversal confirmed' : 'Ã¢ÂÂ Ã¯Â¸Â LEFT MONEY Ã¢ÂÂ price continued';
+            verdict = ejacCorrect
+              ? 'EJAC OPTIMAL - reversal confirmed'
+              : 'LEFT MONEY - price continued';
             verdictColor = ejacCorrect ? '#22c55e' : '#f59e0b';
           }
 
