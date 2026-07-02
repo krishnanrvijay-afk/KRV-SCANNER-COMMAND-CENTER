@@ -956,6 +956,38 @@ body {
     color:#f97316; box-shadow:0 0 18px rgba(249,115,22,0.30);
   }
   .tab-btn#tab-operations.active .tab-badge { background:rgba(249,115,22,0.30); }
+    /* Ã¢ÂÂÃ¢ÂÂ JABBLE TAB Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+    .tab-btn#tab-jabble:hover { background:rgba(168,85,247,0.10); border-color:rgba(168,85,247,0.35); }
+    .tab-btn#tab-jabble.active {
+      background:linear-gradient(180deg,rgba(168,85,247,0.22) 0%,rgba(249,115,22,0.10) 100%);
+      border-color:rgba(168,85,247,0.70); color:#c084fc;
+      box-shadow:0 0 20px rgba(168,85,247,0.30), inset 0 1px 0 rgba(168,85,247,0.15);
+    }
+    #panel-jabble { position:relative; overflow:hidden; background:#d8eef8; min-height:820px; }
+    .jabble-wrap { display:flex; flex-direction:column; align-items:center; padding:24px 0 36px; gap:14px; }
+    .jabble-title {
+      font-family:'Courier New',monospace; font-size:24px; font-weight:700; letter-spacing:.30em;
+      background:linear-gradient(90deg,#a855f7 0%,#c084fc 40%,#f97316 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; text-align:center;
+    }
+    .jabble-subtitle { font-size:8px; letter-spacing:.22em; color:rgba(180,140,240,0.40); font-family:'Courier New',monospace; text-align:center; margin-top:-8px; }
+    .jabble-stage { display:flex; align-items:center; justify-content:center; gap:20px; }
+    .jabble-pill { display:flex; flex-direction:column; align-items:center; gap:7px; padding:16px 14px; border-radius:14px; min-width:80px; font-family:'Courier New',monospace; }
+    .jabble-pill-hl { background:#d8eef8; border:1px solid rgba(26,58,107,0.20); box-shadow:0 2px 12px rgba(26,58,107,0.10); }
+    .jabble-pill-mx { background:#d8eef8; border:1px solid rgba(26,58,107,0.20); box-shadow:0 2px 12px rgba(26,58,107,0.10); }
+    .jabble-pill-label { font-size:8px; letter-spacing:.20em; opacity:.50; text-transform:uppercase; }
+    .jabble-pill-pnl { font-size:20px; font-weight:700; }
+    .jabble-pill-pnl.pos { color:#0a5c2a; text-shadow:none; }
+    .jabble-pill-pnl.neg { color:#8b0000; text-shadow:none; }
+    .jabble-pill-pnl.zer { color:rgba(26,58,107,0.40); }
+    .jabble-pill-open { font-size:9px; letter-spacing:.12em; opacity:.55; }
+    .jabble-pill-hl .jabble-pill-label { color:#6a2d9a; opacity:1; }
+    .jabble-pill-mx .jabble-pill-label { color:#c45000; opacity:1; }
+    .jabble-pill-hl .jabble-pill-open  { color:#6a2d9a; }
+    .jabble-pill-mx .jabble-pill-open  { color:#c45000; }
+    .jabble-canvas-wrap { border-radius:50%; overflow:hidden; box-shadow:0 0 90px rgba(90,40,180,0.22), 0 0 40px rgba(0,0,0,0.90); flex-shrink:0; }
+    .jabble-legend { display:flex; gap:16px; align-items:center; font-family:'Courier New',monospace; font-size:8px; letter-spacing:.14em; color:rgba(255,255,255,0.32); flex-wrap:wrap; justify-content:center; }
+    .jabble-legend-dot { width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:4px; vertical-align:middle; }
   #panel-operations { position:relative; overflow:hidden; padding:0 0 40px; }
   /* nebula orbs */
   .ops-orb { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; opacity:.22; }
@@ -1119,6 +1151,10 @@ body {
       .bn-item.bn-ops .bn-icon { filter: drop-shadow(0 0 5px rgba(239,68,68,0.6)); }
       .bn-item.bn-ops.active { background: rgba(239,68,68,0.12); color: #fff; box-shadow: 0 0 14px rgba(239,68,68,0.3); }
       .bn-item.bn-ops.active .bn-icon { filter: drop-shadow(0 0 8px rgba(239,68,68,0.9)); }
+      .bn-item.bn-jabble { color: #2dd4bf; text-shadow: 0 0 8px rgba(45,212,191,0.5); }
+      .bn-item.bn-jabble .bn-icon { filter: drop-shadow(0 0 5px rgba(45,212,191,0.6)); }
+      .bn-item.bn-jabble.active { background: rgba(45,212,191,0.12); color: #fff; box-shadow: 0 0 14px rgba(45,212,191,0.3); }
+      .bn-item.bn-jabble.active .bn-icon { filter: drop-shadow(0 0 8px rgba(45,212,191,0.9)); }
       .bn-item.bn-alerts { color: #06b6d4; text-shadow: 0 0 12px rgba(6,182,212,0.9); }
       .bn-item.bn-alerts .bn-icon { filter: drop-shadow(0 0 9px rgba(6,182,212,1.0)); }
       .bn-item.bn-alerts.active { background: rgba(6,182,212,0.15); color: #fff; box-shadow: 0 0 18px rgba(6,182,212,0.45); }
@@ -1187,12 +1223,6 @@ body {
       .pg-mfe-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0.3)); border-radius: 2px; box-shadow: 0 0 4px rgba(56,189,248,0.4); }
       .pg-exit-pill { font-size: 7px; font-weight: 700; padding: 2px 4px; border-radius: 3px; letter-spacing: .03em; background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); white-space: nowrap; text-align: center; }
       .pg-loading { text-align: center; padding: 24px; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .1em; }
-      /* ── ALERT OVERLAY FILTER PILLS & ROWS ── */
-      .al-fp { padding:2px 8px; border-radius:12px; font-size:8px; font-weight:700; cursor:pointer; border:1px solid #1e2035; color:#fff; background:#0d0d1a; }
-      .al-fp.active { border-color:#06b6d4; color:#06b6d4; background:#082020; }
-      .al-row { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.04); cursor:pointer; }
-      .al-row:hover { background:rgba(255,255,255,.03); }
-      .al-row.selected { background:rgba(6,182,212,.08); border-left:2px solid #06b6d4; }
     </style>
 </head>
 <body>
@@ -1340,12 +1370,6 @@ body {
 
   <!-- PAIR PERFORMANCE GRID -->
     <div id="panel-pairs">
-      <div style="padding:8px 16px 0">
-        <button id="alert-log-pill" onclick="openAlertOverlay()" style="padding:5px 14px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.08em;cursor:pointer;border:1px solid #06b6d4;background:#082020;color:#06b6d4;box-shadow:0 0 10px rgba(6,182,212,.3)">
-          &#x25C9; ALERTS
-          <span id="alert-pill-count" style="background:#06b6d4;color:#000;border-radius:10px;padding:1px 6px;font-size:8px;margin-left:4px">0</span>
-        </button>
-      </div>
       <div class="pg-controls">
         <div class="pg-time-pills">
           <button class="pg-tp tp-today" id="pg-tab-today" onclick="pgSetTime('today')">TODAY</button>
@@ -1385,6 +1409,7 @@ body {
       <button class="bn-item bn-log" id="bn-log" onclick="bnSetTab('log')"><span class="bn-icon">&#x1F4CB;</span>LOG</button>
       <button class="bn-item bn-ops" id="bn-operations" onclick="bnSetTab('operations')"><span class="bn-icon">&#x2699;&#xFE0F;</span>OPS</button>
       <button class="bn-item bn-alerts" id="bn-alerts" onclick="bnSetTab('alerts')"><span class="bn-icon">&#x25C9;</span>ALERTS</button>
+      <button class="bn-item bn-jabble" id="bn-jabble" onclick="bnSetTab('jabble')"><span class="bn-icon">&#x1F30A;</span>JABBLE</button>
     </nav>
 
   <!-- TAB 1: INSIGHTS -->
@@ -1686,12 +1711,12 @@ function setTab(name) {
     bnSetTab(name);
   }
   function bnSetTab(name) {
-    var panels = ['pairs','insights','scorecard','log','operations','alerts'];
+    var panels = ['pairs','insights','scorecard','log','operations','jabble','alerts'];
     panels.forEach(function(p) {
       var el = document.getElementById('panel-' + p);
       if (el) el.style.display = p === name ? '' : 'none';
     });
-    var items = ['home','insights','scorecard','log','operations','alerts'];
+    var items = ['home','insights','scorecard','log','operations','jabble','alerts'];
     items.forEach(function(i) {
       var el = document.getElementById('bn-' + i);
       if (el) el.classList.toggle('active', i === (name === 'pairs' ? 'home' : name));
@@ -1705,6 +1730,14 @@ function setTab(name) {
     } else {
       _opsActive = false;
       _opsStopTimers();
+    }
+    if (name === 'jabble') {
+      if (typeof _jabbleStart !== 'undefined') {
+        _jabbleStart();
+        if (typeof live !== 'undefined' && live) refreshJabble(live);
+      }
+    } else {
+      if (typeof _jabblePause !== 'undefined') _jabblePause();
     }
     if (name === 'alerts') {
       if (typeof _alertsStart !== 'undefined') _alertsStart();
@@ -1972,6 +2005,7 @@ async function loadLive() {
     renderFleetLink();
     if (typeof pgRender === "function" && _pgData) pgRender();
     if (typeof _opsActive !== 'undefined' && _opsActive) _opsRefresh();
+    if (typeof refreshJabble !== 'undefined' && typeof _jabbleActive !== 'undefined' && _jabbleActive) refreshJabble(live);
   } catch (e) {
     console.error('live', e);
     _liveFail = true;
@@ -3724,15 +3758,11 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           let verdict, verdictColor;
           if (isKill) {
             const killCorrect = isLong ? p30delta < -0.001 : p30delta > 0.001;
-            verdict = killCorrect
-              ? 'KILL CORRECT'
-              : 'KILL MISS - signal was right';
+            verdict      = killCorrect ? 'Ã¢ÂÂ KILL CORRECT' : 'Ã¢ÂÂ Ã¯Â¸Â KILL MISS Ã¢ÂÂ signal was right';
             verdictColor = killCorrect ? '#22c55e' : '#f59e0b';
           } else {
             const ejacCorrect = isLong ? p30delta < -0.001 : p30delta > 0.001;
-            verdict = ejacCorrect
-              ? 'EJAC OPTIMAL - reversal confirmed'
-              : 'LEFT MONEY - price continued';
+            verdict      = ejacCorrect ? 'Ã¢ÂÂ EJAC OPTIMAL Ã¢ÂÂ reversal confirmed' : 'Ã¢ÂÂ Ã¯Â¸Â LEFT MONEY Ã¢ÂÂ price continued';
             verdictColor = ejacCorrect ? '#22c55e' : '#f59e0b';
           }
 
@@ -3948,6 +3978,184 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     // venue scorecards section removed Ã¢ÂÂ per-venue stats live in Fleet Link vessel cards
   }
 
+  function _opsUpdateRacetrack(live) {
+    var el = document.getElementById('ops-racetrack-lanes');
+    if (!el || !live) return;
+    var hlOpen   = (live.hl   && live.hl.open_trades)   ? Object.values(live.hl.open_trades)   : [];
+    var mxOpen   = (live.mexc && live.mexc.open_trades)  ? Object.values(live.mexc.open_trades)  : [];
+    var allTrades = hlOpen.map(function(t){return{t:t,venue:'hl'};})
+                  .concat(mxOpen.map(function(t){return{t:t,venue:'mexc'};}));
+    if (allTrades.length === 0) {
+      el.innerHTML = '<div class="ops-no-positions">NO OPEN POSITIONS &#x2014; FLEET SCANNING</div>';
+      return;
+    }
+    var MAX_DUR = 14400;
+    el.innerHTML = allTrades.map(function(item){
+      var t = item.t;
+      var sym = t.symbol || t.pair || '?';
+      var dir = (t.direction||'').toUpperCase();
+      var pnl = parseFloat(t.pnl||t.unrealized_pnl||0);
+      var openAt = t.opened_at || t.open_time;
+      var elapsed = openAt ? Math.min((Date.now()/1000 - new Date(openAt).getTime()/1000), MAX_DUR) : 0;
+      var pct = Math.max(5, Math.min(95, Math.round(elapsed/MAX_DUR*100)));
+      var venue = item.venue;
+      var barCls = venue === 'hl' ? 'ops-lane-bar-hl' : 'ops-lane-bar-mexc';
+      var dirCls = dir === 'SHORT' ? 'ops-lane-dir-short' : 'ops-lane-dir-long';
+      var pnlCls = pnl >= 0 ? 'ops-venue-pnl-pos' : 'ops-venue-pnl-neg';
+      var key = sym + dir + venue;
+      _opsHorsePhase[key] = _opsHorsePhase[key] || Math.random() * Math.PI * 2;
+      return '<div class="ops-lane" data-key="' + key + '" data-base="' + pct + '">'
+        + '<span class="ops-lane-label">' + sym + '</span>'
+        + '<span class="ops-lane-dir ' + dirCls + '">' + dir + '</span>'
+        + '<div class="ops-lane-bar-wrap"><div class="ops-lane-bar ' + barCls + '" style="width:' + pct + '%" id="horse-' + key + '"></div></div>'
+        + '<div class="ops-lane-dot ' + barCls + '"></div>'
+        + '<span class="ops-lane-pnl ' + pnlCls + '">$' + Math.abs(pnl).toFixed(2) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function _opsAnimateHorses() {
+    if (!_opsActive) return;
+    var now = Date.now() / 1000;
+    document.querySelectorAll('.ops-lane').forEach(function(lane){
+      var key   = lane.getAttribute('data-key');
+      var base  = parseFloat(lane.getAttribute('data-base') || 50);
+      var phase = _opsHorsePhase[key] || 0;
+      var wave  = Math.sin(now * 0.5 + phase) * 2.5;
+      var bar   = document.getElementById('horse-' + key);
+      if (bar) bar.style.width = Math.max(5, Math.min(97, base + wave)) + '%';
+    });
+  }
+
+  function _radarCard(item, zone) {
+    var sym   = (item.sym||"").replace("_USDT","").replace("USDT","");
+    var venue = item.venue, score = item.score, dir = item.dir;
+    var gates = item.gates, gstates = item.gateStates;
+    var cardCls = zone === "ready" ? "radar-card-ready" : "radar-card-warming";
+    var dirCls  = dir === "LONG"   ? "radar-dir-long"  : "radar-dir-short";
+    var lbl     = zone === "ready" ? "FIRING SOON" : (score >= 60 ? "CLOSE" : "DEVELOPING");
+    var lc      = zone === "ready" ? "radar-label-ready" : "radar-label-warming";
+    var rc      = zone === "ready" ? "#00e676" : "#ffb300";
+    var offset  = (125.66 * (1 - score / 100)).toFixed(2);
+    var glbls   = ["J15M","J1H","STOCH","ADX"];
+    var h = '<div class="radar-card ' + cardCls + '">' +
+            '<div class="radar-card-top">' +
+            '<span class="radar-sym">' + sym + '</span>' +
+            '<span class="radar-venue-dot radar-vdot-' + venue + '"></span>' +
+            '<span class="radar-dir-badge ' + dirCls + '">' + dir + '</span>' +
+            '<div class="radar-ring-wrap" style="margin-left:auto">' +
+            '<svg width="44" height="44" viewBox="0 0 44 44">' +
+            '<circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>' +
+            '<circle cx="22" cy="22" r="20" fill="none" stroke="' + rc + '" stroke-width="3"' +
+            ' stroke-dasharray="125.66" stroke-dashoffset="' + offset + '"' +
+            ' stroke-linecap="round" transform="rotate(-90 22 22)"' +
+            (zone === "ready" ? ' style="filter:drop-shadow(0 0 4px ' + rc + ')"' : "") +
+            '/>' +
+            '<text x="22" y="26" text-anchor="middle" font-size="10" fill="#fff" font-family="JetBrains Mono,monospace" font-weight="700">' + score + '</text>' +
+            '</svg></div></div>' +
+            '<div class="radar-firing-label ' + lc + '">' + lbl + '</div>' +
+            '<div class="radar-gates">';
+    glbls.forEach(function(gl, i) {
+      var st  = gstates[i];
+      var bc  = st === "pass" ? "radar-gate-pass" : st === "warm" ? "radar-gate-warm" : "radar-gate-fail";
+      var bw  = st === "pass" ? "100" : st === "warm" ? "55" : "20";
+      h += '<div class="radar-gate-row"><span class="radar-gate-lbl">' + gl +
+           '</span><div class="radar-gate-bar-wrap"><div class="radar-gate-bar ' + bc +
+           '" style="width:' + bw + '%"></div></div></div>';
+    });
+    h += '</div></div>';
+    return h;
+  }
+
+  function _opsUpdateRadar(live) {
+    console.log('[_opsUpdateRadar] live keys:', live ? Object.keys(live) : 'null', 'hl pair_states:', live && live.hl ? (live.hl.pair_states||[]).length : 'n/a', 'mexc pair_states:', live && live.mexc ? (live.mexc.pair_states||[]).length : 'n/a');
+    var el = document.getElementById("ops-radar-content");
+    if (!el || !live) return;
+    var hlPs = (live.hl   && Array.isArray(live.hl.pair_states))   ? live.hl.pair_states   : [];
+    var mxPs = (live.mexc && Array.isArray(live.mexc.pair_states)) ? live.mexc.pair_states : [];
+    var all  = hlPs.map(function(p){return{p:p,venue:"hl"};}).concat(mxPs.map(function(p){return{p:p,venue:"mexc"};}));
+    if (!all.length) { el.innerHTML = '<div class="ops-no-positions">NO PAIR STATES AVAILABLE</div>'; return; }
+    var inTrade = [], ready = [], warming = [];
+    all.forEach(function(item) {
+      var p = item.p, venue = item.venue, sym = p.symbol || p.pair || "?";
+      if (p.in_trade) { inTrade.push({p:p, venue:venue, sym:sym}); return; }
+      var j15m = parseFloat(p.j15m), j1h = parseFloat(p.j1h);
+      var sk   = parseFloat(p.stoch_k_fast), sd  = parseFloat(p.stoch_d_fast);
+      var skp  = parseFloat(p.stoch_k_prev_fast), sdp = parseFloat(p.stoch_d_prev_fast);
+      var adx  = parseFloat(p.adx1h);
+      var lg0 = j15m < 20, lg1 = (j1h >= 0 && j1h < 40), lg2 = (sk < sd && skp >= sdp), lg3 = adx >= 15;
+      var la0 = !lg0 && j15m < 24, la1 = !lg1 && (j1h < 48 && j1h >= -8), la3 = !lg3 && adx >= 12;
+      var sg0 = j15m > 80, sg1 = (j1h > 60 && j1h <= 100), sg2 = (sk > sd && skp <= sdp), sg3 = adx >= 15;
+      var sa0 = !sg0 && j15m > 64, sa1 = !sg1 && j1h > 48, sa3 = !sg3 && adx >= 12;
+      var lScore = [lg0,lg1,lg2,lg3].filter(Boolean).length * 25;
+      var sScore = [sg0,sg1,sg2,sg3].filter(Boolean).length * 25;
+      var lStates = [lg0?"pass":la0?"warm":"fail", lg1?"pass":la1?"warm":"fail", lg2?"pass":"fail", lg3?"pass":la3?"warm":"fail"];
+      var sStates = [sg0?"pass":sa0?"warm":"fail", sg1?"pass":sa1?"warm":"fail", sg2?"pass":"fail", sg3?"pass":sa3?"warm":"fail"];
+      var best = Math.max(lScore, sScore);
+      if (best < 40) return;
+      var useLong = lScore >= sScore;
+      var entry = {p:p, venue:venue, sym:sym, score:best,
+                   dir:useLong?"LONG":"SHORT",
+                   gates:useLong?[lg0,lg1,lg2,lg3]:[sg0,sg1,sg2,sg3],
+                   gateStates:useLong?lStates:sStates};
+      if (best >= 75) ready.push(entry); else warming.push(entry);
+    });
+    ready.sort(function(a,b){return b.score-a.score;});
+    warming.sort(function(a,b){return b.score-a.score;});
+    var cold = Math.max(0, all.length - inTrade.length - ready.length - warming.length);
+    var h = '<div class="radar-zone-pills">';
+    h += '<span class="radar-zone-pill radar-pill-cold">COLD ' + cold + '</span>';
+    h += '<span class="radar-zone-pill radar-pill-warming">WARMING ' + warming.length + '</span>';
+    h += '<span class="radar-zone-pill radar-pill-ready' + (ready.length ? " radar-pill-ready-active" : "") + '">READY ' + ready.length + '</span>';
+    h += '</div>';
+    if (inTrade.length) {
+      h += '<div class="radar-zone-label">IN TRADE</div><div class="radar-cards">';
+      inTrade.forEach(function(item) {
+        var p = item.p, venue = item.venue;
+        var sym = (item.sym||"").replace("_USDT","").replace("USDT","");
+        var dir = (p.direction||"").toUpperCase();
+        var pnl = parseFloat(p.unrealized_pnl || p.pnl || 0);
+        var openAt  = p.opened_at || p.open_time;
+        var elapsed = openAt ? Math.max(0, Date.now()/1000 - new Date(openAt).getTime()/1000) : 0;
+        var durPct  = Math.min(100, Math.round(elapsed / 14400 * 100));
+        var barCls  = venue === "hl" ? "radar-bar-hl" : "radar-bar-mexc";
+        var brdCls  = venue === "hl" ? "radar-card-hl" : "radar-card-mx";
+        var dotClr  = venue === "hl" ? "#a855f7" : "#f97316";
+        var dirCls  = dir === "SHORT" ? "radar-dir-short" : "radar-dir-long";
+        var pnlCls  = pnl >= 0 ? "ops-venue-pnl-pos" : "ops-venue-pnl-neg";
+        var pnlStr  = "$" + Math.abs(pnl).toFixed(2);
+        var hrs = Math.floor(elapsed/3600), mins = Math.floor((elapsed%3600)/60);
+        var durStr  = hrs > 0 ? hrs + "h " + mins + "m" : mins + "m";
+        h += '<div class="radar-card radar-card-intrade ' + brdCls + '">' +
+             '<div class="radar-card-top">' +
+             '<span class="radar-sym">' + sym + '</span>' +
+             '<span class="radar-venue-dot radar-vdot-' + venue + '"></span>' +
+             (dir ? '<span class="radar-dir-badge ' + dirCls + '">' + dir + '</span>' : "") +
+             '<span class="radar-pnl ' + pnlCls + '" style="margin-left:auto">' + pnlStr + '</span>' +
+             '</div>' +
+             '<div class="radar-dur-wrap"><div class="radar-dur-bar ' + barCls + '" style="width:' + durPct + '%">' +
+             '<div class="radar-dur-dot" style="background:' + dotClr + ';box-shadow:0 0 6px ' + dotClr + '"></div></div></div>' +
+             '<div class="radar-dur-label">' + durStr + ' / 4h MAX</div>' +
+             '</div>';
+      });
+      h += '</div>';
+    }
+    if (ready.length) {
+      h += '<div class="radar-zone-label radar-label-ready">READY TO FIRE</div><div class="radar-cards">';
+      ready.forEach(function(item){ h += _radarCard(item, "ready"); });
+      h += '</div>';
+    }
+    if (warming.length) {
+      h += '<div class="radar-zone-label radar-label-warming">WARMING</div><div class="radar-cards">';
+      warming.forEach(function(item){ h += _radarCard(item, "warming"); });
+      h += '</div>';
+    }
+    if (!inTrade.length && !ready.length && !warming.length) {
+      h += '<div class="ops-no-positions">ALL PAIRS COLD &#x2014; MONITORING</div>';
+    }
+    el.innerHTML = h;
+  }
+
 
   function _opsUpdateExitBreakdown(data) {
     var el = document.getElementById('ops-exit-breakdown');
@@ -4051,19 +4259,208 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     if (!_opsPanelEl || _opsPanelEl.style.display === 'none') return;
     if (!live) return;
     try {
-      var exitRes = await fetch('/api/exit_breakdown', {credentials:'include'});
+      var [anaRes, exitRes] = await Promise.all([
+        fetch('/api/analytics?range=today', {credentials:'include'}),
+        fetch('/api/exit_breakdown',        {credentials:'include'}),
+      ]);
+      if (anaRes.ok)  _opsUpdateVenueCards(await anaRes.json(), live);
       if (exitRes.ok) _opsUpdateExitBreakdown(await exitRes.json());
     } catch(e) {}
+    var liveEl = document.getElementById('ops-hl-open');
+    if (liveEl && live !== null && typeof live !== 'undefined') {
+      var hlOpen = _opsOpenLen(live.hl);
+      var mxOpen = _opsOpenLen(live.mexc);
+      _opsSetEl('ops-hl-open', hlOpen);
+      _opsSetEl('ops-mx-open', mxOpen);
+      _opsUpdateRacetrack(live);
+      _opsUpdateRadar(live);
+      _opsBuildDiagnostics(live);
+    }
   }
 
+    function _opsBuildDiagnostics(live) {
+      if (!live) return;
+      var regimeEl = document.getElementById("ops-diag-regime");
+      var pairsEl  = document.getElementById("ops-diag-pairs");
+      if (!regimeEl || !pairsEl) return;
+
+      // Ã¢ÂÂÃ¢ÂÂ BTC Regime cards Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+      var regimeHtml = "";
+      var venues = [{key:"hl",label:"HL",color:"#a855f7"},{key:"mexc",label:"MEXC",color:"#f97316"}];
+      venues.forEach(function(v) {
+        var d = live[v.key];
+        if (!d) { regimeHtml += "<div></div>"; return; }
+        var btcVal   = (d.btc_j1h != null) ? (+d.btc_j1h).toFixed(1) : "--";
+        var longBlk  = !!d.regime_block_long;
+        var shortBlk = !!d.regime_block_short;
+        var longPill  = longBlk
+          ? "<span style=\"background:#7f1d1d;color:#ef4444;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700\">BLOCKED</span>"
+          : "<span style=\"background:#14532d;color:#22c55e;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700\">OPEN</span>";
+        var shortPill = shortBlk
+          ? "<span style=\"background:#7f1d1d;color:#ef4444;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700\">BLOCKED</span>"
+          : "<span style=\"background:#14532d;color:#22c55e;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700\">OPEN</span>";
+        regimeHtml +=
+          "<div style=\"background:#0d0d1a;border:1px solid " + v.color + "4d;border-radius:8px;padding:10px 12px\">" +
+            "<div style=\"display:flex;align-items:baseline;gap:8px;margin-bottom:6px\">" +
+              "<span style=\"font-family:'Bebas Neue',sans-serif;font-size:18px;color:" + v.color + ";letter-spacing:1px\">" + v.label + "</span>" +
+              "<span style=\"font-family:'Bebas Neue',sans-serif;font-size:28px;color:" + v.color + ";line-height:1\">" + btcVal + "</span>" +
+              "<span style=\"font-size:9px;color:#475569;margin-left:2px\">BTC J1H</span>" +
+            "</div>" +
+            "<div style=\"display:flex;gap:8px;align-items:center\">" +
+              "<span style=\"font-size:9px;color:#64748b\">LONG</span>" + longPill +
+            "</div>" +
+            "<div style=\"display:flex;gap:8px;align-items:center;margin-top:4px\">" +
+              "<span style=\"font-size:9px;color:#64748b\">SHORT</span>" + shortPill +
+            "</div>" +
+          "</div>";
+      });
+      regimeEl.innerHTML = regimeHtml;
+
+      // Ã¢ÂÂÃ¢ÂÂ Per-pair gate table Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+      var allPairs = {};
+      ["hl","mexc"].forEach(function(vk) {
+        var d = live[vk];
+        if (!d || !d.pair_states) return;
+        d.pair_states.forEach(function(ps) {
+          var sym = ps.symbol || "?";
+          if (!allPairs[sym]) allPairs[sym] = {};
+          allPairs[sym][vk] = {ps: ps};
+        });
+      });
+
+      function _cell(val, pass, borderline) {
+        var c = pass ? "#22c55e" : (borderline ? "#f59e0b" : "#ef4444");
+        return "<td style=\"padding:3px 6px;color:" + c + ";font-size:10px;white-space:nowrap\">" + val + "</td>";
+      }
+      function _diagRow(sym, vk, entry) {
+        var ps       = entry.ps;
+        var j1h  = ps.j1h    != null ? +ps.j1h    : 50;
+        var adx  = ps.adx1h  != null ? +ps.adx1h  : 0;
+        var kf   = ps.stoch_k_fast != null ? +ps.stoch_k_fast : 50;
+        var df   = ps.stoch_d_fast != null ? +ps.stoch_d_fast : 50;
+        var bid  = ps.bid_pct != null ? +ps.bid_pct : 0;
+        var ask  = ps.ask_pct != null ? +ps.ask_pct : 0;
+        var lScore  = ps.long_score   != null ? +ps.long_score   : 0;
+        var sScore  = ps.short_score  != null ? +ps.short_score  : 0;
+        var cdLong  = ps.cooldown_long  != null ? +ps.cooldown_long  : 0;
+        var cdShort = ps.cooldown_short != null ? +ps.cooldown_short : 0;
+        // Gate pass logic
+        var adxLong    = adx >= 20;
+        var j1hLong    = true;
+        var j1hShort   = j1h > 60 && j1h <= 89;
+        var stochLong  = kf < 25 && kf > df;
+        var stochShort = kf > 75 && kf <= 84 && kf < df;
+        var depthLong  = bid >= 55;
+        var depthShort = ask >= 55;
+        var longReady  = lScore >= 4;
+        var shortReady = sScore >= 4;
+        var killCd     = cdLong > 0 || cdShort > 0;
+        // Borderline: within 5 units of threshold
+        var adxBdr    = !adxLong    && adx >= 15;
+        var j1hSBdr   = !j1hShort  && ((j1h >= 55 && j1h <= 60) || (j1h >= 89 && j1h <= 94));
+        var stochLBdr = !stochLong  && kf < 30 && kf > df;
+        var stochSBdr = !stochShort && kf > 70 && kf <= 89 && kf < df;
+        var depthLBdr = !depthLong  && bid >= 50;
+        var depthSBdr = !depthShort && ask >= 50;
+        // Status
+        var status, statColor;
+        if (longReady && shortReady)         { status = "BOTH READY";  statColor = "#a855f7"; }
+        else if (longReady)                  { status = "LONG READY";  statColor = "#22c55e"; }
+        else if (shortReady)                 { status = "SHORT READY"; statColor = "#f97316"; }
+        else if (killCd)                     { status = "KILL CD";     statColor = "#94a3b8"; }
+        else if (lScore >= 2 || sScore >= 2) { status = "WATCHING";   statColor = "#f59e0b"; }
+        else                                 { status = "BLOCKED";     statColor = "#334155"; }
+        var dimStyle = killCd ? ";opacity:0.55" : "";
+        var vTag = vk === "hl"
+          ? "<span style=\"color:#a855f7;font-size:8px\">[H]</span>"
+          : "<span style=\"color:#f97316;font-size:8px\">[M]</span>";
+        var j1hCL = "#22c55e"; // long j1h always passes
+        var j1hCS = j1hShort ? "#22c55e" : (j1hSBdr ? "#f59e0b" : "#ef4444");
+        return "<tr style=\"border-bottom:1px solid #0f172a" + dimStyle + "\">" +
+          "<td style=\"padding:3px 6px;font-size:10px;font-weight:700;color:#e2e8f0;white-space:nowrap\">" +
+            sym.replace("_USDT","") + vTag +
+          "</td>" +
+          _cell(adx.toFixed(1), adxLong, adxBdr) +
+          "<td style=\"padding:3px 6px;font-size:10px;white-space:nowrap\">" +
+            "<span style=\"color:" + j1hCL + "\">" + j1h.toFixed(1) + "L</span>" +
+            "<span style=\"color:#334155\"> / </span>" +
+            "<span style=\"color:" + j1hCS + "\">" + j1h.toFixed(1) + "S</span>" +
+          "</td>" +
+          _cell(kf.toFixed(1)+"/"+df.toFixed(1), stochLong||stochShort, stochLBdr||stochSBdr) +
+          "<td style=\"padding:3px 6px;font-size:10px;white-space:nowrap\">" +
+            "<span style=\"color:" + (depthLong?"#22c55e":(depthLBdr?"#f59e0b":"#ef4444")) + "\">" + bid.toFixed(1) + "L</span>" +
+            "<span style=\"color:#334155\"> / </span>" +
+            "<span style=\"color:" + (depthShort?"#22c55e":(depthSBdr?"#f59e0b":"#ef4444")) + "\">" + ask.toFixed(1) + "S</span>" +
+          "</td>" +
+          "<td style=\"padding:3px 6px;font-size:10px;white-space:nowrap\">" +
+            "<span style=\"color:" + (lScore>=4?"#22c55e":lScore>=2?"#f59e0b":"#ef4444") + "\">" + lScore + "L</span> " +
+            "<span style=\"color:" + (sScore>=4?"#22c55e":sScore>=2?"#f59e0b":"#ef4444") + "\">" + sScore + "S</span>" +
+          "</td>" +
+          "<td style=\"padding:3px 6px;font-size:10px;font-weight:700;color:" + statColor + ";white-space:nowrap\">" + status + "</td>" +
+        "</tr>";
+      }
+
+      var syms = Object.keys(allPairs).sort();
+      if (syms.length === 0) {
+        pairsEl.innerHTML = "<div style=\"color:#334155;font-size:10px;padding:8px\">AWAITING PAIR DATA...</div>";
+      } else {
+        var tbl =
+          "<table style=\"width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace\">" +
+          "<thead><tr style=\"border-bottom:1px solid #1e293b\">" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">PAIR</th>" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">ADX</th>" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">J1H</th>" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">STOCH K/D</th>" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">DEPTH</th>" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">SCORE</th>" +
+          "<th style=\"padding:4px 6px;font-size:9px;color:#475569;text-align:left;font-weight:400\">STATUS</th>" +
+          "</tr></thead><tbody>";
+        var rows = "";
+        syms.forEach(function(sym) {
+          var entry = allPairs[sym];
+          ["hl","mexc"].forEach(function(vk) {
+            if (entry[vk]) rows += _diagRow(sym, vk, entry[vk]);
+          });
+        });
+        pairsEl.innerHTML = tbl + rows + "</tbody></table>";
+      }
+
+      var tsEl = document.getElementById("ops-diag-updated");
+      if (tsEl) {
+        var now = new Date();
+        tsEl.textContent = now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+      }
+    }
+
   function _opsStartTimers() {
+    _opsUpdateClock();
+    _opsClockTmr = setInterval(_opsUpdateClock, 1000);
+    _opsHorseTmr = setInterval(_opsAnimateHorses, 50);
     _opsGateTmr  = setInterval(_opsRefreshGate, 10000);
     _opsRefreshGate();
   }
 
   function _opsStopTimers() {
+    clearInterval(_opsClockTmr);
+    clearInterval(_opsHorseTmr);
     clearInterval(_opsGateTmr);
   }
+
+  document.addEventListener('mousemove', function(e) {
+    if (!_opsActive) return;
+    var orbs = [
+      {el:document.getElementById('ops-orb1'), d:0.015},
+      {el:document.getElementById('ops-orb2'), d:0.010},
+      {el:document.getElementById('ops-orb3'), d:0.020},
+    ];
+    orbs.forEach(function(o){
+      if (!o.el) return;
+      var x = (e.clientX - window.innerWidth/2)  * o.d;
+      var y = (e.clientY - window.innerHeight/2) * o.d;
+      o.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    });
+  });
+  
 </script>
 
     <!-- TWIN SIGNALS overlay sheet -->
@@ -4274,6 +4671,52 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
     <!-- TAB 4: OPERATIONS -->
     <div id="panel-operations" style="display:none">
+      <div class="ops-orb ops-orb1" id="ops-orb1"></div>
+      <div class="ops-orb ops-orb2" id="ops-orb2"></div>
+      <div class="ops-orb ops-orb3" id="ops-orb3"></div>
+
+        <!-- Gate Diagnostics -->
+        <section class="ops-section" id="ops-gate-diagnostics" style="margin-bottom:16px">
+          <div class="ops-section-accent"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <h2 class="ops-section-title">&#x26A1; GATE DIAGNOSTICS</h2>
+            <div id="ops-diag-updated" style="font-size:9px;color:#334155;font-family:'JetBrains Mono',monospace">--:--</div>
+          </div>
+          <!-- BTC Regime Row -->
+          <div id="ops-diag-regime" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <!-- populated by JS -->
+          </div>
+          <!-- Per-pair gate table -->
+          <div id="ops-diag-pairs" style="overflow-x:auto">
+            <!-- populated by JS -->
+          </div>
+        </section>
+
+      <!-- Signal Radar -->
+      <section class="ops-section" id="ops-radar">
+        <div class="ops-section-accent"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <h2 class="ops-section-title" style="background:linear-gradient(90deg,#a855f7,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block;margin-bottom:0">&#x26A1; SIGNAL RADAR</h2>
+          <span class="ops-header-time" id="ops-clock">--:--:--</span>
+        </div>
+        <div id="ops-radar-content">
+          <div class="ops-no-positions">AWAITING SIGNAL DATA...</div>
+        </div>
+      </section>
+
+      <!-- Section 3: Racetrack -->
+      <section class="ops-section">
+        <div class="ops-section-accent"></div>
+        <h2 class="ops-section-title">OPEN POSITIONS &#x2014; THE RACETRACK</h2>
+        <div class="ops-racetrack">
+          <div class="ops-racetrack-rail"></div>
+          <div id="ops-racetrack-lanes">
+            <div class="ops-no-positions">NO OPEN POSITIONS &#x2014; FLEET SCANNING</div>
+          </div>
+        </div>
+      </section>
+
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 16px">
         <!-- Exit Breakdown -->
         <section class="ops-section" style="margin:0">
@@ -4300,6 +4743,363 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       </div>
     </div>
   
+
+    <!-- TAB 5: JABBLE -->
+    <div id="panel-jabble" style="display:none">
+      <div class="jabble-wrap">
+        <div class="jabble-title">THE JABBLE</div>
+        <div class="jabble-subtitle">FLEET POSITIONS &middot; LIVE POOL &middot; REAL-TIME</div>
+        <div class="jabble-stage">
+          <div class="jabble-pill jabble-pill-hl">
+            <div class="jabble-pill-label">HYPERLIQUID</div>
+            <div class="jabble-pill-pnl zer" id="jab-hl-pnl">--</div>
+            <div class="jabble-pill-open" id="jab-hl-open">0 OPEN</div>
+          </div>
+          <div class="jabble-canvas-wrap">
+            <canvas id="jabble-canvas" width="700" height="700"></canvas>
+          </div>
+          <div class="jabble-pill jabble-pill-mx">
+            <div class="jabble-pill-label">MEXC</div>
+            <div class="jabble-pill-pnl zer" id="jab-mx-pnl">--</div>
+            <div class="jabble-pill-open" id="jab-mx-open">0 OPEN</div>
+          </div>
+        </div>
+        <div class="jabble-legend">
+          <span><span class="jabble-legend-dot" style="background:#a855f7"></span>HL</span>
+          <span><span class="jabble-legend-dot" style="background:#f97316"></span>MEXC</span>
+          <span><span class="jabble-legend-dot" style="background:#22c55e"></span>LONG</span>
+          <span><span class="jabble-legend-dot" style="background:#ef4444"></span>SHORT</span>
+          <span><span class="jabble-legend-dot" style="background:#22c55e;opacity:0.5"></span>PROFIT</span>
+          <span><span class="jabble-legend-dot" style="background:#ef4444;opacity:0.5"></span>LOSS</span>
+          <span style="opacity:0.4">&#x25CF; SIZE=TIER &nbsp; &#x25CF; ORBIT=LIVE TRADE</span>
+        </div>
+      </div>
+    </div>
+
+  <script>
+  (function(){
+    var _active=false,_raf=null,_t=0,_live=null;
+    var _prevKeys={hl:[],mexc:[]},_bursts=[],_drops=[],_ambient=[];
+
+    function _initAmbient(){
+      _ambient=[];
+      for(var i=0;i<18;i++) _ambient.push({r:34+i*15,phase:i*0.38});
+    }
+
+    function _start(){
+      if(_active)return; _active=true;
+      if(!_ambient.length)_initAmbient();
+      _tick();
+    }
+
+    function _pause(){
+      _active=false;
+      if(_raf){cancelAnimationFrame(_raf);_raf=null;}
+    }
+
+    function _tick(){
+      if(!_active)return;
+      _t+=0.018; _draw();
+      _raf=requestAnimationFrame(_tick);
+    }
+
+    function refreshJabble(liveData){
+      _live=liveData;
+      ['hl','mexc'].forEach(function(venue){
+        var st=liveData&&liveData[venue];
+        var ot=st&&st.open_trades;
+        var curKeys=(ot&&typeof ot==='object')?Object.keys(ot):[];
+        var prev=_prevKeys[venue];
+        curKeys.forEach(function(k){
+          if(prev.indexOf(k)===-1){
+            var tr=ot[k];
+            var tier=((tr&&tr.tier)||'').toUpperCase();
+            var isHC=tier.indexOf('HIGH')!==-1;
+            var color=venue==='hl'?'#a855f7':'#f97316';
+            var n=isHC?4:3;
+            for(var i=0;i<n;i++){
+              _bursts.push({r:8+i*16,dr:isHC?4.5:3.0,
+                alpha:isHC?0.94:0.74,color:color,
+                width:isHC?3:2,glow:isHC?30:18});
+            }
+          }
+        });
+        _prevKeys[venue]=curKeys.slice();
+      });
+      var allT=[];
+      ['hl','mexc'].forEach(function(venue){
+        var st=liveData&&liveData[venue];
+        var ot=st&&st.open_trades;
+        if(ot&&typeof ot==='object'){
+          Object.values(ot).forEach(function(tr){allT.push({tr:tr,venue:venue});});
+        }
+      });
+      var n=allT.length;
+      var oldAngles={};
+      _drops.forEach(function(d){oldAngles[d.venue+'|'+d.key]=d.angle;});
+      _drops=allT.map(function(item,idx){
+        var tr=item.tr;
+        var tier=((tr.tier)||'').toUpperCase();
+        var isLg=tier.indexOf('HIGH')!==-1;
+        var sym=(tr.symbol||'?').replace(/_?USDT$/i,'').replace(/USDT$/i,'');
+        var dir=(tr.direction||'LONG').toUpperCase();
+        var key=(tr.symbol||'')+'|'+dir;
+        var existAng=oldAngles[item.venue+'|'+key];
+        return{
+          venue:item.venue,key:key,symbol:sym,direction:dir,tier:tier,
+          size:isLg?30:24,
+          pnl:parseFloat(tr.pnl||tr.unrealized_pnl||tr.cpnl||0),
+          angle:existAng!==undefined?existAng:(idx/Math.max(n,1))*Math.PI*2,
+          speed:0.0044+(idx%4)*0.0005,
+          bobPhase:idx*1.47,
+          orbitR:112+(idx%6)*20,
+        };
+      });
+      _updatePills(liveData);
+    }
+
+    function _updatePills(ld){
+      function _pnl(st){
+        if(!st)return null;
+        var v=st.daily_pnl;
+        if(v==null&&st.daily)v=st.daily.pnl;
+        return v!=null?parseFloat(v):null;
+      }
+      function _open(st){
+        var ot=st&&st.open_trades;
+        if(!ot)return 0;
+        return Array.isArray(ot)?ot.length:Object.keys(ot).length;
+      }
+      function _fmtP(v){
+        if(v==null)return '--';
+        return(v>=0?'+':'')+'$'+Math.abs(v).toFixed(0);
+      }
+      function _cls(v){return(v==null||Math.abs(v)<1)?'zer':(v>=0?'pos':'neg');}
+      function _setEl(id,html,cls){
+        var el=document.getElementById(id);
+        if(!el)return;
+        el.innerHTML=html;
+        if(cls){el.className=el.className.replace(/ ?(pos|neg|zer)/g,'')+' '+cls;}
+      }
+      var hlP=_pnl(ld&&ld.hl),mxP=_pnl(ld&&ld.mexc);
+      var hlO=_open(ld&&ld.hl),mxO=_open(ld&&ld.mexc);
+      _setEl('jab-hl-pnl',_fmtP(hlP),_cls(hlP));
+      _setEl('jab-mx-pnl',_fmtP(mxP),_cls(mxP));
+      _setEl('jab-hl-open',hlO+' OPEN','');
+      _setEl('jab-mx-open',mxO+' OPEN','');
+    }
+
+    function drawDrop(ctx,x,y,r){
+      ctx.beginPath();
+      ctx.moveTo(x,y-r*1.4);
+      ctx.bezierCurveTo(x+r*0.4,y-r*0.6,x+r,y+r*0.3,x+r,y+r*0.6);
+      ctx.bezierCurveTo(x+r,y+r*1.3,x-r,y+r*1.3,x-r,y+r*0.6);
+      ctx.bezierCurveTo(x-r,y+r*0.3,x-r*0.4,y-r*0.6,x,y-r*1.4);
+      ctx.closePath();
+    }
+
+    function _draw(){
+      var cv=document.getElementById('jabble-canvas');
+      if(!cv)return;
+      var ctx=cv.getContext('2d');
+      var W=700,H=700,CX=350,CY=350;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#c8e8f0';
+      ctx.fillRect(0,0,W,H);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(CX,CY,334,314,0,0,Math.PI*2);
+      ctx.clip();
+
+      var bg=ctx.createRadialGradient(CX,CY-18,0,CX,CY,344);
+      bg.addColorStop(0,'#c8e8f0');
+      bg.addColorStop(0.25,'#a0cfe0');
+      bg.addColorStop(0.55,'#6aafcc');
+      bg.addColorStop(0.80,'#3a7fa8');
+      bg.addColorStop(1,'#1a4a6a');
+      ctx.fillStyle=bg;
+      ctx.fillRect(0,0,W,H);
+
+      for(var i=0;i<_ambient.length;i++){
+        var rg=_ambient[i];
+        var pulse=Math.sin(_t*0.55+rg.phase)*3.8;
+        var rr=rg.r+pulse;
+        var isEven=i%2===0;
+        var wc=isEven?'26,58,107':'232,244,248';
+        var baseA=isEven?0.50:0.60;
+        var wa=i<4?baseA+0.15:i>14?baseA-0.15:baseA;
+        var lw=isEven?1.2:0.8;
+        ctx.beginPath();
+        ctx.ellipse(CX,CY,rr*1.08,rr,0,0,Math.PI*2);
+        ctx.strokeStyle='rgba('+wc+','+wa+')';
+        ctx.lineWidth=lw;
+        ctx.stroke();
+      }
+
+      var hlC=0,mxC=0;
+      _drops.forEach(function(d){if(d.venue==='hl')hlC++;else mxC++;});
+      for(var w=0;w<3;w++){
+        if(hlC>0){
+          var tf=((_t*0.42+w*0.334)%1);
+          var rv=tf*250,av=(1-tf)*0.35;
+          ctx.beginPath();
+          ctx.ellipse(CX,CY,rv*1.07,rv,0,0,Math.PI*2);
+          ctx.strokeStyle='rgba(124,58,237,'+av.toFixed(3)+')';
+          ctx.lineWidth=1.5;ctx.stroke();
+        }
+        if(mxC>0){
+          var tf2=((_t*0.42+w*0.334+0.50)%1);
+          var rv2=tf2*250,av2=(1-tf2)*0.35;
+          ctx.beginPath();
+          ctx.ellipse(CX,CY,rv2*1.07,rv2,0,0,Math.PI*2);
+          ctx.strokeStyle='rgba(234,101,0,'+av2.toFixed(3)+')';
+          ctx.lineWidth=1.5;ctx.stroke();
+        }
+      }
+
+      var liveBursts=[];
+      for(var bi=0;bi<_bursts.length;bi++){
+        var b=_bursts[bi];
+        if(b.alpha>0.012){
+          ctx.save();
+          ctx.shadowBlur=b.glow;ctx.shadowColor=b.color;
+          ctx.globalAlpha=b.alpha;
+          ctx.beginPath();
+          ctx.ellipse(CX,CY,b.r*1.07,b.r,0,0,Math.PI*2);
+          ctx.strokeStyle=b.color;ctx.lineWidth=b.width;ctx.stroke();
+          ctx.restore();
+          b.r+=b.dr;b.alpha*=0.933;
+          liveBursts.push(b);
+        }
+      }
+      _bursts=liveBursts;
+
+      for(var di=0;di<_drops.length;di++){
+        var d=_drops[di];
+        var bob=Math.sin(_t*1.05+d.bobPhase)*5;
+        var dx=CX+Math.cos(d.angle)*(d.orbitR+bob);
+        var dy=CY+Math.sin(d.angle)*(d.orbitR+bob)*0.80;
+        var rgb=d.venue==='hl'?'168,85,247':'249,115,22';
+        ctx.beginPath();ctx.moveTo(dx,dy-d.size*1.4);ctx.lineTo(CX,CY);
+        ctx.strokeStyle='rgba('+rgb+',0.09)';ctx.lineWidth=1;ctx.stroke();
+      }
+
+      for(var di2=0;di2<_drops.length;di2++){
+        var d=_drops[di2];
+        var bob2=Math.sin(_t*1.05+d.bobPhase)*5;
+        var dx2=CX+Math.cos(d.angle)*(d.orbitR+bob2);
+        var dy2=CY+Math.sin(d.angle)*(d.orbitR+bob2)*0.80;
+        var r=d.size;
+        var col=d.venue==='hl'?'#a855f7':'#f97316';
+        var rgb=d.venue==='hl'?'168,85,247':'249,115,22';
+        var glowAmt=(d.tier.indexOf('HIGH_CONV')!==-1)?28:(d.tier.indexOf('HIGH_PROB')!==-1)?20:13;
+
+        ctx.save();
+        ctx.shadowBlur=glowAmt;ctx.shadowColor=col;
+        var drg=ctx.createRadialGradient(dx2-r*0.25,dy2-r*0.6,0,dx2,dy2,r*1.5);
+        drg.addColorStop(0,'rgba('+rgb+',0.42)');
+        drg.addColorStop(1,'rgba('+rgb+',0.07)');
+        drawDrop(ctx,dx2,dy2,r);
+        ctx.fillStyle=drg;ctx.fill();
+        drawDrop(ctx,dx2,dy2,r);
+        ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha=0.30;
+        ctx.fillStyle='rgba(255,255,255,0.60)';
+        ctx.beginPath();
+        ctx.ellipse(dx2-r*0.25,dy2-r*0.6,r*0.18,r*0.10,0,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.font='7px "Courier New",monospace';
+        ctx.fillStyle='rgba(255,255,255,0.52)';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(d.symbol,dx2,dy2+r*0.1);
+
+        var pnl=d.pnl;
+        var pnlCol=Math.abs(pnl)<1?'#555555':(pnl>0?'#22c55e':'#ef4444');
+        var pnlTxt=(Math.abs(pnl)<10)
+          ?(pnl>=0?'+':'')+'$'+Math.abs(pnl).toFixed(1)
+          :(pnl>=0?'+':'')+'$'+Math.abs(pnl).toFixed(0);
+        ctx.font='bold '+(r<28?'9':'10')+'px "Courier New",monospace';
+        ctx.fillStyle=pnlCol;
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(pnlTxt,dx2,dy2+r*0.7);
+
+        var pipX=dx2+r*0.70,pipY=dy2-r*0.50;
+        ctx.beginPath();ctx.arc(pipX,pipY,5.5,0,Math.PI*2);
+        ctx.fillStyle=d.direction==='LONG'?'#22c55e':'#ef4444';ctx.fill();
+        ctx.font='bold 6px "Courier New",monospace';
+        ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(d.direction==='LONG'?'L':'S',pipX,pipY);
+
+        var vpX=dx2-r*0.70,vpY=dy2+r*0.90;
+        ctx.beginPath();ctx.arc(vpX,vpY,4.5,0,Math.PI*2);
+        ctx.fillStyle=d.venue==='hl'?'#a855f7':'#f97316';ctx.fill();
+
+        d.angle+=d.speed;
+      }
+
+      var hlP=0,mxP=0;
+      if(_live){
+        if(_live.hl){
+          if(_live.hl.daily_pnl!=null)hlP=parseFloat(_live.hl.daily_pnl);
+          else if(_live.hl.daily&&_live.hl.daily.pnl!=null)hlP=parseFloat(_live.hl.daily.pnl);
+        }
+        if(_live.mexc){
+          if(_live.mexc.daily_pnl!=null)mxP=parseFloat(_live.mexc.daily_pnl);
+          else if(_live.mexc.daily&&_live.mexc.daily.pnl!=null)mxP=parseFloat(_live.mexc.daily.pnl);
+        }
+      }
+      var fp=hlP+mxP;
+      var fpPos=Math.abs(fp)>=1;
+      var fpCol=!fpPos?'#1a3a6b':(fp>0?'#0a5c2a':'#8b0000');
+      var fpShd=!fpPos?'rgba(26,58,107,0.60)':(fp>0?'rgba(10,92,42,0.60)':'rgba(139,0,0,0.60)');
+      var pulse3=24+Math.sin(_t*1.3)*7;
+
+      var cGlow=ctx.createRadialGradient(CX,CY,0,CX,CY,80);
+      cGlow.addColorStop(0,'rgba(255,255,255,0.90)');
+      cGlow.addColorStop(0.4,'rgba(200,232,240,0.60)');
+      cGlow.addColorStop(1,'rgba(200,232,240,0)');
+      ctx.fillStyle=cGlow;
+      ctx.beginPath();
+      ctx.ellipse(CX,CY,80,75,0,0,Math.PI*2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.shadowBlur=pulse3;ctx.shadowColor=fpShd;
+      ctx.font='bold 26px "Courier New",monospace';
+      ctx.fillStyle=fpCol;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText((fp>=0?'+':'')+'$'+Math.abs(fp).toFixed(0),CX,CY-11);
+      ctx.restore();
+
+      ctx.font='9px "Courier New",monospace';
+      ctx.fillStyle='#1a3a6b';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('FLEET ÃÂ· TODAY',CX,CY+15);
+
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(CX,CY,334,314,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(80,38,165,0.16)';
+      ctx.lineWidth=2.5;ctx.stroke();
+      ctx.restore();
+    }
+
+    window._jabbleStart=_start;
+    window._jabblePause=_pause;
+    window.refreshJabble=refreshJabble;
+    Object.defineProperty(window,'_jabbleActive',{
+      get:function(){return _active;},
+      set:function(v){_active=v;},
+      configurable:true,
+    });
+  })();
+  </script>
 
     <!-- TAB: ALERTS -->
     <div id="panel-alerts" style="display:none">
@@ -4492,8 +5292,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           var arrow=active?(_alSortDir===-1?' &#x25BC;':' &#x25B2;'):'';
           var onclick=c.s?' onclick="alSort(\''+c.key+'\')"':'';
           return'<th style="padding:5px 6px;text-align:left;border-bottom:2px solid #1e293b;'+
-            'font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.07em;'+
-            'color:'+(active?'#06b6d4':'#475569')+';white-space:nowrap;'+(c.s?'cursor:pointer':'')+'"'+onclick+'>'+c.label+arrow+'</th>';
+            '"font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.07em;'+
+            '"color:'+(active?'#06b6d4':'#475569')+';white-space:nowrap;'+(c.s?'cursor:pointer':'')+'"+onclick+'>'+c.label+arrow+'</th>';
         }).join('');
       }
       function _renderTable(){
@@ -4569,163 +5369,6 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       window._alertsStart=_alertsStart;
       window._alertsStop=_alertsStop;
     })();
-
-// ── ALERT OVERLAY ──
-let _alOverlayData = [];
-let _alOverlayFilter = 'ALL';
-let _alOverlayInterval = null;
-
-function openAlertOverlay() {
-  document.getElementById('alert-overlay').style.display = 'flex';
-  fetchAlOverlayData();
-  _alOverlayInterval = setInterval(fetchAlOverlayData, 30000);
-}
-
-function closeAlertOverlay() {
-  document.getElementById('alert-overlay').style.display = 'none';
-  if (_alOverlayInterval) { clearInterval(_alOverlayInterval); _alOverlayInterval = null; }
-}
-
-async function fetchAlOverlayData() {
-  try {
-    const r = await fetch('/api/alert-log');
-    if (!r.ok) return;
-    _alOverlayData = await r.json();
-    try {
-      renderAlOverlay();
-    } catch(e) {
-      console.error('renderAlOverlay error:', e);
-    }
-  } catch(e) {
-    console.error('Alert fetch error:', e);
-  }
-}
-
-function alFilter(f, el) {
-  _alOverlayFilter = f;
-  document.querySelectorAll('.al-fp').forEach(function(x) { x.classList.remove('active'); });
-  if (el) el.classList.add('active');
-  renderAlOverlay();
-}
-
-function renderAlOverlay() {
-  try {
-    const data = _alOverlayData;
-    if (!data || !data.length) return;
-    var pc = document.getElementById('alert-pill-count');
-    if (pc) pc.textContent = data.length;
-    const confirmed = data.filter(function(r){ return r.outcome==='CONFIRMED'; }).length;
-    const blocked   = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; }).length;
-    const rate = data.length > 0 ? Math.round(confirmed/data.length*100) : 0;
-    const sr = document.getElementById('al-stats-row');
-    if (sr) sr.innerHTML =
-      `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#06b6d4">${data.length}</div><div style="font-size:7px;color:#fff;font-weight:700">TOTAL</div></div>` +
-      `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#22c55e">${confirmed}</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRMED</div></div>` +
-      `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#ef4444">${blocked}</div><div style="font-size:7px;color:#fff;font-weight:700">BLOCKED</div></div>` +
-      `<div style="flex:1;padding:6px 8px;text-align:center"><div style="font-size:12px;font-weight:700;color:#06b6d4">${rate}%</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRM%</div></div>`;
-    let rows = data;
-    if (_alOverlayFilter === 'CONFIRMED')      rows = data.filter(function(r){ return r.outcome==='CONFIRMED'; });
-    else if (_alOverlayFilter === 'J1H_DISCARDED') rows = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; });
-    else if (_alOverlayFilter === 'EXPIRED')   rows = data.filter(function(r){ return r.outcome && r.outcome.startsWith('EXPIRED'); });
-    const badgeMap = {
-      'CONFIRMED':     'background:#052e16;color:#22c55e;border:1px solid #166534',
-      'J1H_DISCARDED': 'background:#2d1515;color:#ef4444;border:1px solid #991b1b',
-      'EXPIRED_AGE':   'background:#1c1410;color:#f59e0b;border:1px solid #92400e',
-      'EXPIRED_J15M':  'background:#1a1208;color:#f97316;border:1px solid #9a3412',
-      'EXPIRED_PRICE': 'background:#12101c;color:#8b5cf6;border:1px solid #5b21b6',
-    };
-    const labelMap = {
-      'CONFIRMED':     'CONFIRMED',
-      'J1H_DISCARDED': 'J1H BLOCKED',
-      'EXPIRED_AGE':   'EXPIRED AGE',
-      'EXPIRED_J15M':  'EXPIRED J15M',
-      'EXPIRED_PRICE': 'EXPIRED PRICE',
-    };
-    const dotColor = {'HL':'#a855f7','MEXC':'#f97316'};
-    let h2 = '';
-    rows.forEach(function(r, i) {
-      const bStyle = badgeMap[r.outcome] || '';
-      const bLabel = labelMap[r.outcome] || r.outcome;
-      const dot = dotColor[r.venue] || '#fff';
-      const dirColor = r.direction === 'LONG' ? '#22c55e' : '#ef4444';
-      const j1hDir = (r.j1h_prev_valid === false)
-        ? '<span style="color:#fff">\u2192 COLD</span>'
-        : r.j1h_at_signal > r.j1h_prev_at_signal
-          ? `<span style="color:#22c55e">\u2191 ${r.j1h_at_signal}</span>`
-          : r.j1h_at_signal < r.j1h_prev_at_signal
-            ? `<span style="color:#ef4444">\u2193 ${r.j1h_at_signal}</span>`
-            : `<span style="color:#fff">\u2192 ${r.j1h_at_signal}</span>`;
-      const t = r.created_et ? r.created_et.substring(11,16)+' UTC' : '--';
-      h2 += `<div class="al-row" onclick="alSelectRow(${i}, this)">` +
-        `<div style="display:flex;justify-content:space-between;margin-bottom:3px">` +
-        `<div style="font-weight:700;color:#fff;font-size:11px"><span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;margin-right:5px;vertical-align:middle"></span>${r.pair}</div>` +
-        `<div style="font-size:8px;font-weight:700;color:#fff">${t}</div></div>` +
-        `<div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">` +
-        `<span style="padding:2px 6px;border-radius:3px;font-size:7px;font-weight:700;${bStyle}">${bLabel}</span>` +
-        `<span style="color:${dirColor};font-size:8px;font-weight:700">${r.direction}</span>${j1hDir}</div>` +
-        `<div style="font-size:8px;font-weight:700;color:#fff">J15M ${r.j15m_at_signal||'--'} \u00B7 ADX ${r.adx||'--'} \u00B7 pend ${r.pending_duration_seconds||0}s</div></div>`;
-    });
-    const ar = document.getElementById('al-rows');
-    if (ar) ar.innerHTML = h2 || '<div style="padding:20px;text-align:center;color:#fff;font-weight:700">NO ALERTS</div>';
-    window._alFilteredRows = rows;
-  } catch(e) {
-    console.error('renderAlOverlay error:', e);
-  }
-}
-
-function alSelectRow(i, el) {
-  document.querySelectorAll('.al-row').forEach(function(r){ r.classList.remove('selected'); });
-  if (el) el.classList.add('selected');
-  const r = window._alFilteredRows && window._alFilteredRows[i];
-  if (!r) return;
-  document.getElementById('al-detail-empty').style.display = 'none';
-  const dp = document.getElementById('al-detail-content');
-  dp.style.display = 'block';
-  const dur = r.pending_duration_seconds || 0;
-  let tfLabel, tfColor;
-  if (dur < 900)       { tfLabel = 'J5M \u00B7 sub-15min';  tfColor = '#06b6d4'; }
-  else if (dur < 3600) { tfLabel = 'J15M \u00B7 15-60min'; tfColor = '#f97316'; }
-  else                 { tfLabel = 'J1H \u00B7 60min+';     tfColor = '#a855f7'; }
-  const dirColor = r.direction === 'LONG' ? '#22c55e' : '#ef4444';
-  const bStyle = {
-    'CONFIRMED':     'background:#052e16;color:#22c55e;border:1px solid #166534',
-    'J1H_DISCARDED': 'background:#2d1515;color:#ef4444;border:1px solid #991b1b',
-  }[r.outcome] || 'background:#1c1410;color:#f59e0b;border:1px solid #92400e';
-  dp.innerHTML =
-    `<div style="display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e2035">` +
-    `<div><div style="font-size:18px;font-weight:700;color:#fff">${r.pair} <span style="color:${dirColor}">${r.direction}</span></div>` +
-    `<div style="font-size:9px;font-weight:700;color:#fff;margin-top:3px">${r.venue} \u00B7 ${r.tier||'--'} \u00B7 ADX ${r.adx||'--'} \u00B7 Score ${r.score||'--'} \u00B7 ${r.session||'--'}</div></div>` +
-    `<div style="text-align:right"><span style="padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;${bStyle}">${r.outcome||'--'}</span>` +
-    `<div style="font-size:8px;font-weight:700;color:#fff;margin-top:4px">Pending: ${r.pending_duration_seconds||0}s</div></div></div>` +
-    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">` +
-    _alMetric(r.signal_price,'SIGNAL PX') + _alMetric(r.be_confirm_price,'BE CONFIRM') + _alMetric(r.confirm_price||'--','CONFIRM PX','#22c55e') + _alMetric(r.j1h_at_signal,'J1H') +
-    _alMetric(r.j1h_prev_at_signal,'J1H PREV') + _alMetric(r.j15m_at_signal,'J15M') + _alMetric((r.pending_duration_seconds||0)+'s','PENDING') + _alMetric(r.adx,'ADX') +
-    `</div>` +
-    `<div style="margin-bottom:10px;font-size:8px;font-weight:700;color:#fff">TIMEFRAME: <span style="padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700;border:1px solid ${tfColor};color:${tfColor};background:rgba(0,0,0,.4)">${tfLabel}</span></div>` +
-    `<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:10px;margin-bottom:12px">` +
-    `<div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:8px">CONFIRMATION PATH</div>` +
-    _alPathRow('J1H at signal', `${r.j1h_at_signal} (prev: ${r.j1h_prev_at_signal})`) +
-    _alPathRow('J1H gate', r.outcome==='J1H_DISCARDED' ? '<span style="color:#ef4444">BLOCKED</span>' : '<span style="color:#22c55e">PASSED</span>') +
-    _alPathRow('BE confirm target', r.be_confirm_price||'--') +
-    _alPathRow('Confirmed at', r.confirm_price ? `<span style="color:#22c55e">${r.confirm_price}</span>` : '<span style="color:#f59e0b">NEVER CONFIRMED</span>') +
-    _alPathRow('Outcome', r.outcome) +
-    `</div>` +
-    `<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:10px">` +
-    `<div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:6px">CANDLE ANALYSIS</div>` +
-    `<div style="font-size:8px;font-weight:700;color:#fff">Live candle fetch for confirmed trades \u2014 select a CONFIRMED alert to load J5M/J15M/J1H candle data based on trade duration via the MEXC proxy endpoint. This panel will populate with OHLC table, PnL timeline, and peak/exit flags when the candle build is wired in the next sprint.</div></div>`;
-}
-
-function _alMetric(val, lbl, color) {
-  return `<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:8px;text-align:center">` +
-    `<div style="font-size:12px;font-weight:700;color:${color||'#fff'}">${val||'--'}</div>` +
-    `<div style="font-size:7px;font-weight:700;color:#fff;margin-top:2px;letter-spacing:.06em">${lbl}</div></div>`;
-}
-
-function _alPathRow(k, v) {
-  return `<div style="display:flex;justify-content:space-between;margin-bottom:4px">` +
-    `<span style="font-size:8px;font-weight:700;color:#fff">${k}</span>` +
-    `<span style="font-size:8px;font-weight:700;color:#fff">${v}</span></div>`;
-}
     </script>
 
     <div id="kz-scrim" class="exc-scrim" onclick="closeKzSheet()">
@@ -4738,33 +5381,5 @@ function _alPathRow(k, v) {
         </div>
       </div>
 
-
-<div id="alert-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(4px);z-index:999;flex-direction:column">
-  <div style="background:#07070f;border-bottom:1px solid #06b6d4;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-    <div>
-      <div style="font-size:12px;font-weight:700;color:#06b6d4;letter-spacing:.1em">&#x25C9; ALERT LOG</div>
-      <div id="al-overlay-sub" style="font-size:8px;font-weight:700;color:#fff;margin-top:2px">CONFIRMATION SYSTEM</div>
-    </div>
-    <button onclick="closeAlertOverlay()" style="padding:4px 12px;border-radius:4px;background:#0d0d1a;border:1px solid #1e2035;color:#fff;font-size:9px;font-weight:700;cursor:pointer">&#x2715; CLOSE</button>
-  </div>
-  <div style="display:flex;flex:1;overflow:hidden">
-    <div id="al-list-panel" style="width:320px;flex-shrink:0;border-right:1px solid #1e2035;display:flex;flex-direction:column;overflow:hidden">
-      <div style="padding:8px 12px;border-bottom:1px solid #1e2035;display:flex;gap:6px;flex-wrap:wrap">
-        <span class="al-fp active" onclick="alFilter('ALL',this)">ALL</span>
-        <span class="al-fp" onclick="alFilter('CONFIRMED',this)">CONFIRMED</span>
-        <span class="al-fp" onclick="alFilter('J1H_DISCARDED',this)">J1H BLOCKED</span>
-        <span class="al-fp" onclick="alFilter('EXPIRED',this)">EXPIRED</span>
-      </div>
-      <div id="al-stats-row" style="display:flex;border-bottom:1px solid #1e2035"></div>
-      <div id="al-rows" style="flex:1;overflow-y:auto"></div>
-    </div>
-    <div id="al-detail-panel" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-      <div id="al-detail-empty" style="flex:1;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:10px;text-align:center;line-height:1.8">
-        &#x25C9; SELECT AN ALERT<br>TO SEE CANDLE ANALYSIS<br>AND PNL DATA
-      </div>
-      <div id="al-detail-content" style="flex:1;overflow-y:auto;padding:12px 16px;display:none"></div>
-    </div>
-  </div>
-</div>
       </body>
 </html>
