@@ -4587,10 +4587,16 @@ function closeAlertOverlay() {
 async function fetchAlOverlayData() {
   try {
     const r = await fetch('/api/alert-log');
-    if (!r.ok) throw new Error(r.status);
+    if (!r.ok) return;
     _alOverlayData = await r.json();
-    renderAlOverlay();
-  } catch(e) { console.error('Alert overlay fetch:', e); }
+    try {
+      renderAlOverlay();
+    } catch(e) {
+      console.error('renderAlOverlay error:', e);
+    }
+  } catch(e) {
+    console.error('Alert fetch error:', e);
+  }
 }
 
 function alFilter(f, el) {
