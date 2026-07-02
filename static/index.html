@@ -4490,8 +4490,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           var arrow=active?(_alSortDir===-1?' &#x25BC;':' &#x25B2;'):'';
           var onclick=c.s?' onclick="alSort(\''+c.key+'\')"':'';
           return'<th style="padding:5px 6px;text-align:left;border-bottom:2px solid #1e293b;'+
-            '"font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.07em;'+
-            '"color:'+(active?'#06b6d4':'#475569')+';white-space:nowrap;'+(c.s?'cursor:pointer':'')+'"+onclick+'>'+c.label+arrow+'</th>';
+            'font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.07em;'+
+            'color:'+(active?'#06b6d4':'#475569')+';white-space:nowrap;'+(c.s?'cursor:pointer':'')+'"'+onclick+'>'+c.label+arrow+'</th>';
         }).join('');
       }
       function _renderTable(){
@@ -4610,14 +4610,14 @@ function renderAlOverlay() {
   const rate = data.length > 0 ? Math.round(confirmed/data.length*100) : 0;
   const sr = document.getElementById('al-stats-row');
   if (sr) sr.innerHTML =
-    '<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#06b6d4">'+data.length+'</div><div style="font-size:7px;color:#fff;font-weight:700">TOTAL</div></div>'+
-    '<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#22c55e">'+confirmed+'</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRMED</div></div>'+
-    '<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#ef4444">'+blocked+'</div><div style="font-size:7px;color:#fff;font-weight:700">BLOCKED</div></div>'+
-    '<div style="flex:1;padding:6px 8px;text-align:center"><div style="font-size:12px;font-weight:700;color:#06b6d4">'+rate+'%</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRM%</div></div>';
+    `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#06b6d4">${data.length}</div><div style="font-size:7px;color:#fff;font-weight:700">TOTAL</div></div>` +
+    `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#22c55e">${confirmed}</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRMED</div></div>` +
+    `<div style="flex:1;padding:6px 8px;text-align:center;border-right:1px solid #1e2035"><div style="font-size:12px;font-weight:700;color:#ef4444">${blocked}</div><div style="font-size:7px;color:#fff;font-weight:700">BLOCKED</div></div>` +
+    `<div style="flex:1;padding:6px 8px;text-align:center"><div style="font-size:12px;font-weight:700;color:#06b6d4">${rate}%</div><div style="font-size:7px;color:#fff;font-weight:700">CONFIRM%</div></div>`;
   let rows = data;
-  if (_alOverlayFilter === 'CONFIRMED')    rows = data.filter(function(r){ return r.outcome==='CONFIRMED'; });
+  if (_alOverlayFilter === 'CONFIRMED')      rows = data.filter(function(r){ return r.outcome==='CONFIRMED'; });
   else if (_alOverlayFilter === 'J1H_DISCARDED') rows = data.filter(function(r){ return r.outcome==='J1H_DISCARDED'; });
-  else if (_alOverlayFilter === 'EXPIRED') rows = data.filter(function(r){ return r.outcome && r.outcome.startsWith('EXPIRED'); });
+  else if (_alOverlayFilter === 'EXPIRED')   rows = data.filter(function(r){ return r.outcome && r.outcome.startsWith('EXPIRED'); });
   const badgeMap = {
     'CONFIRMED':     'background:#052e16;color:#22c55e;border:1px solid #166534',
     'J1H_DISCARDED': 'background:#2d1515;color:#ef4444;border:1px solid #991b1b',
@@ -4626,32 +4626,35 @@ function renderAlOverlay() {
     'EXPIRED_PRICE': 'background:#12101c;color:#8b5cf6;border:1px solid #5b21b6',
   };
   const labelMap = {
-    'CONFIRMED':'CONFIRMED','J1H_DISCARDED':'J1H BLOCKED',
-    'EXPIRED_AGE':'EXPIRED AGE','EXPIRED_J15M':'EXPIRED J15M','EXPIRED_PRICE':'EXPIRED PRICE',
+    'CONFIRMED':     'CONFIRMED',
+    'J1H_DISCARDED': 'J1H BLOCKED',
+    'EXPIRED_AGE':   'EXPIRED AGE',
+    'EXPIRED_J15M':  'EXPIRED J15M',
+    'EXPIRED_PRICE': 'EXPIRED PRICE',
   };
   const dotColor = {'HL':'#a855f7','MEXC':'#f97316'};
   let h2 = '';
   rows.forEach(function(r, i) {
-    const bStyle = badgeMap[r.outcome] || "";
+    const bStyle = badgeMap[r.outcome] || '';
     const bLabel = labelMap[r.outcome] || r.outcome;
-    const dot = dotColor[r.venue] || "#fff";
+    const dot = dotColor[r.venue] || '#fff';
     const dirColor = r.direction === 'LONG' ? '#22c55e' : '#ef4444';
     const j1hDir = (r.j1h_prev_valid === false)
-      ? '<span style="color:#fff">→ COLD</span>'
+      ? '<span style="color:#fff">\u2192 COLD</span>'
       : r.j1h_at_signal > r.j1h_prev_at_signal
-        ? '<span style="color:#22c55e">↑ '+r.j1h_at_signal+'</span>'
+        ? `<span style="color:#22c55e">\u2191 ${r.j1h_at_signal}</span>`
         : r.j1h_at_signal < r.j1h_prev_at_signal
-          ? '<span style="color:#ef4444">↓ '+r.j1h_at_signal+'</span>'
-          : '<span style="color:#fff">→ '+r.j1h_at_signal+'</span>';
+          ? `<span style="color:#ef4444">\u2193 ${r.j1h_at_signal}</span>`
+          : `<span style="color:#fff">\u2192 ${r.j1h_at_signal}</span>`;
     const t = r.created_et ? r.created_et.substring(11,16)+' UTC' : '--';
-    h2 += '<div class="al-row" onclick="alSelectRow('+i+', this)">' +
-      '<div style="display:flex;justify-content:space-between;margin-bottom:3px">' +
-      '<div style="font-weight:700;color:#fff;font-size:11px"><span style="width:6px;height:6px;border-radius:50%;background:'+dot+';display:inline-block;margin-right:5px;vertical-align:middle"></span>'+r.pair+'</div>' +
-      '<div style="font-size:8px;font-weight:700;color:#fff">'+t+'</div></div>' +
-      '<div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">' +
-      '<span style="padding:2px 6px;border-radius:3px;font-size:7px;font-weight:700;'+bStyle+'">'+bLabel+'</span>' +
-      '<span style="color:'+dirColor+';font-size:8px;font-weight:700">'+r.direction+'</span>'+j1hDir+'</div>' +
-      '<div style="font-size:8px;font-weight:700;color:#fff">J15M '+(r.j15m_at_signal||'--')+' · ADX '+(r.adx||'--')+' · pend '+(r.pending_duration_seconds||0)+'s</div></div>';
+    h2 += `<div class="al-row" onclick="alSelectRow(${i}, this)">` +
+      `<div style="display:flex;justify-content:space-between;margin-bottom:3px">` +
+      `<div style="font-weight:700;color:#fff;font-size:11px"><span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;margin-right:5px;vertical-align:middle"></span>${r.pair}</div>` +
+      `<div style="font-size:8px;font-weight:700;color:#fff">${t}</div></div>` +
+      `<div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">` +
+      `<span style="padding:2px 6px;border-radius:3px;font-size:7px;font-weight:700;${bStyle}">${bLabel}</span>` +
+      `<span style="color:${dirColor};font-size:8px;font-weight:700">${r.direction}</span>${j1hDir}</div>` +
+      `<div style="font-size:8px;font-weight:700;color:#fff">J15M ${r.j15m_at_signal||'--'} \u00B7 ADX ${r.adx||'--'} \u00B7 pend ${r.pending_duration_seconds||0}s</div></div>`;
   });
   const ar = document.getElementById('al-rows');
   if (ar) ar.innerHTML = h2 || '<div style="padding:20px;text-align:center;color:#fff;font-weight:700">NO ALERTS</div>';
@@ -4668,45 +4671,48 @@ function alSelectRow(i, el) {
   dp.style.display = 'block';
   const dur = r.pending_duration_seconds || 0;
   let tfLabel, tfColor;
-  if (dur < 900)       { tfLabel = 'J5M · sub-15min';  tfColor = '#06b6d4'; }
-  else if (dur < 3600) { tfLabel = 'J15M · 15-60min'; tfColor = '#f97316'; }
-  else                 { tfLabel = 'J1H · 60min+';     tfColor = '#a855f7'; }
+  if (dur < 900)       { tfLabel = 'J5M \u00B7 sub-15min';  tfColor = '#06b6d4'; }
+  else if (dur < 3600) { tfLabel = 'J15M \u00B7 15-60min'; tfColor = '#f97316'; }
+  else                 { tfLabel = 'J1H \u00B7 60min+';     tfColor = '#a855f7'; }
   const dirColor = r.direction === 'LONG' ? '#22c55e' : '#ef4444';
-  const bStyle = {'CONFIRMED':'background:#052e16;color:#22c55e;border:1px solid #166534','J1H_DISCARDED':'background:#2d1515;color:#ef4444;border:1px solid #991b1b'}[r.outcome] || 'background:#1c1410;color:#f59e0b;border:1px solid #92400e';
+  const bStyle = {
+    'CONFIRMED':     'background:#052e16;color:#22c55e;border:1px solid #166534',
+    'J1H_DISCARDED': 'background:#2d1515;color:#ef4444;border:1px solid #991b1b',
+  }[r.outcome] || 'background:#1c1410;color:#f59e0b;border:1px solid #92400e';
   dp.innerHTML =
-    '<div style="display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e2035">' +
-    '<div><div style="font-size:18px;font-weight:700;color:#fff">'+r.pair+' <span style="color:'+dirColor+'">'+r.direction+'</span></div>' +
-    '<div style="font-size:9px;font-weight:700;color:#fff;margin-top:3px">'+r.venue+' · '+(r.tier||'--')+' · ADX '+(r.adx||'--')+' · Score '+(r.score||'--')+' · '+(r.session||'--')+'</div></div>' +
-    '<div style="text-align:right"><span style="padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;'+bStyle+'">'+( r.outcome||'--')+'</span>' +
-    '<div style="font-size:8px;font-weight:700;color:#fff;margin-top:4px">Pending: '+(r.pending_duration_seconds||0)+'s</div></div></div>' +
-    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">' +
-    _alMetric(r.signal_price,'SIGNAL PX')+_alMetric(r.be_confirm_price,'BE CONFIRM')+_alMetric(r.confirm_price||'--','CONFIRM PX','#22c55e')+_alMetric(r.j1h_at_signal,'J1H') +
-    _alMetric(r.j1h_prev_at_signal,'J1H PREV')+_alMetric(r.j15m_at_signal,'J15M')+_alMetric((r.pending_duration_seconds||0)+'s','PENDING')+_alMetric(r.adx,'ADX') +
-    '</div>' +
-    '<div style="margin-bottom:10px;font-size:8px;font-weight:700;color:#fff">TIMEFRAME: <span style="padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700;border:1px solid '+tfColor+';color:'+tfColor+';background:rgba(0,0,0,.4)">'+tfLabel+'</span></div>' +
-    '<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:10px;margin-bottom:12px">' +
-    '<div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:8px">CONFIRMATION PATH</div>' +
-    _alPathRow('J1H at signal',r.j1h_at_signal+' (prev: '+r.j1h_prev_at_signal+')') +
-    _alPathRow('J1H gate',r.outcome==='J1H_DISCARDED'?'<span style="color:#ef4444">BLOCKED</span>':'<span style="color:#22c55e">PASSED</span>') +
-    _alPathRow('BE confirm target',r.be_confirm_price||'--') +
-    _alPathRow('Confirmed at',r.confirm_price?'<span style="color:#22c55e">'+r.confirm_price+'</span>':'<span style="color:#f59e0b">NEVER CONFIRMED</span>') +
-    _alPathRow('Outcome',r.outcome) +
-    '</div>' +
-    '<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:10px">' +
-    '<div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:6px">CANDLE ANALYSIS</div>' +
-    '<div style="font-size:8px;font-weight:700;color:#fff">Live candle fetch for confirmed trades — select a CONFIRMED alert to load J5M/J15M/J1H candle data based on trade duration via the MEXC proxy endpoint. This panel will populate with OHLC table, PnL timeline, and peak/exit flags when the candle build is wired in the next sprint.</div></div>';
+    `<div style="display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e2035">` +
+    `<div><div style="font-size:18px;font-weight:700;color:#fff">${r.pair} <span style="color:${dirColor}">${r.direction}</span></div>` +
+    `<div style="font-size:9px;font-weight:700;color:#fff;margin-top:3px">${r.venue} \u00B7 ${r.tier||'--'} \u00B7 ADX ${r.adx||'--'} \u00B7 Score ${r.score||'--'} \u00B7 ${r.session||'--'}</div></div>` +
+    `<div style="text-align:right"><span style="padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;${bStyle}">${r.outcome||'--'}</span>` +
+    `<div style="font-size:8px;font-weight:700;color:#fff;margin-top:4px">Pending: ${r.pending_duration_seconds||0}s</div></div></div>` +
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">` +
+    _alMetric(r.signal_price,'SIGNAL PX') + _alMetric(r.be_confirm_price,'BE CONFIRM') + _alMetric(r.confirm_price||'--','CONFIRM PX','#22c55e') + _alMetric(r.j1h_at_signal,'J1H') +
+    _alMetric(r.j1h_prev_at_signal,'J1H PREV') + _alMetric(r.j15m_at_signal,'J15M') + _alMetric((r.pending_duration_seconds||0)+'s','PENDING') + _alMetric(r.adx,'ADX') +
+    `</div>` +
+    `<div style="margin-bottom:10px;font-size:8px;font-weight:700;color:#fff">TIMEFRAME: <span style="padding:2px 8px;border-radius:10px;font-size:8px;font-weight:700;border:1px solid ${tfColor};color:${tfColor};background:rgba(0,0,0,.4)">${tfLabel}</span></div>` +
+    `<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:10px;margin-bottom:12px">` +
+    `<div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:8px">CONFIRMATION PATH</div>` +
+    _alPathRow('J1H at signal', `${r.j1h_at_signal} (prev: ${r.j1h_prev_at_signal})`) +
+    _alPathRow('J1H gate', r.outcome==='J1H_DISCARDED' ? '<span style="color:#ef4444">BLOCKED</span>' : '<span style="color:#22c55e">PASSED</span>') +
+    _alPathRow('BE confirm target', r.be_confirm_price||'--') +
+    _alPathRow('Confirmed at', r.confirm_price ? `<span style="color:#22c55e">${r.confirm_price}</span>` : '<span style="color:#f59e0b">NEVER CONFIRMED</span>') +
+    _alPathRow('Outcome', r.outcome) +
+    `</div>` +
+    `<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:10px">` +
+    `<div style="font-size:8px;font-weight:700;color:#fff;letter-spacing:.1em;margin-bottom:6px">CANDLE ANALYSIS</div>` +
+    `<div style="font-size:8px;font-weight:700;color:#fff">Live candle fetch for confirmed trades \u2014 select a CONFIRMED alert to load J5M/J15M/J1H candle data based on trade duration via the MEXC proxy endpoint. This panel will populate with OHLC table, PnL timeline, and peak/exit flags when the candle build is wired in the next sprint.</div></div>`;
 }
 
 function _alMetric(val, lbl, color) {
-  return '<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:8px;text-align:center">' +
-    '<div style="font-size:12px;font-weight:700;color:'+(color||'#fff')+'">'+(val||'--')+'</div>' +
-    '<div style="font-size:7px;font-weight:700;color:#fff;margin-top:2px;letter-spacing:.06em">'+lbl+'</div></div>';
+  return `<div style="background:#0a0a12;border:1px solid #1e2035;border-radius:6px;padding:8px;text-align:center">` +
+    `<div style="font-size:12px;font-weight:700;color:${color||'#fff'}">${val||'--'}</div>` +
+    `<div style="font-size:7px;font-weight:700;color:#fff;margin-top:2px;letter-spacing:.06em">${lbl}</div></div>`;
 }
 
 function _alPathRow(k, v) {
-  return '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
-    '<span style="font-size:8px;font-weight:700;color:#fff">'+k+'</span>' +
-    '<span style="font-size:8px;font-weight:700;color:#fff">'+v+'</span></div>';
+  return `<div style="display:flex;justify-content:space-between;margin-bottom:4px">` +
+    `<span style="font-size:8px;font-weight:700;color:#fff">${k}</span>` +
+    `<span style="font-size:8px;font-weight:700;color:#fff">${v}</span></div>`;
 }
     </script>
 
