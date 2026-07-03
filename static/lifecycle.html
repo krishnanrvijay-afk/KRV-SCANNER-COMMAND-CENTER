@@ -14,11 +14,10 @@
   --red:    #ef4444;
   --amber:  #f59e0b;
   --cyan:   #06b6d4;
-  --purple: #a855f7;
   --white:  #ffffff;
   --bg:     #060610;
   --card:   #0b0b18;
-  --node-pending-border: #2a2a4a;
+  --border: #2a2a4a;
   --display: 'Bebas Neue', sans-serif;
   --mono:    'IBM Plex Mono', monospace;
 }
@@ -28,7 +27,7 @@ body {
   background: var(--bg);
   color: var(--white);
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   padding-bottom: 40px;
   min-height: 100vh;
@@ -46,14 +45,14 @@ a { color: inherit; text-decoration: none; }
 }
 .lc-title {
   font-family: var(--display);
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--white);
   letter-spacing: .04em;
 }
 .lc-back {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--white);
   border: 1px solid rgba(255,255,255,0.3);
@@ -61,13 +60,13 @@ a { color: inherit; text-decoration: none; }
   padding: 6px 14px;
 }
 .lc-updated {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--green);
 }
 .lc-updated.stale { color: var(--red); }
 
-/* ── FILTER PILLS ── */
+/* ── VENUE SELECTOR ── */
 .lc-filters {
   display: flex;
   gap: 8px;
@@ -76,7 +75,7 @@ a { color: inherit; text-decoration: none; }
 }
 .lc-fp {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: .06em;
   padding: 6px 16px;
@@ -91,14 +90,14 @@ a { color: inherit; text-decoration: none; }
   border-color: var(--white);
   box-shadow: 0 0 14px rgba(255,255,255,0.25);
 }
+.lc-fp.venue-hl.active   { border-color: var(--hl);   color: var(--hl);   box-shadow: 0 0 14px rgba(168,85,247,0.35); }
+.lc-fp.venue-mexc.active { border-color: var(--mexc); color: var(--mexc); box-shadow: 0 0 14px rgba(249,115,22,0.35); }
 
 /* ── SECTIONS ── */
-.lc-section {
-  padding: 10px 16px 4px;
-}
+.lc-section { padding: 10px 16px 4px; }
 .lc-section-label {
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: .12em;
   color: var(--white);
@@ -107,22 +106,29 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 12px;
 }
 .lc-empty {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--white);
+  color: rgba(255,255,255,0.6);
   padding: 20px 0;
   text-align: center;
 }
 
-/* ── CARD ── */
+/* ── OPEN TRADE CARDS ── */
+.lc-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
 .lc-card {
   background: var(--card);
   border-radius: 10px;
-  border-left: 3px solid var(--node-pending-border);
+  border-left: 3px solid var(--border);
   padding: 14px 16px 16px;
-  margin-bottom: 14px;
-  width: 100%;
+  cursor: pointer;
+  transition: box-shadow .15s ease;
 }
+.lc-card:hover { box-shadow: 0 0 16px rgba(255,255,255,0.1); }
 .lc-card.venue-hl   { border-left-color: var(--hl); }
 .lc-card.venue-mexc { border-left-color: var(--mexc); }
 .lc-card.is-open { animation: lcCardPulse 2.4s ease-in-out infinite; }
@@ -130,14 +136,12 @@ a { color: inherit; text-decoration: none; }
   0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
   50%      { box-shadow: 0 0 16px rgba(255,255,255,0.08); }
 }
-
-/* ── HEADER ROW ── */
-.lc-head {
+.lc-card-head {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .lc-pair {
   font-family: var(--display);
@@ -146,498 +150,390 @@ a { color: inherit; text-decoration: none; }
   color: var(--white);
   letter-spacing: .04em;
 }
-.lc-dir {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .05em;
-}
+.lc-dir { font-size: 14px; font-weight: 700; letter-spacing: .05em; }
 .lc-dir.long  { color: var(--green); }
 .lc-dir.short { color: var(--red); }
 .lc-venue-pill {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: .08em;
   padding: 3px 10px;
   border-radius: 12px;
   border: 1px solid;
+  margin-left: auto;
 }
 .lc-venue-pill.hl   { color: var(--hl);   border-color: var(--hl); }
 .lc-venue-pill.mexc { color: var(--mexc); border-color: var(--mexc); }
-.lc-score {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--white);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.lc-score-bar { display: flex; gap: 2px; }
-.lc-score-seg { width: 8px; height: 12px; border-radius: 2px; background: var(--node-pending-border); }
-.lc-score-seg.filled { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
-.lc-ts {
-  margin-left: auto;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--white);
-}
-
-/* ── PIPELINE ── */
-.lc-pipeline {
-  display: flex;
-  align-items: flex-start;
-  overflow-x: auto;
-  padding: 6px 0 12px;
-  gap: 0;
-}
-.lc-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 78px;
-  flex-shrink: 0;
-}
-.lc-node {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 3px solid var(--node-pending-border);
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--white);
-}
-.lc-node.pending { opacity: 0.3; }
-.lc-node.done    { border-color: var(--green); background: #052210; }
-.lc-node.active  {
-  border-color: var(--amber);
-  background: #1a1000;
-  animation: lcNodePulse 1.4s ease-in-out infinite;
-}
-.lc-node.failed  { border-color: var(--red); background: #1a0505; }
-@keyframes lcNodePulse {
-  0%, 100% { box-shadow: 0 0 0 rgba(245,158,11,0.0); }
-  50%      { box-shadow: 0 0 14px rgba(245,158,11,0.75); }
-}
-.lc-stage-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--white);
-  letter-spacing: .05em;
-  margin-top: 6px;
-  text-align: center;
-}
-.lc-stage-value {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--white);
-  margin-top: 2px;
-  text-align: center;
-  max-width: 84px;
-  word-break: break-word;
-}
-.lc-connector {
-  flex: 1;
-  min-width: 14px;
-  height: 3px;
-  margin-top: 21px;
-  background: var(--node-pending-border);
-  position: relative;
-}
-.lc-connector.active   { background: var(--green); }
-.lc-connector.failed   { background: var(--red); }
-.lc-connector::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: -3px;
-  width: 0; height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid var(--node-pending-border);
-}
-.lc-connector.active::after { border-left-color: var(--green); }
-.lc-connector.failed::after { border-left-color: var(--red); }
-
-.v-green { color: var(--green); }
-.v-white { color: var(--white); }
-.v-red   { color: var(--red); }
-.v-amber { color: var(--amber); }
-
-/* ── DATA ROW ── */
-.lc-datarow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-.lc-dcell { display: flex; flex-direction: column; gap: 2px; }
-.lc-dlabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--white);
-  letter-spacing: .06em;
-}
-.lc-dvalue {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--white);
-}
-
-/* ── EXIT BADGE ── */
-.lc-exit-badge {
+.lc-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; padding: 3px 0; }
+.lc-row .lbl { color: rgba(255,255,255,0.55); }
+.lc-row .val { color: var(--white); }
+.lc-row .val.pos { color: var(--green); }
+.lc-row .val.neg { color: var(--red); }
+.lc-tag {
   display: inline-block;
   font-family: var(--display);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  padding: 3px 12px;
-  border-radius: 12px;
-  border: 1px solid;
+  font-size: 13px;
+  letter-spacing: .08em;
+  padding: 2px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
 }
-.badge-CONFIRM_REVERSAL   { color: var(--red);    border-color: var(--red); }
-.badge-KILL               { color: #f97316;       border-color: #f97316; }
-.badge-PEAK_DECAY_20      { color: #a855f7;       border-color: #a855f7; }
-.badge-SIGNAL_EXHAUSTION  { color: var(--cyan);   border-color: var(--cyan); }
-.badge-TP1                { color: var(--green);  border-color: var(--green); }
-.badge-EXPIRED_AGE        { color: var(--amber);  border-color: var(--amber); }
-.badge-EXPIRED_J15M       { color: var(--amber);  border-color: var(--amber); }
-.badge-EXPIRED_PRICE      { color: var(--amber);  border-color: var(--amber); }
-.badge-J1H_DISCARDED      { color: var(--amber);  border-color: var(--amber); }
-.badge-DEFAULT            { color: var(--white);  border-color: rgba(255,255,255,0.4); }
 
-@media (min-width: 900px) {
-  .lc-card { max-width: 1100px; margin-left: auto; margin-right: auto; }
-  .lc-topbar, .lc-filters, .lc-section { max-width: 1100px; margin-left: auto; margin-right: auto; }
+/* ── EXPIRED ALERTS TABLE ── */
+.lc-table-wrap { overflow-x: auto; margin-bottom: 20px; }
+.lc-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.lc-table th {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: .08em;
+  text-align: left;
+  color: rgba(255,255,255,0.55);
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
 }
+.lc-table td {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.lc-table tr { cursor: pointer; }
+.lc-table tr:hover td { background: rgba(255,255,255,0.04); }
+.lc-outcome {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: .06em;
+  padding: 2px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+}
+
+/* ── CANDLE OVERLAY PANEL ── */
+.lc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.lc-overlay.open { display: flex; }
+.lc-panel {
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  width: 100%;
+  max-width: 920px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+.lc-panel-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.lc-panel-title { font-family: var(--display); font-size: 24px; letter-spacing: .04em; }
+.lc-panel-close {
+  margin-left: auto;
+  font-family: var(--display);
+  font-size: 16px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+}
+.lc-panel-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; font-size: 15px; }
+.lc-panel-meta .lbl { color: rgba(255,255,255,0.55); margin-right: 4px; }
+.lc-chart-block { margin-bottom: 18px; }
+.lc-chart-label { font-family: var(--display); font-size: 16px; letter-spacing: .08em; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+.lc-chart-block canvas { width: 100%; height: 180px; display: block; background: #05050d; border-radius: 8px; }
+.lc-chart-empty { font-size: 14px; color: rgba(255,255,255,0.4); padding: 40px 0; text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="lc-topbar">
-  <a class="lc-back" href="/">&#8592; FLEET</a>
-  <div class="lc-title">TRADE LIFECYCLE MONITOR</div>
-  <div class="lc-updated" id="lc-updated">CONNECTING&#8230;</div>
+  <div class="lc-title">TRADE LIFECYCLE</div>
+  <a class="lc-back" href="/">&larr; BACK</a>
+  <div class="lc-updated" id="lcUpdated">—</div>
 </div>
 
-<div class="lc-filters" id="lc-filters">
-  <button class="lc-fp active" data-filter="venue" data-value="ALL">ALL</button>
-  <button class="lc-fp" data-filter="venue" data-value="HL">HL</button>
-  <button class="lc-fp" data-filter="venue" data-value="MEXC">MEXC</button>
-  <button class="lc-fp" data-filter="dir" data-value="LONG">LONG</button>
-  <button class="lc-fp" data-filter="dir" data-value="SHORT">SHORT</button>
-  <button class="lc-fp" data-filter="open" data-value="OPEN">OPEN ONLY</button>
+<div class="lc-filters" id="lcFilters">
+  <button class="lc-fp active" data-venue="all">ALL</button>
+  <button class="lc-fp venue-hl" data-venue="hl">HL</button>
+  <button class="lc-fp venue-mexc" data-venue="mexc">MEXC</button>
 </div>
 
 <div class="lc-section">
-  <div class="lc-section-label">OPEN NOW</div>
-  <div id="lc-open-cards"><div class="lc-empty">LOADING&#8230;</div></div>
+  <div class="lc-section-label">OPEN TRADES</div>
+  <div class="lc-cards" id="lcOpenCards"><div class="lc-empty">Loading…</div></div>
 </div>
 
 <div class="lc-section">
-  <div class="lc-section-label">CLOSED TODAY</div>
-  <div id="lc-closed-cards"><div class="lc-empty">LOADING&#8230;</div></div>
+  <div class="lc-section-label">EXPIRED ALERTS</div>
+  <div class="lc-table-wrap">
+    <table class="lc-table">
+      <thead>
+        <tr>
+          <th>TIME</th><th>VENUE</th><th>PAIR</th><th>DIR</th><th>TIER</th>
+          <th>OUTCOME</th><th>SIGNAL</th><th>SESSION</th><th>SCORE</th>
+        </tr>
+      </thead>
+      <tbody id="lcExpiredBody">
+        <tr><td colspan="9" class="lc-empty">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="lc-overlay" id="lcOverlay">
+  <div class="lc-panel">
+    <div class="lc-panel-head">
+      <div class="lc-panel-title" id="lcPanelTitle">—</div>
+      <button class="lc-panel-close" id="lcPanelClose">CLOSE</button>
+    </div>
+    <div class="lc-panel-meta" id="lcPanelMeta"></div>
+    <div id="lcPanelCharts"></div>
+  </div>
 </div>
 
 <script>
-const POLL_MS = 8000;
-let filters = { venue: 'ALL', dir: 'ALL', open: false };
-let liveData = null;
-let closedData = [];
-let alertRows = [];
+const state = { venue: 'all', open: [], expired: [] };
 
-document.getElementById('lc-filters').addEventListener('click', (e) => {
+function fmtNum(v, d) {
+  if (v === null || v === undefined || v === '') return '—';
+  const n = Number(v);
+  if (Number.isNaN(n)) return String(v);
+  return n.toFixed(d === undefined ? 4 : d);
+}
+function fmtEt(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  } catch (e) { return '—'; }
+}
+function elapsedStr(s) {
+  if (s === null || s === undefined) return '—';
+  s = Math.max(0, Math.floor(s));
+  const m = Math.floor(s / 60), r = s % 60;
+  return m + 'm ' + r + 's';
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('/api/lifecycle/alerts?venue=' + state.venue);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    state.open = data.open || [];
+    state.expired = data.expired || [];
+    renderOpen();
+    renderExpired();
+    document.getElementById('lcUpdated').textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US', { hour12: false });
+    document.getElementById('lcUpdated').classList.remove('stale');
+  } catch (e) {
+    document.getElementById('lcUpdated').textContent = 'FETCH FAILED';
+    document.getElementById('lcUpdated').classList.add('stale');
+  }
+}
+
+function renderOpen() {
+  const wrap = document.getElementById('lcOpenCards');
+  if (!state.open.length) {
+    wrap.innerHTML = '<div class="lc-empty">No open trades</div>';
+    return;
+  }
+  wrap.innerHTML = state.open.map((t, i) => {
+    const dirClass = (t.direction || '').toUpperCase() === 'LONG' ? 'long' : 'short';
+    const pnl = Number(t.unrealized_pnl);
+    const pnlClass = Number.isFinite(pnl) ? (pnl >= 0 ? 'pos' : 'neg') : '';
+    return `
+    <div class="lc-card venue-${t.venue} is-open" data-kind="open" data-idx="${i}">
+      <div class="lc-card-head">
+        <span class="lc-pair">${t.pair || '—'}</span>
+        <span class="lc-dir ${dirClass}">${(t.direction || '—').toUpperCase()}</span>
+        <span class="lc-venue-pill ${t.venue}">${t.venue.toUpperCase()}</span>
+      </div>
+      <div class="lc-row"><span class="lbl">TIER</span><span class="val">${t.tier || '—'}</span></div>
+      <div class="lc-row"><span class="lbl">ENTRY</span><span class="val">${fmtNum(t.entry_price)}</span></div>
+      <div class="lc-row"><span class="lbl">CURRENT</span><span class="val">${fmtNum(t.current_price)}</span></div>
+      <div class="lc-row"><span class="lbl">SL</span><span class="val">${fmtNum(t.sl)}</span></div>
+      <div class="lc-row"><span class="lbl">PNL</span><span class="val ${pnlClass}">${fmtNum(t.unrealized_pnl, 2)}</span></div>
+      <div class="lc-row"><span class="lbl">R</span><span class="val ${pnlClass}">${fmtNum(t.r, 2)}</span></div>
+      <div class="lc-row"><span class="lbl">ELAPSED</span><span class="val">${elapsedStr(t.elapsed_s)}</span></div>
+      <div style="margin-top:8px;"><span class="lc-tag">OPEN</span></div>
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('.lc-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const t = state.open[Number(el.dataset.idx)];
+      openCandlePanel({
+        venue: t.venue, pair: t.pair, direction: t.direction,
+        signal_ts: t.opened_at, signal_price: t.entry_price,
+        title: t.pair + ' ' + (t.direction || '').toUpperCase() + ' — OPEN',
+      });
+    });
+  });
+}
+
+function renderExpired() {
+  const body = document.getElementById('lcExpiredBody');
+  if (!state.expired.length) {
+    body.innerHTML = '<tr><td colspan="9" class="lc-empty">No expired alerts today</td></tr>';
+    return;
+  }
+  body.innerHTML = state.expired.map((a, i) => {
+    const dirClass = (a.direction || '').toUpperCase() === 'LONG' ? 'long' : 'short';
+    return `
+    <tr data-kind="expired" data-idx="${i}">
+      <td>${fmtEt(a.created_at)}</td>
+      <td style="color:var(--${a.venue === 'hl' ? 'hl' : (a.venue === 'mexc' ? 'mexc' : 'white')})">${(a.venue || '—').toUpperCase()}</td>
+      <td>${a.pair || '—'}</td>
+      <td class="lc-dir ${dirClass}">${(a.direction || '—').toUpperCase()}</td>
+      <td>${a.tier || '—'}</td>
+      <td><span class="lc-outcome">${a.outcome || '—'}</span></td>
+      <td>${fmtNum(a.signal_price)}</td>
+      <td>${a.session || '—'}</td>
+      <td>${a.score !== null && a.score !== undefined ? a.score : '—'}</td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('tr[data-kind="expired"]').forEach(el => {
+    el.addEventListener('click', () => {
+      const a = state.expired[Number(el.dataset.idx)];
+      const ts = a.created_at ? Math.floor(new Date(a.created_at).getTime() / 1000) : null;
+      openCandlePanel({
+        venue: a.venue, pair: a.pair, direction: a.direction,
+        signal_ts: ts, signal_price: a.signal_price,
+        title: a.pair + ' ' + (a.direction || '').toUpperCase() + ' — ' + a.outcome,
+      });
+    });
+  });
+}
+
+async function openCandlePanel(ctx) {
+  const overlay = document.getElementById('lcOverlay');
+  const chartsWrap = document.getElementById('lcPanelCharts');
+  document.getElementById('lcPanelTitle').textContent = ctx.title;
+  document.getElementById('lcPanelMeta').innerHTML =
+    `<span><span class="lbl">VENUE</span>${(ctx.venue || '—').toUpperCase()}</span>
+     <span><span class="lbl">SIGNAL PRICE</span>${fmtNum(ctx.signal_price)}</span>`;
+  chartsWrap.innerHTML = ['5m', '15m', '1h'].map(tf =>
+    `<div class="lc-chart-block">
+       <div class="lc-chart-label">${tf.toUpperCase()}</div>
+       <canvas id="lcChart_${tf}" width="880" height="180"></canvas>
+     </div>`
+  ).join('');
+  overlay.classList.add('open');
+
+  if (!ctx.venue || !ctx.pair || !ctx.signal_ts) {
+    ['5m', '15m', '1h'].forEach(tf => {
+      chartsWrap.querySelector(`#lcChart_${tf}`).replaceWith(
+        Object.assign(document.createElement('div'), { className: 'lc-chart-empty', textContent: 'No timestamp available' })
+      );
+    });
+    return;
+  }
+
+  try {
+    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    ['5m', '15m', '1h'].forEach(tf => {
+      const canvas = document.getElementById('lcChart_' + tf);
+      const candles = (data.candles && data.candles[tf]) || [];
+      if (!candles.length) {
+        canvas.replaceWith(Object.assign(document.createElement('div'), { className: 'lc-chart-empty', textContent: 'No candle data' }));
+        return;
+      }
+      drawCandles(canvas, candles, ctx.signal_ts * 1000, ctx.signal_price, ctx.direction);
+    });
+  } catch (e) {
+    chartsWrap.innerHTML = '<div class="lc-chart-empty">Failed to load candle data</div>';
+  }
+}
+
+function drawCandles(canvas, candles, signalMs, signalPrice, direction) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  let lo = Infinity, hi = -Infinity;
+  candles.forEach(c => { lo = Math.min(lo, c.low); hi = Math.max(hi, c.high); });
+  if (signalPrice !== null && signalPrice !== undefined && Number.isFinite(Number(signalPrice))) {
+    lo = Math.min(lo, Number(signalPrice));
+    hi = Math.max(hi, Number(signalPrice));
+  }
+  const pad = (hi - lo) * 0.08 || 1;
+  lo -= pad; hi += pad;
+
+  const t0 = candles[0].time_ms, t1 = candles[candles.length - 1].time_ms;
+  const tSpan = Math.max(t1 - t0, 1);
+  const marginL = 8, marginR = 8, marginT = 6, marginB = 6;
+  const plotW = w - marginL - marginR;
+  const plotH = h - marginT - marginB;
+
+  const xOf = t => marginL + ((t - t0) / tSpan) * plotW;
+  const yOf = p => marginT + (1 - (p - lo) / (hi - lo)) * plotH;
+
+  const bw = Math.max(2, Math.min(10, plotW / candles.length * 0.6));
+  candles.forEach(c => {
+    const x = xOf(c.time_ms);
+    const up = c.close >= c.open;
+    ctx.strokeStyle = up ? '#22c55e' : '#ef4444';
+    ctx.fillStyle = up ? '#22c55e' : '#ef4444';
+    ctx.beginPath();
+    ctx.moveTo(x, yOf(c.high));
+    ctx.lineTo(x, yOf(c.low));
+    ctx.stroke();
+    const yo = yOf(c.open), yc = yOf(c.close);
+    const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yc - yo));
+    ctx.fillRect(x - bw / 2, top, bw, hgt);
+  });
+
+  if (signalPrice !== null && signalPrice !== undefined && Number.isFinite(Number(signalPrice))) {
+    const y = yOf(Number(signalPrice));
+    ctx.strokeStyle = 'rgba(6,182,212,0.85)';
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(marginL, y);
+    ctx.lineTo(w - marginR, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  if (signalMs >= t0 && signalMs <= t1) {
+    const x = xOf(signalMs);
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath();
+    ctx.moveTo(x, marginT);
+    ctx.lineTo(x, h - marginB);
+    ctx.stroke();
+  }
+}
+
+document.getElementById('lcFilters').addEventListener('click', (e) => {
   const btn = e.target.closest('.lc-fp');
   if (!btn) return;
-  const kind = btn.dataset.filter;
-  const val  = btn.dataset.value;
-  if (kind === 'open') {
-    filters.open = !filters.open;
-    btn.classList.toggle('active', filters.open);
-  } else if (kind === 'venue') {
-    filters.venue = val;
-    document.querySelectorAll('.lc-fp[data-filter="venue"]').forEach(b => b.classList.toggle('active', b.dataset.value === val));
-  } else if (kind === 'dir') {
-    filters.dir = (filters.dir === val) ? 'ALL' : val;
-    document.querySelectorAll('.lc-fp[data-filter="dir"]').forEach(b => b.classList.toggle('active', filters.dir === b.dataset.value));
-  }
-  render();
+  document.querySelectorAll('.lc-fp').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.venue = btn.dataset.venue;
+  loadData();
 });
 
-function fmtNum(v, digits) {
-  if (v === null || v === undefined || v === '') return '\u2014';
-  const n = Number(v);
-  if (Number.isNaN(n)) return '\u2014';
-  return n.toFixed(digits === undefined ? 4 : digits);
-}
-function fmtMoney(v) {
-  if (v === null || v === undefined || v === '') return '\u2014';
-  const n = Number(v);
-  if (Number.isNaN(n)) return '\u2014';
-  const sign = n >= 0 ? '+' : '';
-  return sign + '$' + n.toFixed(2);
-}
-function fmtSecs(v) {
-  if (v === null || v === undefined) return '\u2014';
-  const n = Math.round(Number(v));
-  if (Number.isNaN(n)) return '\u2014';
-  return n + 's';
-}
-function j1hColor(v) {
-  if (v === null || v === undefined) return 'v-white';
-  const n = Number(v);
-  if (Number.isNaN(n)) return 'v-white';
-  if (n < 30) return 'v-green';
-  if (n > 70) return 'v-red';
-  return 'v-white';
-}
-function pnlColor(v) {
-  if (v === null || v === undefined) return 'v-white';
-  const n = Number(v);
-  if (Number.isNaN(n)) return 'v-white';
-  return n > 0 ? 'v-green' : (n < 0 ? 'v-red' : 'v-white');
-}
+document.getElementById('lcPanelClose').addEventListener('click', () => {
+  document.getElementById('lcOverlay').classList.remove('open');
+});
+document.getElementById('lcOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'lcOverlay') e.target.classList.remove('open');
+});
 
-function matchAlert(pair, direction, refTsSeconds) {
-  if (refTsSeconds === null || refTsSeconds === undefined) return null;
-  let best = null, bestDelta = null;
-  for (const a of alertRows) {
-    const aPair = a.pair || a.symbol;
-    const aDir  = a.direction;
-    if (aPair !== pair || aDir !== direction) continue;
-    const aTs = a.created_at ? (new Date(a.created_at)).getTime() / 1000 : null;
-    if (aTs === null || Number.isNaN(aTs)) continue;
-    const delta = Math.abs(aTs - refTsSeconds);
-    if (delta <= 120 && (bestDelta === null || delta < bestDelta)) {
-      best = a; bestDelta = delta;
-    }
-  }
-  return best;
-}
-
-function buildStagesForOpenTrade(trade, alert) {
-  const j1hSignal = alert ? alert.j1h_at_signal : trade.j1h;
-  const pendingDur = alert ? alert.pending_duration_seconds : null;
-  const confirmPrice = alert ? alert.confirm_price : trade.be_confirm_price;
-  const age = trade.elapsed_s;
-  const crActive = (age !== null && age !== undefined) ? age < 30 : true;
-  const pnl = trade.unrealized_pnl;
-
-  return [
-    { key: 'SIGNAL',    label: 'SIGNAL',    state: 'done', valueHtml: `<span class="${j1hColor(j1hSignal)}">${fmtNum(j1hSignal, 1)}</span>` },
-    { key: 'J1H_GATE',  label: 'J1H GATE',  state: 'done', valueHtml: `<span class="v-green">PASS</span>` },
-    { key: 'PENDING',   label: 'PENDING',   state: 'done', valueHtml: `<span class="v-green">${fmtSecs(pendingDur)}</span>` },
-    { key: 'CONFIRMED', label: 'CONFIRMED', state: 'done', valueHtml: `<span class="v-white">${fmtNum(confirmPrice, 4)}</span>` },
-    { key: 'OPEN',      label: 'OPEN',      state: 'active', valueHtml:
-        `<span class="${pnlColor(pnl)}">${fmtSecs(age)}</span><br><span class="${crActive ? 'v-red' : 'v-green'}">CR GUARD: ${crActive ? 'ACTIVE' : 'CLEAR'}</span>` },
-    { key: 'EXIT',      label: 'EXIT',      state: 'pending', valueHtml: `<span class="v-white">\u2014</span>` },
-  ];
-}
-
-function buildStagesForClosedRecord(rec) {
-  const outcome = (rec.outcome || '').toUpperCase();
-  const wasDiscarded = !rec.entry_price;
-  const j1hSignal = rec.j1h_at_signal;
-
-  if (wasDiscarded) {
-    const isJ1hBlocked = outcome.includes('J1H');
-    return [
-      { key: 'SIGNAL',    label: 'SIGNAL',    state: 'done',
-        valueHtml: `<span class="${j1hColor(j1hSignal)}">${fmtNum(j1hSignal, 1)}</span>` },
-      { key: 'J1H_GATE',  label: 'J1H GATE',  state: isJ1hBlocked ? 'failed' : 'done',
-        valueHtml: isJ1hBlocked ? `<span class="v-red">BLOCKED<br>${rec.outcome || ''}</span>` : `<span class="v-green">PASS</span>` },
-      { key: 'PENDING',   label: 'PENDING',   state: isJ1hBlocked ? 'pending' : 'failed',
-        valueHtml: isJ1hBlocked ? `<span class="v-white">\u2014</span>` : `<span class="v-red">EXPIRED</span>` },
-      { key: 'CONFIRMED', label: 'CONFIRMED', state: 'pending',
-        valueHtml: `<span class="v-amber">${outcome === 'DISCARDED' ? 'DISCARDED' : 'EXPIRED'}</span>` },
-      { key: 'OPEN',      label: 'OPEN',      state: 'pending', valueHtml: `<span class="v-white">\u2014</span>` },
-      { key: 'EXIT',      label: 'EXIT',      state: 'pending', valueHtml: `<span class="v-white">\u2014</span>` },
-    ];
-  }
-
-  const pnl = rec.pnl_dollars;
-  return [
-    { key: 'SIGNAL',    label: 'SIGNAL',    state: 'done', valueHtml: `<span class="${j1hColor(j1hSignal)}">${fmtNum(j1hSignal, 1)}</span>` },
-    { key: 'J1H_GATE',  label: 'J1H GATE',  state: 'done', valueHtml: `<span class="v-green">PASS</span>` },
-    { key: 'PENDING',   label: 'PENDING',   state: 'done', valueHtml: `<span class="v-green">${fmtSecs(rec.pending_duration_seconds)}</span>` },
-    { key: 'CONFIRMED', label: 'CONFIRMED', state: 'done', valueHtml: `<span class="v-white">${fmtNum(rec.confirm_price, 4)}</span>` },
-    { key: 'OPEN',      label: 'OPEN',      state: 'done', valueHtml: `<span class="${pnlColor(pnl)}">${fmtSecs(rec.duration_seconds)}</span>` },
-    { key: 'EXIT',      label: 'EXIT',      state: 'done', valueHtml:
-        `<span class="lc-exit-badge ${badgeClass(rec.exit_reason)}">${rec.exit_reason || '\u2014'}</span><br><span class="${pnlColor(pnl)}">${fmtMoney(pnl)}</span>` },
-  ];
-}
-
-function badgeClass(reason) {
-  if (!reason) return 'badge-DEFAULT';
-  const key = 'badge-' + reason.toUpperCase();
-  const known = ['badge-CONFIRM_REVERSAL','badge-KILL','badge-PEAK_DECAY_20','badge-SIGNAL_EXHAUSTION',
-                 'badge-TP1','badge-EXPIRED_AGE','badge-EXPIRED_J15M','badge-EXPIRED_PRICE','badge-J1H_DISCARDED'];
-  return known.includes(key) ? key : 'badge-DEFAULT';
-}
-
-function renderPipeline(stages) {
-  let html = '<div class="lc-pipeline">';
-  stages.forEach((s, i) => {
-    html += `<div class="lc-stage">
-      <div class="lc-node ${s.state}">${s.state === 'failed' ? '&#10005;' : (s.state === 'done' ? '&#10003;' : '')}</div>
-      <div class="lc-stage-label">${s.label}</div>
-      <div class="lc-stage-value">${s.valueHtml}</div>
-    </div>`;
-    if (i < stages.length - 1) {
-      const connState = s.state === 'failed' ? 'failed' : (s.state === 'done' ? 'active' : '');
-      html += `<div class="lc-connector ${connState}"></div>`;
-    }
-  });
-  html += '</div>';
-  return html;
-}
-
-function renderOpenCard(trade, venue) {
-  const alert = matchAlert(trade.symbol, trade.direction, trade.opened_at);
-  const stages = buildStagesForOpenTrade(trade, alert);
-  const dirClass = trade.direction === 'LONG' ? 'long' : 'short';
-  const dirArrow = trade.direction === 'LONG' ? '&#9650; LONG' : '&#9660; SHORT';
-  const score = trade.score || 0;
-  let bars = '';
-  for (let i = 0; i < 4; i++) bars += `<div class="lc-score-seg ${i < score ? 'filled' : ''}"></div>`;
-  const openedDate = trade.opened_at ? new Date(trade.opened_at * 1000).toLocaleTimeString() : '\u2014';
-
-  return `<div class="lc-card venue-${venue} is-open">
-    <div class="lc-head">
-      <span class="lc-pair">${trade.symbol}</span>
-      <span class="lc-dir ${dirClass}">${dirArrow}</span>
-      <span class="lc-venue-pill ${venue}">${venue.toUpperCase()}</span>
-      <span class="lc-score"><span class="lc-score-bar">${bars}</span></span>
-      <span class="lc-ts">${openedDate}</span>
-    </div>
-    ${renderPipeline(stages)}
-    <div class="lc-datarow">
-      <div class="lc-dcell"><div class="lc-dlabel">ENTRY</div><div class="lc-dvalue">${fmtNum(trade.entry_price, 4)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">CURRENT</div><div class="lc-dvalue">${fmtNum(trade.current_price, 4)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">PNL</div><div class="lc-dvalue ${pnlColor(trade.unrealized_pnl)}">${fmtMoney(trade.unrealized_pnl)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">MFE</div><div class="lc-dvalue">\u2014</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">MAE</div><div class="lc-dvalue">\u2014</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">DURATION</div><div class="lc-dvalue">${fmtSecs(trade.elapsed_s)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">J1H AT ENTRY</div><div class="lc-dvalue ${j1hColor(trade.j1h)}">${fmtNum(trade.j1h, 1)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">SESSION</div><div class="lc-dvalue">${(alert && alert.session) || trade.session || '\u2014'}</div></div>
-    </div>
-  </div>`;
-}
-
-function renderClosedCard(rec) {
-  const venue = (rec._venue || '').toLowerCase() === 'hl' ? 'hl' : 'mexc';
-  const stages = buildStagesForClosedRecord(rec);
-  const dirClass = rec.direction === 'LONG' ? 'long' : 'short';
-  const dirArrow = rec.direction === 'LONG' ? '&#9650; LONG' : (rec.direction === 'SHORT' ? '&#9660; SHORT' : '\u2014');
-  const score = rec.score || 0;
-  let bars = '';
-  for (let i = 0; i < 4; i++) bars += `<div class="lc-score-seg ${i < score ? 'filled' : ''}"></div>`;
-  const tsRaw = rec.close_time || rec.open_time;
-  const tsStr = tsRaw ? new Date(tsRaw).toLocaleTimeString() : '\u2014';
-
-  return `<div class="lc-card venue-${venue}">
-    <div class="lc-head">
-      <span class="lc-pair">${rec.pair}</span>
-      <span class="lc-dir ${dirClass}">${dirArrow}</span>
-      <span class="lc-venue-pill ${venue}">${venue.toUpperCase()}</span>
-      <span class="lc-score"><span class="lc-score-bar">${bars}</span></span>
-      <span class="lc-ts">${tsStr}</span>
-    </div>
-    ${renderPipeline(stages)}
-    <div class="lc-datarow">
-      <div class="lc-dcell"><div class="lc-dlabel">ENTRY</div><div class="lc-dvalue">${fmtNum(rec.entry_price, 4)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">EXIT PRICE</div><div class="lc-dvalue">${fmtNum(rec.exit_price, 4)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">PNL</div><div class="lc-dvalue ${pnlColor(rec.pnl_dollars)}">${fmtMoney(rec.pnl_dollars)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">MFE</div><div class="lc-dvalue">${fmtNum(rec.mfe_r, 2)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">MAE</div><div class="lc-dvalue">${fmtNum(rec.mae_r, 2)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">DURATION</div><div class="lc-dvalue">${fmtSecs(rec.duration_seconds)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">J1H AT ENTRY</div><div class="lc-dvalue ${j1hColor(rec.j1h_at_signal)}">${fmtNum(rec.j1h_at_signal, 1)}</div></div>
-      <div class="lc-dcell"><div class="lc-dlabel">SESSION</div><div class="lc-dvalue">${rec.session || '\u2014'}</div></div>
-    </div>
-  </div>`;
-}
-
-function collectOpenTrades() {
-  const out = [];
-  if (!liveData) return out;
-  ['hl', 'mexc'].forEach((venue) => {
-    const st = liveData[venue];
-    if (!st || !st.open_trades) return;
-    Object.values(st.open_trades).forEach((t) => out.push({ trade: t, venue }));
-  });
-  return out;
-}
-
-function passesFilter(venue, direction, isOpen) {
-  if (filters.venue !== 'ALL' && venue.toUpperCase() !== filters.venue) return false;
-  if (filters.dir !== 'ALL' && direction !== filters.dir) return false;
-  if (filters.open && !isOpen) return false;
-  return true;
-}
-
-function render() {
-  const openTrades = collectOpenTrades().filter(o => passesFilter(o.venue, o.trade.direction, true));
-  const openHtml = openTrades.length
-    ? openTrades.map(o => renderOpenCard(o.trade, o.venue)).join('')
-    : '<div class="lc-empty">NO OPEN TRADES</div>';
-  document.getElementById('lc-open-cards').innerHTML = openHtml;
-
-  const closedFiltered = closedData.filter(r => passesFilter(r._venue || '', r.direction || '', false));
-  const closedHtml = closedFiltered.length
-    ? closedFiltered.map(renderClosedCard).join('')
-    : '<div class="lc-empty">NO CLOSED TRADES TODAY</div>';
-  document.getElementById('lc-closed-cards').innerHTML = closedHtml;
-}
-
-async function pollLive() {
-  try {
-    const res = await fetch('/api/live');
-    if (!res.ok) throw new Error('live ' + res.status);
-    liveData = await res.json();
-    setUpdated(true);
-  } catch (e) {
-    console.error('lifecycle live poll error', e);
-    setUpdated(false);
-  }
-  render();
-}
-
-async function pollClosed() {
-  try {
-    const res = await fetch('/api/lifecycle-closed');
-    if (!res.ok) throw new Error('closed ' + res.status);
-    const data = await res.json();
-    alertRows  = data.alerts || [];
-    closedData = data.closed || [];
-  } catch (e) {
-    console.error('lifecycle closed poll error', e);
-  }
-  render();
-}
-
-function setUpdated(ok) {
-  const el = document.getElementById('lc-updated');
-  if (!el) return;
-  if (ok) {
-    el.textContent = 'LIVE \u00B7 ' + new Date().toLocaleTimeString();
-    el.classList.remove('stale');
-  } else {
-    el.textContent = 'CONNECTION ERROR';
-    el.classList.add('stale');
-  }
-}
-
-function pollAll() {
-  pollLive();
-  pollClosed();
-}
-
-pollAll();
-setInterval(pollAll, POLL_MS);
+loadData();
+setInterval(loadData, 30000);
 </script>
 </body>
 </html>
