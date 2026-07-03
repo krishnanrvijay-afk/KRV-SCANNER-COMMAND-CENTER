@@ -1533,8 +1533,8 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
     return JSONResponse({"open": open_trades, "expired": expired})
 
 
-LIFECYCLE_HL_INTERVALS   = (("5m", "5m"), ("15m", "15m"), ("1h", "1h"))
-LIFECYCLE_MEXC_INTERVALS = (("5m", "Min5"), ("15m", "Min15"), ("1h", "Min60"))
+LIFECYCLE_INTERVAL_SECONDS = {"1m": 60, "5m": 300, "15m": 900, "1h": 3600}
+LIFECYCLE_MEXC_INTERVAL_MAP = {"1m": "Min1", "5m": "Min5", "15m": "Min15", "1h": "Min60"}
 
 async def _fetch_hl_candles(coin: str, interval: str, start_ms: int, end_ms: int) -> list[dict]:
     payload = {"type": "candleSnapshot", "req": {"coin": coin, "interval": interval,
@@ -1601,26 +1601,39 @@ async def _fetch_mexc_candles(symbol: str, interval: str, start_s: int, end_s: i
 async def api_lifecycle_candles(
     request: Request,
     venue:     str,
-    pair:      str,
     signal_ts: float = Query(...),
+    symbol:    Optional[str] = Query(None),
+    pair:      Optional[str] = Query(None),
+    interval:  str = Query("5m"),
 ) -> JSONResponse:
     _require_auth(request)
     if venue not in ("hl", "mexc"):
         raise HTTPException(400, "venue must be: hl | mexc")
+    if interval not in LIFECYCLE_INTERVAL_SECONDS:
+        raise HTTPException(400, "interval must be: 1m | 5m | 15m | 1h")
 
-    start_s = int(signal_ts) - 300
+    sym = symbol or pair
+    if not sym:
+        raise HTTPException(400, "symbol required")
+
+    interval_s = LIFECYCLE_INTERVAL_SECONDS[interval]
+    start_s = int(signal_ts) - interval_s * 30
     end_s   = int(signal_ts) + 600
 
-    result: dict = {}
     if venue == "hl":
-        coin = _hl_coin(pair)
-        for label, interval in LIFECYCLE_HL_INTERVALS:
-            result[label] = await _fetch_hl_candles(coin, interval, start_s * 1000, end_s * 1000)
+        coin = _hl_coin(sym)
+        candles = await _fetch_hl_candles(coin, interval, start_s * 1000, end_s * 1000)
     else:
-        for label, interval in LIFECYCLE_MEXC_INTERVALS:
-            result[label] = await _fetch_mexc_candles(pair, interval, start_s, end_s)
+        mexc_interval = LIFECYCLE_MEXC_INTERVAL_MAP[interval]
+        candles = await _fetch_mexc_candles(sym, mexc_interval, start_s, end_s)
 
-    return JSONResponse({"venue": venue, "pair": pair, "signal_ts": signal_ts, "candles": result})
+    return JSONResponse({
+        "venue":     venue,
+        "pair":      sym,
+        "signal_ts": signal_ts,
+        "interval":  interval,
+        "candles":   candles,
+    })
 
 
 if __name__ == "__main__":

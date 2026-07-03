@@ -4142,6 +4142,29 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     }
   }
 
+  // ---------- FORENSIC CANDLE TABLE ----------
+  var _fctRow = null, _fctTF = '1m', _fctCandles = [], _fctLoading = false;
+  var _fctMargin = 5000, _fctLeverage = 5;
+
+  function _fctIntervalSeconds(tf) {
+    return tf==='1m' ? 60 : tf==='5m' ? 300 : tf==='15m' ? 900 : 3600;
+  }
+
+  function _fctAvailableTFs(r) {
+    var dur = r.pending_duration_seconds;
+    var tfs = ['1m'];
+    if (!dur) return tfs;
+    if (dur >= 300) tfs.push('5m');
+    if (dur >= 900) tfs.push('15m');
+    if (dur >= 3600) tfs.push('1h');
+    return tfs;
+  }
+
+  function _fctSignalTs(r) {
+    var t = r.created_at ? new Date(r.created_at).getTime() : (r.ts ? new Date(r.ts).getTime() : null);
+    return t ? Math.floor(t/1000) : null;
+  }
+
   function alSelect(i, el) {
     _alovSelIdx = i;
     var rows = document.querySelectorAll('.alov-row');
@@ -4149,13 +4172,205 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     if (el) el.classList.add('alov-selected');
     var r = _alovFiltered[i];
     if (!r) return;
+    _fctRow = r;
+    var tfs = _fctAvailableTFs(r);
+    _fctTF = tfs[0];
     document.getElementById('alov-detail-empty').style.display = 'none';
     var c = document.getElementById('alov-detail-content');
     c.style.display = 'block';
-    var rows2 = Object.keys(r).map(function(k) {
-      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="font-size:9px;font-weight:700;color:#888">'+k+'</span><span style="font-size:9px;font-weight:700;color:#fff">'+JSON.stringify(r[k])+'</span></div>';
+    _fctRenderShell(tfs);
+    _fctLoadAndRender();
+  }
+
+  function _fctRenderShell(tfs) {
+    var tabsHtml = tfs.map(function(tf) {
+      var active = tf === _fctTF;
+      var style = active
+        ? 'border-bottom:2px solid #06b6d4;color:#06b6d4;font-weight:800'
+        : 'color:#ffffff;font-weight:700';
+      return '<span onclick="_fctSelectTF(\''+tf+'\')" style="cursor:pointer;padding:8px 14px;font-size:16px;'+style+'">'+tf.toUpperCase()+'</span>';
     }).join('');
-    c.innerHTML = rows2;
+    var c = document.getElementById('alov-detail-content');
+    c.innerHTML =
+      '<div style="background:#050508;display:flex;gap:4px;border-bottom:1px solid #1e1e3a;flex-shrink:0" id="fct-tabs">'+tabsHtml+'</div>'
+      + '<div id="fct-body" style="background:#07070f;padding:12px 0"></div>';
+  }
+
+  function _fctSelectTF(tf) {
+    if (_fctLoading) return;
+    _fctTF = tf;
+    var tfs = _fctAvailableTFs(_fctRow);
+    _fctRenderShell(tfs);
+    _fctLoadAndRender();
+  }
+
+  async function _fctLoadAndRender() {
+    var r = _fctRow;
+    if (!r) return;
+    var body = document.getElementById('fct-body');
+    if (body) body.innerHTML = '<div style="padding:24px;text-align:center;color:#ffffff;font-size:16px;font-weight:700">LOADING...</div>';
+    _fctLoading = true;
+    var signalTs = _fctSignalTs(r);
+    var venue = (r.venue||'').toLowerCase();
+    var qs = new URLSearchParams({
+      venue: venue,
+      symbol: r.pair||'',
+      signal_ts: signalTs||'',
+      interval: _fctTF
+    });
+    var candles = [];
+    try {
+      var resp = await fetch('/api/lifecycle/candles?'+qs.toString(), {credentials:'include'});
+      var data = resp.ok ? await resp.json() : {};
+      candles = data.candles || [];
+    } catch(e) { candles = []; }
+    _fctLoading = false;
+    _fctCandles = candles;
+    if (_fctRow !== r) return;
+    _fctRenderTable(r, candles, signalTs);
+  }
+
+  function _fctComputeKDJ(candles) {
+    var k = 50, d = 50, out = [];
+    for (var i=0;i<candles.length;i++) {
+      var lo = i, hi = i;
+      var lookback = Math.max(0, i-8);
+      var lowest = candles[i].low, highest = candles[i].high;
+      for (var j=lookback;j<=i;j++) {
+        if (candles[j].low < lowest) lowest = candles[j].low;
+        if (candles[j].high > highest) highest = candles[j].high;
+      }
+      var rsv = (highest === lowest) ? 50 : (candles[i].close - lowest) / (highest - lowest) * 100;
+      k = (2/3)*k + (1/3)*rsv;
+      d = (2/3)*d + (1/3)*k;
+      var jv = 3*k - 2*d;
+      out.push(jv);
+    }
+    return out;
+  }
+
+  function _fctJColor(j) {
+    if (j == null || isNaN(j)) return '#ffffff';
+    if (j < 30) return '#22c55e';
+    if (j > 70) return '#ef4444';
+    return '#ffffff';
+  }
+
+  function _fctEtTime(ms) {
+    return new Date(ms).toLocaleString('en-US', {timeZone:'America/New_York', hour:'2-digit', minute:'2-digit', hour12:false});
+  }
+
+  function _fctRenderTable(r, candles, signalTs) {
+    var body = document.getElementById('fct-body');
+    if (!body) return;
+    if (!candles.length) {
+      body.innerHTML = '<div style="padding:24px;text-align:center;color:#ffffff;font-size:16px;font-weight:700">NO CANDLE DATA</div>';
+      return;
+    }
+    var intervalS = _fctIntervalSeconds(_fctTF);
+    var dir = (r.dir||'').toUpperCase();
+    var isLong = dir.indexOf('LONG') !== -1 || dir === 'L';
+    var pendingDur = r.pending_duration_seconds || 480;
+    var windowEnd = (signalTs||0) + pendingDur;
+
+    var jSeries = _fctComputeKDJ(candles);
+
+    var winIdx = [];
+    for (var i=0;i<candles.length;i++) {
+      var ts = Math.floor(candles[i].time_ms/1000);
+      if (signalTs != null && ts >= signalTs && ts <= windowEnd) winIdx.push(i);
+    }
+    if (!winIdx.length) winIdx = [candles.length-1];
+
+    var signalIdx = winIdx[0];
+    var signalPrice = candles[signalIdx].close;
+    var beConfirmPrice = r.be_confirm_price;
+
+    var pnlByIdx = {};
+    var peakIdx = winIdx[0], peakPnl = -Infinity;
+    var beHitIdx = -1;
+    for (var w=0; w<winIdx.length; w++) {
+      var idx = winIdx[w];
+      var close = candles[idx].close;
+      var pnl = isLong
+        ? (close - signalPrice) / signalPrice * _fctMargin * _fctLeverage
+        : (signalPrice - close) / signalPrice * _fctMargin * _fctLeverage;
+      pnlByIdx[idx] = pnl;
+      if (pnl > peakPnl) { peakPnl = pnl; peakIdx = idx; }
+      if (beHitIdx === -1 && beConfirmPrice != null) {
+        var hi = candles[idx].high, low = candles[idx].low;
+        if (isLong && hi >= beConfirmPrice) beHitIdx = idx;
+        if (!isLong && low <= beConfirmPrice) beHitIdx = idx;
+      }
+    }
+    var expiredIdx = winIdx[winIdx.length-1];
+    var beMissed = beConfirmPrice != null && beHitIdx === -1;
+
+    var rowsHtml = winIdx.map(function(idx) {
+      var c = candles[idx];
+      var pnl = pnlByIdx[idx];
+      var jv = jSeries[idx];
+      var pnlColor = pnl > 0 ? '#22c55e' : (pnl < 0 ? '#ef4444' : '#ffffff');
+      var jColor = _fctJColor(jv);
+
+      var notes = [];
+      if (idx === signalIdx) notes.push('<span style="color:#06b6d4">SIGNAL</span>');
+      if (idx === beHitIdx) notes.push('<span style="color:#22c55e">BE_HIT</span>');
+      if (idx === expiredIdx && beMissed) notes.push('<span style="color:#ef4444">BE_MISS</span>');
+      if (idx === peakIdx) notes.push('<span style="color:#f59e0b">&#9733; PEAK</span>');
+      if (idx === expiredIdx) notes.push('<span style="color:#ef4444">EXPIRED</span>');
+
+      var borderColor = null;
+      if (idx === signalIdx) borderColor = '#06b6d4';
+      else if (idx === peakIdx) borderColor = '#f59e0b';
+      else if (idx === beHitIdx) borderColor = '#22c55e';
+      else if (idx === expiredIdx) borderColor = '#ef4444';
+      var borderStyle = borderColor ? 'border-left:2px solid '+borderColor+';' : 'border-left:2px solid transparent;';
+
+      return '<tr style="'+borderStyle+'">'
+        + '<td style="padding:8px 10px;font-size:16px;font-weight:700;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">'+_fctEtTime(c.time_ms)+'</td>'
+        + '<td style="padding:8px 10px;font-size:16px;font-weight:700;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">'+c.close.toFixed(4)+'</td>'
+        + '<td style="padding:8px 10px;font-size:16px;font-weight:700;color:'+pnlColor+';font-family:\'IBM Plex Mono\',monospace">'+(pnl>=0?'+':'')+pnl.toFixed(2)+'</td>'
+        + '<td style="padding:8px 10px;font-size:16px;font-weight:700;color:'+jColor+';font-family:\'IBM Plex Mono\',monospace">'+jv.toFixed(1)+'</td>'
+        + '<td style="padding:8px 10px;font-size:16px;font-weight:700;font-family:\'IBM Plex Mono\',monospace">'+notes.join(' ')+'</td>'
+        + '</tr>';
+    }).join('');
+
+    var highs = winIdx.map(function(idx){ return candles[idx].high; });
+    var lows = winIdx.map(function(idx){ return candles[idx].low; });
+    var rangeHigh = Math.max.apply(null, highs);
+    var rangeLow = Math.min.apply(null, lows);
+    var rangeDollar = rangeHigh - rangeLow;
+    var rangePct = rangeLow !== 0 ? (rangeDollar/rangeLow*100) : 0;
+
+    var jAtSignal = jSeries[signalIdx];
+    var jAtExpiry = jSeries[expiredIdx];
+    var jWinValues = winIdx.map(function(idx){ return jSeries[idx]; });
+    var jPeak = Math.max.apply(null, jWinValues);
+
+    var summaryHtml =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 10px;border-top:1px solid #1e1e3a;font-family:\'IBM Plex Mono\',monospace">'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">PEAK PNL: </span><span style="font-size:16px;font-weight:700;color:#22c55e">'+(peakPnl>=0?'+':'')+peakPnl.toFixed(2)+'</span></div>'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">PEAK TIME: </span><span style="font-size:16px;font-weight:700;color:#ffffff">'+_fctEtTime(candles[peakIdx].time_ms)+'</span></div>'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">BE CONFIRM: </span><span style="font-size:16px;font-weight:700;color:'+(beHitIdx!==-1?'#22c55e':'#ef4444')+'">'+(beHitIdx!==-1?'HIT':'MISSED')+'</span></div>'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">PRICE RANGE: </span><span style="font-size:16px;font-weight:700;color:#ffffff">$'+rangeDollar.toFixed(4)+' ('+rangePct.toFixed(2)+'%)</span></div>'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">J AT SIGNAL: </span><span style="font-size:16px;font-weight:700;color:'+_fctJColor(jAtSignal)+'">'+jAtSignal.toFixed(1)+'</span></div>'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">J PEAK: </span><span style="font-size:16px;font-weight:700;color:#ffffff">'+jPeak.toFixed(1)+'</span></div>'
+      + '<div><span style="font-size:16px;font-weight:700;color:#ffffff">J AT EXPIRY: </span><span style="font-size:16px;font-weight:700;color:'+_fctJColor(jAtExpiry)+'">'+jAtExpiry.toFixed(1)+'</span></div>'
+      + '</div>';
+
+    body.innerHTML =
+      '<table style="width:100%;border-collapse:collapse">'
+      + '<thead><tr>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:16px;font-weight:800;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">TIME</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:16px;font-weight:800;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">PRICE</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:16px;font-weight:800;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">PROJ_PNL</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:16px;font-weight:800;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">J_VALUE</th>'
+      + '<th style="padding:8px 10px;text-align:left;font-size:16px;font-weight:800;color:#ffffff;font-family:\'IBM Plex Mono\',monospace">NOTE</th>'
+      + '</tr></thead>'
+      + '<tbody>'+rowsHtml+'</tbody>'
+      + '</table>'
+      + summaryHtml;
   }
 
   // ---------- J-MAP OVERLAY ----------
