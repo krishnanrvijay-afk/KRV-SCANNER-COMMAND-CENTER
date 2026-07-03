@@ -1123,6 +1123,9 @@ body {
       .bn-item.bn-alerts .bn-icon { filter: drop-shadow(0 0 9px rgba(6,182,212,1.0)); }
       .bn-item.bn-alerts.active { background: rgba(6,182,212,0.15); color: #fff; box-shadow: 0 0 18px rgba(6,182,212,0.45); }
       .bn-item.bn-alerts.active .bn-icon { filter: drop-shadow(0 0 14px rgba(6,182,212,1.0)); }
+      .bn-item.bn-lifecycle { color: #eab308; text-shadow: 0 0 8px rgba(234,179,8,0.5); }
+      .bn-item.bn-lifecycle .bn-icon { filter: drop-shadow(0 0 5px rgba(234,179,8,0.6)); }
+      .bn-item.bn-lifecycle:hover { background: rgba(234,179,8,0.12); color: #fff; }
       .al-stat { background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px 10px; text-align:center; }
       .al-sval { font-family:var(--display); font-size:20px; font-weight:700; line-height:1.1; }
       .al-slbl { font-family:var(--display); font-size:8px; font-weight:700; letter-spacing:.1em; color:#475569; margin-top:3px; }
@@ -1396,6 +1399,7 @@ body {
       <button class="bn-item bn-log" id="bn-log" onclick="bnSetTab('log')"><span class="bn-icon">&#x1F4CB;</span>LOG</button>
       <button class="bn-item bn-ops" id="bn-operations" onclick="bnSetTab('operations')"><span class="bn-icon">&#x2699;&#xFE0F;</span>OPS</button>
       <button class="bn-item bn-alerts" id="bn-alerts" onclick="bnSetTab('alerts')"><span class="bn-icon">&#x25C9;</span>ALERTS</button>
+      <a class="bn-item bn-lifecycle" id="bn-lifecycle" href="/lifecycle"><span class="bn-icon">&#x1F501;</span>LIFECYCLE</a>
           </nav>
 
   <!-- TAB 1: INSIGHTS -->
