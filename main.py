@@ -1441,6 +1441,132 @@ async def api_alert_log(request: Request) -> JSONResponse:
     })
     return JSONResponse(rows)
 
+# ─────────────────────────── lifecycle monitor ───────────────────────────
+
+@app.get("/lifecycle")
+async def lifecycle(request: Request) -> HTMLResponse:
+    if not _is_authed(request):
+        return HTMLResponse(_login_html())
+    html = (STATIC_DIR / "lifecycle.html").read_text()
+    return HTMLResponse(html)
+
+LIFECYCLE_JOIN_WINDOW_S = 120
+LIFECYCLE_DISCARD_OUTCOMES = {
+    "EXPIRED_AGE", "EXPIRED_J15M", "EXPIRED_PRICE", "J1H_DISCARDED",
+    "DISCARDED", "EXPIRED",
+}
+
+def _lc_ts(val: Any) -> Optional[float]:
+    dt = _to_et(val)
+    return dt.timestamp() if dt else None
+
+def _lc_match_alert(alert_rows: list, pair: str, direction: str, ref_ts: Optional[float]) -> dict:
+    if ref_ts is None:
+        return {}
+    best, best_delta = None, None
+    for a in alert_rows:
+        a_pair = a.get("pair") or a.get("symbol")
+        a_dir  = a.get("direction")
+        if a_pair != pair or a_dir != direction:
+            continue
+        a_ts = _lc_ts(a.get("created_at"))
+        if a_ts is None:
+            continue
+        delta = abs(a_ts - ref_ts)
+        if delta <= LIFECYCLE_JOIN_WINDOW_S and (best_delta is None or delta < best_delta):
+            best, best_delta = a, delta
+    return best or {}
+
+def _lc_merge_closed(venue: str, trade_rows: list, alert_rows: list) -> list:
+    out = []
+    for t in trade_rows:
+        pair      = t.get("pair") or t.get("symbol") or "UNKNOWN"
+        direction = t.get("direction", "")
+        ref_ts    = _lc_ts(t.get("open_time")) or _lc_ts(t.get("close_time"))
+        a = _lc_match_alert(alert_rows, pair, direction, ref_ts)
+        out.append({
+            "_venue":                   venue,
+            "pair":                     pair,
+            "direction":                direction,
+            "entry_price":              t.get("entry_price"),
+            "exit_price":               t.get("exit_price"),
+            "exit_reason":              t.get("exit_reason"),
+            "pnl_dollars":              t.get("pnl_dollars"),
+            "duration_seconds":         t.get("duration_seconds"),
+            "mae_r":                    t.get("mae_r"),
+            "mfe_r":                    t.get("mfe_r"),
+            "open_time":                t.get("open_time"),
+            "close_time":               t.get("close_time"),
+            "outcome":                  a.get("outcome"),
+            "j1h_at_signal":            a.get("j1h_at_signal"),
+            "j1h_prev_at_signal":       a.get("j1h_prev_at_signal"),
+            "pending_duration_seconds": a.get("pending_duration_seconds"),
+            "signal_price":             a.get("signal_price"),
+            "confirm_price":            a.get("confirm_price"),
+            "score":                    a.get("score"),
+            "session":                  a.get("session"),
+        })
+    return out
+
+def _lc_discarded_alerts(alert_rows: list) -> list:
+    out = []
+    for a in alert_rows:
+        outcome = str(a.get("outcome") or "").upper()
+        if outcome not in LIFECYCLE_DISCARD_OUTCOMES:
+            continue
+        pair      = a.get("pair") or a.get("symbol") or "UNKNOWN"
+        direction = a.get("direction", "")
+        out.append({
+            "_venue":                   a.get("venue") or a.get("exchange") or "",
+            "pair":                     pair,
+            "direction":                direction,
+            "entry_price":              None,
+            "exit_price":               None,
+            "exit_reason":              a.get("outcome"),
+            "pnl_dollars":              None,
+            "duration_seconds":         None,
+            "mae_r":                    None,
+            "mfe_r":                    None,
+            "open_time":                None,
+            "close_time":               a.get("created_at"),
+            "outcome":                  a.get("outcome"),
+            "j1h_at_signal":            a.get("j1h_at_signal"),
+            "j1h_prev_at_signal":       a.get("j1h_prev_at_signal"),
+            "pending_duration_seconds": a.get("pending_duration_seconds"),
+            "signal_price":             a.get("signal_price"),
+            "confirm_price":            a.get("confirm_price"),
+            "score":                    a.get("score"),
+            "session":                  a.get("session"),
+        })
+    return out
+
+@app.get("/api/lifecycle-closed")
+async def api_lifecycle_closed(request: Request) -> JSONResponse:
+    _require_auth(request)
+    today_et    = datetime.now(ET).date()
+    et_midnight = _et_midnight(today_et)
+    utc_iso     = et_midnight.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
+    alert_rows, hl_rows, mexc_rows = await asyncio.gather(
+        _sb_fetch("alert_log", {
+            "created_at": f"gte.{utc_iso}",
+            "order":      "created_at.desc",
+            "limit":      "500",
+        }),
+        _sb_fetch("hl_trade_log",   {"open_time": f"gte.{utc_iso}", "order": "open_time.desc",  "limit": "500"}),
+        _sb_fetch("mexc_trade_log", {"open_time": f"gte.{utc_iso}", "order": "open_time.desc",  "limit": "500"}),
+    )
+
+    closed  = _lc_merge_closed("hl", hl_rows, alert_rows)
+    closed += _lc_merge_closed("mexc", mexc_rows, alert_rows)
+    closed += _lc_discarded_alerts(alert_rows)
+    closed.sort(key=lambda r: str(r.get("close_time") or r.get("open_time") or ""), reverse=True)
+
+    return JSONResponse({
+        "alerts": alert_rows,
+        "closed": closed[:50],
+    })
+
 if __name__ == "__main__":
   import uvicorn
   uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)
