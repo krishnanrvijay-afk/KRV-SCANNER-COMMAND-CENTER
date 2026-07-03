@@ -248,10 +248,27 @@ a { color: inherit; text-decoration: none; }
 }
 .lc-panel-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; font-size: 15px; }
 .lc-panel-meta .lbl { color: rgba(255,255,255,0.55); margin-right: 4px; }
-.lc-chart-block { margin-bottom: 18px; }
-.lc-chart-label { font-family: var(--display); font-size: 16px; letter-spacing: .08em; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
-.lc-chart-block canvas { width: 100%; height: 180px; display: block; background: #05050d; border-radius: 8px; }
-.lc-chart-empty { font-size: 14px; color: rgba(255,255,255,0.4); padding: 40px 0; text-align: center; }
+.lc-chart-empty { font-size: 14px; font-weight: 700; color: #ffffff; padding: 40px 0; text-align: center; }
+
+/* ── TIMEFRAME TABS / CANDLE TABLE ── */
+.lc-tf-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.lc-tf-tab {
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+}
+.lc-tf-tab.active {
+  background: rgba(255,255,255,0.14);
+  border-color: var(--white);
+  box-shadow: 0 0 14px rgba(255,255,255,0.25);
+}
 </style>
 </head>
 <body>
@@ -297,7 +314,8 @@ a { color: inherit; text-decoration: none; }
       <button class="lc-panel-close" id="lcPanelClose">CLOSE</button>
     </div>
     <div class="lc-panel-meta" id="lcPanelMeta"></div>
-    <div id="lcPanelCharts"></div>
+    <div class="lc-tf-tabs" id="lcTfTabs"></div>
+    <div id="lcTfContent"></div>
   </div>
 </div>
 
@@ -374,6 +392,8 @@ function renderOpen() {
       openCandlePanel({
         venue: t.venue, pair: t.pair, direction: t.direction,
         signal_ts: t.opened_at, signal_price: t.entry_price,
+        pending_duration_seconds: t.pending_duration_seconds ?? null,
+        be_confirm_price: t.be_confirm_price ?? null,
         title: t.pair + ' ' + (t.direction || '').toUpperCase() + ' — OPEN',
       });
     });
@@ -408,113 +428,236 @@ function renderExpired() {
       openCandlePanel({
         venue: a.venue, pair: a.pair, direction: a.direction,
         signal_ts: ts, signal_price: a.signal_price,
+        pending_duration_seconds: a.pending_duration_seconds ?? null,
+        be_confirm_price: a.be_confirm_price ?? null,
         title: a.pair + ' ' + (a.direction || '').toUpperCase() + ' — ' + a.outcome,
       });
     });
   });
 }
 
-async function openCandlePanel(ctx) {
+function fmtEtHM(ms) {
+  if (ms === null || ms === undefined) return '—';
+  try {
+    return new Date(ms).toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+  } catch (e) { return '—'; }
+}
+
+function tabsForPending(pending) {
+  const tabs = ['1m'];
+  if (pending !== null && Number.isFinite(pending) && pending > 0) {
+    if (pending >= 300)  tabs.push('5m');
+    if (pending >= 900)  tabs.push('15m');
+    if (pending >= 3600) tabs.push('1h');
+  }
+  return tabs;
+}
+
+function computeKDJ(candles) {
+  const n = 9;
+  let K = 50, D = 50;
+  return candles.map((c, i) => {
+    const start = Math.max(0, i - n + 1);
+    let lowest = Infinity, highest = -Infinity;
+    for (let j = start; j <= i; j++) {
+      lowest = Math.min(lowest, candles[j].low);
+      highest = Math.max(highest, candles[j].high);
+    }
+    const rsv = highest === lowest ? 50 : (c.close - lowest) / (highest - lowest) * 100;
+    K = (2 / 3) * K + (1 / 3) * rsv;
+    D = (2 / 3) * D + (1 / 3) * K;
+    return 3 * K - 2 * D;
+  });
+}
+
+function jColorFor(v) {
+  if (!Number.isFinite(v)) return '#ffffff';
+  return v < 30 ? '#22c55e' : (v > 70 ? '#ef4444' : '#ffffff');
+}
+function jFmt(v) { return Number.isFinite(v) ? v.toFixed(1) : '—'; }
+function pnlFmt(v) {
+  if (v === null || !Number.isFinite(v)) return '—';
+  return (v > 0 ? '+' : (v < 0 ? '-' : '')) + '$' + Math.abs(v).toFixed(2);
+}
+function pnlColorFor(v) {
+  if (v === null || !Number.isFinite(v)) return '#ffffff';
+  return v > 0 ? '#22c55e' : (v < 0 ? '#ef4444' : '#ffffff');
+}
+
+function buildCandleTable(contentEl, candles, ctx) {
+  const isLong = (ctx.direction || '').toUpperCase() === 'LONG';
+  const signalPrice = Number(ctx.signal_price);
+  const signalMs = ctx.signal_ts ? ctx.signal_ts * 1000 : null;
+  const beConfirmPrice = (ctx.be_confirm_price === null || ctx.be_confirm_price === undefined)
+    ? null : Number(ctx.be_confirm_price);
+
+  const jValues = computeKDJ(candles);
+  const projPnls = candles.map(c => {
+    if (!Number.isFinite(signalPrice) || signalPrice === 0) return null;
+    const close = Number(c.close);
+    return isLong
+      ? (close - signalPrice) / signalPrice * 5000 * 5
+      : (signalPrice - close) / signalPrice * 5000 * 5;
+  });
+
+  let signalIdx = -1;
+  if (signalMs !== null) {
+    for (let i = 0; i < candles.length; i++) {
+      if (candles[i].time_ms <= signalMs) signalIdx = i; else break;
+    }
+  }
+
+  let beHitIdx = -1;
+  if (beConfirmPrice !== null && Number.isFinite(beConfirmPrice)) {
+    for (let i = 0; i < candles.length; i++) {
+      const close = Number(candles[i].close);
+      const hit = isLong ? close >= beConfirmPrice : close <= beConfirmPrice;
+      if (hit) { beHitIdx = i; break; }
+    }
+  }
+
+  let peakIdx = -1, peakVal = -Infinity;
+  projPnls.forEach((v, i) => {
+    if (v !== null && v > peakVal) { peakVal = v; peakIdx = i; }
+  });
+
+  const lastIdx = candles.length - 1;
+  const beHappened = beHitIdx !== -1;
+
+  const rows = candles.map((c, i) => {
+    let note = '', noteColor = '', borderColor = 'transparent';
+    if (i === lastIdx) {
+      note = beHappened ? 'EXPIRED' : 'BE MISS';
+      noteColor = '#ef4444';
+      borderColor = '#ef4444';
+    } else if (i === signalIdx) {
+      note = 'SIGNAL'; noteColor = '#06b6d4'; borderColor = '#06b6d4';
+    } else if (i === beHitIdx) {
+      note = 'BE HIT'; noteColor = '#22c55e'; borderColor = '#22c55e';
+    } else if (i === peakIdx) {
+      note = 'PEAK ★'; noteColor = '#f59e0b'; borderColor = '#f59e0b';
+    }
+
+    const timeStr = fmtEtHM(c.time_ms);
+    const closeStr = Number(c.close).toFixed(6);
+    const pnl = projPnls[i];
+    const jVal = jValues[i];
+
+    return `
+    <tr style="border-left:3px solid ${borderColor}">
+      <td style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:left">${timeStr}</td>
+      <td style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">${closeStr}</td>
+      <td style="padding:8px;font-size:14px;font-weight:700;color:${pnlColorFor(pnl)};text-align:right">${pnlFmt(pnl)}</td>
+      <td style="padding:8px;font-size:14px;font-weight:700;color:${jColorFor(jVal)};text-align:right">${jFmt(jVal)}</td>
+      <td style="padding:8px;font-size:12px;font-weight:700;color:${noteColor}">${note}</td>
+    </tr>`;
+  }).join('');
+
+  const peakTimeStr = peakIdx !== -1 ? fmtEtHM(candles[peakIdx].time_ms) : '—';
+  const jAtSignal = signalIdx !== -1 ? jValues[signalIdx] : null;
+  const jPeak = peakIdx !== -1 ? jValues[peakIdx] : null;
+  const jAtExpiry = jValues.length ? jValues[jValues.length - 1] : null;
+
+  contentEl.innerHTML = `
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace">
+  <thead>
+  <tr style="border-bottom:2px solid #1e1e3a">
+  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:left">TIME</th>
+  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">CLOSE</th>
+  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">PROJ PNL</th>
+  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">J</th>
+  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:left">NOTE</th>
+  </tr>
+  </thead>
+  <tbody id="candle-tbody">
+  ${rows}
+  </tbody>
+  </table>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;border-top:1px solid #1e1e3a">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">PEAK PNL</div>
+      <div style="font-size:16px;font-weight:700;color:#22c55e">${pnlFmt(peakIdx !== -1 ? projPnls[peakIdx] : null)}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">PEAK TIME</div>
+      <div style="font-size:16px;font-weight:700;color:#ffffff">${peakTimeStr}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">BE CONFIRM</div>
+      <div style="font-size:16px;font-weight:700;color:${beHappened ? '#22c55e' : '#ef4444'}">${beHappened ? 'HIT' : 'MISSED'}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">J AT SIGNAL</div>
+      <div style="font-size:16px;font-weight:700;color:${jColorFor(jAtSignal)}">${jFmt(jAtSignal)}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">J PEAK</div>
+      <div style="font-size:16px;font-weight:700;color:#ffffff">${jFmt(jPeak)}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">J AT EXPIRY</div>
+      <div style="font-size:16px;font-weight:700;color:${jColorFor(jAtExpiry)}">${jFmt(jAtExpiry)}</div>
+    </div>
+  </div>`;
+}
+
+async function renderTfTable(tf) {
+  const contentEl = document.getElementById('lcTfContent');
+  const ctx = state.panelCtx;
+  contentEl.innerHTML = '<div class="lc-chart-empty">Loading…</div>';
+  try {
+    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const candles = (data.candles && data.candles[tf]) || [];
+    if (!candles.length) {
+      contentEl.innerHTML = '<div class="lc-chart-empty">No candle data</div>';
+      return;
+    }
+    buildCandleTable(contentEl, candles, ctx);
+  } catch (e) {
+    contentEl.innerHTML = '<div class="lc-chart-empty">Failed to load candle data</div>';
+  }
+}
+
+function openCandlePanel(ctx) {
   const overlay = document.getElementById('lcOverlay');
-  const chartsWrap = document.getElementById('lcPanelCharts');
+  const tfTabsEl = document.getElementById('lcTfTabs');
+  const contentEl = document.getElementById('lcTfContent');
   document.getElementById('lcPanelTitle').textContent = ctx.title;
   document.getElementById('lcPanelMeta').innerHTML =
     `<span><span class="lbl">VENUE</span>${(ctx.venue || '—').toUpperCase()}</span>
      <span><span class="lbl">SIGNAL PRICE</span>${fmtNum(ctx.signal_price)}</span>`;
-  chartsWrap.innerHTML = ['5m', '15m', '1h'].map(tf =>
-    `<div class="lc-chart-block">
-       <div class="lc-chart-label">${tf.toUpperCase()}</div>
-       <canvas id="lcChart_${tf}" width="880" height="180"></canvas>
-     </div>`
-  ).join('');
+  state.panelCtx = ctx;
   overlay.classList.add('open');
 
   if (!ctx.venue || !ctx.pair || !ctx.signal_ts) {
-    ['5m', '15m', '1h'].forEach(tf => {
-      chartsWrap.querySelector(`#lcChart_${tf}`).replaceWith(
-        Object.assign(document.createElement('div'), { className: 'lc-chart-empty', textContent: 'No timestamp available' })
-      );
-    });
+    tfTabsEl.innerHTML = '';
+    contentEl.innerHTML = '<div class="lc-chart-empty">No timestamp available</div>';
     return;
   }
 
-  try {
-    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    ['5m', '15m', '1h'].forEach(tf => {
-      const canvas = document.getElementById('lcChart_' + tf);
-      const candles = (data.candles && data.candles[tf]) || [];
-      if (!candles.length) {
-        canvas.replaceWith(Object.assign(document.createElement('div'), { className: 'lc-chart-empty', textContent: 'No candle data' }));
-        return;
-      }
-      drawCandles(canvas, candles, ctx.signal_ts * 1000, ctx.signal_price, ctx.direction);
-    });
-  } catch (e) {
-    chartsWrap.innerHTML = '<div class="lc-chart-empty">Failed to load candle data</div>';
-  }
+  const pending = (ctx.pending_duration_seconds === null || ctx.pending_duration_seconds === undefined)
+    ? null : Number(ctx.pending_duration_seconds);
+  const tabs = tabsForPending(pending);
+
+  tfTabsEl.innerHTML = tabs.map((tf, i) =>
+    `<button class="lc-tf-tab${i === 0 ? ' active' : ''}" data-tf="${tf}">${tf.toUpperCase()}</button>`
+  ).join('');
+
+  renderTfTable(tabs[0]);
 }
 
-function drawCandles(canvas, candles, signalMs, signalPrice, direction) {
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-
-  let lo = Infinity, hi = -Infinity;
-  candles.forEach(c => { lo = Math.min(lo, c.low); hi = Math.max(hi, c.high); });
-  if (signalPrice !== null && signalPrice !== undefined && Number.isFinite(Number(signalPrice))) {
-    lo = Math.min(lo, Number(signalPrice));
-    hi = Math.max(hi, Number(signalPrice));
-  }
-  const pad = (hi - lo) * 0.08 || 1;
-  lo -= pad; hi += pad;
-
-  const t0 = candles[0].time_ms, t1 = candles[candles.length - 1].time_ms;
-  const tSpan = Math.max(t1 - t0, 1);
-  const marginL = 8, marginR = 8, marginT = 6, marginB = 6;
-  const plotW = w - marginL - marginR;
-  const plotH = h - marginT - marginB;
-
-  const xOf = t => marginL + ((t - t0) / tSpan) * plotW;
-  const yOf = p => marginT + (1 - (p - lo) / (hi - lo)) * plotH;
-
-  const bw = Math.max(2, Math.min(10, plotW / candles.length * 0.6));
-  candles.forEach(c => {
-    const x = xOf(c.time_ms);
-    const up = c.close >= c.open;
-    ctx.strokeStyle = up ? '#22c55e' : '#ef4444';
-    ctx.fillStyle = up ? '#22c55e' : '#ef4444';
-    ctx.beginPath();
-    ctx.moveTo(x, yOf(c.high));
-    ctx.lineTo(x, yOf(c.low));
-    ctx.stroke();
-    const yo = yOf(c.open), yc = yOf(c.close);
-    const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yc - yo));
-    ctx.fillRect(x - bw / 2, top, bw, hgt);
-  });
-
-  if (signalPrice !== null && signalPrice !== undefined && Number.isFinite(Number(signalPrice))) {
-    const y = yOf(Number(signalPrice));
-    ctx.strokeStyle = 'rgba(6,182,212,0.85)';
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.moveTo(marginL, y);
-    ctx.lineTo(w - marginR, y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  if (signalMs >= t0 && signalMs <= t1) {
-    const x = xOf(signalMs);
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-    ctx.beginPath();
-    ctx.moveTo(x, marginT);
-    ctx.lineTo(x, h - marginB);
-    ctx.stroke();
-  }
-}
+document.getElementById('lcTfTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.lc-tf-tab');
+  if (!btn) return;
+  document.querySelectorAll('.lc-tf-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTfTable(btn.dataset.tf);
+});
 
 document.getElementById('lcFilters').addEventListener('click', (e) => {
   const btn = e.target.closest('.lc-fp');

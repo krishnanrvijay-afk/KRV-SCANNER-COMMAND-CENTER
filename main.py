@@ -1598,6 +1598,7 @@ async def _fetch_mexc_candles(symbol: str, interval: str, start_s: int, end_s: i
 
 
 LIFECYCLE_CANDLE_TFS = ("5m", "15m", "1h")
+LIFECYCLE_ALL_TFS = ("1m", "5m", "15m", "1h")
 
 @app.get("/api/lifecycle/candles")
 async def api_lifecycle_candles(
@@ -1606,6 +1607,7 @@ async def api_lifecycle_candles(
     signal_ts: float = Query(...),
     symbol:    Optional[str] = Query(None),
     pair:      Optional[str] = Query(None),
+    interval:  Optional[str] = Query(None),
 ) -> JSONResponse:
     _require_auth(request)
     if venue not in ("hl", "mexc"):
@@ -1614,6 +1616,11 @@ async def api_lifecycle_candles(
     sym = symbol or pair
     if not sym:
         raise HTTPException(400, "symbol required")
+
+    if interval is not None and interval not in LIFECYCLE_ALL_TFS:
+        raise HTTPException(400, f"interval must be one of: {', '.join(LIFECYCLE_ALL_TFS)}")
+
+    tfs = (interval,) if interval else LIFECYCLE_CANDLE_TFS
 
     async def _fetch_tf(tf: str) -> list[dict]:
         interval_s = LIFECYCLE_INTERVAL_SECONDS[tf]
@@ -1626,8 +1633,8 @@ async def api_lifecycle_candles(
             mexc_interval = LIFECYCLE_MEXC_INTERVAL_MAP[tf]
             return await _fetch_mexc_candles(sym, mexc_interval, start_s, end_s)
 
-    results = await asyncio.gather(*[_fetch_tf(tf) for tf in LIFECYCLE_CANDLE_TFS])
-    candles_by_tf = dict(zip(LIFECYCLE_CANDLE_TFS, results))
+    results = await asyncio.gather(*[_fetch_tf(tf) for tf in tfs])
+    candles_by_tf = dict(zip(tfs, results))
 
     return JSONResponse({
         "venue":        venue,
