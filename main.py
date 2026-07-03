@@ -1450,122 +1450,178 @@ async def lifecycle(request: Request) -> HTMLResponse:
     html = (STATIC_DIR / "lifecycle.html").read_text()
     return HTMLResponse(html)
 
-LIFECYCLE_JOIN_WINDOW_S = 120
-LIFECYCLE_DISCARD_OUTCOMES = {
-    "EXPIRED_AGE", "EXPIRED_J15M", "EXPIRED_PRICE", "J1H_DISCARDED",
-    "DISCARDED", "EXPIRED",
-}
+LIFECYCLE_EXPIRED_OUTCOMES = {"EXPIRED_AGE", "EXPIRED_J15M", "EXPIRED_PRICE"}
 
-def _lc_ts(val: Any) -> Optional[float]:
-    dt = _to_et(val)
-    return dt.timestamp() if dt else None
+def _lc_venue(row: dict) -> str:
+    v = str(row.get("venue") or row.get("exchange") or "").strip().lower()
+    if v in ("hl", "hyperliquid"):
+        return "hl"
+    if v in ("mexc",):
+        return "mexc"
+    return v
 
-def _lc_match_alert(alert_rows: list, pair: str, direction: str, ref_ts: Optional[float]) -> dict:
-    if ref_ts is None:
-        return {}
-    best, best_delta = None, None
-    for a in alert_rows:
-        a_pair = a.get("pair") or a.get("symbol")
-        a_dir  = a.get("direction")
-        if a_pair != pair or a_dir != direction:
-            continue
-        a_ts = _lc_ts(a.get("created_at"))
-        if a_ts is None:
-            continue
-        delta = abs(a_ts - ref_ts)
-        if delta <= LIFECYCLE_JOIN_WINDOW_S and (best_delta is None or delta < best_delta):
-            best, best_delta = a, delta
-    return best or {}
-
-def _lc_merge_closed(venue: str, trade_rows: list, alert_rows: list) -> list:
-    out = []
-    for t in trade_rows:
-        pair      = t.get("pair") or t.get("symbol") or "UNKNOWN"
-        direction = t.get("direction", "")
-        ref_ts    = _lc_ts(t.get("open_time")) or _lc_ts(t.get("close_time"))
-        a = _lc_match_alert(alert_rows, pair, direction, ref_ts)
-        out.append({
-            "_venue":                   venue,
-            "pair":                     pair,
-            "direction":                direction,
-            "entry_price":              t.get("entry_price"),
-            "exit_price":               t.get("exit_price"),
-            "exit_reason":              t.get("exit_reason"),
-            "pnl_dollars":              t.get("pnl_dollars"),
-            "duration_seconds":         t.get("duration_seconds"),
-            "mae_r":                    t.get("mae_r"),
-            "mfe_r":                    t.get("mfe_r"),
-            "open_time":                t.get("open_time"),
-            "close_time":               t.get("close_time"),
-            "outcome":                  a.get("outcome"),
-            "j1h_at_signal":            a.get("j1h_at_signal"),
-            "j1h_prev_at_signal":       a.get("j1h_prev_at_signal"),
-            "pending_duration_seconds": a.get("pending_duration_seconds"),
-            "signal_price":             a.get("signal_price"),
-            "confirm_price":            a.get("confirm_price"),
-            "score":                    a.get("score"),
-            "session":                  a.get("session"),
-        })
-    return out
-
-def _lc_discarded_alerts(alert_rows: list) -> list:
-    out = []
-    for a in alert_rows:
-        outcome = str(a.get("outcome") or "").upper()
-        if outcome not in LIFECYCLE_DISCARD_OUTCOMES:
-            continue
-        pair      = a.get("pair") or a.get("symbol") or "UNKNOWN"
-        direction = a.get("direction", "")
-        out.append({
-            "_venue":                   a.get("venue") or a.get("exchange") or "",
-            "pair":                     pair,
-            "direction":                direction,
-            "entry_price":              None,
-            "exit_price":               None,
-            "exit_reason":              a.get("outcome"),
-            "pnl_dollars":              None,
-            "duration_seconds":         None,
-            "mae_r":                    None,
-            "mfe_r":                    None,
-            "open_time":                None,
-            "close_time":               a.get("created_at"),
-            "outcome":                  a.get("outcome"),
-            "j1h_at_signal":            a.get("j1h_at_signal"),
-            "j1h_prev_at_signal":       a.get("j1h_prev_at_signal"),
-            "pending_duration_seconds": a.get("pending_duration_seconds"),
-            "signal_price":             a.get("signal_price"),
-            "confirm_price":            a.get("confirm_price"),
-            "score":                    a.get("score"),
-            "session":                  a.get("session"),
-        })
-    return out
-
-@app.get("/api/lifecycle-closed")
-async def api_lifecycle_closed(request: Request) -> JSONResponse:
+@app.get("/api/lifecycle/alerts")
+async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResponse:
     _require_auth(request)
+    if venue not in ("all", "hl", "mexc"):
+        raise HTTPException(400, "venue must be: all | hl | mexc")
+
     today_et    = datetime.now(ET).date()
     et_midnight = _et_midnight(today_et)
     utc_iso     = et_midnight.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
-    alert_rows, hl_rows, mexc_rows = await asyncio.gather(
-        _sb_fetch("alert_log", {
-            "created_at": f"gte.{utc_iso}",
-            "order":      "created_at.desc",
-            "limit":      "500",
-        }),
-        _sb_fetch("hl_trade_log",   {"open_time": f"gte.{utc_iso}", "order": "open_time.desc",  "limit": "500"}),
-        _sb_fetch("mexc_trade_log", {"open_time": f"gte.{utc_iso}", "order": "open_time.desc",  "limit": "500"}),
-    )
-
-    closed  = _lc_merge_closed("hl", hl_rows, alert_rows)
-    closed += _lc_merge_closed("mexc", mexc_rows, alert_rows)
-    closed += _lc_discarded_alerts(alert_rows)
-    closed.sort(key=lambda r: str(r.get("close_time") or r.get("open_time") or ""), reverse=True)
-
-    return JSONResponse({
-        "alerts": alert_rows,
-        "closed": closed[:50],
+    alert_rows = await _sb_fetch("alert_log", {
+        "created_at": f"gte.{utc_iso}",
+        "order":      "created_at.desc",
+        "limit":      "500",
     })
+
+    expired: list = []
+    for a in alert_rows:
+        outcome = str(a.get("outcome") or "").upper()
+        if outcome not in LIFECYCLE_EXPIRED_OUTCOMES:
+            continue
+        a_venue = _lc_venue(a)
+        if venue != "all" and a_venue != venue:
+            continue
+        expired.append({
+            "created_at":               a.get("created_at"),
+            "venue":                    a_venue,
+            "pair":                     a.get("pair") or a.get("symbol"),
+            "direction":                a.get("direction"),
+            "tier":                     a.get("tier"),
+            "outcome":                  outcome,
+            "signal_price":             a.get("signal_price"),
+            "be_confirm_price":         a.get("be_confirm_price"),
+            "confirm_price":            a.get("confirm_price"),
+            "j1h_at_signal":            a.get("j1h_at_signal"),
+            "j1h_prev_at_signal":       a.get("j1h_prev_at_signal"),
+            "j15m_at_signal":           a.get("j15m_at_signal"),
+            "adx":                      a.get("adx") or a.get("adx1h"),
+            "session":                  a.get("session"),
+            "pending_duration_seconds": a.get("pending_duration_seconds"),
+            "score":                    a.get("score"),
+        })
+    expired.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+
+    open_trades: list = []
+    for v in ("hl", "mexc"):
+        if venue != "all" and venue != v:
+            continue
+        state = _live.get(v) or {}
+        ot = state.get("open_trades") or {}
+        trades_iter = ot.values() if isinstance(ot, dict) else (ot if isinstance(ot, list) else [])
+        for t in trades_iter:
+            open_trades.append({
+                "venue":          v,
+                "pair":           t.get("symbol"),
+                "direction":      t.get("direction"),
+                "tier":           t.get("tier"),
+                "outcome":        "OPEN",
+                "entry_price":    t.get("entry_price"),
+                "sl":             t.get("sl_price"),
+                "current_price":  t.get("current_price"),
+                "unrealized_pnl": t.get("unrealized_pnl"),
+                "r":              t.get("r"),
+                "opened_at":      t.get("opened_at"),
+                "elapsed_s":      t.get("elapsed_s"),
+                "session":        t.get("session"),
+                "j1h":            t.get("j1h"),
+            })
+    open_trades.sort(key=lambda t: t.get("opened_at") or 0, reverse=True)
+
+    return JSONResponse({"open": open_trades, "expired": expired})
+
+
+LIFECYCLE_HL_INTERVALS   = (("5m", "5m"), ("15m", "15m"), ("1h", "1h"))
+LIFECYCLE_MEXC_INTERVALS = (("5m", "Min5"), ("15m", "Min15"), ("1h", "Min60"))
+
+async def _fetch_hl_candles(coin: str, interval: str, start_ms: int, end_ms: int) -> list[dict]:
+    payload = {"type": "candleSnapshot", "req": {"coin": coin, "interval": interval,
+               "startTime": start_ms, "endTime": end_ms}}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            resp = await client.post(HL_API_URL, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            if not isinstance(data, list):
+                return []
+            candles: list[dict] = []
+            for c in data:
+                if isinstance(c, dict):
+                    t = c.get("t") or c.get("T") or c.get("time") or 0
+                    candles.append({
+                        "time_ms": int(t),
+                        "open":    float(c.get("o") or 0),
+                        "high":    float(c.get("h") or 0),
+                        "low":     float(c.get("l") or 0),
+                        "close":   float(c.get("c") or 0),
+                    })
+                elif isinstance(c, (list, tuple)) and len(c) >= 5:
+                    candles.append({
+                        "time_ms": int(c[0]),
+                        "open":    float(c[1]),
+                        "high":    float(c[2]),
+                        "low":     float(c[3]),
+                        "close":   float(c[4]),
+                    })
+            return sorted(candles, key=lambda x: x["time_ms"])
+        except Exception as exc:
+            print(f"[LIFECYCLE] HL candle error: {exc}")
+            return []
+
+
+async def _fetch_mexc_candles(symbol: str, interval: str, start_s: int, end_s: int) -> list[dict]:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            resp = await client.get(f"{MEXC_KLINE_BASE}/{symbol}",
+                                    params={"interval": interval, "start": start_s, "end": end_s})
+            resp.raise_for_status()
+            d = resp.json().get("data") or {}
+            times  = d.get("time", [])
+            opens  = d.get("open", [])
+            highs  = d.get("high", [])
+            lows   = d.get("low", [])
+            closes = d.get("close", [])
+            n = min(len(times), len(opens), len(highs), len(lows), len(closes))
+            candles = [{
+                "time_ms": int(times[i]) * 1000,
+                "open":    float(opens[i]),
+                "high":    float(highs[i]),
+                "low":     float(lows[i]),
+                "close":   float(closes[i]),
+            } for i in range(n)]
+            return sorted(candles, key=lambda x: x["time_ms"])
+        except Exception as exc:
+            print(f"[LIFECYCLE] MEXC candle error: {exc}")
+            return []
+
+
+@app.get("/api/lifecycle/candles")
+async def api_lifecycle_candles(
+    request: Request,
+    venue:     str,
+    pair:      str,
+    signal_ts: float = Query(...),
+) -> JSONResponse:
+    _require_auth(request)
+    if venue not in ("hl", "mexc"):
+        raise HTTPException(400, "venue must be: hl | mexc")
+
+    start_s = int(signal_ts) - 300
+    end_s   = int(signal_ts) + 600
+
+    result: dict = {}
+    if venue == "hl":
+        coin = _hl_coin(pair)
+        for label, interval in LIFECYCLE_HL_INTERVALS:
+            result[label] = await _fetch_hl_candles(coin, interval, start_s * 1000, end_s * 1000)
+    else:
+        for label, interval in LIFECYCLE_MEXC_INTERVALS:
+            result[label] = await _fetch_mexc_candles(pair, interval, start_s, end_s)
+
+    return JSONResponse({"venue": venue, "pair": pair, "signal_ts": signal_ts, "candles": result})
+
 
 if __name__ == "__main__":
   import uvicorn
