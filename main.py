@@ -1597,6 +1597,8 @@ async def _fetch_mexc_candles(symbol: str, interval: str, start_s: int, end_s: i
             return []
 
 
+LIFECYCLE_CANDLE_TFS = ("5m", "15m", "1h")
+
 @app.get("/api/lifecycle/candles")
 async def api_lifecycle_candles(
     request: Request,
@@ -1604,35 +1606,35 @@ async def api_lifecycle_candles(
     signal_ts: float = Query(...),
     symbol:    Optional[str] = Query(None),
     pair:      Optional[str] = Query(None),
-    interval:  str = Query("5m"),
 ) -> JSONResponse:
     _require_auth(request)
     if venue not in ("hl", "mexc"):
         raise HTTPException(400, "venue must be: hl | mexc")
-    if interval not in LIFECYCLE_INTERVAL_SECONDS:
-        raise HTTPException(400, "interval must be: 1m | 5m | 15m | 1h")
 
     sym = symbol or pair
     if not sym:
         raise HTTPException(400, "symbol required")
 
-    interval_s = LIFECYCLE_INTERVAL_SECONDS[interval]
-    start_s = int(signal_ts) - interval_s * 30
-    end_s   = int(signal_ts) + 600
+    async def _fetch_tf(tf: str) -> list[dict]:
+        interval_s = LIFECYCLE_INTERVAL_SECONDS[tf]
+        start_s = int(signal_ts) - interval_s * 30
+        end_s   = int(signal_ts) + 600
+        if venue == "hl":
+            coin = _hl_coin(sym)
+            return await _fetch_hl_candles(coin, tf, start_s * 1000, end_s * 1000)
+        else:
+            mexc_interval = LIFECYCLE_MEXC_INTERVAL_MAP[tf]
+            return await _fetch_mexc_candles(sym, mexc_interval, start_s, end_s)
 
-    if venue == "hl":
-        coin = _hl_coin(sym)
-        candles = await _fetch_hl_candles(coin, interval, start_s * 1000, end_s * 1000)
-    else:
-        mexc_interval = LIFECYCLE_MEXC_INTERVAL_MAP[interval]
-        candles = await _fetch_mexc_candles(sym, mexc_interval, start_s, end_s)
+    results = await asyncio.gather(*[_fetch_tf(tf) for tf in LIFECYCLE_CANDLE_TFS])
+    candles_by_tf = dict(zip(LIFECYCLE_CANDLE_TFS, results))
 
     return JSONResponse({
-        "venue":     venue,
-        "pair":      sym,
-        "signal_ts": signal_ts,
-        "interval":  interval,
-        "candles":   candles,
+        "venue":        venue,
+        "pair":         sym,
+        "signal_ts":    signal_ts,
+        "signal_ts_ms": int(signal_ts * 1000),
+        "candles":      candles_by_tf,
     })
 
 
