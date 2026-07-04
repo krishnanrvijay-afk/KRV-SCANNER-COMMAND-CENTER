@@ -210,6 +210,27 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--amber);
   color: var(--amber);
 }
+.lc-outpills {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 0 12px;
+}
+.lc-outpill {
+  font-family: var(--mono);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #2a2a4a;
+  background: #0d0d1f;
+  color: #ffffff;
+  cursor: pointer;
+  margin: 4px;
+}
+.lc-outpill.active {
+  border-color: #06b6d4;
+  color: #06b6d4;
+}
 
 /* ── CANDLE OVERLAY PANEL ── */
 .lc-overlay {
@@ -291,7 +312,17 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <div class="lc-section">
-  <div class="lc-section-label">EXPIRED ALERTS</div>
+  <div class="lc-section-label">ALERTS TODAY</div>
+  <div class="lc-outpills" id="lcOutcomeFilters">
+    <button class="lc-outpill active" data-filter="ALL">ALL</button>
+    <button class="lc-outpill" data-filter="CONFIRMED">CONFIRMED</button>
+    <button class="lc-outpill" data-filter="EXPIRED">EXPIRED</button>
+    <button class="lc-outpill" data-filter="J1H_BLOCKED">J1H BLOCKED</button>
+    <button class="lc-outpill" data-filter="PEAK_DECAY">PEAK DECAY</button>
+    <button class="lc-outpill" data-filter="CONFIRM_REVERSAL">CONFIRM REVERSAL</button>
+    <button class="lc-outpill" data-filter="SIGNAL_EXHAUSTION">SIGNAL EXHAUSTION</button>
+    <button class="lc-outpill" data-filter="KILL">KILL</button>
+  </div>
   <div class="lc-table-wrap">
     <table class="lc-table">
       <thead>
@@ -320,7 +351,7 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <script>
-const state = { venue: 'all', open: [], expired: [] };
+const state = { venue: 'all', open: [], expired: [], expiredFilter: 'ALL', expiredFiltered: [] };
 
 function fmtNum(v, d) {
   if (v === null || v === undefined || v === '') return '—';
@@ -400,13 +431,52 @@ function renderOpen() {
   });
 }
 
+function outcomeFilterPred(filter) {
+  switch (filter) {
+    case 'CONFIRMED':          return a => (a.outcome || '').toUpperCase() === 'CONFIRMED';
+    case 'EXPIRED':            return a => (a.outcome || '').toUpperCase().includes('EXPIRED');
+    case 'J1H_BLOCKED':        return a => (a.outcome || '').toUpperCase() === 'J1H_DISCARDED';
+    case 'PEAK_DECAY':         return a => (a.outcome || '').toUpperCase() === 'PEAK_DECAY_20';
+    case 'CONFIRM_REVERSAL':   return a => (a.outcome || '').toUpperCase() === 'CONFIRM_REVERSAL';
+    case 'SIGNAL_EXHAUSTION':  return a => (a.outcome || '').toUpperCase() === 'SIGNAL_EXHAUSTION';
+    case 'KILL':               return a => { const o = (a.outcome || '').toUpperCase(); return o === 'KILL' || o === 'KILLZONE'; };
+    default:                   return () => true;
+  }
+}
+
+function outcomeColor(o) {
+  const v = String(o || '').toUpperCase();
+  if (v === 'CONFIRMED') return '#22c55e';
+  if (v === 'EXPIRED_AGE' || v === 'EXPIRED_J15M' || v === 'EXPIRED_PRICE') return '#f59e0b';
+  if (v === 'J1H_DISCARDED') return '#f59e0b';
+  if (v === 'PEAK_DECAY_20') return '#a855f7';
+  if (v === 'CONFIRM_REVERSAL') return '#ef4444';
+  if (v === 'SIGNAL_EXHAUSTION') return '#06b6d4';
+  if (v === 'KILL' || v === 'KILLZONE') return '#f97316';
+  return '#ffffff';
+}
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+function outcomeBadge(o) {
+  const c = outcomeColor(o);
+  const label = o || '—';
+  return '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;color:' + c +
+    ';background:' + hexToRgba(c, 0.15) + ';border:1px solid ' + hexToRgba(c, 0.4) + '">' + label + '</span>';
+}
+
 function renderExpired() {
   const body = document.getElementById('lcExpiredBody');
-  if (!state.expired.length) {
-    body.innerHTML = '<tr><td colspan="9" class="lc-empty">No expired alerts today</td></tr>';
+  const pred = outcomeFilterPred(state.expiredFilter);
+  const list = state.expired.filter(pred);
+  state.expiredFiltered = list;
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="9" class="lc-empty">No alerts match this filter</td></tr>';
     return;
   }
-  body.innerHTML = state.expired.map((a, i) => {
+  body.innerHTML = list.map((a, i) => {
     const dirClass = (a.direction || '').toUpperCase() === 'LONG' ? 'long' : 'short';
     return `
     <tr data-kind="expired" data-idx="${i}">
@@ -415,7 +485,7 @@ function renderExpired() {
       <td>${a.pair || '—'}</td>
       <td class="lc-dir ${dirClass}">${(a.direction || '—').toUpperCase()}</td>
       <td>${a.tier || '—'}</td>
-      <td><span class="lc-outcome">${a.outcome || '—'}</span></td>
+      <td>${outcomeBadge(a.outcome)}</td>
       <td>${fmtNum(a.signal_price)}</td>
       <td>${a.session || '—'}</td>
       <td>${a.score !== null && a.score !== undefined ? a.score : '—'}</td>
@@ -423,7 +493,7 @@ function renderExpired() {
   }).join('');
   body.querySelectorAll('tr[data-kind="expired"]').forEach(el => {
     el.addEventListener('click', () => {
-      const a = state.expired[Number(el.dataset.idx)];
+      const a = state.expiredFiltered[Number(el.dataset.idx)];
       const ts = a.created_at ? Math.floor(new Date(a.created_at).getTime() / 1000) : null;
       openCandlePanel({
         venue: a.venue, pair: a.pair, direction: a.direction,
@@ -666,6 +736,15 @@ document.getElementById('lcFilters').addEventListener('click', (e) => {
   btn.classList.add('active');
   state.venue = btn.dataset.venue;
   loadData();
+});
+
+document.getElementById('lcOutcomeFilters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.lc-outpill');
+  if (!btn) return;
+  document.querySelectorAll('.lc-outpill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.expiredFilter = btn.dataset.filter;
+  renderExpired();
 });
 
 document.getElementById('lcPanelClose').addEventListener('click', () => {
