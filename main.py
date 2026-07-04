@@ -1461,28 +1461,43 @@ def _lc_venue(row: dict) -> str:
     return v
 
 @app.get("/api/lifecycle/alerts")
-async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResponse:
+async def api_lifecycle_alerts(
+    request: Request,
+    venue: str = "all",
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+) -> JSONResponse:
     _require_auth(request)
     if venue not in ("all", "hl", "mexc"):
         raise HTTPException(400, "venue must be: all | hl | mexc")
 
-    today_et    = datetime.now(ET).date()
-    et_midnight = _et_midnight(today_et)
-    utc_iso     = et_midnight.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    if date_from and date_to:
+        try:
+            start_et = _et_midnight(date.fromisoformat(date_from))
+            end_et   = _et_midnight(date.fromisoformat(date_to)) + timedelta(days=1)
+        except ValueError:
+            raise HTTPException(400, "Invalid date format; use YYYY-MM-DD")
+    else:
+        today_et = datetime.now(ET).date()
+        start_et = _et_midnight(today_et)
+        end_et   = start_et + timedelta(days=1)
+
+    start_utc_iso = start_et.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    end_utc_iso   = end_et.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
     alert_rows, hl_trades, mexc_trades = await asyncio.gather(
         _sb_fetch("alert_log", {
-            "created_at": f"gte.{utc_iso}",
+            "created_at": [f"gte.{start_utc_iso}", f"lt.{end_utc_iso}"],
             "order":      "created_at.desc",
             "limit":      "500",
         }),
         _sb_fetch("hl_trade_log", {
-            "open_time": f"gte.{utc_iso}",
+            "open_time": [f"gte.{start_utc_iso}", f"lt.{end_utc_iso}"],
             "order":     "open_time.asc",
             "limit":     "1000",
         }),
         _sb_fetch("mexc_trade_log", {
-            "open_time": f"gte.{utc_iso}",
+            "open_time": [f"gte.{start_utc_iso}", f"lt.{end_utc_iso}"],
             "order":     "open_time.asc",
             "limit":     "1000",
         }),
