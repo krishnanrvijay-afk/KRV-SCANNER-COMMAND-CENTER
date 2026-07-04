@@ -1479,8 +1479,6 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
     expired: list = []
     for a in alert_rows:
         outcome = str(a.get("outcome") or "").upper()
-        if outcome not in LIFECYCLE_EXPIRED_OUTCOMES:
-            continue
         a_venue = _lc_venue(a)
         if venue != "all" and a_venue != venue:
             continue
