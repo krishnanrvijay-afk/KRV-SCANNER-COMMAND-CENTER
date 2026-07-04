@@ -1493,7 +1493,7 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
         a_dt = _parse_open_utc(created_at)
         if not a_dt:
             return None
-        window_end = a_dt + timedelta(seconds=120)
+        window_end = a_dt + timedelta(seconds=600)
         for t in trade_logs_by_venue.get(a_venue) or []:
             if str(t.get("pair") or "").upper() != str(pair or "").upper():
                 continue
@@ -1542,6 +1542,11 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
             "exit_price":               _f(matched_trade.get("exit_price"))  if matched_trade else None,
         })
     expired.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+
+    for _row in expired[:5]:
+        print(f"[LIFECYCLE_DEBUG] pair={_row.get('pair')} direction={_row.get('direction')} "
+              f"created_at={_row.get('created_at')} exit_reason={_row.get('exit_reason')!r} "
+              f"pnl_dollars={_row.get('pnl_dollars')!r}")
 
     open_trades: list = []
     for v in ("hl", "mexc"):
