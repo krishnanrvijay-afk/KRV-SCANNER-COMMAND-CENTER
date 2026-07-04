@@ -486,7 +486,7 @@ function pnlSpan(pnl) {
   if (pnl === null || pnl === undefined) return '';
   const n = Number(pnl);
   const c = n > 0 ? '#22c55e' : (n < 0 ? '#ef4444' : '#ffffff');
-  return ' <span style="font-size:14px;font-weight:700;color:' + c + '">' + (n > 0 ? '+' : '') + n.toFixed(2) + '</span>';
+  return ' <span style="font-size:13px;font-weight:700;margin-left:8px;color:' + c + '">' + (n > 0 ? '+' : '') + n.toFixed(2) + '</span>';
 }
 
 function renderExpired() {
@@ -566,6 +566,18 @@ function jColorFor(v) {
   if (!Number.isFinite(v)) return '#ffffff';
   return v < 30 ? '#22c55e' : (v > 70 ? '#ef4444' : '#ffffff');
 }
+function jColorForExpiry(v) {
+  if (!Number.isFinite(v)) return '#ffffff';
+  if (v < 0) return '#ef4444';
+  if (v < 30) return '#22c55e';
+  if (v <= 70) return '#ffffff';
+  return '#ef4444';
+}
+function zoneForTime(tMs, preZoneEndMs, postZoneStartMs) {
+  if (Number.isFinite(preZoneEndMs) && tMs < preZoneEndMs) return 'pre';
+  if (Number.isFinite(postZoneStartMs) && tMs >= postZoneStartMs) return 'post';
+  return 'signal';
+}
 function jFmt(v) { return Number.isFinite(v) ? v.toFixed(1) : '—'; }
 function pnlFmt(v) {
   if (v === null || !Number.isFinite(v)) return '—';
@@ -576,7 +588,7 @@ function pnlColorFor(v) {
   return v > 0 ? '#22c55e' : (v < 0 ? '#ef4444' : '#ffffff');
 }
 
-function buildCandleTable(contentEl, candles, ctx) {
+function buildCandleTable(contentEl, candles, ctx, zones) {
   const isLong = (ctx.direction || '').toUpperCase() === 'LONG';
   const signalPrice = Number(ctx.signal_price);
   const signalMs = ctx.signal_ts ? ctx.signal_ts * 1000 : null;
@@ -616,34 +628,54 @@ function buildCandleTable(contentEl, candles, ctx) {
   const lastIdx = candles.length - 1;
   const beHappened = beHitIdx !== -1;
 
-  const rows = candles.map((c, i) => {
-    let note = '', noteColor = '', borderColor = 'transparent';
+  const preZoneEndMs = zones ? zones.preZoneEndMs : null;
+  const postZoneStartMs = zones ? zones.postZoneStartMs : null;
+
+  const rowsArr = [];
+  let prevZone = null;
+  candles.forEach((c, i) => {
+    const zone = zoneForTime(c.time_ms, preZoneEndMs, postZoneStartMs);
+
+    if (zones && prevZone === 'pre' && zone === 'signal') {
+      rowsArr.push('<tr><td colspan="5" style="background:#06b6d4;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ SIGNAL FIRED — ALERT WINDOW BEGINS ▼</td></tr>');
+    }
+    if (zones && prevZone === 'signal' && zone === 'post') {
+      rowsArr.push('<tr><td colspan="5" style="background:#f97316;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ ALERT EXPIRED / TRADE CLOSED ▼</td></tr>');
+    }
+    prevZone = zone;
+
+    let note = '', noteColor = '', noteBorderColor = 'transparent';
     if (i === lastIdx) {
       note = beHappened ? 'EXPIRED' : 'BE MISS';
       noteColor = '#ef4444';
-      borderColor = '#ef4444';
+      noteBorderColor = '#ef4444';
     } else if (i === signalIdx) {
-      note = 'SIGNAL'; noteColor = '#06b6d4'; borderColor = '#06b6d4';
+      note = 'SIGNAL'; noteColor = '#06b6d4'; noteBorderColor = '#06b6d4';
     } else if (i === beHitIdx) {
-      note = 'BE HIT'; noteColor = '#22c55e'; borderColor = '#22c55e';
+      note = 'BE HIT'; noteColor = '#22c55e'; noteBorderColor = '#22c55e';
     } else if (i === peakIdx) {
-      note = 'PEAK ★'; noteColor = '#f59e0b'; borderColor = '#f59e0b';
+      note = 'PEAK ★'; noteColor = '#f59e0b'; noteBorderColor = '#f59e0b';
     }
+
+    let rowBg = '#060610', borderColor = noteBorderColor;
+    if (zone === 'pre') { rowBg = '#1a0505'; borderColor = '#ef444444'; }
+    else if (zone === 'post') { rowBg = '#05051a'; borderColor = '#06b6d444'; }
 
     const timeStr = fmtEtHM(c.time_ms);
     const closeStr = Number(c.close).toFixed(6);
     const pnl = projPnls[i];
     const jVal = jValues[i];
 
-    return `
-    <tr style="border-left:3px solid ${borderColor}">
+    rowsArr.push(`
+    <tr style="background:${rowBg};border-left:2px solid ${borderColor}">
       <td style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:left">${timeStr}</td>
       <td style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">${closeStr}</td>
       <td style="padding:8px;font-size:14px;font-weight:700;color:${pnlColorFor(pnl)};text-align:right">${pnlFmt(pnl)}</td>
       <td style="padding:8px;font-size:14px;font-weight:700;color:${jColorFor(jVal)};text-align:right">${jFmt(jVal)}</td>
       <td style="padding:8px;font-size:12px;font-weight:700;color:${noteColor}">${note}</td>
-    </tr>`;
-  }).join('');
+    </tr>`);
+  });
+  const rows = rowsArr.join('');
 
   const peakTimeStr = peakIdx !== -1 ? fmtEtHM(candles[peakIdx].time_ms) : '—';
   const jAtSignal = signalIdx !== -1 ? jValues[signalIdx] : null;
@@ -690,7 +722,7 @@ function buildCandleTable(contentEl, candles, ctx) {
     </div>
     <div>
       <div style="font-size:11px;font-weight:700;color:#ffffff;opacity:0.5;letter-spacing:0.1em">J AT EXPIRY</div>
-      <div style="font-size:16px;font-weight:700;color:${jColorFor(jAtExpiry)}">${jFmt(jAtExpiry)}</div>
+      <div style="font-size:16px;font-weight:700;color:${jColorForExpiry(jAtExpiry)}">${jFmt(jAtExpiry)}</div>
     </div>
   </div>`;
 }
@@ -698,9 +730,11 @@ function buildCandleTable(contentEl, candles, ctx) {
 async function renderTfTable(tf) {
   const contentEl = document.getElementById('lcTfContent');
   const ctx = state.panelCtx;
+  const pending = (ctx.pending_duration_seconds === null || ctx.pending_duration_seconds === undefined || !Number.isFinite(Number(ctx.pending_duration_seconds)))
+    ? 480 : Number(ctx.pending_duration_seconds);
   contentEl.innerHTML = '<div class="lc-chart-empty">Loading…</div>';
   try {
-    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}`;
+    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}&pending=${pending}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
@@ -709,7 +743,11 @@ async function renderTfTable(tf) {
       contentEl.innerHTML = '<div class="lc-chart-empty">No candle data</div>';
       return;
     }
-    buildCandleTable(contentEl, candles, ctx);
+    const zones = {
+      preZoneEndMs: data.pre_zone_end_ms,
+      postZoneStartMs: data.post_zone_start_ms,
+    };
+    buildCandleTable(contentEl, candles, ctx, zones);
   } catch (e) {
     contentEl.innerHTML = '<div class="lc-chart-empty">Failed to load candle data</div>';
   }

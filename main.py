@@ -1652,6 +1652,7 @@ async def api_lifecycle_candles(
     symbol:    Optional[str] = Query(None),
     pair:      Optional[str] = Query(None),
     interval:  Optional[str] = Query(None),
+    pending:   float = Query(480),
 ) -> JSONResponse:
     _require_auth(request)
     if venue not in ("hl", "mexc"):
@@ -1665,11 +1666,12 @@ async def api_lifecycle_candles(
         raise HTTPException(400, f"interval must be one of: {', '.join(LIFECYCLE_ALL_TFS)}")
 
     tfs = (interval,) if interval else LIFECYCLE_CANDLE_TFS
+    pending_seconds = int(pending)
 
     async def _fetch_tf(tf: str) -> list[dict]:
         interval_s = LIFECYCLE_INTERVAL_SECONDS[tf]
-        start_s = int(signal_ts) - interval_s * 30
-        end_s   = int(signal_ts) + 600
+        start_s = int(signal_ts) - interval_s * 10
+        end_s   = int(signal_ts) + pending_seconds + interval_s * 10
         if venue == "hl":
             coin = _hl_coin(sym)
             return await _fetch_hl_candles(coin, tf, start_s * 1000, end_s * 1000)
@@ -1681,11 +1683,14 @@ async def api_lifecycle_candles(
     candles_by_tf = dict(zip(tfs, results))
 
     return JSONResponse({
-        "venue":        venue,
-        "pair":         sym,
-        "signal_ts":    signal_ts,
-        "signal_ts_ms": int(signal_ts * 1000),
-        "candles":      candles_by_tf,
+        "venue":              venue,
+        "pair":               sym,
+        "signal_ts":          signal_ts,
+        "signal_ts_ms":       int(signal_ts * 1000),
+        "expiry_ts_ms":       int((signal_ts + pending_seconds) * 1000),
+        "pre_zone_end_ms":    int(signal_ts * 1000),
+        "post_zone_start_ms": int((signal_ts + pending_seconds) * 1000),
+        "candles":            candles_by_tf,
     })
 
 
