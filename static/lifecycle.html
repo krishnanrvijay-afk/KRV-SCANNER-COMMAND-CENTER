@@ -312,7 +312,7 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <div class="lc-section">
-  <div class="lc-section-label">ALERTS TODAY</div>
+  <div class="lc-section-label">FULL LIFECYCLE LOG</div>
   <div class="lc-outpills" id="lcOutcomeFilters">
     <button class="lc-outpill active" data-filter="ALL">ALL</button>
     <button class="lc-outpill" data-filter="CONFIRMED">CONFIRMED</button>
@@ -436,10 +436,10 @@ function outcomeFilterPred(filter) {
     case 'CONFIRMED':          return a => (a.outcome || '').toUpperCase() === 'CONFIRMED';
     case 'EXPIRED':            return a => (a.outcome || '').toUpperCase().includes('EXPIRED');
     case 'J1H_BLOCKED':        return a => (a.outcome || '').toUpperCase() === 'J1H_DISCARDED';
-    case 'PEAK_DECAY':         return a => (a.outcome || '').toUpperCase() === 'PEAK_DECAY_20';
-    case 'CONFIRM_REVERSAL':   return a => (a.outcome || '').toUpperCase() === 'CONFIRM_REVERSAL';
-    case 'SIGNAL_EXHAUSTION':  return a => (a.outcome || '').toUpperCase() === 'SIGNAL_EXHAUSTION';
-    case 'KILL':               return a => { const o = (a.outcome || '').toUpperCase(); return o === 'KILL' || o === 'KILLZONE'; };
+    case 'PEAK_DECAY':         return a => (a.exit_reason || '').toUpperCase() === 'PEAK_DECAY_20';
+    case 'CONFIRM_REVERSAL':   return a => (a.exit_reason || '').toUpperCase() === 'CONFIRM_REVERSAL';
+    case 'SIGNAL_EXHAUSTION':  return a => (a.exit_reason || '').toUpperCase() === 'SIGNAL_EXHAUSTION';
+    case 'KILL':               return a => { const er = (a.exit_reason || '').toUpperCase(); return er === 'KILL' || er === 'KILLZONE' || er === 'HP_TIME_EXIT' || er === 'SL_PROXIMITY'; };
     default:                   return () => true;
   }
 }
@@ -466,6 +466,28 @@ function outcomeBadge(o) {
   return '<span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;color:' + c +
     ';background:' + hexToRgba(c, 0.15) + ';border:1px solid ' + hexToRgba(c, 0.4) + '">' + label + '</span>';
 }
+function exitReasonColor(er) {
+  const v = String(er || '').toUpperCase();
+  if (v === 'PEAK_DECAY_20') return '#a855f7';
+  if (v === 'CONFIRM_REVERSAL') return '#ef4444';
+  if (v === 'SIGNAL_EXHAUSTION') return '#06b6d4';
+  if (v === 'KILL' || v === 'KILLZONE') return '#f97316';
+  if (v === 'HP_TIME_EXIT') return '#f97316';
+  if (v === 'SL_PROXIMITY') return '#f97316';
+  return '#ffffff';
+}
+function exitReasonBadge(er) {
+  if (!er) return '';
+  const c = exitReasonColor(er);
+  return ' <span style="display:inline-block;margin-left:4px;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;color:' + c +
+    ';background:' + hexToRgba(c, 0.15) + ';border:1px solid ' + hexToRgba(c, 0.4) + '">' + er + '</span>';
+}
+function pnlSpan(pnl) {
+  if (pnl === null || pnl === undefined) return '';
+  const n = Number(pnl);
+  const c = n > 0 ? '#22c55e' : (n < 0 ? '#ef4444' : '#ffffff');
+  return ' <span style="font-size:14px;font-weight:700;color:' + c + '">' + (n > 0 ? '+' : '') + n.toFixed(2) + '</span>';
+}
 
 function renderExpired() {
   const body = document.getElementById('lcExpiredBody');
@@ -485,7 +507,7 @@ function renderExpired() {
       <td>${a.pair || '—'}</td>
       <td class="lc-dir ${dirClass}">${(a.direction || '—').toUpperCase()}</td>
       <td>${a.tier || '—'}</td>
-      <td>${outcomeBadge(a.outcome)}</td>
+      <td>${outcomeBadge(a.outcome)}${exitReasonBadge(a.exit_reason)}${pnlSpan(a.pnl_dollars)}</td>
       <td>${fmtNum(a.signal_price)}</td>
       <td>${a.session || '—'}</td>
       <td>${a.score !== null && a.score !== undefined ? a.score : '—'}</td>

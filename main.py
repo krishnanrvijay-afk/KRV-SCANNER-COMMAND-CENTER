@@ -1470,11 +1470,41 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
     et_midnight = _et_midnight(today_et)
     utc_iso     = et_midnight.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
-    alert_rows = await _sb_fetch("alert_log", {
-        "created_at": f"gte.{utc_iso}",
-        "order":      "created_at.desc",
-        "limit":      "500",
-    })
+    alert_rows, hl_trades, mexc_trades = await asyncio.gather(
+        _sb_fetch("alert_log", {
+            "created_at": f"gte.{utc_iso}",
+            "order":      "created_at.desc",
+            "limit":      "500",
+        }),
+        _sb_fetch("hl_trade_log", {
+            "open_time": f"gte.{utc_iso}",
+            "order":     "open_time.asc",
+            "limit":     "1000",
+        }),
+        _sb_fetch("mexc_trade_log", {
+            "open_time": f"gte.{utc_iso}",
+            "order":     "open_time.asc",
+            "limit":     "1000",
+        }),
+    )
+    trade_logs_by_venue = {"hl": hl_trades, "mexc": mexc_trades}
+
+    def _match_trade(a_venue: str, pair: Any, direction: Any, created_at: Any) -> Optional[dict]:
+        a_dt = _parse_open_utc(created_at)
+        if not a_dt:
+            return None
+        window_end = a_dt + timedelta(seconds=120)
+        for t in trade_logs_by_venue.get(a_venue) or []:
+            if str(t.get("pair") or "").upper() != str(pair or "").upper():
+                continue
+            if str(t.get("direction") or "").upper() != str(direction or "").upper():
+                continue
+            t_dt = _parse_open_utc(t.get("open_time"))
+            if not t_dt:
+                continue
+            if a_dt <= t_dt <= window_end:
+                return t
+        return None
 
     expired: list = []
     for a in alert_rows:
@@ -1482,11 +1512,15 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
         a_venue = _lc_venue(a)
         if venue != "all" and a_venue != venue:
             continue
+        a_pair      = a.get("pair") or a.get("symbol")
+        a_direction = a.get("direction")
+        a_created   = a.get("created_at")
+        matched_trade = _match_trade(a_venue, a_pair, a_direction, a_created)
         expired.append({
-            "created_at":               a.get("created_at"),
+            "created_at":               a_created,
             "venue":                    a_venue,
-            "pair":                     a.get("pair") or a.get("symbol"),
-            "direction":                a.get("direction"),
+            "pair":                     a_pair,
+            "direction":                a_direction,
             "tier":                     a.get("tier"),
             "outcome":                  outcome,
             "signal_price":             a.get("signal_price"),
@@ -1499,6 +1533,13 @@ async def api_lifecycle_alerts(request: Request, venue: str = "all") -> JSONResp
             "session":                  a.get("session"),
             "pending_duration_seconds": a.get("pending_duration_seconds"),
             "score":                    a.get("score"),
+            "exit_reason":              matched_trade.get("exit_reason")      if matched_trade else None,
+            "pnl_dollars":              _f(matched_trade.get("pnl_dollars"))  if matched_trade else None,
+            "duration_seconds":         matched_trade.get("duration_seconds") if matched_trade else None,
+            "mae_r":                    _f(matched_trade.get("mae_r"))        if matched_trade else None,
+            "mfe_r":                    _f(matched_trade.get("mfe_r"))        if matched_trade else None,
+            "entry_price":              _f(matched_trade.get("entry_price")) if matched_trade else None,
+            "exit_price":               _f(matched_trade.get("exit_price"))  if matched_trade else None,
         })
     expired.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
 
