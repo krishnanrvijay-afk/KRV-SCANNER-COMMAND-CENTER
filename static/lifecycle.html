@@ -704,16 +704,28 @@ function buildCandleTable(contentEl, candles, ctx, zones) {
       if (isOpenedOutcome) {
         rowsArr.push('<tr><td colspan="5" style="background:#22c55e;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ TRADE OPENED — POSITION ACTIVE ▼</td></tr>');
       } else {
-        rowsArr.push('<tr><td colspan="5" style="background:#f97316;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ ALERT EXPIRED / TRADE CLOSED ▼</td></tr>');
+        const _exitLabel = ctx.exit_reason ? ctx.exit_reason.replace(/_/g, ' ') : 'ALERT EXPIRED';
+        const _bannerBg = (outcomeUp === 'EXPIRED_AGE' || outcomeUp === 'EXPIRED_J15M' || outcomeUp === 'EXPIRED_PRICE')
+          ? '#f97316'
+          : (outcomeUp === 'J1H_DISCARDED')
+          ? '#ef4444'
+          : '#a855f7';
+        rowsArr.push('<tr><td colspan="5" style="background:' + _bannerBg + ';color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ ' + _exitLabel + ' ▼</td></tr>');
       }
     }
     prevZone = zone;
 
     let note = '', noteColor = '', noteBorderColor = 'transparent';
     if (i === lastIdx) {
-      note = beHappened ? 'EXPIRED' : 'BE MISS';
-      noteColor = '#ef4444';
-      noteBorderColor = '#ef4444';
+      if (ctx.exit_reason && !isExpiredOutcome && !isOpenedOutcome) {
+        note = ctx.exit_reason.replace(/_/g, ' ');
+        noteColor = '#a855f7';
+        noteBorderColor = '#a855f7';
+      } else {
+        note = beHappened ? 'EXPIRED' : 'BE MISS';
+        noteColor = '#ef4444';
+        noteBorderColor = '#ef4444';
+      }
     } else if (i === signalIdx) {
       note = 'SIGNAL'; noteColor = '#06b6d4'; noteBorderColor = '#06b6d4';
     } else if (i === beHitIdx) {
