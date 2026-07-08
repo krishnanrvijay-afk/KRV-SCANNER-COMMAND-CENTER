@@ -1200,6 +1200,26 @@ body {
       .active-j5m { border-color:#06b6d4; color:#06b6d4; background:rgba(6,182,212,.12); }
       .active-j15m { border-color:#00e676; color:#00e676; background:rgba(0,230,118,.12); }
       .active-j1h { border-color:#ffaa00; color:#ffaa00; background:rgba(255,170,0,.12); }
+
+      /* ── PAIR TRADE TABLE ── */
+      #pt-section { padding: 10px 14px; }
+      .pt-filters { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px; }
+      .pt-pill-group { display:flex; gap:3px; }
+      .pt-pill { padding:4px 11px; border-radius:20px; font-size:9px; font-weight:800; letter-spacing:.08em; cursor:pointer; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.04); color:#ffffff; font-family:var(--display); }
+      .pt-pill.active { background:rgba(6,182,212,0.18); border-color:#06b6d4; color:#06b6d4; }
+      .pt-date-input { background:#0a0a0f; border:1px solid rgba(255,255,255,0.2); color:#ffffff; font-size:9px; font-weight:700; padding:4px 8px; border-radius:6px; font-family:var(--display); }
+      .pt-pair-input { background:#0a0a0f; border:1px solid rgba(255,255,255,0.2); color:#ffffff; font-size:9px; font-weight:700; padding:4px 8px; border-radius:6px; width:80px; font-family:var(--display); }
+      .pt-cols { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      @media(max-width:600px){ .pt-cols { grid-template-columns:1fr; } }
+      .pt-col-label { color:#ffffff; font-weight:700; font-size:9px; letter-spacing:.1em; margin-bottom:5px; font-family:var(--display); }
+      .pt-table-wrap { overflow-x:auto; }
+      .pt-table { width:100%; border-collapse:collapse; }
+      .pt-table th { color:#ffffff; font-weight:700; font-size:9px; letter-spacing:.06em; padding:5px 5px; border-bottom:1px solid rgba(255,255,255,0.12); cursor:pointer; white-space:nowrap; text-align:left; font-family:var(--display); }
+      .pt-table th:hover { color:#06b6d4; }
+      .pt-table td { padding:4px 5px; border-bottom:1px solid rgba(255,255,255,0.05); color:#ffffff; font-weight:700; font-size:9px; white-space:nowrap; font-family:var(--display); }
+      .pt-table tr.pt-pos > td:first-child { border-left:2px solid rgba(34,197,94,0.55); padding-left:4px; }
+      .pt-table tr.pt-neg > td:first-child { border-left:2px solid rgba(239,68,68,0.55); padding-left:4px; }
+      .pt-msg { color:#ffffff; font-weight:700; font-size:9px; padding:10px; text-align:center; font-family:var(--display); }
     </style>
 </head>
 <body>
@@ -1347,6 +1367,34 @@ body {
 
   <!-- PAIR PERFORMANCE GRID -->
     <div id="panel-pairs">
+    <!-- ── PAIR TRADE PERFORMANCE TABLE ── -->
+    <div id="pt-section">
+      <div class="pt-filters">
+        <div class="pt-pill-group">
+          <button class="pt-pill active" id="pt-v-all"  onclick="ptSetVenue('all')">ALL</button>
+          <button class="pt-pill"        id="pt-v-hl"   onclick="ptSetVenue('hl')">HL</button>
+          <button class="pt-pill"        id="pt-v-mexc" onclick="ptSetVenue('mexc')">MEXC</button>
+        </div>
+        <input type="date" id="pt-date" class="pt-date-input" onchange="ptLoad()">
+        <div class="pt-pill-group">
+          <button class="pt-pill active" id="pt-d-all"   onclick="ptSetDir('all')">ALL</button>
+          <button class="pt-pill"        id="pt-d-long"  onclick="ptSetDir('long')">LONG</button>
+          <button class="pt-pill"        id="pt-d-short" onclick="ptSetDir('short')">SHORT</button>
+        </div>
+        <input type="text" id="pt-pair-f" class="pt-pair-input" placeholder="PAIR" oninput="ptRender()">
+      </div>
+      <div class="pt-cols">
+        <div>
+          <div class="pt-col-label">PAIR PERFORMANCE</div>
+          <div class="pt-table-wrap" id="pt-left-wrap"><div class="pt-msg">LOADING…</div></div>
+        </div>
+        <div>
+          <div class="pt-col-label">VENUE BREAKDOWN</div>
+          <div class="pt-table-wrap" id="pt-right-wrap"><div class="pt-msg">LOADING…</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- /PAIR TRADE PERFORMANCE TABLE -->
       <div style="padding:8px 16px 4px;display:flex;gap:8px">
 
         <button id="alert-log-pill" onclick="openAlertOverlay()" style="padding:6px 16px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid #06b6d4;background:#082020;color:#06b6d4;box-shadow:0 0 10px rgba(6,182,212,.3);letter-spacing:.08em">
@@ -1589,7 +1637,7 @@ body {
         <div class="log-count-num" id="log-count">Ã¢ÂÂ</div>
         <div class="log-count-lbl">TRADES</div>
       </div>
-      <button class="export-btn" onclick="exportCSV()">EXPORT CSV</button>
+      <button onclick="exportCSV()" style="font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.08em;color:#ffffff;border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.55);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0">&#x2193; CSV</button>
     </div>
 
     <!-- Summary -->
@@ -1700,6 +1748,126 @@ function fmtDur(secs) {
 function setTab(name) {
     bnSetTab(name);
   }
+  // ── PAIR TRADE TABLE ───────────────────────────────────────────────────────
+  var _ptData = null, _ptVenue = 'all', _ptDir = 'all';
+  var _ptLS = {col:'netPnl', dir:-1};  // left sort
+  var _ptRS = {col:'netPnl', dir:-1};  // right sort
+
+  (function(){ var d=document.getElementById('pt-date'); if(d) d.value=new Date().toISOString().slice(0,10); })();
+
+  function ptSetVenue(v){
+    _ptVenue=v;
+    ['all','hl','mexc'].forEach(function(x){ var e=document.getElementById('pt-v-'+x); if(e) e.classList.toggle('active',x===v); });
+    ptLoad();
+  }
+  function ptSetDir(d){
+    _ptDir=d;
+    ['all','long','short'].forEach(function(x){ var e=document.getElementById('pt-d-'+x); if(e) e.classList.toggle('active',x===d); });
+    ptRender();
+  }
+  async function ptLoad(){
+    var dateEl=document.getElementById('pt-date');
+    var date=dateEl?dateEl.value:new Date().toISOString().slice(0,10);
+    var vp=_ptVenue==='all'?'':('&venue='+encodeURIComponent(_ptVenue));
+    var url='/api/trades?date='+encodeURIComponent(date)+vp;
+    ['pt-left-wrap','pt-right-wrap'].forEach(function(id){ var e=document.getElementById(id); if(e) e.innerHTML='<div class="pt-msg">LOADING…</div>'; });
+    try{
+      var res=await fetch(url);
+      if(!res.ok) throw new Error(res.status);
+      _ptData=await res.json();
+      ptRender();
+    }catch(e){
+      ['pt-left-wrap','pt-right-wrap'].forEach(function(id){ var el=document.getElementById(id); if(el) el.innerHTML='<div class="pt-msg">LOAD ERROR</div>'; });
+    }
+  }
+  function _ptFmtDur(s){
+    if(s==null||s==='') return '—';
+    s=parseInt(s,10); return Math.floor(s/60)+'m '+(s%60)+'s';
+  }
+  function _ptGetRows(){
+    if(!_ptData) return [];
+    var pf=(document.getElementById('pt-pair-f')||{value:''}).value.trim().toUpperCase();
+    return _ptData.filter(function(r){
+      if(_ptVenue!=='all'&&(r._venue||'').toLowerCase()!==_ptVenue) return false;
+      if(_ptDir!=='all'&&(r.direction||'').toLowerCase()!==_ptDir) return false;
+      if(pf&&!(r.pair||'').toUpperCase().includes(pf)) return false;
+      return true;
+    });
+  }
+  function ptRender(){
+    if(!_ptData){ ptLoad(); return; }
+    var rows=_ptGetRows();
+
+    /* LEFT — pair aggregate */
+    var lm={};
+    rows.forEach(function(r){
+      var k=r.pair||'';
+      if(!lm[k]) lm[k]={pair:k,trades:0,wins:0,netPnl:0,totR:0,totDur:0,totMae:0,totMfe:0};
+      var m=lm[k], pnl=parseFloat(r.pnl_dollars||0);
+      m.trades++; m.netPnl+=pnl; if(pnl>0) m.wins++;
+      m.totR+=parseFloat(r.r_value||0);
+      m.totDur+=(r.duration_seconds||0);
+      m.totMae+=parseFloat(r.mae_r||0);
+      m.totMfe+=parseFloat(r.mfe_r||0);
+    });
+    var lr=Object.values(lm);
+    lr.sort(function(a,b){ var c=_ptLS.col,av=a[c],bv=b[c]; return _ptLS.dir*(bv-av); });
+    var lshow=lr.slice(0,50), lmore=lr.length>50?lr.length-50:0;
+    var lh='<table class="pt-table"><thead><tr>'
+      +[['pair','PAIR'],['trades','TRADES'],['winPct','WIN%'],['netPnl','AVG PNL'],['totR','AVG R'],['totDur','AVG DUR'],['totMae','AVG MAE'],['totMfe','AVG MFE']].map(function(x){
+        return '<th onclick="ptSortL(\''+x[0]+'\')">'  +x[1]+'</th>';
+      }).join('')+'</tr></thead><tbody>';
+    lshow.forEach(function(m){
+      var wr=m.trades>0?(m.wins/m.trades*100).toFixed(1)+'%':'0.0%';
+      var ap=m.trades>0?(m.netPnl/m.trades).toFixed(2):'—';
+      var ar=m.trades>0?(m.totR/m.trades).toFixed(2):'—';
+      var ad=_ptFmtDur(m.trades>0?Math.round(m.totDur/m.trades):null);
+      var am=m.trades>0?(m.totMae/m.trades).toFixed(2):'—';
+      var af=m.trades>0?(m.totMfe/m.trades).toFixed(2):'—';
+      var cls=m.netPnl>0?'pt-pos':m.netPnl<0?'pt-neg':'';
+      lh+='<tr class="'+cls+'"><td>'+(m.pair||'—')+'</td><td>'+m.trades+'</td><td>'+wr+'</td>'
+        +'<td>'+(parseFloat(ap)>=0?'+':'')+ap+'</td><td>'+ar+'</td><td>'+ad+'</td><td>'+am+'</td><td>'+af+'</td></tr>';
+    });
+    if(lmore>0) lh+='<tr><td colspan="8" class="pt-msg">+ '+lmore+' more</td></tr>';
+    if(lshow.length===0) lh+='<tr><td colspan="8" class="pt-msg">NO DATA</td></tr>';
+    lh+='</tbody></table>';
+    document.getElementById('pt-left-wrap').innerHTML=lh;
+
+    /* RIGHT — venue breakdown */
+    var rm={};
+    rows.forEach(function(r){
+      var k=(r._venue||'hl')+'|'+(r.pair||'');
+      if(!rm[k]) rm[k]={venue:(r._venue||'hl'),pair:(r.pair||''),trades:0,wins:0,netPnl:0,totDur:0,exits:{}};
+      var m=rm[k], pnl=parseFloat(r.pnl_dollars||0);
+      m.trades++; m.netPnl+=pnl; if(pnl>0) m.wins++;
+      m.totDur+=(r.duration_seconds||0);
+      var ex=r.exit_reason||'OTHER'; m.exits[ex]=(m.exits[ex]||0)+1;
+    });
+    var rr=Object.values(rm);
+    rr.sort(function(a,b){ var c=_ptRS.col,av=a[c],bv=b[c]; return _ptRS.dir*(bv-av); });
+    var rshow=rr.slice(0,50), rmore=rr.length>50?rr.length-50:0;
+    var rh='<table class="pt-table"><thead><tr>'
+      +[['venue','VENUE'],['pair','PAIR'],['trades','TRADES'],['winPct','WIN%'],['netPnl','NET PNL'],['bestExit','BEST EXIT'],['totDur','AVG DUR']].map(function(x){
+        return '<th onclick="ptSortR(\''+x[0]+'\')">'  +x[1]+'</th>';
+      }).join('')+'</tr></thead><tbody>';
+    rshow.forEach(function(m){
+      var wr=m.trades>0?(m.wins/m.trades*100).toFixed(1)+'%':'0.0%';
+      var np=(m.netPnl>=0?'+':'')+m.netPnl.toFixed(2);
+      var be=Object.entries(m.exits).sort(function(a,b){return b[1]-a[1];})[0];
+      var ad=_ptFmtDur(m.trades>0?Math.round(m.totDur/m.trades):null);
+      var cls=m.netPnl>0?'pt-pos':m.netPnl<0?'pt-neg':'';
+      rh+='<tr class="'+cls+'"><td>'+(m.venue||'—').toUpperCase()+'</td><td>'+(m.pair||'—')+'</td>'
+        +'<td>'+m.trades+'</td><td>'+wr+'</td><td>'+np+'</td><td>'+(be?be[0]:'—')+'</td><td>'+ad+'</td></tr>';
+    });
+    if(rmore>0) rh+='<tr><td colspan="7" class="pt-msg">+ '+rmore+' more</td></tr>';
+    if(rshow.length===0) rh+='<tr><td colspan="7" class="pt-msg">NO DATA</td></tr>';
+    rh+='</tbody></table>';
+    document.getElementById('pt-right-wrap').innerHTML=rh;
+  }
+  function ptSortL(col){ if(_ptLS.col===col){_ptLS.dir*=-1;}else{_ptLS={col:col,dir:-1};} ptRender(); }
+  function ptSortR(col){ if(_ptRS.col===col){_ptRS.dir*=-1;}else{_ptRS={col:col,dir:-1};} ptRender(); }
+  // ── /PAIR TRADE TABLE ───────────────────────────────────────────────────────
+
   function bnSetTab(name) {
     var panels = ['pairs','insights','scorecard','log','operations','alerts'];
     panels.forEach(function(p) {
@@ -1711,7 +1879,7 @@ function setTab(name) {
       var el = document.getElementById('bn-' + i);
       if (el) el.classList.toggle('active', i === (name === 'pairs' ? 'home' : name));
     });
-    if (name === 'home') name = 'pairs';
+    if (name === 'home') { name = 'pairs'; if(typeof ptLoad==='function') ptLoad(); }
     if (name === 'log' && !logLoaded) loadLog();
     if (name === 'operations') {
       _opsActive = true;
@@ -1739,6 +1907,7 @@ function setTab(name) {
       if (el) el.classList.toggle('active', x === t);
     });
     pgLoad();
+  ptLoad();
   }
 
     function pgSetVenue(v) {
@@ -2864,7 +3033,9 @@ function detailHTML(r) {
     return `<div class="detail-cell"><div class="detail-lbl">${lbl}</div><div class="detail-val" style="color:${color || '#ffffff'}${fw ? ';font-weight:'+fw : ''}">${val}</div></div>`;
   }
   const slTp   = [r.sl, r.tp1, r.tp2].map(v => v != null ? fmtNum(v, 4) : 'Ã¢ÂÂ').join(' / ');
-  const jVals  = [r.j15m_entry, r.j1h_entry].map(v => fmtNum(v, 1)).join(' / ');
+  const j5mVal  = r.j5m_entry  != null ? fmtNum(r.j5m_entry,  1) : '—';
+  const j15mVal = r.j15m_entry != null ? fmtNum(r.j15m_entry, 1) : '—';
+  const j1hVal  = r.j1h_entry  != null ? fmtNum(r.j1h_entry,  1) : '—';
   const stoch  = [r.stoch_k_entry, r.stoch_d_entry].map(v => fmtNum(v, 1)).join(' / ');
   const chg24  = r.chg24h_entry != null ? fmtNum(r.chg24h_entry, 2) + '%' : 'not yet tracked';
   const chg24c = r.chg24h_entry != null ? (parseFloat(r.chg24h_entry) >= 0 ? C.green : C.red) : '#ffffff';
@@ -2877,7 +3048,9 @@ function detailHTML(r) {
     dc('LEVERAGE',    r.leverage          != null ? fmtNum(r.leverage, 1) + 'x'   : 'Ã¢ÂÂ'),
     dc('SCORE',       r.score             != null ? fmtNum(r.score, 1)             : 'Ã¢ÂÂ'),
     dc('ADX1H',       r.adx1h             != null ? fmtNum(r.adx1h, 1)            : 'Ã¢ÂÂ'),
-    dc('J15M / J1H',  jVals),
+    dc('J5',          j5mVal),
+    dc('J15',         j15mVal),
+    dc('J1H',         j1hVal),
     dc('STOCH K / D', stoch),
     dc('RSI',         r.rsi_entry         != null ? fmtNum(r.rsi_entry, 1)        : 'Ã¢ÂÂ'),
     dc('DEPTH %',     r.depth_pct_entry   != null ? fmtNum(r.depth_pct_entry, 2) + '%' : 'Ã¢ÂÂ'),
@@ -3110,7 +3283,7 @@ function onLogFilterChange() {
 
 function exportCSV() {
   const rows = getLogFiltered();
-  const headers = ['venue','pair','direction','tier','session_opened','close_time_et','exit_reason','pnl_dollars','r_value','mae_r','mfe_r','duration_seconds','score','adx1h'];
+  const headers = ['venue','pair','direction','tier','session_opened','close_time_et','exit_reason','pnl_dollars','r_value','mae_r','mfe_r','duration_seconds','j15m_entry','j5m_entry','stoch_k_entry','stoch_d_entry','rsi_entry','score'];
   const lines = [headers.join(',')];
   for (const r of rows) {
     lines.push(headers.map(h => {
@@ -3133,7 +3306,7 @@ function exportCSV() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `fleet-log-${range}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = 'aria-log-' + new Date().toISOString().slice(0,10) + '.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -4951,7 +5124,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var blob=new Blob([lines.join('\n')],{type:'text/csv'});
         var url=URL.createObjectURL(blob);
         var a=document.createElement('a');
-        a.href=url;a.download='alert_log_'+new Date().toISOString().slice(0,10)+'.csv';
+        a.href=url;a.download='aria-alerts-'+new Date().toISOString().slice(0,10)+'.csv';
         a.click();URL.revokeObjectURL(url);
       };
       window._alertsStart=_alertsStart;
