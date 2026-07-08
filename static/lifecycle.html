@@ -473,6 +473,9 @@ function renderOpen() {
         be_confirm_price: t.be_confirm_price ?? null,
         outcome: 'TRADE_OPENED',
         title: t.pair + ' ' + (t.direction || '').toUpperCase() + ' — OPEN',
+        depth_bid_pct: t.depth_bid_pct ?? null,
+        depth_ask_pct: t.depth_ask_pct ?? null,
+        sl_price: t.sl ?? null,
       });
     });
   });
@@ -579,6 +582,10 @@ function renderExpired() {
         be_confirm_price: a.be_confirm_price ?? null,
         outcome: a.outcome,
         title: a.pair + ' ' + (a.direction || '').toUpperCase() + ' — ' + a.outcome,
+        depth_bid_pct: a.depth_bid_pct ?? null,
+        depth_ask_pct: a.depth_ask_pct ?? null,
+        sl_price: a.sl ?? null,
+        exit_r: a.r_value ?? null,
       });
     });
   });
@@ -591,14 +598,8 @@ function fmtEtHM(ms) {
   } catch (e) { return '—'; }
 }
 
-function tabsForPending(pending) {
-  const tabs = ['1m'];
-  if (pending !== null && Number.isFinite(pending) && pending > 0) {
-    if (pending >= 300)  tabs.push('5m');
-    if (pending >= 900)  tabs.push('15m');
-    if (pending >= 3600) tabs.push('1h');
-  }
-  return tabs;
+function tabsForPending(_pending) {
+  return ['1m', '5m', '15m', '1h'];
 }
 
 function computeKDJ(candles) {
@@ -686,62 +687,113 @@ function buildCandleTable(contentEl, candles, ctx, zones) {
     if (v !== null && v > peakVal) { peakVal = v; peakIdx = i; }
   });
 
-  const lastIdx = candles.length - 1;
   const beHappened = beHitIdx !== -1;
 
   const preZoneEndMs = zones ? zones.preZoneEndMs : null;
   const postZoneStartMs = zones ? zones.postZoneStartMs : null;
 
+  // ── pre-signal count, signalLastIdx, exitPrice ──────────────────────────────
+  let preCandleCount = 0, signalLastIdx = -1, exitPrice = null;
+  candles.forEach((c, i) => {
+    const z = zoneForTime(c.time_ms, preZoneEndMs, postZoneStartMs);
+    if (z === 'pre') preCandleCount++;
+    if (z === 'signal') { signalLastIdx = i; exitPrice = Number(c.close); }
+  });
+
+  // ── R-per-candle: requires sl_price in ctx ──────────────────────────────────
+  const slPrice = ctx.sl_price != null ? Number(ctx.sl_price) : null;
+  let risk1R = null;
+  if (slPrice !== null && Number.isFinite(signalPrice) && signalPrice > 0) {
+    const r = Math.abs(signalPrice - slPrice) / signalPrice * 25000;
+    if (r > 0) risk1R = r;
+  }
+
   const rowsArr = [];
+
+  // ── pre-signal header ───────────────────────────────────────────────────────
+  if (zones && preCandleCount > 0) {
+    rowsArr.push('<tr><td colspan="8" style="background:#6d28d9;color:#ffffff;font-size:11px;font-weight:700;padding:4px 8px;letter-spacing:0.12em">\u25b2 PRE-SIGNAL (last ' + preCandleCount + ' candles)</td></tr>');
+  }
+
   let prevZone = null;
   candles.forEach((c, i) => {
     const zone = zoneForTime(c.time_ms, preZoneEndMs, postZoneStartMs);
 
     if (zones && prevZone === 'pre' && zone === 'signal') {
-      rowsArr.push('<tr><td colspan="5" style="background:#06b6d4;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ SIGNAL FIRED — ALERT WINDOW BEGINS ▼</td></tr>');
+      rowsArr.push('<tr><td colspan="8" style="background:#06b6d4;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">\u25bc SIGNAL FIRED \u2014 ALERT WINDOW BEGINS \u25bc</td></tr>');
     }
     if (zones && prevZone === 'signal' && zone === 'post') {
-      if (isOpenedOutcome) {
-        rowsArr.push('<tr><td colspan="5" style="background:#22c55e;color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ TRADE OPENED — POSITION ACTIVE ▼</td></tr>');
-      } else {
-        const _exitLabel = ctx.exit_reason ? ctx.exit_reason.replace(/_/g, ' ') : 'ALERT EXPIRED';
-        const _bannerBg = (outcomeUp === 'EXPIRED_AGE' || outcomeUp === 'EXPIRED_J15M' || outcomeUp === 'EXPIRED_PRICE')
-          ? '#f97316'
-          : (outcomeUp === 'J1H_DISCARDED')
-          ? '#ef4444'
-          : '#a855f7';
-        rowsArr.push('<tr><td colspan="5" style="background:' + _bannerBg + ';color:#000000;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">▼ ' + _exitLabel + ' ▼</td></tr>');
-      }
+      rowsArr.push('<tr><td colspan="8" style="background:#1e3a5f;color:#ffffff;font-size:12px;font-weight:700;padding:4px 8px;letter-spacing:0.15em">\u25bc POST-EXIT (next 10 candles)</td></tr>');
     }
     prevZone = zone;
 
-    let note = '', noteColor = '', noteBorderColor = 'transparent';
-    if (i === lastIdx) {
-      if (ctx.exit_reason && !isExpiredOutcome && !isOpenedOutcome) {
-        note = ctx.exit_reason.replace(/_/g, ' ');
-        noteColor = '#a855f7';
-        noteBorderColor = '#a855f7';
-      } else {
-        note = beHappened ? 'EXPIRED' : 'BE MISS';
-        noteColor = '#ef4444';
-        noteBorderColor = '#ef4444';
+    let note = '', noteColor = '#ffffff', noteBorderColor = 'transparent';
+
+    if (zone === 'pre') {
+      // ── pre-zone: COMPRESSED if J extremes ──────────────────────────────────
+      const j = jValues[i];
+      if (Number.isFinite(j) && (isLong ? j < 20 : j > 80)) {
+        note = 'COMPRESSED'; noteColor = '#22c55e'; noteBorderColor = '#22c55e';
       }
-    } else if (i === signalIdx) {
-      note = 'SIGNAL'; noteColor = '#06b6d4'; noteBorderColor = '#06b6d4';
-    } else if (i === beHitIdx) {
-      note = 'BE HIT'; noteColor = '#22c55e'; noteBorderColor = '#22c55e';
-    } else if (i === peakIdx) {
-      note = 'PEAK ★'; noteColor = '#f59e0b'; noteBorderColor = '#f59e0b';
+    } else if (zone === 'post') {
+      // ── post-zone: exit-relative PNL note ───────────────────────────────────
+      if (exitPrice !== null && Number.isFinite(exitPrice) && exitPrice > 0) {
+        const close = Number(c.close);
+        const postPnl = isLong
+          ? (close - exitPrice) / exitPrice * 25000
+          : (exitPrice - close) / exitPrice * 25000;
+        note = (postPnl >= 0 ? '+' : '') + '$' + Math.abs(postPnl).toFixed(2);
+        noteColor = postPnl >= 0 ? '#22c55e' : '#ef4444';
+      }
+    } else {
+      // ── signal zone: existing note logic (use signalLastIdx, not lastIdx) ───
+      if (i === signalLastIdx) {
+        if (ctx.exit_reason && !isExpiredOutcome && !isOpenedOutcome) {
+          note = ctx.exit_reason.replace(/_/g, ' ');
+          noteColor = '#a855f7';
+          noteBorderColor = '#a855f7';
+        } else {
+          note = beHappened ? 'EXPIRED' : 'BE MISS';
+          noteColor = '#ef4444';
+          noteBorderColor = '#ef4444';
+        }
+      } else if (i === signalIdx) {
+        note = 'SIGNAL'; noteColor = '#06b6d4'; noteBorderColor = '#06b6d4';
+      } else if (i === beHitIdx) {
+        note = 'BE HIT'; noteColor = '#22c55e'; noteBorderColor = '#22c55e';
+      } else if (i === peakIdx) {
+        note = 'PEAK \u2605'; noteColor = '#f59e0b'; noteBorderColor = '#f59e0b';
+      }
     }
 
     let rowBg = '#060610', borderColor = noteBorderColor;
     if (zone === 'pre') { rowBg = '#1a0505'; borderColor = '#ef444444'; }
-    else if (zone === 'post' && !isOpenedOutcome) { rowBg = '#05051a'; borderColor = '#06b6d444'; }
+    else if (zone === 'post') { rowBg = '#05051a'; borderColor = '#06b6d444'; }
 
     const timeStr = fmtEtHM(c.time_ms);
     const closeStr = Number(c.close).toFixed(6);
     const pnl = projPnls[i];
     const jVal = jValues[i];
+
+    // ── VOL ────────────────────────────────────────────────────────────────────
+    const volRaw = c.volume;
+    const volStr = (volRaw !== undefined && volRaw !== null && volRaw !== '')
+      ? Math.round(Number(volRaw)).toLocaleString() : '\u2014';
+
+    // ── S%/B% (signal row only) ────────────────────────────────────────────────
+    let sbStr = '\u2014';
+    if (i === signalIdx) {
+      const bid = ctx.depth_bid_pct, ask = ctx.depth_ask_pct;
+      if (bid != null || ask != null) {
+        sbStr = (bid != null ? Number(bid).toFixed(1) + '%' : '\u2014') + '/' + (ask != null ? Number(ask).toFixed(1) + '%' : '\u2014');
+      }
+    }
+
+    // ── R (signal zone only, requires sl_price) ────────────────────────────────
+    let rStr = '\u2014';
+    if (zone === 'signal' && risk1R !== null && pnl !== null) {
+      rStr = (pnl / risk1R).toFixed(2) + 'R';
+    }
 
     rowsArr.push(`
     <tr style="background:${rowBg};border-left:2px solid ${borderColor}">
@@ -749,26 +801,32 @@ function buildCandleTable(contentEl, candles, ctx, zones) {
       <td style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">${closeStr}</td>
       <td style="padding:8px;font-size:14px;font-weight:700;color:${pnlColorFor(pnl)};text-align:right">${pnlFmt(pnl)}</td>
       <td style="padding:8px;font-size:14px;font-weight:700;color:${jColorFor(jVal)};text-align:right">${jFmt(jVal)}</td>
+      <td style="padding:6px 8px;font-size:12px;font-weight:700;color:#ffffff;text-align:right">${volStr}</td>
+      <td style="padding:6px 8px;font-size:11px;font-weight:700;color:#ffffff;text-align:right;white-space:nowrap">${sbStr}</td>
+      <td style="padding:6px 8px;font-size:12px;font-weight:700;color:${pnlColorFor(pnl)};text-align:right">${rStr}</td>
       <td style="padding:8px;font-size:12px;font-weight:700;color:${noteColor}">${note}</td>
     </tr>`);
   });
   const rows = rowsArr.join('');
 
-  const peakTimeStr = peakIdx !== -1 ? fmtEtHM(candles[peakIdx].time_ms) : '—';
+  const peakTimeStr = peakIdx !== -1 ? fmtEtHM(candles[peakIdx].time_ms) : '\u2014';
   const jAtSignal = signalIdx !== -1 ? jValues[signalIdx] : null;
   const jPeak = peakIdx !== -1 ? jValues[peakIdx] : null;
-  const jAtExpiry = jValues.length ? jValues[jValues.length - 1] : null;
+  const jAtExpiry = signalLastIdx !== -1 ? jValues[signalLastIdx] : (jValues.length ? jValues[jValues.length - 1] : null);
 
   contentEl.innerHTML = `
   <div style="overflow-x:auto">
   <table style="width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace">
   <thead>
   <tr style="border-bottom:2px solid #1e1e3a">
-  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:left">TIME</th>
-  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">CLOSE</th>
-  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">PROJ PNL</th>
-  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:right">J</th>
-  <th style="padding:8px;font-size:14px;font-weight:700;color:#ffffff;text-align:left">NOTE</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:left">TIME</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:right">CLOSE</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:right">PROJ PNL</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:right">J</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:right">VOL</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:right">S%/B%</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:right">R</th>
+  <th style="padding:8px;font-size:13px;font-weight:700;color:#ffffff;text-align:left">NOTE</th>
   </tr>
   </thead>
   <tbody id="candle-tbody">
@@ -811,7 +869,7 @@ async function renderTfTable(tf) {
     ? 480 : Number(ctx.pending_duration_seconds);
   contentEl.innerHTML = '<div class="lc-chart-empty">Loading…</div>';
   try {
-    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}&pending=${pending}`;
+    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}&pending=${pending}&pre_bars=15&post_bars=10`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
