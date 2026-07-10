@@ -1799,6 +1799,7 @@ async def api_lifecycle_candles(
     pair:      Optional[str] = Query(None),
     interval:  Optional[str] = Query(None),
     pending:   float = Query(480),
+    close_ts:  Optional[float] = Query(None),
 ) -> JSONResponse:
     _require_auth(request)
     if venue not in ("hl", "mexc"):
@@ -1835,7 +1836,8 @@ async def api_lifecycle_candles(
         "signal_ts_ms":       int(signal_ts * 1000),
         "expiry_ts_ms":       int((signal_ts + pending_seconds) * 1000),
         "pre_zone_end_ms":    int(signal_ts * 1000),
-        "post_zone_start_ms": int((signal_ts + pending_seconds) * 1000),
+        "post_zone_start_ms": int(close_ts * 1000) if close_ts else int((signal_ts + 86400) * 1000),
+        "close_ts":           close_ts,
         "candles":            candles_by_tf,
     })
 
