@@ -700,6 +700,16 @@ function buildCandleTable(contentEl, candles, ctx, zones) {
     if (z === 'signal') { signalLastIdx = i; exitPrice = Number(c.close); }
   });
 
+  // ── pre-zone peak: max projPnl in pre-signal candles ──────────────────────
+  let prePeakIdx = -1, prePeakVal = -Infinity;
+  candles.forEach((c, i) => {
+    const z = zoneForTime(c.time_ms, preZoneEndMs, postZoneStartMs);
+    if (z === 'pre') {
+      const v = projPnls[i];
+      if (v !== null && v > prePeakVal) { prePeakVal = v; prePeakIdx = i; }
+    }
+  });
+
   // ── R-per-candle: requires sl_price in ctx ──────────────────────────────────
   const slPrice = ctx.sl_price != null ? Number(ctx.sl_price) : null;
   let risk1R = null;
@@ -734,6 +744,10 @@ function buildCandleTable(contentEl, candles, ctx, zones) {
       const j = jValues[i];
       if (Number.isFinite(j) && (isLong ? j < 20 : j > 80)) {
         note = 'COMPRESSED'; noteColor = '#22c55e'; noteBorderColor = '#22c55e';
+      }
+      // ── pre-zone peak ────────────────────────────────────────────────────────
+      if (i === prePeakIdx) {
+        note = 'PRE-PEAK ★'; noteColor = '#f59e0b'; noteBorderColor = '#f59e0b';
       }
     } else if (zone === 'post') {
       // ── post-zone: exit-relative PNL note ───────────────────────────────────
