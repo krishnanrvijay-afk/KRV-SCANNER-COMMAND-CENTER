@@ -1120,6 +1120,12 @@ body {
       .bn-item.bn-ops.active { background: rgba(239,68,68,0.12); color: #fff; box-shadow: 0 0 14px rgba(239,68,68,0.3); }
       .bn-item.bn-ops.active .bn-icon { filter: drop-shadow(0 0 8px rgba(239,68,68,0.9)); }
       .bn-item.bn-alerts { color: #06b6d4; text-shadow: 0 0 12px rgba(6,182,212,0.9); }
+      .bn-item.bn-perf { color: #ec4899; text-shadow: 0 0 8px rgba(236,72,153,0.5); }
+      .bn-item.bn-perf .bn-icon { filter: drop-shadow(0 0 5px rgba(236,72,153,0.6)); }
+      .bn-item.bn-perf.active { background: rgba(236,72,153,0.12); color: #fff; box-shadow: 0 0 14px rgba(236,72,153,0.3); }
+      .bn-item.bn-perf.active .bn-icon { filter: drop-shadow(0 0 8px rgba(236,72,153,0.9)); }
+      .pf-pill { font-family:var(--display); font-size:9px; font-weight:800; letter-spacing:.08em; padding:2px 7px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:none; color:#fff; cursor:pointer; }
+      .pf-pill.active { background:rgba(236,72,153,0.2); border-color:#ec4899; color:#ec4899; }
       .bn-item.bn-alerts .bn-icon { filter: drop-shadow(0 0 9px rgba(6,182,212,1.0)); }
       .bn-item.bn-alerts.active { background: rgba(6,182,212,0.15); color: #fff; box-shadow: 0 0 18px rgba(6,182,212,0.45); }
       .bn-item.bn-alerts.active .bn-icon { filter: drop-shadow(0 0 14px rgba(6,182,212,1.0)); }
@@ -1447,6 +1453,7 @@ body {
       <button class="bn-item bn-log" id="bn-log" onclick="bnSetTab('log')"><span class="bn-icon">&#x1F4CB;</span>LOG</button>
       <button class="bn-item bn-ops" id="bn-operations" onclick="bnSetTab('operations')"><span class="bn-icon">&#x2699;&#xFE0F;</span>OPS</button>
       <button class="bn-item bn-alerts" id="bn-alerts" onclick="bnSetTab('alerts')"><span class="bn-icon">&#x25C9;</span>ALERTS</button>
+      <button class="bn-item bn-perf" id="bn-perf" onclick="bnSetTab('perf')"><span class="bn-icon">&#x25A3;</span>PERF</button>
       <a class="bn-item bn-lifecycle" id="bn-lifecycle" href="/lifecycle"><span class="bn-icon">&#x1F501;</span>LIFECYCLE</a>
           </nav>
 
@@ -1869,12 +1876,12 @@ function setTab(name) {
   // ── /PAIR TRADE TABLE ───────────────────────────────────────────────────────
 
   function bnSetTab(name) {
-    var panels = ['pairs','insights','scorecard','log','operations','alerts'];
+    var panels = ['pairs','insights','scorecard','log','operations','alerts','perf'];
     panels.forEach(function(p) {
       var el = document.getElementById('panel-' + p);
       if (el) el.style.display = p === name ? '' : 'none';
     });
-    var items = ['home','insights','scorecard','log','operations','alerts'];
+    var items = ['home','insights','scorecard','log','operations','alerts','perf'];
     items.forEach(function(i) {
       var el = document.getElementById('bn-' + i);
       if (el) el.classList.toggle('active', i === (name === 'pairs' ? 'home' : name));
@@ -1893,6 +1900,9 @@ function setTab(name) {
       if (typeof _alertsStart !== 'undefined') _alertsStart();
     } else {
       if (typeof _alertsStop !== 'undefined') _alertsStop();
+    }
+    if (name === 'perf') {
+      if (typeof _perfStart !== 'undefined') _perfStart();
     }
   }
 
@@ -4918,6 +4928,135 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         </table>
       </div>
     </div>
+
+
+<div id="panel-perf" style="display:none">
+  <div style="padding:12px 14px 0">
+    <div style="font-family:var(--display);font-size:13px;font-weight:700;color:#ec4899;letter-spacing:.12em;margin-bottom:10px">&#x25A3; PERFORMANCE BREAKDOWN</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+      <div style="display:flex;gap:4px;align-items:center">
+        <span style="font-size:9px;font-weight:800;color:#ffffff;letter-spacing:.1em">VENUE</span>
+        <button class="pf-pill active" id="pf-v-ALL" onclick="pfSetFilter('venue','ALL')">ALL</button>
+        <button class="pf-pill" id="pf-v-HL" onclick="pfSetFilter('venue','HL')">HL</button>
+        <button class="pf-pill" id="pf-v-MEXC" onclick="pfSetFilter('venue','MEXC')">MEXC</button>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <span style="font-size:9px;font-weight:800;color:#ffffff;letter-spacing:.1em">DIR</span>
+        <button class="pf-pill active" id="pf-d-ALL" onclick="pfSetFilter('dir','ALL')">ALL</button>
+        <button class="pf-pill" id="pf-d-LONG" onclick="pfSetFilter('dir','LONG')">LONG</button>
+        <button class="pf-pill" id="pf-d-SHORT" onclick="pfSetFilter('dir','SHORT')">SHORT</button>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <span style="font-size:9px;font-weight:800;color:#ffffff;letter-spacing:.1em">SESSION</span>
+        <button class="pf-pill active" id="pf-s-ALL" onclick="pfSetFilter('sess','ALL')">ALL</button>
+        <button class="pf-pill" id="pf-s-ASIA" onclick="pfSetFilter('sess','ASIA')">ASIA</button>
+        <button class="pf-pill" id="pf-s-EU" onclick="pfSetFilter('sess','EU')">EU</button>
+        <button class="pf-pill" id="pf-s-US" onclick="pfSetFilter('sess','US')">US</button>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:9px;font-weight:800;color:#ffffff;letter-spacing:.1em">DEPTH</span>
+        <button class="pf-pill active" id="pf-dc-ALL" onclick="pfSetFilter('depth','ALL')">ALL</button>
+        <button class="pf-pill" id="pf-dc-STRONG_BID" onclick="pfSetFilter('depth','STRONG_BID')">STRONG BID</button>
+        <button class="pf-pill" id="pf-dc-NEUTRAL" onclick="pfSetFilter('depth','NEUTRAL')">NEUTRAL</button>
+        <button class="pf-pill" id="pf-dc-STRONG_ASK" onclick="pfSetFilter('depth','STRONG_ASK')">STRONG ASK</button>
+      </div>
+    </div>
+    <div id="pf-status" style="font-size:10px;font-weight:700;color:#ffffff;margin-bottom:8px">&#x2014;</div>
+    <div id="pf-table-wrap" style="overflow-x:auto"></div>
+  </div>
+  <script>
+    var _pfData=null,_pfLoaded=false;
+    var _pfFilters={venue:'ALL',dir:'ALL',sess:'ALL',depth:'ALL'};
+    var _pfSort={col:'netPnl',dir:-1};
+    function pfSetFilter(group,val){
+      var groups={venue:['ALL','HL','MEXC'],dir:['ALL','LONG','SHORT'],sess:['ALL','ASIA','EU','US'],depth:['ALL','STRONG_BID','NEUTRAL','STRONG_ASK']};
+      var pfx={venue:'pf-v-',dir:'pf-d-',sess:'pf-s-',depth:'pf-dc-'};
+      _pfFilters[group]=val;
+      (groups[group]||[]).forEach(function(v){var el=document.getElementById(pfx[group]+v);if(el)el.classList.toggle('active',v===val);});
+      pfRender();
+    }
+    function pfGetRows(){
+      if(!_pfData)return[];
+      return _pfData.filter(function(r){
+        if(_pfFilters.venue!=='ALL'&&(r.venue||'').toUpperCase()!==_pfFilters.venue)return false;
+        if(_pfFilters.dir!=='ALL'&&(r.direction||'').toUpperCase()!==_pfFilters.dir)return false;
+        if(_pfFilters.sess!=='ALL'&&(r.session||'').toUpperCase()!==_pfFilters.sess)return false;
+        if(_pfFilters.depth!=='ALL'&&(r.depth_context||'').toUpperCase()!==_pfFilters.depth)return false;
+        return true;
+      });
+    }
+    function pfFmtDur(s){if(s==null||s==='')return'—';s=parseInt(s,10);return Math.floor(s/60)+'m '+(s%60)+'s';}
+    function pfRender(){
+      if(!_pfData){pfLoad();return;}
+      var rows=pfGetRows();
+      var agg={};
+      rows.forEach(function(r){
+        var k=[r.venue||'',r.pair||'',r.direction||'',r.session||'',r.depth_context||''].join('|');
+        if(!agg[k])agg[k]={venue:r.venue||'',pair:r.pair||'',dir:r.direction||'',sess:r.session||'',depth:r.depth_context||'',trades:0,wins:0,netPnl:0,totMae:0,totMfe:0,totDur:0,exits:{}};
+        var a=agg[k],pnl=parseFloat(r.pnl_dollars||0);
+        a.trades++;a.netPnl+=pnl;if(pnl>0)a.wins++;
+        a.totMae+=parseFloat(r.mae_r||0);
+        a.totMfe+=parseFloat(r.mfe_r||0);
+        a.totDur+=(r.duration_seconds||0);
+        if(r.exit_reason){a.exits[r.exit_reason]=(a.exits[r.exit_reason]||0)+1;}
+      });
+      var arr=Object.values(agg);
+      arr.sort(function(a,b){var c=_pfSort.col,av=a[c]||0,bv=b[c]||0;return _pfSort.dir*(bv-av);});
+      var stat=document.getElementById('pf-status');
+      if(stat)stat.textContent=arr.length+' groups · '+rows.length+' trades';
+      var tw=document.getElementById('pf-table-wrap');
+      if(!tw)return;
+      if(!arr.length){tw.innerHTML='<div style="padding:24px;text-align:center;font-weight:700;color:#ffffff">NO DATA</div>';return;}
+      var hdrs=['VENUE','PAIR','DIR','SESSION','DEPTH','TRADES','WIN%','NET PNL','AVG MAE','AVG MFE','AVG DUR','BEST EXIT'];
+      var cols2=['venue','pair','dir','sess','depth','trades','winPct','netPnl','avgMae','avgMfe','avgDur','bestExit'];
+      var html='<table style="width:100%;border-collapse:collapse;font-family:var(--display);font-size:11px"><thead><tr style="border-bottom:2px solid #1e1e3a">';
+      hdrs.forEach(function(h,i){html+='<th style="padding:6px 8px;font-weight:700;color:#ffffff;text-align:left;white-space:nowrap;cursor:pointer" data-col="'+cols2[i]+'" onclick="pfSort(this.dataset.col)">'+h+'</th>';});
+      html+='</tr></thead><tbody>';
+      arr.forEach(function(a){
+        var wr=a.trades>0?(a.wins/a.trades*100).toFixed(1)+'%':'—';
+        var np=a.netPnl>=0?'+$'+a.netPnl.toFixed(2):'-$'+Math.abs(a.netPnl).toFixed(2);
+        var am=a.trades>0?(a.totMae/a.trades).toFixed(2):'—';
+        var af=a.trades>0?(a.totMfe/a.trades).toFixed(2):'—';
+        var ad=pfFmtDur(a.trades>0?Math.round(a.totDur/a.trades):null);
+        var be='—';var beMax=0;
+        Object.keys(a.exits).forEach(function(k){if(a.exits[k]>beMax){beMax=a.exits[k];be=k.replace(/_/g,' ');}});
+        var bdr=a.netPnl>0?'border-left:2px solid rgba(34,197,94,0.5)':a.netPnl<0?'border-left:2px solid rgba(239,68,68,0.5)':'';
+        html+='<tr style="border-bottom:1px solid #0f0f1a;'+bdr+'">'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff">'+a.venue+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff">'+a.pair+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:'+(a.dir==='LONG'?'#22c55e':a.dir==='SHORT'?'#ef4444':'#ffffff')+'">'+a.dir+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff">'+a.sess+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff">'+a.depth+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff;text-align:right">'+a.trades+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff;text-align:right">'+wr+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:'+(a.netPnl>0?'#22c55e':a.netPnl<0?'#ef4444':'#ffffff')+';text-align:right">'+np+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff;text-align:right">'+am+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff;text-align:right">'+af+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#ffffff;text-align:right;white-space:nowrap">'+ad+'</td>'
+          +'<td style="padding:5px 8px;font-weight:700;color:#a855f7">'+be+'</td>'
+          +'</tr>';
+      });
+      html+='</tbody></table>';
+      tw.innerHTML=html;
+    }
+    window.pfSort=function(col){if(_pfSort.col===col){_pfSort.dir*=-1;}else{_pfSort={col:col,dir:-1};}pfRender();};
+    async function pfLoad(){
+      var stat=document.getElementById('pf-status');
+      if(stat)stat.textContent='LOADING…';
+      try{
+        var res=await fetch('/api/performance',{credentials:'include'});
+        if(!res.ok)throw new Error(res.status);
+        _pfData=await res.json();_pfLoaded=true;
+        pfRender();
+      }catch(e){
+        _pfLoaded=true;
+        var stat2=document.getElementById('pf-status');
+        if(stat2)stat2.textContent='LOAD ERROR: '+e.message;
+      }
+    }
+    window._perfStart=function(){if(!_pfLoaded)pfLoad();};
+  </script>
+</div><!-- /panel-perf -->
 
     <script>
     (function(){
