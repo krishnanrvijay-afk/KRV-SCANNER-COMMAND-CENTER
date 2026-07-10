@@ -763,6 +763,137 @@ async def api_log(
     all_rows.sort(key=lambda r: str(r.get("close_time") or ""), reverse=True)
     return JSONResponse(all_rows)
 
+
+@app.get("/api/trades")
+async def api_trades(
+    request: Request,
+    date: Optional[str] = None,
+    venue: Optional[str] = None,
+) -> JSONResponse:
+    _require_auth(request)
+    date_cls = globals()["date"]  # avoid shadowing by 'date' param
+    hl_rows, mexc_rows = await asyncio.gather(
+        _sb_fetch("hl_trade_log",   {"order": "close_time.desc", "limit": "2000"}),
+        _sb_fetch("mexc_trade_log", {"order": "close_time.desc", "limit": "2000"}),
+    )
+    target = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        start = _et_midnight(date_cls.fromisoformat(target))
+        end   = start + timedelta(days=1)
+    except Exception:
+        raise HTTPException(400, "Invalid date format; use YYYY-MM-DD")
+    def _in_range(r):
+        ct = _to_et(r.get("close_time"))
+        return bool(ct and start <= ct < end)
+    hl_f   = [r for r in hl_rows   if _in_range(r)]
+    mexc_f = [r for r in mexc_rows if _in_range(r)]
+    if venue and venue.lower() != "all":
+        if venue.lower() == "hl":
+            mexc_f = []
+        elif venue.lower() == "mexc":
+            hl_f = []
+    all_rows = (
+        [{"_venue": "hl",   **r} for r in hl_f   if r.get("close_time")]
+      + [{"_venue": "mexc", **r} for r in mexc_f if r.get("close_time")]
+    )
+    all_rows.sort(key=lambda r: str(r.get("close_time") or ""), reverse=True)
+    return JSONResponse(all_rows)
+
+
+@app.get("/api/performance")
+async def api_performance(
+    request: Request,
+    venue: Optional[str] = None,
+    direction: Optional[str] = None,
+    session: Optional[str] = None,
+) -> JSONResponse:
+    _require_auth(request)
+    al_rows, tl_hl, tl_mx = await asyncio.gather(
+        _sb_fetch("alert_log", {
+            "order": "created_at.desc",
+            "limit": "5000",
+            "select": (
+                "venue,pair,direction,session,depth_context,"
+                "j5m_at_signal,j15m_at_signal,j1h_at_signal,"
+                "created_at,outcome"
+            ),
+        }),
+        _sb_fetch("hl_trade_log", {
+            "order": "open_time.desc",
+            "limit": "2000",
+            "select": (
+                "pair,direction,open_time,exit_reason,"
+                "pnl_dollars,mae_r,mfe_r,duration_seconds"
+            ),
+        }),
+        _sb_fetch("mexc_trade_log", {
+            "order": "open_time.desc",
+            "limit": "2000",
+            "select": (
+                "pair,direction,open_time,exit_reason,"
+                "pnl_dollars,mae_r,mfe_r,duration_seconds"
+            ),
+        }),
+    )
+
+    def _parse_dt(s):
+        if not s:
+            return None
+        try:
+            return datetime.fromisoformat(s.replace("Z", "+00:00"))
+        except Exception:
+            return None
+
+    tl_all = (
+        [{"_venue": "hl",   **r} for r in tl_hl  if r.get("pnl_dollars") is not None]
+      + [{"_venue": "mexc", **r} for r in tl_mx  if r.get("pnl_dollars") is not None]
+    )
+
+    results = []
+    for al in al_rows:
+        if al.get("outcome") != "TRADE_OPENED":
+            continue
+        al_ts = _parse_dt(al.get("created_at"))
+        if not al_ts:
+            continue
+        if venue and venue.lower() != "all" and                 al.get("venue", "").lower() != venue.lower():
+            continue
+        if direction and direction.lower() != "all" and                 al.get("direction", "").lower() != direction.lower():
+            continue
+        if session and session.lower() != "all" and                 al.get("session", "").lower() != session.lower():
+            continue
+        matched = None
+        for tl in tl_all:
+            if tl.get("pair") != al.get("pair"):
+                continue
+            if tl.get("direction") != al.get("direction"):
+                continue
+            tl_ts = _parse_dt(tl.get("open_time"))
+            if not tl_ts:
+                continue
+            if abs((tl_ts - al_ts).total_seconds()) <= 30:
+                matched = tl
+                break
+        if not matched:
+            continue
+        results.append({
+            "venue":            al.get("venue"),
+            "pair":             al.get("pair"),
+            "direction":        al.get("direction"),
+            "session":          al.get("session"),
+            "depth_context":    al.get("depth_context"),
+            "j5m":              al.get("j5m_at_signal"),
+            "j15m":             al.get("j15m_at_signal"),
+            "j1h":              al.get("j1h_at_signal"),
+            "exit_reason":      matched.get("exit_reason"),
+            "pnl_dollars":      matched.get("pnl_dollars"),
+            "mae_r":            matched.get("mae_r"),
+            "mfe_r":            matched.get("mfe_r"),
+            "duration_seconds": matched.get("duration_seconds"),
+        })
+    return JSONResponse(results)
+
+
 @app.get("/api/schema")
 async def api_schema(request: Request) -> JSONResponse:
     _require_auth(request)
