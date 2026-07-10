@@ -476,6 +476,7 @@ function renderOpen() {
         depth_bid_pct: t.depth_bid_pct ?? null,
         depth_ask_pct: t.depth_ask_pct ?? null,
         sl_price: t.sl ?? null,
+        close_ts: t.close_time ? Math.floor(new Date(t.close_time).getTime() / 1000) : null,
       });
     });
   });
@@ -883,7 +884,8 @@ async function renderTfTable(tf) {
     ? 480 : Number(ctx.pending_duration_seconds);
   contentEl.innerHTML = '<div class="lc-chart-empty">Loading…</div>';
   try {
-    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}&pending=${pending}&pre_bars=15&post_bars=10`;
+    const closeParam = ctx.close_ts ? '&close_ts=' + encodeURIComponent(ctx.close_ts) : '';
+    const url = `/api/lifecycle/candles?venue=${encodeURIComponent(ctx.venue)}&pair=${encodeURIComponent(ctx.pair)}&signal_ts=${ctx.signal_ts}&interval=${tf}&pending=${pending}&pre_bars=15&post_bars=10` + closeParam;
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
@@ -892,9 +894,10 @@ async function renderTfTable(tf) {
       contentEl.innerHTML = '<div class="lc-chart-empty">No candle data</div>';
       return;
     }
+    const closeMsApi = data.close_ts ? data.close_ts * 1000 : null;
     const zones = {
       preZoneEndMs: data.pre_zone_end_ms,
-      postZoneStartMs: data.post_zone_start_ms,
+      postZoneStartMs: closeMsApi || data.post_zone_start_ms,
     };
     buildCandleTable(contentEl, candles, ctx, zones);
   } catch (e) {
