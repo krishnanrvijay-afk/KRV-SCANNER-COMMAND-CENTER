@@ -1842,6 +1842,34 @@ async def api_lifecycle_candles(
     })
 
 
+
+@app.post("/api/fleet/halt")
+async def fleet_halt_toggle(
+    request: Request,
+) -> JSONResponse:
+    _require_auth(request)
+    body = await request.json()
+    halt = bool(body.get("halt", False))
+    sb = _get_supabase()
+    if sb:
+        sb.table("hl_scanner_state").update({"fleet_halt": halt}).eq("id", 1).execute()
+        sb.table("mexc_scanner_state").update({"fleet_halt": halt}).eq("id", 1).execute()
+    return JSONResponse({"fleet_halt": halt, "status": "ok"})
+
+
+@app.get("/api/fleet/status")
+async def fleet_status(
+    request: Request,
+) -> JSONResponse:
+    _require_auth(request)
+    sb = _get_supabase()
+    halt = False
+    if sb:
+        r = sb.table("hl_scanner_state").select("fleet_halt").eq("id", 1).execute()
+        if r.data:
+            halt = r.data[0].get("fleet_halt", False)
+    return JSONResponse({"fleet_halt": halt})
+
 if __name__ == "__main__":
   import uvicorn
   uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)
