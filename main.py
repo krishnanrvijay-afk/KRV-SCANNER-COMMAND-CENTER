@@ -1661,7 +1661,7 @@ async def api_lifecycle_alerts(
         a_pair      = a.get("pair") or a.get("symbol")
         a_direction = a.get("direction")
         a_created   = a.get("created_at")
-        matched_trade = _match_trade(a_venue, a_pair, a_direction, a_created)
+        matched_trade = _match_trade(a_venue, a_pair, a_direction, a_created) if outcome == "TRADE_OPENED" else None
         expired.append({
             "created_at":               a_created,
             "venue":                    a_venue,

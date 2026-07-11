@@ -5107,7 +5107,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           'J1H_DISCARDED': {c:'#ef4444',l:'J1H BLOCKED'},
           'EXPIRED_AGE':   {c:'#f59e0b',l:'EXPIRED AGE'},
           'EXPIRED_J15M':  {c:'#f97316',l:'EXPIRED J15M'},
-          'EXPIRED_PRICE': {c:'#8b5cf6',l:'EXPIRED PRICE'}
+          'EXPIRED_PRICE': {c:'#8b5cf6',l:'EXPIRED PRICE'},
+          'BLOCKED_DUPLICATE':{c:'#475569',l:'BLOCKED DUP'}
         };
         var d=map[o]||{c:'#64748b',l:o||'&#x2014;'};
         return'<span style="display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:'+d.c+'22;color:'+d.c+';border:1px solid '+d.c+'44">'+d.l+'</span>';
@@ -5122,6 +5123,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       }
       function _pendingHtml(r){
         var o=r.outcome||'',s=parseInt(r.pending_duration_seconds)||0;
+        if(o==='BLOCKED_DUPLICATE')return'<span style="color:#475569">—</span>';
         var cm={'CONFIRMED':'#22c55e','EXPIRED_AGE':'#f59e0b','EXPIRED_J15M':'#f97316','EXPIRED_PRICE':'#8b5cf6','J1H_DISCARDED':null};
         var c=cm.hasOwnProperty(o)?cm[o]:'#64748b';
         var bar=c?'<div style="margin-top:2px;height:2px;background:#1e293b;border-radius:1px;width:54px"><div style="height:100%;width:'+Math.min(100,(s/480)*100).toFixed(1)+'%;background:'+c+';border-radius:1px"></div></div>':'';

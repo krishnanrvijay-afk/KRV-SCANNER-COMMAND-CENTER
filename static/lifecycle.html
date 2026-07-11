@@ -566,7 +566,7 @@ function renderExpired() {
       <td>${a.pair || '—'}</td>
       <td class="lc-dir ${dirClass}">${(a.direction || '—').toUpperCase()}</td>
       <td>${a.tier || '—'}</td>
-      <td>${outcomeBadge(a.outcome)}${exitReasonBadge(a.exit_reason)}${pnlSpan(a.pnl_dollars)}</td>
+      <td>${outcomeBadge(a.outcome)}${a.outcome === 'TRADE_OPENED' ? exitReasonBadge(a.exit_reason) + pnlSpan(a.pnl_dollars) : ''}</td>
       <td>${fmtNum(a.signal_price)}</td>
       <td>${a.session || '—'}</td>
       <td>${a.score !== null && a.score !== undefined ? a.score : '—'}</td>
@@ -674,24 +674,28 @@ function buildCandleTable(contentEl, candles, ctx, zones) {
     }
   }
 
+  const preZoneEndMs = zones ? zones.preZoneEndMs : null;
+  const postZoneStartMs = zones ? zones.postZoneStartMs : null;
+
+  // beHitIdx: first candle in signal zone where price crosses be_confirm_price
   let beHitIdx = -1;
   if (beConfirmPrice !== null && Number.isFinite(beConfirmPrice)) {
     for (let i = 0; i < candles.length; i++) {
+      if (zoneForTime(candles[i].time_ms, preZoneEndMs, postZoneStartMs) !== 'signal') continue;
       const close = Number(candles[i].close);
       const hit = isLong ? close >= beConfirmPrice : close <= beConfirmPrice;
       if (hit) { beHitIdx = i; break; }
     }
   }
 
+  // peakIdx: candle with max proj_pnl in signal zone
   let peakIdx = -1, peakVal = -Infinity;
   projPnls.forEach((v, i) => {
+    if (zoneForTime(candles[i].time_ms, preZoneEndMs, postZoneStartMs) !== 'signal') return;
     if (v !== null && v > peakVal) { peakVal = v; peakIdx = i; }
   });
 
   const beHappened = beHitIdx !== -1;
-
-  const preZoneEndMs = zones ? zones.preZoneEndMs : null;
-  const postZoneStartMs = zones ? zones.postZoneStartMs : null;
 
   // ── pre-signal count, signalLastIdx, exitPrice ──────────────────────────────
   let preCandleCount = 0, signalLastIdx = -1, exitPrice = null;
