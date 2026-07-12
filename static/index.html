@@ -2190,8 +2190,7 @@ function renderFleetLink() {
   }
   function _flScans(st) {
     if (!st) return 0;
-    var ps = st.pair_states;
-    return Array.isArray(ps) ? ps.length : 0;
+    return (st.scan_count || 0);
   }
   function _flPnl(st) {
     if (!st) return null;
