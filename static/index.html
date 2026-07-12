@@ -4880,16 +4880,9 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       <div style="padding:12px 14px 0">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div style="font-family:var(--display);font-size:13px;font-weight:700;color:#06b6d4;text-shadow:0 0 10px rgba(6,182,212,0.6);letter-spacing:.12em">&#x25C9; ALERT LOG</div>
-          <div style="font-size:10px;color:#64748b;font-family:var(--display)" id="al-last-refresh">&#x2014;</div>
+          <div style="font-size:10px;color:#ffffff;font-weight:700;font-family:var(--display)" id="al-last-refresh">&#x2014;</div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px">
-          <div class="al-stat"><div class="al-sval" id="al-sv-total">&#x2014;</div><div class="al-slbl">TOTAL</div></div>
-          <div class="al-stat"><div class="al-sval" id="al-sv-conf" style="color:#22c55e">&#x2014;</div><div class="al-slbl">CONFIRMED</div></div>
-          <div class="al-stat"><div class="al-sval" id="al-sv-j1h" style="color:#ef4444">&#x2014;</div><div class="al-slbl">J1H BLOCKED</div></div>
-          <div class="al-stat"><div class="al-sval" id="al-sv-exp" style="color:#f59e0b">&#x2014;</div><div class="al-slbl">EXPIRED</div></div>
-          <div class="al-stat"><div class="al-sval" id="al-sv-rate" style="color:#06b6d4">&#x2014;</div><div class="al-slbl">CONFIRM RATE</div></div>
-          <div class="al-stat"><div class="al-sval" id="al-sv-avg" style="color:#a855f7">&#x2014;</div><div class="al-slbl">AVG PENDING</div></div>
-        </div>
+        <div id="al-stat-line" style="font-size:11px;font-family:var(--display);font-weight:700;color:#ffffff;margin-bottom:10px;letter-spacing:.06em">&#x2014;</div>
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap">
           <div style="flex:1;display:flex;flex-wrap:wrap;gap:8px">
             <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
@@ -4917,6 +4910,15 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
               <button class="al-pill" id="al-f-sess-ASIA" onclick="alFilter('sess','ASIA')">ASIA</button>
               <button class="al-pill" id="al-f-sess-EU" onclick="alFilter('sess','EU')">EU</button>
               <button class="al-pill" id="al-f-sess-US" onclick="alFilter('sess','US')">US</button>
+            </div>
+            <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+              <span class="log-filter-label">FROM</span>
+              <input type="date" id="al-from" class="log-date-input" onchange="alDateFilter()">
+              <span class="log-filter-label">TO</span>
+              <input type="date" id="al-to" class="log-date-input" onchange="alDateFilter()">
+            </div>
+            <div style="display:flex;gap:3px;align-items:center">
+              <input type="text" id="al-pair" class="log-pair-input" placeholder="PAIR FILTER" oninput="alPairFilter(this.value)">
             </div>
           </div>
           <button onclick="alCsvExport()" style="font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.08em;color:#06b6d4;border:1px solid rgba(6,182,212,0.4);background:rgba(6,182,212,0.08);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0">&#x2193; CSV</button>
@@ -5064,7 +5066,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
     <script>
     (function(){
       var _alData=[],_alFiltered=[],_alActive=false,_alLoaded=false,_alTimer=null;
-      var _alFilters={outcome:'ALL',venue:'ALL',dir:'ALL',sess:'ALL'};
+      var _alFilters={outcome:'ALL',venue:'ALL',dir:'ALL',sess:'ALL',pair:''};
       var _alSortCol='created_at',_alSortDir=-1;
       var _alCols=[
         {key:'created_at',               label:'TIME',       s:true},
@@ -5158,6 +5160,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           '</tr>';
       }
       function _applyFilters(){
+        var _pairQ=(_alFilters.pair||'').toLowerCase();
         _alFiltered=_alData.filter(function(r){
           var o=r.outcome||'',fo=_alFilters.outcome;
           if(fo!=='ALL'){if(fo==='EXPIRED'){if(o.indexOf('EXPIRED')===-1)return false;}else if(o!==fo)return false;}
@@ -5167,6 +5170,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           if(_alFilters.dir!=='ALL'&&d!==_alFilters.dir)return false;
           var s=(r.session||'').toUpperCase();
           if(_alFilters.sess!=='ALL'&&s!==_alFilters.sess)return false;
+          if(_pairQ&&(r.pair||'').toLowerCase().indexOf(_pairQ)===-1)return false;
           return true;
         });
         var sc=_alSortCol,sd=_alSortDir;
@@ -5182,13 +5186,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var conf=rows.filter(function(r){return r.outcome==='CONFIRMED';}).length;
         var j1h=rows.filter(function(r){return r.outcome==='J1H_DISCARDED';}).length;
         var exp=rows.filter(function(r){return(r.outcome||'').indexOf('EXPIRED')!==-1;}).length;
-        var rate=total>0?(conf/total*100).toFixed(1)+'%':'&#x2014;';
-        var ps=0,pc=0;
-        rows.forEach(function(r){if(r.pending_duration_seconds!=null){ps+=Number(r.pending_duration_seconds);pc++;}});
-        var avg=pc>0?(ps/pc).toFixed(1)+'s':'&#x2014;';
-        function sv(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
-        sv('al-sv-total',total);sv('al-sv-conf',conf);sv('al-sv-j1h',j1h);
-        sv('al-sv-exp',exp);sv('al-sv-rate',rate);sv('al-sv-avg',avg);
+        var el=document.getElementById('al-stat-line');
+        if(el)el.textContent='TOTAL: '+total+' · CONFIRMED: '+conf+' · BLOCKED: '+j1h+' · EXPIRED: '+exp;
       }
       function _renderHeaders(){
         var hrow=document.getElementById('al-header-row');
@@ -5218,7 +5217,11 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         try{
           var _ctrl=new AbortController();
           var _to=setTimeout(function(){_ctrl.abort();},11000);
-          var res=await fetch('/api/alert-log',{signal:_ctrl.signal});
+          var _af=(document.getElementById('al-from')||{value:''}).value;
+          var _at=(document.getElementById('al-to')||{value:''}).value;
+          var _aurl='/api/alert-log';
+          if(_af&&_at)_aurl+='?from_date='+encodeURIComponent(_af)+'&to_date='+encodeURIComponent(_at);
+          var res=await fetch(_aurl,{signal:_ctrl.signal});
           clearTimeout(_to);
           if(!res.ok)throw new Error(res.status);
           _alData=await res.json();_alLoaded=true;
@@ -5255,6 +5258,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         if(_alSortCol===col){_alSortDir*=-1;}else{_alSortCol=col;_alSortDir=-1;}
         _applyFilters();_renderHeaders();_renderTable();
       };
+      window.alDateFilter=function(){_alFetch();};
+      window.alPairFilter=function(v){_alFilters.pair=v;_applyFilters();_renderTable();};
       window.alCsvExport=function(){
         var hdrs=_alCols.map(function(c){return c.key;});
         var lines=[hdrs.join(',')];
