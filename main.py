@@ -125,6 +125,27 @@ async def _sb_fetch(table: str, extra_params: Optional[dict] = None) -> list:
         except Exception:
             return []
 
+async def _sb_patch(table: str, row_filter: str, payload: dict) -> bool:
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return False
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal",
+    }
+    async with httpx.AsyncClient(timeout=8.0) as client:
+        try:
+            r = await client.patch(
+                f"{SUPABASE_URL}/rest/v1/{table}?{row_filter}",
+                headers=headers,
+                json=payload,
+            )
+            r.raise_for_status()
+            return True
+        except Exception:
+            return False
+
 # ─────────────────────────── type helpers ───────────────────────────
 def _f(val: Any) -> Optional[float]:
     """Safe float cast."""
@@ -1850,10 +1871,8 @@ async def fleet_halt_toggle(
     _require_auth(request)
     body = await request.json()
     halt = bool(body.get("halt", False))
-    sb = _get_supabase()
-    if sb:
-        sb.table("hl_scanner_state").update({"fleet_halt": halt}).eq("id", 1).execute()
-        sb.table("mexc_scanner_state").update({"fleet_halt": halt}).eq("id", 1).execute()
+    await _sb_patch("hl_scanner_state",   "id=eq.1", {"fleet_halt": halt})
+    await _sb_patch("mexc_scanner_state", "id=eq.1", {"fleet_halt": halt})
     return JSONResponse({"fleet_halt": halt, "status": "ok"})
 
 
@@ -1862,12 +1881,8 @@ async def fleet_status(
     request: Request,
 ) -> JSONResponse:
     _require_auth(request)
-    sb = _get_supabase()
-    halt = False
-    if sb:
-        r = sb.table("hl_scanner_state").select("fleet_halt").eq("id", 1).execute()
-        if r.data:
-            halt = r.data[0].get("fleet_halt", False)
+    rows = await _sb_fetch("hl_scanner_state", {"id": "eq.1", "select": "fleet_halt"})
+    halt = rows[0].get("fleet_halt", False) if rows else False
     return JSONResponse({"fleet_halt": halt})
 
 if __name__ == "__main__":
