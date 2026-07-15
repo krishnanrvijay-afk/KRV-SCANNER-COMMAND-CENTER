@@ -1806,7 +1806,7 @@ function setTab(name) {
   var _ptLS = {col:'netPnl', dir:-1};  // left sort
   var _ptRS = {col:'netPnl', dir:-1};  // right sort
 
-  (function(){ var d=document.getElementById('pt-date'); if(d) d.value=new Date().toISOString().slice(0,10); })();
+  (function(){ var d=document.getElementById('pt-date'); if(d) d.value=_edtToday(); })();
 
   function ptSetVenue(v){
     _ptVenue=v;
@@ -1820,7 +1820,7 @@ function setTab(name) {
   }
   async function ptLoad(){
     var dateEl=document.getElementById('pt-date');
-    var date=dateEl?dateEl.value:new Date().toISOString().slice(0,10);
+    var date=dateEl?dateEl.value:_edtToday();
     var vp=_ptVenue==='all'?'':('&venue='+encodeURIComponent(_ptVenue));
     var url='/api/trades?date='+encodeURIComponent(date)+vp;
     ['pt-left-wrap','pt-right-wrap'].forEach(function(id){ var e=document.getElementById(id); if(e) e.innerHTML='<div class="pt-msg">LOADING…</div>'; });
@@ -3147,6 +3147,9 @@ function renderFooter() {
 let tlVenue = 'all';
 let tlData  = null;
 
+function _edtToday(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/New_York'});}
+function _edtHHMM(v){try{return new Date(v).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false});}catch(e){return '';}}
+function _edtH(h){return String((h-4+24)%24).padStart(2,'0');}
 const TL_SESSIONS = [
   { key:'ASIA', label:'ASIA', startH:0,  endH:8,  bg:'rgba(79,70,229,0.07)',  bd:'rgba(79,70,229,0.22)'  },
   { key:'EU',   label:'EU',   startH:8,  endH:14, bg:'rgba(124,58,237,0.07)', bd:'rgba(124,58,237,0.22)' },
@@ -3155,7 +3158,7 @@ const TL_SESSIONS = [
 
 function _initTlDate() {
   var el = document.getElementById('tl-date');
-  if (el) el.value = new Date().toISOString().slice(0,10);
+  if (el) el.value = _edtToday();
 }
 
 function saveTlMargin() {
@@ -3174,7 +3177,7 @@ function setTlVenue(v) {
 }
 
 async function loadTimeline() {
-  var d   = (document.getElementById('tl-date') || {}).value || new Date().toISOString().slice(0,10);
+  var d   = (document.getElementById('tl-date') || {}).value || _edtToday();
   var mgn = parseInt(localStorage.getItem('margin_per_trade') || (document.getElementById('tl-margin') || {value:'2000'}).value, 10);
   try {
     var res = await fetch('/api/timeline?date=' + d + '&venue=' + tlVenue + '&margin=' + mgn);
@@ -3279,10 +3282,10 @@ function renderTlSheet() {
       var bg3   = isLong2 ? 'rgba(0,230,118,0.65)' : 'rgba(255,77,77,0.65)';
       var bd3   = isLong2 ? '#00e676' : '#ff4d4d';
       var top3  = BAR_TOP + row2 * (BAR_H + BAR_GAP);
-      var ot3   = t.open_time.slice(11,16);
-      var ct3   = t.close_time.slice(11,16);
+      var ot3   = _edtHHMM(t.open_time);
+      var ct3   = _edtHHMM(t.close_time);
       barsH += '<div class="tl-bar" style="left:' + lPct2 + '%;width:' + wPct2 + '%;top:' + top3 + 'px;height:' + BAR_H + 'px;background:' + bg3 + ';border-color:' + bd3 + '"'
-             + ' title="' + t.pair + ' ' + t.direction + ' | ' + ot3 + '\u2013' + ct3 + ' UTC | ' + t.result.toUpperCase() + ' | ' + t.venue.toUpperCase() + '">'
+             + ' title="' + t.pair + ' ' + t.direction + ' | ' + ot3 + '\u2013' + ct3 + ' EDT | ' + t.result.toUpperCase() + ' | ' + t.venue.toUpperCase() + '">'
              + '<span class="tl-bar-lbl">' + t.pair + '</span></div>';
     });
 
@@ -3307,13 +3310,13 @@ function renderTlSheet() {
       var peakPt2 = sessSeries.reduce(function(a,b){ return b.margin_deployed > a.margin_deployed ? b : a; });
       var pkX = ((peakPt2.t_ms - sStartMs) / sDur * W).toFixed(1);
       var pkY = (SH - peakPt2.margin_deployed / maxM * SH * 0.9).toFixed(1);
-      var pkT = new Date(peakPt2.t_ms).toISOString().slice(11,16) + ' UTC';
+      var pkT = _edtHHMM(peakPt2.t_ms) + ' EDT';
       var pkLbl = 'peak ' + Math.round(peakPt2.margin_deployed).toLocaleString() + ' @ ' + pkT;
 
       var drainSvg = sessDrains.map(function(dr) {
         var dx = ((dr.t_ms - sStartMs) / sDur * W).toFixed(1);
         var dy2 = (SH - dr.margin_deployed / maxM * SH * 0.9).toFixed(1);
-        var dT = new Date(dr.t_ms).toISOString().slice(11,16) + ' UTC';
+        var dT = _edtHHMM(dr.t_ms) + ' EDT';
         return '<circle cx="' + dx + '" cy="' + dy2 + '" r="3.5" fill="' + C.amber + '"/>'
              + '<text x="' + dx + '" y="' + (parseFloat(dy2)+13) + '" fill="' + C.amber + '" font-size="8" text-anchor="middle" font-weight="700">' + Math.round(dr.margin_deployed).toLocaleString() + ' @ ' + dT + '</text>';
       }).join('');
@@ -3338,7 +3341,7 @@ function renderTlSheet() {
     out += '<div class="tl-session" style="background:' + sess.bg + ';border-color:' + sess.bd + '">'
       + '<div class="tl-session-header">'
       + '<span class="tl-sess-name">' + sess.label + '</span>'
-      + '<span class="tl-sess-meta">' + sess.startH + ':00 &ndash; ' + sess.endH + ':00 UTC &nbsp;&middot;&nbsp; ' + tradeCnt + ' trade' + (tradeCnt !== 1 ? 's' : '') + '</span>'
+      + '<span class="tl-sess-meta">' + _edtH(sess.startH) + ':00 &ndash; ' + _edtH(sess.endH) + ':00 EDT &nbsp;&middot;&nbsp; ' + tradeCnt + ' trade' + (tradeCnt !== 1 ? 's' : '') + '</span>'
       + '</div>'
       + '<div class="tl-track-outer"><div class="tl-track-wrap" style="height:' + trackH + 'px">'
       + gridH + clH
@@ -3741,7 +3744,7 @@ function exportCSV() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = 'aria-log-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.download = 'aria-log-' + _edtToday() + '.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -3751,7 +3754,7 @@ function exportCSV() {
 function _initLogDates() {
   const today = new Date();
   const from  = new Date(today.getTime() - 7 * 24 * 3600 * 1000);
-  const fmt   = d => d.toISOString().slice(0, 10);
+  const fmt   = d => d.toLocaleDateString('en-CA',{timeZone:'America/New_York'});
   const fromEl = document.getElementById('log-from');
   const toEl   = document.getElementById('log-to');
   if (fromEl) fromEl.value = fmt(from);
@@ -3782,7 +3785,7 @@ function _initLogDates() {
   function _initReconDates() {
     const d    = new Date();
     const yest = new Date(d.getTime() - 86400000);
-    const fmt  = x => x.toISOString().slice(0, 10);
+    const fmt  = x => x.toLocaleDateString('en-CA',{timeZone:'America/New_York'});
     const fe = document.getElementById('rc-from');
     const te = document.getElementById('rc-to');
     if (fe) fe.value = fmt(yest);
@@ -3867,7 +3870,7 @@ function _initLogDates() {
       const mfeStr  = mfeV != null ? (mfeV > 0 ? '+' : '') + mfeV.toFixed(2) + 'R' : '--';
       const maeCol  = maeV != null && maeV < 0 ? C.red : '#ffffff';
       const mfeCol  = mfeV != null && mfeV > 0 ? C.green : '#ffffff';
-      const ots     = (t.open_time || '').slice(0, 16).replace('T', ' ') + ' UTC';
+      const ots     = t.open_time ? _edtHHMM(t.open_time) + ' EDT' : '';
       const safeKey = key.replace(/\|/g, '__');
       return '<div class="recon-row-wrap"><div class="recon-row" onclick="rcRowClick(\'' + key + '\')">'
         + vtag + dtag + etag
@@ -5782,7 +5785,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         var blob=new Blob([lines.join('\n')],{type:'text/csv'});
         var url=URL.createObjectURL(blob);
         var a=document.createElement('a');
-        a.href=url;a.download='aria-alerts-'+new Date().toISOString().slice(0,10)+'.csv';
+        a.href=url;a.download='aria-alerts-'+_edtToday()+'.csv';
         a.click();URL.revokeObjectURL(url);
       };
       window._alertsStart=_alertsStart;
