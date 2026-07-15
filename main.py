@@ -1885,6 +1885,33 @@ async def fleet_status(
     halt = rows[0].get("fleet_halt", False) if rows else False
     return JSONResponse({"fleet_halt": halt})
 
+
+
+@app.post("/api/force_close")
+async def api_force_close(request: Request) -> JSONResponse:
+    _require_auth(request)
+    body = await request.json()
+    venue     = (body.get("venue") or "").lower().strip()
+    pair      = (body.get("pair") or "").strip()
+    direction = (body.get("direction") or "").upper().strip()
+
+    if venue not in ("hl", "mexc") or not pair or not direction:
+        raise HTTPException(400, "venue (hl|mexc), pair, direction required")
+
+    table   = "hl_scanner_state" if venue == "hl" else "mexc_scanner_state"
+    payload = {
+        "force_close_pair":      pair,
+        "force_close_direction": direction,
+        "force_close_ts":        datetime.now(timezone.utc).isoformat(),
+    }
+    ok = await _sb_patch(table, "id=eq.1", payload)
+    return JSONResponse({
+        "status":    "queued" if ok else "patch_failed",
+        "venue":     venue,
+        "pair":      pair,
+        "direction": direction,
+    })
+
 if __name__ == "__main__":
   import uvicorn
   uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=False)
