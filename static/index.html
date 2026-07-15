@@ -1132,6 +1132,9 @@ body {
       .bn-item.bn-lifecycle { color: #eab308; text-shadow: 0 0 8px rgba(234,179,8,0.5); }
       .bn-item.bn-lifecycle .bn-icon { filter: drop-shadow(0 0 5px rgba(234,179,8,0.6)); }
       .bn-item.bn-lifecycle:hover { background: rgba(234,179,8,0.12); color: #fff; }
+      .bn-item.bn-signals { color: #22d3ee; text-shadow: 0 0 8px rgba(34,211,238,0.5); }
+      .bn-item.bn-signals .bn-icon { filter: drop-shadow(0 0 5px rgba(34,211,238,0.6)); }
+      .bn-item.bn-signals:hover { background: rgba(34,211,238,0.12); color: #fff; }
       .al-stat { background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:8px 10px; text-align:center; }
       .al-sval { font-family:var(--display); font-size:20px; font-weight:700; line-height:1.1; }
       .al-slbl { font-family:var(--display); font-size:8px; font-weight:700; letter-spacing:.1em; color:#475569; margin-top:3px; }
@@ -1490,6 +1493,7 @@ body {
       <button class="bn-item bn-alerts" id="bn-alerts" onclick="bnSetTab('alerts')"><span class="bn-icon">&#x25C9;</span>ALERTS</button>
       <button class="bn-item bn-perf" id="bn-perf" onclick="bnSetTab('perf')"><span class="bn-icon">&#x25A3;</span>PERF</button>
       <a class="bn-item bn-lifecycle" id="bn-lifecycle" href="/lifecycle"><span class="bn-icon">&#x1F501;</span>LIFECYCLE</a>
+      <a class="bn-item bn-signals" id="bn-signals" href="/signals"><span class="bn-icon">&#x25CE;</span>SIGNALS</a>
           </nav>
 
   <!-- TAB 1: INSIGHTS -->
@@ -5954,4 +5958,5 @@ fleetHaltInit();
 </script>
       </body>
 </html>
+
 
