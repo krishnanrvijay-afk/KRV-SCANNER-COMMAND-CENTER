@@ -1468,121 +1468,17 @@ body {
   </div>
 
 
-  <!-- HOME 3-COL: GATE ACTIVITY + TODAY'S SIGNALS + ACTIVE POSITIONS -->
-  <div class="home-tri-col" id="home-tri-col">
-    <!-- LEFT: Gate Activity -->
-    <div class="tri-col">
-      <div class="tri-col-hdr">
-        <span class="tri-col-icon">&#x26A1;</span>
-        <span class="tri-col-title">GATE ACTIVITY</span>
-        <span class="tri-col-badge" id="htc-gate-badge">&#x2014; blocked</span>
-      </div>
-      <div class="tri-col-body">
-        <div id="htc-gate-bars"></div>
-        <div class="tri-feed-hdr" id="htc-feed-hdr" style="display:none">RECENT BLOCKS</div>
-        <div id="htc-gate-feed"></div>
-      </div>
+
+  <!-- ACTIVE POSITIONS -->
+  <div id="htc-pos-section" style="padding:8px 14px 80px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="font-family:var(--display);font-size:13px;font-weight:700;color:#22c55e;letter-spacing:.1em">&#x25C9; ACTIVE POSITIONS</span>
+      <span class="tri-col-badge badge-green" id="htc-pos-badge" style="margin-left:auto">0 LIVE</span>
     </div>
-    <!-- MIDDLE: Today's Signals -->
-    <div class="tri-col">
-      <div class="tri-col-hdr">
-        <span class="tri-col-icon">&#x25CE;</span>
-        <span class="tri-col-title">TODAY'S SIGNALS</span>
-        <span class="tri-col-badge badge-blue" id="htc-sig-badge">&#x2014; signals</span>
-      </div>
-      <div class="tri-col-body">
-        <div class="tri-sig-stats" id="htc-sig-stats"></div>
-        <div class="tri-sig-tbl-hdr"><div>PAIR</div><div>TRD</div><div>WR%</div><div>NET P&amp;L</div><div>TOP EXIT</div></div>
-        <div id="htc-sig-table"></div>
-      </div>
-    </div>
-    <!-- RIGHT: Active Positions -->
-    <div class="tri-col" style="border-right:none">
-      <div class="tri-col-hdr">
-        <span class="tri-col-icon">&#x25C9;</span>
-        <span class="tri-col-title">ACTIVE POSITIONS</span>
-        <span class="tri-col-badge badge-green" id="htc-pos-badge">0 LIVE</span>
-      </div>
-      <div class="tri-col-body" id="htc-pos-list">
-        <div class="tri-no-pos">NO OPEN POSITIONS</div>
-      </div>
+    <div id="htc-pos-list">
+      <div class="tri-no-pos">NO OPEN POSITIONS</div>
     </div>
   </div>
-
-
-  <!-- PAIR PERFORMANCE GRID -->
-    <div id="panel-pairs">
-    <!-- ── PAIR TRADE PERFORMANCE TABLE ── -->
-    <div id="pt-section">
-      <div class="pt-filters">
-        <div class="pt-pill-group">
-          <button class="pt-pill active" id="pt-v-all"  onclick="ptSetVenue('all')">ALL</button>
-          <button class="pt-pill"        id="pt-v-hl"   onclick="ptSetVenue('hl')">HL</button>
-          <button class="pt-pill"        id="pt-v-mexc" onclick="ptSetVenue('mexc')">MEXC</button>
-        </div>
-        <input type="date" id="pt-date" class="pt-date-input" onchange="ptLoad()">
-        <div class="pt-pill-group">
-          <button class="pt-pill active" id="pt-d-all"   onclick="ptSetDir('all')">ALL</button>
-          <button class="pt-pill"        id="pt-d-long"  onclick="ptSetDir('long')">LONG</button>
-          <button class="pt-pill"        id="pt-d-short" onclick="ptSetDir('short')">SHORT</button>
-        </div>
-        <input type="text" id="pt-pair-f" class="pt-pair-input" placeholder="PAIR" oninput="ptRender()">
-      </div>
-      <div class="pt-cols">
-        <div>
-          <div class="pt-col-label">PAIR PERFORMANCE</div>
-          <div class="pt-table-wrap" id="pt-left-wrap"><div class="pt-msg">LOADING…</div></div>
-        </div>
-        <div>
-          <div class="pt-col-label">VENUE BREAKDOWN</div>
-          <div class="pt-table-wrap" id="pt-right-wrap"><div class="pt-msg">LOADING…</div></div>
-        </div>
-      </div>
-    </div>
-    <!-- /PAIR TRADE PERFORMANCE TABLE -->
-      <div style="padding:8px 16px 4px;display:flex;gap:8px">
-
-        <button id="alert-log-pill" onclick="openAlertOverlay()" style="padding:6px 16px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid #06b6d4;background:#082020;color:#06b6d4;box-shadow:0 0 10px rgba(6,182,212,.3);letter-spacing:.08em">
-          &#x25C9; ALERTS
-          <span id="alert-pill-count" style="background:#06b6d4;color:#000;border-radius:10px;padding:1px 7px;font-size:8px;margin-left:4px;font-weight:800">0</span>
-        </button>
-
-        <button id="jmap-pill" onclick="openJmapOverlay()" style="padding:6px 16px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid #a855f7;background:#1a0f2e;color:#a855f7;box-shadow:0 0 10px rgba(168,85,247,.3);letter-spacing:.08em">
-          &#x2b21; J MAP
-          <span id="jmap-pill-count" style="background:#a855f7;color:#000;border-radius:10px;padding:1px 7px;font-size:8px;margin-left:4px;font-weight:800">31</span>
-        </button>
-
-      </div>
-      <div class="pg-controls">
-        <div class="pg-time-pills">
-          <button class="pg-tp tp-today" id="pg-tab-today" onclick="pgSetTime('today')">TODAY</button>
-          <button class="pg-tp tp-week active" id="pg-tab-week" onclick="pgSetTime('week')">WEEK</button>
-          <button class="pg-tp tp-month" id="pg-tab-month" onclick="pgSetTime('month')">MONTH</button>
-          <button class="pg-tp tp-ytd" id="pg-tab-ytd" onclick="pgSetTime('ytd')">YTD</button>
-          <button class="pg-tp tp-all" id="pg-tab-all" onclick="pgSetTime('all')">ALL</button>
-        </div>
-        <div class="pg-venue-pills">
-          <button class="pg-vp vp-all active" id="pg-vp-all" onclick="pgSetVenue('all')">ALL</button>
-          <button class="pg-vp vp-hl" id="pg-vp-hl" onclick="pgSetVenue('hl')">HL</button>
-          <button class="pg-vp vp-mx" id="pg-vp-mx" onclick="pgSetVenue('mexc')">MX</button>
-        </div>
-      </div>
-      <div class="pg-grid">
-        <div class="pg-grid-header">
-          <div class="pg-gh">PAIR</div>
-          <div class="pg-gh">V</div>
-          <div class="pg-gh">TRD</div>
-          <div class="pg-gh">WR%</div>
-          <div class="pg-gh">KILL%</div>
-          <div class="pg-gh">NET PnL</div>
-          <div class="pg-gh">MFE</div>
-          <div class="pg-gh">TOP EXIT</div>
-        </div>
-        <div id="pg-grid">
-          <div class="pg-loading">LOADING...</div>
-        </div>
-      </div>
-    </div>
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
@@ -2670,7 +2566,7 @@ function htcRenderSignals() {
 
 function htcRefresh() {
   htcRenderPositions();
-  htcRenderSignals();
+  // signals rendered in lifecycle/ops tab
 }
 // -- FLEET LINK render --
 function renderFleetLink() {
@@ -5342,6 +5238,89 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
     <!-- TAB 4: OPERATIONS -->
     <div id="panel-operations" style="display:none">
+
+  <!-- ── SIGNAL ANALYTICS (moved from home page) ── -->
+  <div style="padding:12px 16px 0">
+    <div style="font-family:var(--display);font-size:13px;font-weight:700;color:#f97316;letter-spacing:.12em;margin-bottom:10px">&#x25A3; SIGNAL ANALYTICS</div>
+  </div>
+  <div style="padding:0 16px 16px">
+    <!-- PAIR PERFORMANCE GRID -->
+      <div id="panel-pairs">
+      <!-- ── PAIR TRADE PERFORMANCE TABLE ── -->
+      <div id="pt-section">
+        <div class="pt-filters">
+          <div class="pt-pill-group">
+            <button class="pt-pill active" id="pt-v-all"  onclick="ptSetVenue('all')">ALL</button>
+            <button class="pt-pill"        id="pt-v-hl"   onclick="ptSetVenue('hl')">HL</button>
+            <button class="pt-pill"        id="pt-v-mexc" onclick="ptSetVenue('mexc')">MEXC</button>
+          </div>
+          <input type="date" id="pt-date" class="pt-date-input" onchange="ptLoad()">
+          <div class="pt-pill-group">
+            <button class="pt-pill active" id="pt-d-all"   onclick="ptSetDir('all')">ALL</button>
+            <button class="pt-pill"        id="pt-d-long"  onclick="ptSetDir('long')">LONG</button>
+            <button class="pt-pill"        id="pt-d-short" onclick="ptSetDir('short')">SHORT</button>
+          </div>
+          <input type="text" id="pt-pair-f" class="pt-pair-input" placeholder="PAIR" oninput="ptRender()">
+        </div>
+        <div class="pt-cols">
+          <div>
+            <div class="pt-col-label">PAIR PERFORMANCE</div>
+            <div class="pt-table-wrap" id="pt-left-wrap"><div class="pt-msg">LOADING…</div></div>
+          </div>
+          <div>
+            <div class="pt-col-label">VENUE BREAKDOWN</div>
+            <div class="pt-table-wrap" id="pt-right-wrap"><div class="pt-msg">LOADING…</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- /PAIR TRADE PERFORMANCE TABLE -->
+        <div style="padding:8px 16px 4px;display:flex;gap:8px">
+  
+          <button id="alert-log-pill" onclick="openAlertOverlay()" style="padding:6px 16px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid #06b6d4;background:#082020;color:#06b6d4;box-shadow:0 0 10px rgba(6,182,212,.3);letter-spacing:.08em">
+            &#x25C9; ALERTS
+            <span id="alert-pill-count" style="background:#06b6d4;color:#000;border-radius:10px;padding:1px 7px;font-size:8px;margin-left:4px;font-weight:800">0</span>
+          </button>
+  
+          <button id="jmap-pill" onclick="openJmapOverlay()" style="padding:6px 16px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid #a855f7;background:#1a0f2e;color:#a855f7;box-shadow:0 0 10px rgba(168,85,247,.3);letter-spacing:.08em">
+            &#x2b21; J MAP
+            <span id="jmap-pill-count" style="background:#a855f7;color:#000;border-radius:10px;padding:1px 7px;font-size:8px;margin-left:4px;font-weight:800">31</span>
+          </button>
+  
+        </div>
+        <div class="pg-controls">
+          <div class="pg-time-pills">
+            <button class="pg-tp tp-today" id="pg-tab-today" onclick="pgSetTime('today')">TODAY</button>
+            <button class="pg-tp tp-week active" id="pg-tab-week" onclick="pgSetTime('week')">WEEK</button>
+            <button class="pg-tp tp-month" id="pg-tab-month" onclick="pgSetTime('month')">MONTH</button>
+            <button class="pg-tp tp-ytd" id="pg-tab-ytd" onclick="pgSetTime('ytd')">YTD</button>
+            <button class="pg-tp tp-all" id="pg-tab-all" onclick="pgSetTime('all')">ALL</button>
+          </div>
+          <div class="pg-venue-pills">
+            <button class="pg-vp vp-all active" id="pg-vp-all" onclick="pgSetVenue('all')">ALL</button>
+            <button class="pg-vp vp-hl" id="pg-vp-hl" onclick="pgSetVenue('hl')">HL</button>
+            <button class="pg-vp vp-mx" id="pg-vp-mx" onclick="pgSetVenue('mexc')">MX</button>
+          </div>
+        </div>
+        <div class="pg-grid">
+          <div class="pg-grid-header">
+            <div class="pg-gh">PAIR</div>
+            <div class="pg-gh">V</div>
+            <div class="pg-gh">TRD</div>
+            <div class="pg-gh">WR%</div>
+            <div class="pg-gh">KILL%</div>
+            <div class="pg-gh">NET PnL</div>
+            <div class="pg-gh">MFE</div>
+            <div class="pg-gh">TOP EXIT</div>
+          </div>
+          <div id="pg-grid">
+            <div class="pg-loading">LOADING...</div>
+          </div>
+        </div>
+      </div>
+  
+  </div>
+  <hr style="border:none;border-top:1px solid #1a1a2e;margin:0 16px 4px">
+
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 16px">
         <!-- Exit Breakdown -->
         <section class="ops-section" style="margin:0">
