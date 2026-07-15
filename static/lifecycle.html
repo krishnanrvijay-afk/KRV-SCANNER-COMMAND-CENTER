@@ -3,160 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>LIFECYCLE — KRV FLEET SCORECARD</title>
+<title>LIFECYCLE — KRV FLEET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --hl:      #a855f7;
-  --mexc:    #f97316;
-  --green:   #22c55e;
-  --red:     #ef4444;
-  --amber:   #f59e0b;
-  --cyan:    #06b6d4;
-  --white:   #ffffff;
-  --bg:      #060610;
-  --card:    #0b0b18;
-  --border:  #2a2a4a;
-  --display: 'Bebas Neue', sans-serif;
-  --mono:    'IBM Plex Mono', monospace;
-  --s-scan:  #4466ff;
-  --s-gate:  #f59e0b;
-  --s-sig:   #f97316;
-  --s-alert: #a855f7;
-  --s-open:  #06b6d4;
-  --s-mgmt:  #22c55e;
-  --s-close: #6b7280;
+:root{
+  --hl:#a855f7;--mexc:#f97316;--green:#22c55e;--red:#ef4444;
+  --amber:#f59e0b;--cyan:#06b6d4;--white:#ffffff;
+  --bg:#060610;--card:#0b0b18;--border:#1e1e38;
+  --display:'Bebas Neue',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --s-gate:#f59e0b;--s-open:#06b6d4;--s-mgmt:#22c55e;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{background:var(--bg);color:var(--white);font-family:var(--mono);font-size:13px;font-weight:700;min-height:100vh;display:flex;flex-direction:column;overflow:hidden;height:100vh}
-a{color:inherit;text-decoration:none}
+body{background:var(--bg);color:var(--white);font-family:var(--mono);font-size:12px;font-weight:700;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── TOPBAR ── */
-.topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:#08081a;flex-shrink:0;flex-wrap:wrap}
-.topbar-title{font-family:var(--display);font-size:22px;letter-spacing:.08em;color:var(--white)}
-.topbar-sub{font-size:10px;color:#555577;letter-spacing:.15em;margin-left:2px}
-.back-btn{font-family:var(--display);font-size:14px;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;color:var(--white);background:transparent;cursor:pointer;text-decoration:none;flex-shrink:0}
-.venue-btns{display:flex;gap:5px}
-.vbtn{font-family:var(--display);font-size:13px;letter-spacing:.06em;padding:4px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
-.vbtn.active-all{border-color:var(--white);color:var(--white);background:rgba(255,255,255,.1)}
-.vbtn.active-hl{border-color:var(--hl);color:var(--hl);background:rgba(168,85,247,.12);box-shadow:0 0 12px rgba(168,85,247,.3)}
-.vbtn.active-mexc{border-color:var(--mexc);color:var(--mexc);background:rgba(249,115,22,.12);box-shadow:0 0 12px rgba(249,115,22,.3)}
-.topbar-right{display:flex;gap:8px;align-items:center;margin-left:auto}
-.sess-badge{font-family:var(--display);font-size:13px;padding:4px 10px;border-radius:4px;border:1px solid var(--border);letter-spacing:.08em}
+.topbar{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);background:#07071a;flex-shrink:0;min-height:44px}
+.back-btn{font-family:var(--display);font-size:13px;border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:3px 10px;color:var(--white);background:transparent;cursor:pointer;text-decoration:none;flex-shrink:0}
+.topbar-title{font-family:var(--display);font-size:20px;letter-spacing:.08em;color:var(--white);flex-shrink:0}
+.topbar-sub{font-size:9px;color:#444466;letter-spacing:.15em;flex-shrink:0}
+.venue-btns{display:flex;gap:4px;flex-shrink:0}
+.vbtn{font-family:var(--display);font-size:12px;letter-spacing:.06em;padding:3px 11px;border-radius:16px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s}
+.vbtn.active-all{border-color:var(--white);color:var(--white);background:rgba(255,255,255,.08)}
+.vbtn.active-hl{border-color:var(--hl);color:var(--hl);background:rgba(168,85,247,.1);box-shadow:0 0 10px rgba(168,85,247,.25)}
+.vbtn.active-mexc{border-color:var(--mexc);color:var(--mexc);background:rgba(249,115,22,.1);box-shadow:0 0 10px rgba(249,115,22,.25)}
+
+/* BTC REGIME */
+.btc-regime{display:flex;align-items:center;gap:7px;border:1px solid;border-radius:5px;padding:4px 10px;flex-shrink:0;transition:all .4s;margin-left:4px}
+.btc-regime.bull{border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.06)}
+.btc-regime.bear{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.06)}
+.btc-regime.range{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06)}
+.regime-icon{font-size:14px;flex-shrink:0}
+.regime-label{font-family:var(--display);font-size:16px;letter-spacing:.1em;flex-shrink:0}
+.regime-price{font-size:11px;font-variant-numeric:tabular-nums;flex-shrink:0}
+.regime-chg{font-size:10px;font-variant-numeric:tabular-nums;flex-shrink:0}
+
+.topbar-right{display:flex;gap:7px;align-items:center;margin-left:auto;flex-shrink:0}
+.sess-badge{font-family:var(--display);font-size:12px;padding:3px 9px;border-radius:4px;border:1px solid;letter-spacing:.08em}
 .sess-ASIA{color:var(--amber);border-color:rgba(245,158,11,.4)}
 .sess-EU{color:var(--cyan);border-color:rgba(6,182,212,.4)}
 .sess-US{color:var(--green);border-color:rgba(34,197,94,.4)}
-.clock{font-size:13px;color:#8888bb;font-variant-numeric:tabular-nums;letter-spacing:.05em}
-.pnl-badge{font-family:var(--display);font-size:16px;letter-spacing:.05em}
+.clock{font-size:11px;color:#666688;font-variant-numeric:tabular-nums;letter-spacing:.05em}
+.pnl-badge{font-family:var(--display);font-size:15px;letter-spacing:.05em}
 .pnl-pos{color:var(--green)}
 .pnl-neg{color:var(--red)}
-.stale-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;animation:blink 1.2s infinite}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px var(--green)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
+.stale-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite;flex-shrink:0}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* ── PIPELINE BAR ── */
-.pipeline{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid var(--border);background:#09091c;flex-shrink:0;gap:0}
+.pipeline{display:flex;align-items:center;padding:5px 12px;border-bottom:1px solid var(--border);background:#08081c;flex-shrink:0;gap:0;min-height:36px}
 .pipe-stage{flex:1;display:flex;align-items:center}
-.pipe-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
-.pipe-box{display:flex;align-items:center;gap:5px;border:1px solid;border-radius:5px;padding:4px 8px;justify-content:center;min-width:76px;transition:all .4s;cursor:default}
-.pipe-icon{font-size:13px}
-.pipe-label{font-family:var(--display);font-size:11px;letter-spacing:.08em}
-.pipe-count{font-size:10px;font-weight:700;min-width:14px;text-align:center;font-variant-numeric:tabular-nums}
-.pipe-arrow{width:20px;height:1px;flex-shrink:0;opacity:.35}
-.pipe-box.dim{border-color:#1a1a33 !important;background:transparent !important;color:#333355}
-.pipe-box.lit{box-shadow:0 0 10px}
+.pipe-node{flex:1;display:flex;align-items:center;justify-content:center}
+.pipe-box{display:flex;align-items:center;gap:4px;border:1px solid;border-radius:4px;padding:3px 7px;cursor:default;transition:all .4s}
+.pipe-label{font-family:var(--display);font-size:10px;letter-spacing:.08em}
+.pipe-count{font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;min-width:12px;text-align:center}
+.pipe-arrow{width:16px;height:1px;flex-shrink:0;opacity:.3}
 
 /* ── MAIN GRID ── */
-.main-grid{flex:1;display:grid;grid-template-columns:38% 36% 26%;gap:0;overflow:hidden;min-height:0}
+.main-grid{flex:1;display:grid;grid-template-columns:24% 50% 26%;gap:0;overflow:hidden;min-height:0}
 .panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}
 .panel:last-child{border-right:none}
-.panel-hdr{display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--border);flex-shrink:0;background:#09091c}
-.panel-hdr-icon{font-size:12px}
-.panel-hdr-label{font-family:var(--display);font-size:12px;letter-spacing:.1em;color:#8888cc}
-.panel-hdr-badge{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;margin-left:auto}
-.panel-body{flex:1;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:5px}
-.panel-body::-webkit-scrollbar{width:3px}
-.panel-body::-webkit-scrollbar-thumb{background:#2a2a4a;border-radius:2px}
-.empty-msg{color:#333355;text-align:center;padding:40px 10px;font-size:11px}
+.panel-hdr{display:flex;align-items:center;gap:5px;padding:6px 9px;border-bottom:1px solid var(--border);flex-shrink:0;background:#08081c}
+.panel-hdr-label{font-family:var(--display);font-size:11px;letter-spacing:.1em;color:#6666aa}
+.panel-hdr-badge{font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;margin-left:auto}
+.panel-body{flex:1;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:5px}
+.panel-body::-webkit-scrollbar{width:2px}
+.panel-body::-webkit-scrollbar-thumb{background:#1e1e38;border-radius:2px}
 
-/* ── EVENT CARDS ── */
-.ev-card{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:7px 9px;animation:slideIn .3s ease-out;transition:border-color .3s}
-@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-.ev-card.ev-block{background:#12080e;border-color:#ef444422}
-.ev-card.ev-pass{background:#08120a;border-color:#22c55e22}
-.ev-card.ev-close-win{background:#08120a;border-color:#22c55e44}
-.ev-card.ev-close-loss{background:#120808;border-color:#ef444444}
-.ev-card.ev-open{background:#080c14;border-color:#06b6d422}
-.ev-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-.ev-row:last-child{margin-bottom:0}
-.venue-chip{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid}
-.vc-hl{color:var(--hl);border-color:rgba(168,85,247,.5);background:rgba(168,85,247,.1)}
-.vc-mexc{color:var(--mexc);border-color:rgba(249,115,22,.5);background:rgba(249,115,22,.1)}
-.ev-pair{font-size:12px;color:var(--white)}
-.dir-chip{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;border:1px solid}
-.dc-long{color:var(--green);border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.1)}
-.dc-short{color:var(--red);border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.1)}
-.ev-stage-chip{font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;border:1px solid;margin-left:auto}
-.ev-sess{font-size:9px;color:#444466;flex-shrink:0}
-.ev-time{font-size:8px;color:#333355;flex-shrink:0}
-.ev-sub{font-size:9px;display:flex;align-items:center;gap:6px;color:#666688;flex-wrap:wrap}
-.gate-chip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;border:1px solid}
-.ev-pnl{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
-.ev-r{font-size:9px}
-.ev-exit{font-size:9px;background:rgba(255,255,255,.05);padding:1px 6px;border-radius:3px;color:#aaaacc}
-.ev-dur{font-size:8px;color:#333355;margin-left:auto}
+/* ── GATE ANALYSIS PANEL ── */
+.gate-section-lbl{font-size:7px;letter-spacing:.15em;color:#333355;padding:3px 2px 1px;text-transform:uppercase}
+.gate-bar-row{display:flex;align-items:center;gap:5px;padding:3px 0}
+.gate-bar-name{font-size:9px;color:#8888aa;width:72px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gate-bar-track{flex:1;height:6px;background:#0f0f22;border-radius:3px;overflow:hidden}
+.gate-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.gate-bar-n{font-size:10px;font-variant-numeric:tabular-nums;width:24px;text-align:right;flex-shrink:0}
+.gate-bar-pct{font-size:8px;color:#333355;width:26px;text-align:right;flex-shrink:0}
 
-/* ── ACTIVE TRADE CARDS ── */
-.tr-card{background:var(--card);border-radius:6px;padding:9px 10px;border:1px solid;transition:border-color .5s,box-shadow .5s}
-.tr-card.tr-win{border-color:rgba(34,197,94,.4);box-shadow:0 0 16px rgba(34,197,94,.08)}
-.tr-card.tr-loss{border-color:rgba(239,68,68,.3);box-shadow:0 0 16px rgba(239,68,68,.06)}
+/* Session x Gate matrix */
+.sess-matrix{background:#0a0a1e;border:1px solid var(--border);border-radius:4px;padding:5px 6px;font-size:8px}
+.sess-matrix-hdr{display:grid;grid-template-columns:1fr 30px 30px 30px;gap:2px;margin-bottom:4px;color:#444466;font-size:7px;letter-spacing:.1em}
+.sess-matrix-row{display:grid;grid-template-columns:1fr 30px 30px 30px;gap:2px;padding:2px 0}
+.smr-name{color:#777799;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.smr-n{text-align:center;font-variant-numeric:tabular-nums}
+
+/* Recent blocks compact */
+.rb-row{display:flex;align-items:center;gap:4px;padding:2px 4px;border-radius:3px;font-size:8px;border-bottom:1px solid #0c0c20}
+.rb-row:last-child{border-bottom:none}
+.rb-time{color:#333355;width:30px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.rb-vc{width:28px;flex-shrink:0;text-align:center;font-size:7px;font-weight:700;border-radius:2px;padding:1px 2px}
+.rb-pair{color:#aaaacc;width:38px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+.rb-dir-l{color:var(--green);font-size:7px;width:30px;flex-shrink:0}
+.rb-dir-s{color:var(--red);font-size:7px;width:30px;flex-shrink:0}
+.rb-gate{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}
+
+/* ── ACTIVE TRADES ── */
+.tr-card{background:var(--card);border-radius:5px;padding:8px 9px;border:1px solid;transition:border-color .5s,box-shadow .5s}
+.tr-card.tr-win{border-color:rgba(34,197,94,.35);box-shadow:0 0 12px rgba(34,197,94,.07)}
+.tr-card.tr-loss{border-color:rgba(239,68,68,.3);box-shadow:0 0 12px rgba(239,68,68,.05)}
 .tr-card.tr-flat{border-color:var(--border)}
-.tr-hdr{display:flex;align-items:center;gap:5px;margin-bottom:8px}
-.tr-pair{font-size:14px;color:var(--white)}
-.tr-pnl-big{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:color .4s}
-.tr-r{font-size:11px;margin-top:1px}
-.tr-prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:7px}
-.tr-price-box{background:#0a0a1c;border-radius:4px;padding:4px 6px}
-.tr-price-lbl{font-size:7px;color:#444466;letter-spacing:.1em}
-.tr-price-val{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.tr-watchers{display:flex;gap:5px}
-.watcher{flex:1;border:1px solid;border-radius:4px;padding:4px 6px;transition:all .5s}
-.watcher.armed{border-color:var(--amber);background:rgba(245,158,11,.08);box-shadow:0 0 8px rgba(245,158,11,.15)}
-.watcher.idle{border-color:#1a1a33;background:transparent}
-.watcher-lbl{font-size:7px;letter-spacing:.1em;color:#444466}
+.tr-hdr{display:flex;align-items:center;gap:4px;margin-bottom:6px}
+.tr-pair{font-size:14px;color:var(--white);font-weight:700}
+.tr-pnl-big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;transition:color .3s}
+.tr-r{font-size:10px;margin-top:1px;font-variant-numeric:tabular-nums}
+.tr-prices{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:6px}
+.tr-price-box{background:#080818;border-radius:3px;padding:3px 5px;border:1px solid #14142a}
+.tr-price-lbl{font-size:6px;color:#333355;letter-spacing:.12em}
+.tr-price-val{font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px}
+.tr-watchers{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.watcher{border:1px solid;border-radius:4px;padding:4px 5px;transition:all .4s}
+.watcher.armed{border-color:var(--amber);background:rgba(245,158,11,.07);box-shadow:0 0 7px rgba(245,158,11,.12)}
+.watcher.idle{border-color:#141428;background:transparent}
+.watcher.be-on{border-color:var(--cyan);background:rgba(6,182,212,.06)}
+.watcher-lbl{font-size:7px;letter-spacing:.1em;display:flex;align-items:center;gap:3px}
 .watcher.armed .watcher-lbl{color:var(--amber)}
-.watcher-val{font-size:9px;margin-top:2px;color:#666688}
+.watcher.be-on .watcher-lbl{color:var(--cyan)}
+.watcher.idle .watcher-lbl{color:#333355}
+.watcher-dot{display:inline-block;width:4px;height:4px;border-radius:50%;flex-shrink:0}
+.watcher.armed .watcher-dot{background:var(--amber);box-shadow:0 0 4px var(--amber)}
+.watcher.be-on .watcher-dot{background:var(--cyan);box-shadow:0 0 4px var(--cyan)}
+.watcher.idle .watcher-dot{background:#1e1e38}
+.watcher-val{font-size:9px;margin-top:2px;font-variant-numeric:tabular-nums}
 .watcher.armed .watcher-val{color:var(--amber)}
-.watcher-dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:3px;flex-shrink:0}
-.watcher.armed .watcher-dot{background:var(--amber);box-shadow:0 0 5px var(--amber)}
-.watcher.idle .watcher-dot{background:#2a2a4a}
-.tr-elapsed{font-size:8px;color:#444466;font-variant-numeric:tabular-nums}
+.watcher.be-on .watcher-val{color:var(--cyan)}
+.watcher.idle .watcher-val{color:#2a2a44}
+.tr-footer{display:flex;align-items:center;justify-content:space-between;margin-top:5px;padding-top:4px;border-top:1px solid #0f0f22}
+.tr-elapsed{font-size:8px;color:#333355;font-variant-numeric:tabular-nums}
+.venue-chip{font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;border:1px solid;flex-shrink:0}
+.vc-hl{color:var(--hl);border-color:rgba(168,85,247,.4);background:rgba(168,85,247,.08)}
+.vc-mexc{color:var(--mexc);border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.08)}
+.dir-chip{font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;border:1px solid;flex-shrink:0}
+.dc-long{color:var(--green);border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.08)}
+.dc-short{color:var(--red);border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08)}
+.ev-sess{font-size:8px;flex-shrink:0}
+.sess-ASIA-txt{color:var(--amber)}
+.sess-EU-txt{color:var(--cyan)}
+.sess-US-txt{color:var(--green)}
+.empty-msg{color:#1e1e38;text-align:center;padding:30px 10px;font-size:10px}
+.tr-divider{border:none;border-top:1px solid #0f0f22;margin:2px 0}
 
 /* ── STATS PANEL ── */
-.stat-block{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-bottom:0}
-.stat-lbl{font-size:8px;color:#444466;letter-spacing:.12em;margin-bottom:3px}
-.stat-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
-.stat-sub{font-size:9px;color:#444466;margin-top:2px}
-.divider{height:1px;background:var(--border);margin:6px 0}
-.gate-row{display:flex;align-items:center;gap:6px;padding:4px 0}
-.gate-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0;border:1px solid}
-.gate-name{font-size:9px;color:#666688;flex:1;letter-spacing:.05em}
-.gate-n{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.venue-live{display:flex;gap:6px}
-.vlive{flex:1;border:1px solid;border-radius:5px;padding:7px;text-align:center}
-.vlive-dot{width:7px;height:7px;border-radius:50%;margin:0 auto 4px;box-shadow:0 0 8px}
-.vlive-name{font-size:13px;font-weight:700;font-family:var(--display);letter-spacing:.06em}
-.vlive-status{font-size:8px;opacity:.7;letter-spacing:.1em}
-.vlive-hl{border-color:rgba(168,85,247,.4);background:rgba(168,85,247,.05)}
-.vlive-mexc{border-color:rgba(249,115,22,.4);background:rgba(249,115,22,.05)}
+.stat-block{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:7px 9px}
+.stat-lbl{font-size:7px;color:#333355;letter-spacing:.14em;margin-bottom:2px}
+.stat-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.stat-sub{font-size:8px;color:#444466;margin-top:2px;font-variant-numeric:tabular-nums}
+.divider{height:1px;background:var(--border);margin:4px 0}
+.gate-row{display:flex;align-items:center;gap:5px;padding:3px 0}
+.gate-sq{width:6px;height:6px;border-radius:1px;flex-shrink:0;border:1px solid}
+.gate-name{font-size:8px;color:#555577;flex:1;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gate-n{font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;width:20px;text-align:right;flex-shrink:0}
+.gate-bar-sm{flex:1;height:4px;background:#0a0a1e;border-radius:2px;overflow:hidden;margin:0 3px}
+.gate-bar-sm-fill{height:100%;border-radius:2px;transition:width .5s}
+.venue-live{display:flex;gap:5px}
+.vlive{flex:1;border:1px solid;border-radius:4px;padding:5px;text-align:center}
+.vlive-dot{width:6px;height:6px;border-radius:50%;margin:0 auto 3px}
+.vlive-name{font-size:12px;font-weight:700;font-family:var(--display);letter-spacing:.06em}
+.vlive-status{font-size:7px;opacity:.6;letter-spacing:.12em;margin-top:1px}
+.vlive-hl{border-color:rgba(168,85,247,.35);background:rgba(168,85,247,.04)}
+.vlive-mexc{border-color:rgba(249,115,22,.35);background:rgba(249,115,22,.04)}
 
-/* ── TICKER ── */
-.ticker{border-top:1px solid var(--border);background:#08081a;height:32px;display:flex;align-items:center;gap:8px;padding:0 12px;flex-shrink:0;overflow:hidden}
-.ticker-label{font-size:8px;color:#333355;letter-spacing:.15em;flex-shrink:0}
-.ticker-track{flex:1;overflow:hidden;display:flex;gap:6px;align-items:center}
-.tick-chip{display:flex;align-items:center;gap:4px;border:1px solid;border-radius:3px;padding:2px 7px;flex-shrink:0;font-size:9px}
+/* open trades count badge for center panel */
+.trade-split{display:flex;gap:4px;align-items:center}
+.venue-tag{font-size:8px;font-weight:700;padding:1px 5px;border-radius:10px}
+.vtag-hl{color:var(--hl);background:rgba(168,85,247,.12)}
+.vtag-mexc{color:var(--mexc);background:rgba(249,115,22,.12)}
 </style>
 </head>
 <body>
@@ -166,16 +177,23 @@ a{color:inherit;text-decoration:none}
   <a href="/" class="back-btn">← FLEET</a>
   <span class="topbar-title">LIFECYCLE</span>
   <span class="topbar-sub">MONITOR</span>
-
   <div class="venue-btns">
     <button class="vbtn active-all" onclick="setVenue('all',this)">ALL</button>
     <button class="vbtn" onclick="setVenue('hl',this)">HL</button>
     <button class="vbtn" onclick="setVenue('mexc',this)">MEXC</button>
   </div>
 
+  <!-- BTC REGIME -->
+  <div class="btc-regime range" id="btc-regime">
+    <span class="regime-icon" id="btc-icon">◈</span>
+    <span class="regime-label" id="btc-label" style="color:var(--amber)">BTC</span>
+    <span class="regime-price" id="btc-price" style="color:#888899">—</span>
+    <span class="regime-chg" id="btc-chg" style="color:#555577">—</span>
+  </div>
+
   <div class="topbar-right">
     <div class="sess-badge" id="sess-badge">EU</div>
-    <div style="display:flex;align-items:center;gap:5px">
+    <div style="display:flex;align-items:center;gap:4px">
       <div class="live-dot" id="live-dot"></div>
       <span class="pnl-badge pnl-pos" id="pnl-badge">+$0.00</span>
     </div>
@@ -184,31 +202,33 @@ a{color:inherit;text-decoration:none}
 </div>
 
 <!-- PIPELINE BAR -->
-<div class="pipeline" id="pipeline">
-  <!-- rendered by JS -->
-</div>
+<div class="pipeline" id="pipeline"></div>
 
 <!-- MAIN GRID -->
 <div class="main-grid">
 
-  <!-- LEFT: Event Stream -->
+  <!-- LEFT: Gate Filter Analysis -->
   <div class="panel">
     <div class="panel-hdr">
-      <span class="panel-hdr-icon" style="color:var(--s-sig)">◎</span>
-      <span class="panel-hdr-label">SIGNAL PIPELINE</span>
-      <span class="panel-hdr-badge" id="ev-count" style="background:rgba(100,100,200,.1);color:#8888cc;border:1px solid #2a2a4a">0 events</span>
+      <span style="font-size:10px;color:var(--s-gate)">⚡</span>
+      <span class="panel-hdr-label">GATE FILTER</span>
+      <span class="panel-hdr-badge" id="gate-total-badge" style="background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.3)">0 blocked</span>
     </div>
-    <div class="panel-body" id="ev-stream">
-      <div class="empty-msg">Waiting for signals…</div>
+    <div class="panel-body" id="gate-panel">
+      <div class="empty-msg">Waiting for gate data…</div>
     </div>
   </div>
 
   <!-- CENTER: Active Trades -->
   <div class="panel">
     <div class="panel-hdr">
-      <span class="panel-hdr-icon" style="color:var(--s-mgmt)">◉</span>
+      <span style="font-size:10px;color:var(--s-mgmt)">◉</span>
       <span class="panel-hdr-label">ACTIVE TRADES</span>
-      <span class="panel-hdr-badge" id="trade-count" style="background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.3)">0 LIVE</span>
+      <div class="trade-split" style="margin-left:auto">
+        <span id="hl-trade-tag" class="venue-tag vtag-hl" style="display:none">HL 0</span>
+        <span id="mx-trade-tag" class="venue-tag vtag-mexc" style="display:none">MEXC 0</span>
+        <span class="panel-hdr-badge" id="trade-count" style="background:rgba(34,197,94,.08);color:var(--green);border:1px solid rgba(34,197,94,.25)">0 LIVE</span>
+      </div>
     </div>
     <div class="panel-body" id="trade-stream">
       <div class="empty-msg">No open positions</div>
@@ -218,7 +238,7 @@ a{color:inherit;text-decoration:none}
   <!-- RIGHT: Stats -->
   <div class="panel">
     <div class="panel-hdr">
-      <span class="panel-hdr-icon" style="color:#8888cc">▦</span>
+      <span style="font-size:10px;color:#6666aa">▦</span>
       <span class="panel-hdr-label">SESSION STATS</span>
     </div>
     <div class="panel-body" id="stats-panel">
@@ -232,42 +252,18 @@ a{color:inherit;text-decoration:none}
         <div class="stat-sub" id="s-wrsub">0W / 0L of 0</div>
       </div>
       <div class="divider"></div>
-      <div class="stat-lbl" style="padding:0 2px;letter-spacing:.12em;font-size:8px;color:#444466">GATE BLOCKS TODAY</div>
-      <div class="gate-row">
-        <div class="gate-sq" style="background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4)"></div>
-        <div class="gate-name">SESSION_BLOCK</div>
-        <div class="gate-n" style="color:var(--red)" id="g-session">0</div>
-      </div>
-      <div class="gate-row">
-        <div class="gate-sq" style="background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.4)"></div>
-        <div class="gate-name">J1H_FLOOR / CEILING</div>
-        <div class="gate-n" style="color:var(--mexc)" id="g-j1h">0</div>
-      </div>
-      <div class="gate-row">
-        <div class="gate-sq" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4)"></div>
-        <div class="gate-name">STOCH / J15M</div>
-        <div class="gate-n" style="color:var(--amber)" id="g-stoch">0</div>
-      </div>
-      <div class="gate-row">
-        <div class="gate-sq" style="background:rgba(107,114,128,.15);border-color:rgba(107,114,128,.4)"></div>
-        <div class="gate-name">COOLDOWN</div>
-        <div class="gate-n" style="color:#6b7280" id="g-cooldown">0</div>
-      </div>
-      <div class="gate-row">
-        <div class="gate-sq" style="background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.4)"></div>
-        <div class="gate-name">ADX / OTHER</div>
-        <div class="gate-n" style="color:#818cf8" id="g-other">0</div>
-      </div>
+      <div class="stat-lbl" style="padding:0 2px;font-size:7px;color:#333355;letter-spacing:.12em">GATE BLOCKS TODAY</div>
+      <div id="stats-gates"></div>
       <div class="divider"></div>
-      <div class="stat-lbl" style="padding:0 2px;letter-spacing:.12em;font-size:8px;color:#444466">VENUES</div>
+      <div class="stat-lbl" style="padding:0 2px;font-size:7px;color:#333355;letter-spacing:.12em">VENUES</div>
       <div class="venue-live">
         <div class="vlive vlive-hl">
-          <div class="vlive-dot" style="background:var(--hl);box-shadow:0 0 8px var(--hl)"></div>
+          <div class="vlive-dot" style="background:var(--hl);box-shadow:0 0 7px var(--hl)"></div>
           <div class="vlive-name" style="color:var(--hl)">HL</div>
           <div class="vlive-status">LIVE</div>
         </div>
         <div class="vlive vlive-mexc">
-          <div class="vlive-dot" style="background:var(--mexc);box-shadow:0 0 8px var(--mexc)"></div>
+          <div class="vlive-dot" style="background:var(--mexc);box-shadow:0 0 7px var(--mexc)"></div>
           <div class="vlive-name" style="color:var(--mexc)">MEXC</div>
           <div class="vlive-status">LIVE</div>
         </div>
@@ -277,560 +273,462 @@ a{color:inherit;text-decoration:none}
 
 </div>
 
-<!-- TICKER -->
-<div class="ticker">
-  <span class="ticker-label">EVENTS</span>
-  <div class="ticker-track" id="ticker-track">
-    <span style="color:#2a2a4a;font-size:9px">Waiting…</span>
-  </div>
-</div>
-
 <script>
 'use strict';
 
-// ── State ──────────────────────────────────────────────
-let venue   = 'all';
+// ── State ────────────────────────────────────────────────
+let venue       = 'all';
 let _lastPollOk = true;
 let _todayPnl   = 0;
 let _wins = 0, _losses = 0;
-let _gCounts    = {session:0, j1h:0, stoch:0, cooldown:0, other:0};
-let _tickerItems = [];
-let _openTrades  = [];
-let _streamItems = []; // [{id, ts, ...}]
-let _seenIds     = new Set();
-let _tickInterval = null;
+let _openTrades = [];
+let _gateRows   = [];   // raw gate_activity rows
+let _streamItems= [];
+let _seenIds    = new Set();
 
-// ── Helpers ────────────────────────────────────────────
-function fmt2(n){ return String(Math.round(n)).padStart(2,'0'); }
-function fmtTime(iso){
-  const d = new Date(iso);
-  return `${fmt2(d.getHours())}:${fmt2(d.getMinutes())}`;
+// Gate category definitions
+const GATE_CATS = [
+  { key:'ma_stack',  label:'MA_STACK',  test: t => t.includes('MA_STACK'),          color:'#a855f7' },
+  { key:'j1h',       label:'J1H / J3H', test: t => t.includes('J1H') || t.includes('J3H') || (t.includes('1H') && !t.includes('J15')), color:'#f97316' },
+  { key:'j15m',      label:'J15M / RSI',test: t => t.includes('J15') || t.includes('RSI') || t.includes('STOCH'),  color:'#f59e0b' },
+  { key:'cooldown',  label:'COOLDOWN',  test: t => t.includes('COOLDOWN') || t.includes('COOL') || t.includes('KILL'), color:'#6b7280' },
+  { key:'session',   label:'SESSION',   test: t => t.includes('SESSION') || t.includes('HALT'), color:'#ef4444' },
+  { key:'other',     label:'OTHER',     test: () => true,                             color:'#818cf8' },
+];
+
+function catOf(gt){
+  const t = (gt||'').toUpperCase();
+  for(const c of GATE_CATS) if(c.test(t)) return c.key;
+  return 'other';
 }
-function fmtDur(s){
-  s = Math.round(s);
-  if(s < 60) return `${s}s`;
-  return `${Math.floor(s/60)}m ${s%60}s`;
-}
-function fmtPnl(v){
-  const s = v >= 0 ? '+' : '';
-  return `${s}$${Math.abs(v).toFixed(2)}`;
-}
-function pnlColor(v){ return v >= 0 ? 'var(--green)' : 'var(--red)'; }
-function venueChip(v){
-  const cls = v === 'hl' ? 'vc-hl' : 'vc-mexc';
-  return `<span class="venue-chip ${cls}">${v.toUpperCase()}</span>`;
-}
-function dirChip(d){
-  const cls = d === 'LONG' ? 'dc-long' : 'dc-short';
-  return `<span class="dir-chip ${cls}">${d}</span>`;
-}
-function stageChip(label, color){
-  return `<span class="ev-stage-chip" style="color:${color};border-color:${color}44;background:${color}11">${label}</span>`;
-}
-function gateChipEl(label, color){
-  return `<span class="gate-chip" style="color:${color};border-color:${color}44;background:${color}11">✗ ${label}</span>`;
-}
-function getSession(){
-  const h = new Date().getUTCHours();
-  if(h >= 0  && h < 8)  return 'ASIA';
-  if(h >= 8  && h < 16) return 'EU';
-  return 'US';
-}
-function sessColor(s){
-  if(s==='ASIA') return 'var(--amber)';
-  if(s==='EU')   return 'var(--cyan)';
-  return 'var(--green)';
-}
-function gateColor(gt){
-  if(!gt) return '#6b7280';
-  const t = gt.toUpperCase();
-  if(t.includes('SESSION')) return 'var(--red)';
-  if(t.includes('J1H') || t.includes('1H')) return 'var(--mexc)';
-  if(t.includes('STOCH') || t.includes('J15') || t.includes('RSI')) return 'var(--amber)';
-  if(t.includes('COOLDOWN') || t.includes('COOL')) return '#6b7280';
-  if(t.includes('ADX')) return '#818cf8';
-  return '#8888aa';
-}
-function elapsedStr(openedAt){
-  const s = Math.round((Date.now()/1000) - openedAt);
-  return fmtDur(s);
-}
-function priceFmt(pair, p){
+
+// ── Helpers ──────────────────────────────────────────────
+const fmt2 = n => String(Math.round(n)).padStart(2,'0');
+function fmtTime(iso){ const d=new Date(iso); return `${fmt2(d.getHours())}:${fmt2(d.getMinutes())}`; }
+function fmtDur(s){ s=Math.round(s); return s<60?`${s}s`:`${Math.floor(s/60)}m${s%60<10?'0':''}${s%60}s`; }
+function fmtPnl(v){ return `${v>=0?'+':''}$${Math.abs(v).toFixed(2)}`; }
+function pnlColor(v){ return v>0?'var(--green)':v<0?'var(--red)':'#666688'; }
+function getSession(){ const h=new Date().getUTCHours(); return h<8?'ASIA':h<16?'EU':'US'; }
+function priceFmt(pair,p){
   if(!p) return '—';
   if((pair||'').includes('BTC')) return p.toFixed(0);
-  if(p > 1000) return p.toFixed(1);
-  if(p > 10)   return p.toFixed(2);
+  if(p>1000) return p.toFixed(1);
+  if(p>10)   return p.toFixed(2);
   return p.toFixed(4);
 }
+function sessColorCls(s){ return s==='ASIA'?'sess-ASIA-txt':s==='EU'?'sess-EU-txt':'sess-US-txt'; }
+function elapsedStr(oa){ return fmtDur(Math.max(0,Math.round(Date.now()/1000 - oa))); }
 
-// ── Venue filter ───────────────────────────────────────
+// ── Venue filter ─────────────────────────────────────────
 function setVenue(v, btn){
   venue = v;
-  document.querySelectorAll('.vbtn').forEach(b => {
-    b.className = 'vbtn';
-    if(b === btn){
-      if(v==='all')  b.className = 'vbtn active-all';
-      else if(v==='hl')   b.className = 'vbtn active-hl';
-      else if(v==='mexc') b.className = 'vbtn active-mexc';
-    }
-  });
+  document.querySelectorAll('.vbtn').forEach(b => b.className='vbtn');
+  btn.className = v==='all'?'vbtn active-all':v==='hl'?'vbtn active-hl':'vbtn active-mexc';
   render();
 }
 
-// ── Clock ──────────────────────────────────────────────
+// ── Clock ────────────────────────────────────────────────
 function tickClock(){
   const now = new Date();
   document.getElementById('clock').textContent =
     `${fmt2(now.getHours())}:${fmt2(now.getMinutes())}:${fmt2(now.getSeconds())}`;
   const sess = getSession();
-  const sb = document.getElementById('sess-badge');
+  const sb   = document.getElementById('sess-badge');
   sb.textContent = sess;
-  sb.className = `sess-badge sess-${sess}`;
-
-  // Update elapsed on active trade cards
+  sb.className   = `sess-badge sess-${sess}`;
   document.querySelectorAll('[data-opened-at]').forEach(el => {
-    const oa = parseFloat(el.dataset.openedAt);
-    el.textContent = elapsedStr(oa);
+    el.textContent = elapsedStr(parseFloat(el.dataset.openedAt));
   });
 }
 setInterval(tickClock, 1000);
 tickClock();
 
-// ── Pipeline bar ───────────────────────────────────────
+// ── BTC Regime ───────────────────────────────────────────
+let _btcChg = 0;
+async function fetchBtc(){
+  try{
+    const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT',{signal:AbortSignal.timeout(5000)});
+    const d = await r.json();
+    const price = parseFloat(d.lastPrice);
+    const chg   = parseFloat(d.priceChangePercent);
+    _btcChg = chg;
+    const regime = chg > 1.5 ? 'BULL' : chg < -1.5 ? 'BEAR' : 'RANGE';
+    const color  = regime==='BULL'?'var(--green)':regime==='BEAR'?'var(--red)':'var(--amber)';
+    const icon   = regime==='BULL'?'▲':regime==='BEAR'?'▼':'◈';
+    const cls    = regime==='BULL'?'bull':regime==='BEAR'?'bear':'range';
+    const el     = document.getElementById('btc-regime');
+    el.className = `btc-regime ${cls}`;
+    document.getElementById('btc-icon').textContent  = icon;
+    document.getElementById('btc-label').textContent = regime;
+    document.getElementById('btc-label').style.color  = color;
+    document.getElementById('btc-price').textContent  = `$${price.toLocaleString('en-US',{maximumFractionDigits:0})}`;
+    document.getElementById('btc-price').style.color  = color;
+    document.getElementById('btc-chg').textContent    = `${chg>=0?'+':''}${chg.toFixed(2)}%`;
+    document.getElementById('btc-chg').style.color    = color;
+  }catch(e){ /* silent — binance may block */ }
+}
+fetchBtc();
+setInterval(fetchBtc, 30000);
+
+// ── Pipeline bar ─────────────────────────────────────────
 const STAGES = [
-  { id:'SCAN',   label:'SCAN',   icon:'⟳', color:'var(--s-scan)' },
-  { id:'GATE',   label:'GATE',   icon:'⚡', color:'var(--s-gate)' },
-  { id:'SIGNAL', label:'SIGNAL', icon:'◎', color:'var(--s-sig)'  },
-  { id:'ALERT',  label:'ALERT',  icon:'◈', color:'var(--s-alert)'},
-  { id:'OPEN',   label:'OPEN',   icon:'▲', color:'var(--s-open)' },
-  { id:'MANAGE', label:'MANAGE', icon:'◉', color:'var(--s-mgmt)' },
-  { id:'CLOSE',  label:'CLOSE',  icon:'✓', color:'var(--s-close)'},
+  {id:'SCAN', label:'SCAN', icon:'⟳', color:'#4466ff'},
+  {id:'GATE', label:'GATE', icon:'⚡', color:'#f59e0b'},
+  {id:'SIGNAL',label:'SIG', icon:'◎', color:'#f97316'},
+  {id:'ALERT',label:'ALERT',icon:'◈', color:'#a855f7'},
+  {id:'OPEN', label:'OPEN', icon:'▲', color:'#06b6d4'},
+  {id:'MANAGE',label:'MGT',icon:'◉', color:'#22c55e'},
+  {id:'CLOSE',label:'CLOSE',icon:'✓', color:'#6b7280'},
 ];
 
 function renderPipeline(counts){
-  const pl = document.getElementById('pipeline');
-  pl.innerHTML = STAGES.map((s, i) => {
-    const n = counts[s.id] || 0;
-    const lit = n > 0;
-    const bg  = lit ? `${s.color}18` : 'transparent';
-    const bc  = lit ? s.color : '#1a1a33';
-    const shadow = lit ? `box-shadow:0 0 8px ${s.color}44` : '';
-    const arrow = i < STAGES.length-1
-      ? `<div class="pipe-arrow" style="background:linear-gradient(90deg,${s.color},${STAGES[i+1].color});"></div>`
-      : '';
-    return `
-      <div class="pipe-stage">
-        <div class="pipe-node">
-          <div class="pipe-box" style="border-color:${bc};background:${bg};color:${lit?s.color:'#333355'};${shadow}">
-            <span class="pipe-icon">${s.icon}</span>
-            <div>
-              <div class="pipe-label" style="color:${lit?s.color:'#333355'}">${s.label}</div>
-              <div class="pipe-count" style="color:${lit?s.color:'#2a2a44'}">${lit?n:'—'}</div>
-            </div>
-          </div>
-        </div>
-        ${arrow}
-      </div>`;
+  document.getElementById('pipeline').innerHTML = STAGES.map((s,i) => {
+    const n = counts[s.id]||0, lit = n>0;
+    const bc = lit?s.color:'#141428';
+    const bg = lit?`${s.color}14`:'transparent';
+    const arrow = i<STAGES.length-1
+      ? `<div class="pipe-arrow" style="background:linear-gradient(90deg,${s.color},${STAGES[i+1].color})"></div>`:'';
+    return `<div class="pipe-stage"><div class="pipe-node">
+      <div class="pipe-box" style="border-color:${bc};background:${bg};color:${lit?s.color:'#222244'}">
+        <span style="font-size:10px">${s.icon}</span>
+        <div><div class="pipe-label" style="color:${lit?s.color:'#222244'}">${s.label}</div>
+        <div class="pipe-count" style="color:${lit?s.color:'#1a1a33'}">${lit?n:'—'}</div></div>
+      </div></div>${arrow}</div>`;
   }).join('');
 }
 
-// ── Event Stream rendering ─────────────────────────────
-function evCardHtml(item){
-  const vc = venueChip(item.venue);
-  const dc = dirChip(item.direction);
-  const time = item.ts ? fmtTime(item.ts) : '';
+// ── Gate Analysis Panel ──────────────────────────────────
+function renderGatePanel(rows){
+  const filtered = rows.filter(r => venue==='all' || (r.venue||'').toLowerCase()===venue);
+  const total    = filtered.length;
 
-  if(item.type === 'gate_block'){
-    const gc = gateColor(item.gate_type);
-    return `<div class="ev-card ev-block">
-      <div class="ev-row">
-        ${vc}
-        <span class="ev-pair">${item.pair}</span>
-        ${dc}
-        <span class="ev-sess" style="color:${sessColor(item.session||'')}"> ${item.session||''}</span>
-        ${stageChip('⚡ GATE', 'var(--s-gate)')}
-      </div>
-      <div class="ev-sub">
-        ${gateChipEl(item.gate_type||'GATE_FAIL', gc)}
-        <span style="color:#555577">${item.reason||''}</span>
-        <span class="ev-time" style="margin-left:auto">${time}</span>
-      </div>
+  document.getElementById('gate-total-badge').textContent = `${total} blocked`;
+
+  // Count by category
+  const catCounts = {};
+  GATE_CATS.forEach(c => catCounts[c.key] = 0);
+  const sessCounts = {}; // key: {ASIA:0,EU:0,US:0}
+  GATE_CATS.forEach(c => sessCounts[c.key] = {ASIA:0,EU:0,US:0});
+  // pair counts
+  const pairCounts = {};
+  // individual gate_type counts
+  const typeCounts = {};
+
+  filtered.forEach(r => {
+    const cat  = catOf(r.gate_type);
+    const sess = (r.session||'').toUpperCase();
+    catCounts[cat]++;
+    if(sess && sessCounts[cat]) sessCounts[cat][sess] = (sessCounts[cat][sess]||0)+1;
+    const pair = (r.pair||'').replace('_USDT','');
+    pairCounts[pair] = (pairCounts[pair]||0)+1;
+    typeCounts[r.gate_type] = (typeCounts[r.gate_type]||0)+1;
+  });
+
+  const maxCat = Math.max(1, ...Object.values(catCounts));
+
+  // Top gate types
+  const topTypes = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxType  = Math.max(1, topTypes[0]?.[1]||1);
+
+  // Top pairs
+  const topPairs = Object.entries(pairCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  // Recent 14 blocks
+  const recent = [...filtered].sort((a,b)=>(b.fired_at||'')>(a.fired_at||'')?1:-1).slice(0,14);
+
+  document.getElementById('gate-panel').innerHTML = total === 0
+    ? '<div class="empty-msg">No gate data yet…</div>'
+    : `
+  <div class="gate-section-lbl">BY CATEGORY</div>
+  ${GATE_CATS.map(c => {
+    const n = catCounts[c.key]||0;
+    const pct = total>0?Math.round(n/total*100):0;
+    return `<div class="gate-bar-row">
+      <div class="gate-bar-name" style="color:${c.color}">${c.label}</div>
+      <div class="gate-bar-track"><div class="gate-bar-fill" style="width:${Math.round(n/maxCat*100)}%;background:${c.color}88"></div></div>
+      <div class="gate-bar-n" style="color:${n>0?c.color:'#222244'}">${n}</div>
+      <div class="gate-bar-pct">${n>0?pct+'%':''}</div>
     </div>`;
-  }
+  }).join('')}
 
-  if(item.type === 'signal_pass'){
-    return `<div class="ev-card ev-pass">
-      <div class="ev-row">
-        ${vc}
-        <span class="ev-pair">${item.pair}</span>
-        ${dc}
-        <span class="ev-sess" style="color:${sessColor(item.session||'')}"> ${item.session||''}</span>
-        ${stageChip('◈ ALERT', 'var(--s-alert)')}
-      </div>
-      <div class="ev-sub">
-        <span style="color:rgba(34,197,94,.6)">✓ Gates passed</span>
-        ${item.j15m != null ? `<span>j15m=${item.j15m.toFixed(1)}</span>` : ''}
-        ${item.j1h  != null ? `<span>j1h=${item.j1h.toFixed(1)}</span>` : ''}
-        <span class="ev-time" style="margin-left:auto">${time}</span>
-      </div>
+  <div class="gate-section-lbl" style="margin-top:4px">TOP GATE TYPES</div>
+  ${topTypes.map(([gt,n])=>{
+    const c = GATE_CATS.find(c=>c.test((gt||'').toUpperCase()))||GATE_CATS[GATE_CATS.length-1];
+    return `<div class="gate-bar-row">
+      <div class="gate-bar-name" style="color:${c.color};font-size:8px">${gt.replace('_BLOCK','').replace('_FAIL','')}</div>
+      <div class="gate-bar-track"><div class="gate-bar-fill" style="width:${Math.round(n/maxType*100)}%;background:${c.color}66"></div></div>
+      <div class="gate-bar-n" style="color:${c.color}">${n}</div>
+      <div class="gate-bar-pct"></div>
     </div>`;
-  }
+  }).join('')}
 
-  if(item.type === 'trade_close'){
-    const win = (item.pnl||0) >= 0;
-    return `<div class="ev-card ${win?'ev-close-win':'ev-close-loss'}">
-      <div class="ev-row">
-        ${vc}
-        <span class="ev-pair">${item.pair}</span>
-        ${dc}
-        <span class="ev-sess" style="color:${sessColor(item.session||'')}"> ${item.session||''}</span>
-        ${stageChip('✓ CLOSE', win?'var(--s-mgmt)':'var(--red)')}
-      </div>
-      <div class="ev-sub">
-        <span class="ev-pnl" style="color:${pnlColor(item.pnl||0)}">${fmtPnl(item.pnl||0)}</span>
-        ${item.r != null ? `<span class="ev-r" style="color:${pnlColor(item.r)}">${item.r>=0?'+':''}${item.r.toFixed(2)}R</span>` : ''}
-        ${item.exit_reason ? `<span class="ev-exit">${item.exit_reason}</span>` : ''}
-        ${item.duration ? `<span class="ev-dur">${fmtDur(item.duration)}</span>` : ''}
-      </div>
+  <div class="sess-matrix" style="margin-top:4px">
+    <div class="sess-matrix-hdr"><span>GATE → SESS</span><span style="color:var(--amber)">ASIA</span><span style="color:var(--cyan)">EU</span><span style="color:var(--green)">US</span></div>
+    ${GATE_CATS.filter(c=>catCounts[c.key]>0).map(c=>`
+    <div class="sess-matrix-row">
+      <div class="smr-name" style="color:${c.color};font-size:8px">${c.label}</div>
+      <div class="smr-n" style="color:${sessCounts[c.key]?.ASIA>0?'var(--amber)':'#222244'}">${sessCounts[c.key]?.ASIA||0}</div>
+      <div class="smr-n" style="color:${sessCounts[c.key]?.EU>0?'var(--cyan)':'#222244'}">${sessCounts[c.key]?.EU||0}</div>
+      <div class="smr-n" style="color:${sessCounts[c.key]?.US>0?'var(--green)':'#222244'}">${sessCounts[c.key]?.US||0}</div>
+    </div>`).join('')}
+  </div>
+
+  ${topPairs.length>0?`
+  <div class="gate-section-lbl" style="margin-top:4px">TOP BLOCKED PAIRS</div>
+  ${topPairs.map(([pair,n])=>`<div class="gate-bar-row">
+    <div class="gate-bar-name">${pair}</div>
+    <div class="gate-bar-track"><div class="gate-bar-fill" style="width:${Math.round(n/(topPairs[0][1])*100)}%;background:#818cf888"></div></div>
+    <div class="gate-bar-n" style="color:#818cf8">${n}</div>
+    <div class="gate-bar-pct"></div>
+  </div>`).join('')}`:''}
+
+  <div class="gate-section-lbl" style="margin-top:4px">RECENT BLOCKS</div>
+  ${recent.map(r=>{
+    const pair = (r.pair||'').replace('_USDT','');
+    const vc   = r.venue==='hl'?'color:var(--hl)':'color:var(--mexc)';
+    const dir  = (r.direction||'').toUpperCase();
+    const gt   = r.gate_type||'';
+    const c    = GATE_CATS.find(cc=>cc.test(gt.toUpperCase()))||GATE_CATS[GATE_CATS.length-1];
+    const dirCls = dir==='LONG'?'rb-dir-l':'rb-dir-s';
+    const sess = (r.session||'').substring(0,2);
+    return `<div class="rb-row">
+      <div class="rb-time">${r.fired_at?fmtTime(r.fired_at):'--:--'}</div>
+      <div class="rb-vc" style="${vc}">${(r.venue||'').toUpperCase()}</div>
+      <div class="rb-pair">${pair}</div>
+      <div class="${dirCls}">${dir}</div>
+      <div class="rb-gate" style="color:${c.color}">${gt}</div>
+      <div style="font-size:7px;color:#333355;width:16px;flex-shrink:0;text-align:right">${sess}</div>
     </div>`;
-  }
-
-  if(item.type === 'trade_open'){
-    return `<div class="ev-card ev-open">
-      <div class="ev-row">
-        ${vc}
-        <span class="ev-pair">${item.pair}</span>
-        ${dc}
-        <span class="ev-sess" style="color:${sessColor(item.session||'')}"> ${item.session||''}</span>
-        ${stageChip('▲ OPEN', 'var(--s-open)')}
-      </div>
-      <div class="ev-sub">
-        <span style="color:rgba(6,182,212,.7)">Position opened</span>
-        ${item.entry ? `<span>entry=${priceFmt(item.pair,item.entry)}</span>` : ''}
-        <span class="ev-time" style="margin-left:auto">${time}</span>
-      </div>
-    </div>`;
-  }
-
-  return '';
+  }).join('')}`;
 }
 
-function renderStream(items){
-  const el = document.getElementById('ev-stream');
-  const filtered = items.filter(i => venue==='all' || i.venue === venue);
-  document.getElementById('ev-count').textContent = `${filtered.length} events`;
-  if(filtered.length === 0){
-    el.innerHTML = '<div class="empty-msg">Waiting for signals…</div>';
-    return;
-  }
-  el.innerHTML = filtered.slice(0,25).map(evCardHtml).join('');
-}
-
-// ── Active trades rendering ────────────────────────────
+// ── Active Trades ────────────────────────────────────────
 function tradeCardHtml(t){
   const pnl = t.unrealized_pnl ?? 0;
   const r   = t.r ?? 0;
   const pc  = pnlColor(pnl);
-  const cls = pnl > 0 ? 'tr-win' : pnl < 0 ? 'tr-loss' : 'tr-flat';
+  const cls = pnl>0.5?'tr-win':pnl<-0.5?'tr-loss':'tr-flat';
   const pair = (t.pair||'').replace('_USDT','').replace('_','');
-  const wallArmed = (t.elapsed_s||0) > 90 && pnl > 0;
+  const vc   = (t.venue||'hl')==='hl'?'vc-hl':'vc-mexc';
+  const dc   = (t.direction||'LONG')==='LONG'?'dc-long':'dc-short';
+  const sess = (t.session||'').toUpperCase();
+
+  // Watcher states
+  const wallArmed = pnl > 0;
+  const decayArmed= pnl > 2;
+  const beArmed   = pnl > 0;  // proxy
+
+  // TP1 proxy: if elapsed > 3 min and in profit
+  const elapsed = t.opened_at ? Math.round(Date.now()/1000 - t.opened_at) : 0;
 
   return `<div class="tr-card ${cls}">
-    <div class="tr-hdr">
-      ${venueChip(t.venue||'hl')}
-      <span class="tr-pair">${pair}</span>
-      ${dirChip(t.direction||'SHORT')}
-      <span class="ev-sess" style="color:${sessColor(t.session||'')};margin-left:auto">${t.session||''}</span>
+  <div class="tr-hdr">
+    <span class="venue-chip ${vc}">${(t.venue||'hl').toUpperCase()}</span>
+    <span class="tr-pair">${pair}</span>
+    <span class="dir-chip ${dc}">${t.direction||'LONG'}</span>
+    <span class="ev-sess ${sessColorCls(sess)}" style="font-size:8px;margin-left:4px">${sess}</span>
+    <span class="tr-elapsed" style="margin-left:auto" data-opened-at="${t.opened_at||0}">${t.opened_at?elapsedStr(t.opened_at):'—'}</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px">
+    <div style="flex-shrink:0">
+      <div class="stat-lbl">UNREALIZED</div>
+      <div class="tr-pnl-big" style="color:${pc}">${fmtPnl(pnl)}</div>
+      <div class="tr-r" style="color:${pc}">${r>=0?'+':''}${r.toFixed(3)}R</div>
     </div>
-    <div style="display:flex;gap:12px;margin-bottom:8px">
-      <div>
-        <div class="stat-lbl">UNREALIZED P&L</div>
-        <div class="tr-pnl-big" style="color:${pc}">${fmtPnl(pnl)}</div>
-        <div class="tr-r" style="color:${pc}">${r>=0?'+':''}${r.toFixed(3)}R</div>
-      </div>
-      <div style="flex:1">
-        <div class="tr-prices">
-          <div class="tr-price-box">
-            <div class="tr-price-lbl">ENTRY</div>
-            <div class="tr-price-val" style="color:#8888cc">${priceFmt(t.pair,t.entry_price)}</div>
-          </div>
-          <div class="tr-price-box">
-            <div class="tr-price-lbl">NOW</div>
-            <div class="tr-price-val" style="color:${pc}">${priceFmt(t.pair,t.current_price)}</div>
-          </div>
-          <div class="tr-price-box">
-            <div class="tr-price-lbl">SL</div>
-            <div class="tr-price-val" style="color:var(--red)">${priceFmt(t.pair,t.sl)}</div>
-          </div>
+    <div style="flex:1">
+      <div class="tr-prices">
+        <div class="tr-price-box">
+          <div class="tr-price-lbl">ENTRY</div>
+          <div class="tr-price-val" style="color:#7777aa">${priceFmt(t.pair,t.entry_price)}</div>
+        </div>
+        <div class="tr-price-box">
+          <div class="tr-price-lbl">NOW</div>
+          <div class="tr-price-val" style="color:${pc}">${priceFmt(t.pair,t.current_price)}</div>
+        </div>
+        <div class="tr-price-box">
+          <div class="tr-price-lbl">SL</div>
+          <div class="tr-price-val" style="color:var(--red)">${priceFmt(t.pair,t.sl)}</div>
+        </div>
+        <div class="tr-price-box">
+          <div class="tr-price-lbl">PEAK</div>
+          <div class="tr-price-val" style="color:var(--amber)">${t.peak_pnl_usd!=null?fmtPnl(t.peak_pnl_usd):'—'}</div>
         </div>
       </div>
     </div>
-    <div class="tr-watchers">
-      <div class="watcher ${wallArmed?'armed':'idle'}">
-        <div style="display:flex;align-items:center">
-          <span class="watcher-dot"></span>
-          <div class="watcher-lbl">WALL_TP</div>
-        </div>
-        <div class="watcher-val">${wallArmed ? 'watching' : pnl > 0 ? 'arming…' : 'waiting'}</div>
-      </div>
-      <div class="watcher ${pnl > 5 ? 'armed' : 'idle'}">
-        <div style="display:flex;align-items:center">
-          <span class="watcher-dot"></span>
-          <div class="watcher-lbl">PEAK_DECAY</div>
-        </div>
-        <div class="watcher-val">${pnl > 5 ? 'active' : 'waiting'}</div>
-      </div>
-      <div class="watcher idle">
-        <div style="display:flex;align-items:center">
-          <span class="watcher-dot" style="background:#ef4444;"></span>
-          <div class="watcher-lbl">SL</div>
-        </div>
-        <div class="watcher-val" style="color:rgba(239,68,68,.5)">${t.sl ? priceFmt(t.pair,t.sl) : '—'}</div>
-      </div>
+  </div>
+  <div class="tr-watchers">
+    <div class="watcher ${wallArmed?'armed':'idle'}">
+      <div class="watcher-lbl"><span class="watcher-dot"></span>WALL_TP</div>
+      <div class="watcher-val">${wallArmed?'watching':'waiting'}</div>
     </div>
-    <div class="tr-elapsed" style="margin-top:5px" data-opened-at="${t.opened_at||0}">
-      ${t.opened_at ? elapsedStr(t.opened_at) : '—'}
+    <div class="watcher ${decayArmed?'armed':'idle'}">
+      <div class="watcher-lbl"><span class="watcher-dot"></span>PEAK_DECAY</div>
+      <div class="watcher-val">${decayArmed?'active'+( t.peak_pnl_usd!=null?` / pk${fmtPnl(t.peak_pnl_usd)}`:''):'waiting'}</div>
     </div>
-  </div>`;
+    <div class="watcher ${beArmed?'be-on':'idle'}">
+      <div class="watcher-lbl"><span class="watcher-dot"></span>BE</div>
+      <div class="watcher-val">${beArmed?'+profit guard':'waiting'}</div>
+    </div>
+  </div>
+</div>`;
 }
 
 function renderTrades(trades){
-  const filtered = trades.filter(t => venue==='all' || (t.venue||'').toLowerCase() === venue);
-  const el = document.getElementById('trade-stream');
+  const filtered = trades.filter(t => venue==='all'||(t.venue||'').toLowerCase()===venue);
+  const hlCount  = filtered.filter(t=>(t.venue||'').toLowerCase()==='hl').length;
+  const mxCount  = filtered.filter(t=>(t.venue||'').toLowerCase()==='mexc').length;
+  const el       = document.getElementById('trade-stream');
   document.getElementById('trade-count').textContent = `${filtered.length} LIVE`;
-  if(filtered.length === 0){
-    el.innerHTML = '<div class="empty-msg">No open positions</div>';
-    return;
-  }
+  const hlTag = document.getElementById('hl-trade-tag');
+  const mxTag = document.getElementById('mx-trade-tag');
+  hlTag.textContent = `HL ${hlCount}`; hlTag.style.display = hlCount>0?'':'none';
+  mxTag.textContent = `MEXC ${mxCount}`; mxTag.style.display = mxCount>0?'':'none';
+  if(filtered.length===0){ el.innerHTML='<div class="empty-msg">No open positions</div>'; return; }
   el.innerHTML = filtered.map(tradeCardHtml).join('');
 }
 
-// ── Stats rendering ────────────────────────────────────
+// ── Stats Panel ──────────────────────────────────────────
 function renderStats(){
   const spnl = document.getElementById('s-pnl');
   spnl.textContent = fmtPnl(_todayPnl);
   spnl.style.color = pnlColor(_todayPnl);
 
-  const total = _wins + _losses;
-  const wr    = total > 0 ? Math.round(_wins/total*100) : 0;
+  const total = _wins+_losses;
+  const wr    = total>0?Math.round(_wins/total*100):0;
   const swr   = document.getElementById('s-wr');
   swr.textContent = `${wr}%`;
-  swr.style.color = wr >= 50 ? 'var(--green)' : 'var(--red)';
+  swr.style.color = wr>=50?'var(--green)':'var(--red)';
   document.getElementById('s-wrsub').textContent = `${_wins}W / ${_losses}L of ${total}`;
-
-  document.getElementById('g-session').textContent  = _gCounts.session;
-  document.getElementById('g-j1h').textContent      = _gCounts.j1h;
-  document.getElementById('g-stoch').textContent    = _gCounts.stoch;
-  document.getElementById('g-cooldown').textContent = _gCounts.cooldown;
-  document.getElementById('g-other').textContent    = _gCounts.other;
 
   const pnlBadge = document.getElementById('pnl-badge');
   pnlBadge.textContent = fmtPnl(_todayPnl);
-  pnlBadge.className   = `pnl-badge ${_todayPnl >= 0 ? 'pnl-pos' : 'pnl-neg'}`;
+  pnlBadge.className   = `pnl-badge ${_todayPnl>=0?'pnl-pos':'pnl-neg'}`;
+
+  // Gate breakdown in stats sidebar (simplified, using same data as gate panel)
+  const filtered = _gateRows.filter(r => venue==='all'||(r.venue||'').toLowerCase()===venue);
+  const catCounts = {};
+  GATE_CATS.forEach(c => catCounts[c.key] = 0);
+  filtered.forEach(r => catCounts[catOf(r.gate_type)]++);
+  const maxV = Math.max(1,...Object.values(catCounts));
+
+  document.getElementById('stats-gates').innerHTML = GATE_CATS.map(c=>`
+    <div class="gate-row">
+      <div class="gate-sq" style="background:${c.color}22;border-color:${c.color}66"></div>
+      <div class="gate-name">${c.label}</div>
+      <div class="gate-bar-sm"><div class="gate-bar-sm-fill" style="width:${Math.round((catCounts[c.key]||0)/maxV*100)}%;background:${c.color}88"></div></div>
+      <div class="gate-n" style="color:${catCounts[c.key]>0?c.color:'#1e1e38'}">${catCounts[c.key]||0}</div>
+    </div>`).join('');
 }
 
-// ── Ticker rendering ───────────────────────────────────
-function renderTicker(){
-  const el = document.getElementById('ticker-track');
-  const items = venue === 'all' ? _tickerItems : _tickerItems.filter(i => i.venue === venue);
-  if(items.length === 0){
-    el.innerHTML = '<span style="color:#2a2a4a;font-size:9px">Waiting for events…</span>';
-    return;
-  }
-  el.innerHTML = items.slice(0,30).map(i => {
-    const vc = i.venue === 'hl' ? 'var(--hl)' : 'var(--mexc)';
-    const dc = (i.direction||'').toUpperCase() === 'LONG' ? 'var(--green)' : 'var(--red)';
-    return `<div class="tick-chip" style="border-color:${i.color}44;background:${i.color}0a">
-      <span style="color:${vc};font-weight:700">${(i.venue||'').toUpperCase()}</span>
-      <span style="color:#d0d0f0;font-weight:700">${(i.pair||'').replace('_USDT','')}</span>
-      <span style="color:${dc}">${i.direction||''}</span>
-      <span style="color:${i.color};font-weight:700">${i.label}</span>
-      ${i.pnl != null ? `<span style="color:${pnlColor(i.pnl)};font-weight:700">${fmtPnl(i.pnl)}</span>` : ''}
-      <span style="color:#333355">${i.time}</span>
-    </div>`;
-  }).join('');
+// ── Pipeline counts ──────────────────────────────────────
+function computePipelineCounts(){
+  const counts = {SCAN:1, GATE:0, SIGNAL:0, ALERT:0, OPEN:0, MANAGE:0, CLOSE:0};
+  const filtered = _gateRows.filter(r => venue==='all'||(r.venue||'').toLowerCase()===venue);
+  counts.GATE   = filtered.length;
+  counts.SIGNAL = _streamItems.filter(i=>i.type==='signal_pass').length;
+  counts.ALERT  = counts.SIGNAL;
+  counts.OPEN   = _streamItems.filter(i=>i.type==='trade_open').length;
+  counts.CLOSE  = _streamItems.filter(i=>i.type==='trade_close').length;
+  counts.MANAGE = _openTrades.filter(t=>venue==='all'||(t.venue||'').toLowerCase()===venue).length;
+  counts.OPEN   = Math.max(counts.OPEN, counts.MANAGE);
+  return counts;
 }
 
-// ── Full render pass ───────────────────────────────────
+// ── Full render pass ─────────────────────────────────────
 function render(){
-  renderStream(_streamItems);
+  renderGatePanel(_gateRows);
   renderTrades(_openTrades);
   renderStats();
-  renderTicker();
+  renderPipeline(computePipelineCounts());
 }
 
-// ── Data processing ────────────────────────────────────
+// ── Data processing ──────────────────────────────────────
 function processGateActivity(rows){
-  _gCounts = {session:0, j1h:0, stoch:0, cooldown:0, other:0};
-
-  rows.forEach(row => {
-    const gt = (row.gate_type || row.reason || '').toUpperCase();
-    if(gt.includes('SESSION')) _gCounts.session++;
-    else if(gt.includes('J1H') || gt.includes('1H_')) _gCounts.j1h++;
-    else if(gt.includes('STOCH') || gt.includes('J15') || gt.includes('RSI')) _gCounts.stoch++;
-    else if(gt.includes('COOLDOWN') || gt.includes('COOL')) _gCounts.cooldown++;
-    else _gCounts.other++;
-
-    const id = `gate_${row.fired_at}_${row.pair}_${row.direction}_${row.gate_type}`;
-    if(_seenIds.has(id)) return;
-    _seenIds.add(id);
-
-    const item = {
-      id, type:'gate_block',
-      venue: (row.venue||'').toLowerCase(),
-      pair: (row.pair||'').replace('_USDT',''),
-      direction: (row.direction||'').toUpperCase(),
-      session: row.session || '',
-      gate_type: row.gate_type || row.reason || 'GATE_FAIL',
-      reason: row.reason || '',
-      ts: row.fired_at,
-      sortKey: row.fired_at || '',
-    };
-
-    _streamItems.unshift(item);
-    _streamItems = _streamItems.slice(0, 50);
-
-    const gc = gateColor(item.gate_type);
-    _tickerItems.unshift({
-      venue: item.venue, pair: item.pair, direction: item.direction,
-      label: item.gate_type, color: gc, time: fmtTime(item.ts), pnl: null
-    });
-    _tickerItems = _tickerItems.slice(0, 80);
-  });
+  _gateRows = rows;
 }
 
 function processAlerts(data){
-  const open    = data.open    || [];
+  _openTrades = data.open || [];
   const expired = data.expired || [];
-
-  _openTrades = open;
 
   _wins = 0; _losses = 0; _todayPnl = 0;
 
   expired.forEach(a => {
     const outcome = (a.outcome||'').toUpperCase();
-    const pnl = a.pnl_dollars;
+    const pnl     = a.pnl_dollars;
 
-    if(outcome === 'TRADE_OPENED' && pnl != null){
-      if(pnl >= 0) _wins++; else _losses++;
+    if(outcome==='TRADE_OPENED' && pnl!=null){
+      if(pnl>=0) _wins++; else _losses++;
       _todayPnl += pnl;
 
       const id = `close_${a.created_at}_${a.pair}_${a.direction}`;
       if(!_seenIds.has(id)){
         _seenIds.add(id);
-        const item = {
-          id, type:'trade_close',
-          venue: (a.venue||'').toLowerCase(),
-          pair: (a.pair||'').replace('_USDT',''),
-          direction: (a.direction||'').toUpperCase(),
-          session: a.session || '',
-          pnl: pnl,
-          r: a.mae_r != null ? null : null,
-          exit_reason: a.exit_reason || '',
-          duration: a.duration_seconds,
-          ts: a.created_at,
-        };
-        _streamItems.unshift(item);
-        _streamItems = _streamItems.slice(0, 50);
-        _tickerItems.unshift({
-          venue: item.venue, pair: item.pair, direction: item.direction,
-          label: item.exit_reason || 'CLOSE', color: pnl >= 0 ? 'var(--green)' : 'var(--red)',
-          time: fmtTime(a.created_at), pnl: pnl
-        });
-        _tickerItems = _tickerItems.slice(0, 80);
+        _streamItems.unshift({id, type:'trade_close',
+          venue:(a.venue||'').toLowerCase(),pair:a.pair,
+          direction:(a.direction||'').toUpperCase(),
+          session:a.session||'',pnl,exit_reason:a.exit_reason||'',
+          duration:a.duration_seconds,ts:a.created_at});
+        _streamItems = _streamItems.slice(0,60);
       }
     }
-    else if(outcome === 'TRADE_OPENED' && pnl == null){
+    else if(outcome==='TRADE_OPENED' && pnl==null){
       const id = `open_${a.created_at}_${a.pair}_${a.direction}`;
       if(!_seenIds.has(id)){
         _seenIds.add(id);
-        _streamItems.unshift({
-          id, type:'trade_open',
-          venue: (a.venue||'').toLowerCase(),
-          pair: (a.pair||'').replace('_USDT',''),
-          direction: (a.direction||'').toUpperCase(),
-          session: a.session || '',
-          entry: a.entry_price,
-          j15m: a.j15m_at_signal, j1h: a.j1h_at_signal,
-          ts: a.created_at,
-        });
-        _streamItems = _streamItems.slice(0, 50);
+        _streamItems.unshift({id,type:'trade_open',
+          venue:(a.venue||'').toLowerCase(),pair:a.pair,
+          direction:(a.direction||'').toUpperCase(),
+          session:a.session||'',entry:a.entry_price,ts:a.created_at});
+        _streamItems = _streamItems.slice(0,60);
       }
     }
     else if(!outcome.startsWith('TRADE')){
       const id = `sig_${a.created_at}_${a.pair}_${a.direction}`;
       if(!_seenIds.has(id)){
         _seenIds.add(id);
-        _streamItems.unshift({
-          id, type:'signal_pass',
-          venue: (a.venue||'').toLowerCase(),
-          pair: (a.pair||'').replace('_USDT',''),
-          direction: (a.direction||'').toUpperCase(),
-          session: a.session || '',
-          j15m: a.j15m_at_signal, j1h: a.j1h_at_signal,
-          ts: a.created_at,
-        });
-        _streamItems = _streamItems.slice(0, 50);
+        _streamItems.unshift({id,type:'signal_pass',
+          venue:(a.venue||'').toLowerCase(),pair:a.pair,
+          direction:(a.direction||'').toUpperCase(),
+          session:a.session||'',ts:a.created_at});
+        _streamItems = _streamItems.slice(0,60);
       }
     }
   });
-
-  // sort stream by ts desc
-  _streamItems.sort((a,b) => (b.sortKey||b.ts||'') > (a.sortKey||a.ts||'') ? 1 : -1);
 }
 
-function computePipelineCounts(){
-  const recent5m = Date.now() - 5*60*1000;
-  const counts = {SCAN:1, GATE:0, SIGNAL:0, ALERT:0, OPEN:0, MANAGE:0, CLOSE:0};
-
-  _streamItems.forEach(i => {
-    const t = i.ts ? new Date(i.ts).getTime() : 0;
-    if(i.type === 'gate_block')   { counts.GATE++;   if(t > recent5m) counts.SIGNAL++; }
-    if(i.type === 'signal_pass')  { counts.SIGNAL++;  counts.ALERT++; }
-    if(i.type === 'trade_open')   { counts.OPEN++; }
-    if(i.type === 'trade_close')  { counts.CLOSE++; }
-  });
-  counts.MANAGE = _openTrades.length;
-  counts.OPEN   = Math.max(counts.OPEN, _openTrades.length);
-
-  return counts;
-}
-
-// ── Poll ───────────────────────────────────────────────
+// ── Poll ─────────────────────────────────────────────────
 async function poll(){
-  try {
+  try{
     const [alertsRes, gateRes] = await Promise.all([
       fetch(`/api/lifecycle/alerts?venue=${venue}`),
       fetch('/api/gate_activity')
     ]);
     if(!alertsRes.ok || !gateRes.ok) throw new Error('bad status');
-
     const alertsData = await alertsRes.json();
     const gateData   = await gateRes.json();
 
     processAlerts(alertsData);
-    processGateActivity(Array.isArray(gateData) ? gateData : []);
+    processGateActivity(Array.isArray(gateData)?gateData:[]);
 
-    const counts = computePipelineCounts();
-    renderPipeline(counts);
     render();
 
     if(!_lastPollOk){
-      document.getElementById('live-dot').className = 'live-dot';
-      _lastPollOk = true;
+      document.getElementById('live-dot').className='live-dot';
+      _lastPollOk=true;
     }
-  } catch(e){
-    console.warn('poll error', e);
-    document.getElementById('live-dot').className = 'stale-dot';
-    _lastPollOk = false;
+  }catch(e){
+    console.warn('poll error',e);
+    document.getElementById('live-dot').className='stale-dot';
+    _lastPollOk=false;
   }
 }
 
-// ── Init ───────────────────────────────────────────────
+// ── Init ─────────────────────────────────────────────────
 renderPipeline({SCAN:1,GATE:0,SIGNAL:0,ALERT:0,OPEN:0,MANAGE:0,CLOSE:0});
 render();
 poll();
-setInterval(poll, 4000);
+setInterval(poll, 3000);
 </script>
 </body>
 </html>
