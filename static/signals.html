@@ -75,12 +75,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .vh-mode.sim{color:var(--amber)}
 .vh-mode.init{color:#666}
 
-/* ── ECG ── */
-.ecg-wrap{margin-top:8px}
-.ecg-path{fill:none;stroke-width:1.5;stroke-dasharray:200;stroke-dashoffset:200;animation:ecgDraw 2.4s linear infinite}
-.hl .ecg-path{stroke:var(--hl)}
-.mx .ecg-path{stroke:var(--mexc)}
-@keyframes ecgDraw{0%{stroke-dashoffset:200}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-200}}
+
 
 /* ── BEAM ── */
 .beam-track{position:relative;height:3px;margin-top:6px;border-radius:2px;overflow:visible}
@@ -109,7 +104,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em;color:#ccc}
 
 /* ── STAGE ROW ── */
-.stage-row{display:flex;align-items:center;gap:6px;padding:5px 10px;border-left:2px solid transparent;transition:all .3s;margin-left:2px}
+.stage-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px 4px}.stage-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-left:2px solid transparent;transition:all .3s}
 .stage-row.active-row{border-left-color:inherit;background:rgba(255,255,255,.02)}
 .stage-lbl{width:84px;flex-shrink:0}
 .stage-name{font-family:var(--D);font-size:10px;letter-spacing:.1em;line-height:1;transition:color .3s;font-weight:700}
@@ -123,8 +118,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .stat-pass{color:var(--green)}
 .stat-fail{color:var(--red)}
 
-/* ── CONNECTOR ── */
-.connector{margin-left:14px;width:1px;height:5px;background:#1a1a2e}
+.connector{display:none}
 
 /* ── DIR GATES ── */
 .dir-hdr{padding:3px 12px;display:flex;align-items:center;gap:8px}
@@ -202,11 +196,6 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
           <div class="vh-mode init" id="HL-mode-lbl">INIT</div>
         </div>
       </div>
-      <div class="ecg-wrap">
-        <svg viewBox="0 0 200 24" preserveAspectRatio="none" style="width:100%;height:22px">
-          <path class="ecg-path" d="M0,12 L35,12 L43,4 L51,20 L59,12 L75,12 L83,2 L91,22 L99,12 L130,12 L138,6 L146,18 L154,12 L200,12"/>
-        </svg>
-      </div>
       <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
     </div>
     <div class="pipe-body" id="HL-pipe-body">
@@ -224,11 +213,6 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
           <div class="vh-pairs" id="MEXC-pairs-lbl">— PAIRS</div>
           <div class="vh-mode init" id="MEXC-mode-lbl">INIT</div>
         </div>
-      </div>
-      <div class="ecg-wrap">
-        <svg viewBox="0 0 200 24" preserveAspectRatio="none" style="width:100%;height:22px">
-          <path class="ecg-path" d="M0,12 L35,12 L43,4 L51,20 L59,12 L75,12 L83,2 L91,22 L99,12 L130,12 L138,6 L146,18 L154,12 L200,12"/>
-        </svg>
       </div>
       <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
     </div>
@@ -470,6 +454,7 @@ function buildPipeBody(venue, pairs) {
       </div>
     </div>
 
+    <div class="stage-grid">
     ${PAIR_STAGES.map(st=>`
       <div class="stage-row" id="${venue}-row-${st.id}" style="border-left-color:${st.cp?'#22d3ee':clr}">
         <div class="stage-lbl">
@@ -481,7 +466,8 @@ function buildPipeBody(venue, pairs) {
         </div>
         <div class="stage-stats" id="${venue}-stats-${st.id}"></div>
       </div>
-    `).join('<div class="connector"></div>')}
+    `).join('')}
+    </div>
 
     <div class="connector"></div>
 
