@@ -64,8 +64,9 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .pa{width:16px;height:1px;flex-shrink:0;opacity:.3}
 
 /* ── MAIN GRID ── */
-.main{flex:1;display:grid;grid-template-columns:34% 66%;min-height:0;overflow:hidden}
-.col{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.col{display:flex;flex-direction:column;overflow:hidden;border-bottom:1px solid var(--border)}
+.col:last-child{border-bottom:none}
 .col:last-child{border-right:none}
 .col-hdr{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--border);background:#06061a;flex-shrink:0}
 .col-hdr-lbl{font-family:var(--D);font-size:14px;letter-spacing:.1em;color:var(--white)}
@@ -238,24 +239,24 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 
 <!-- MAIN -->
 <div class="main">
-  <!-- LEFT: Gate Filter -->
-  <div class="col">
-    <div class="col-hdr">
-      <span style="font-size:12px;color:var(--amber)">⚡</span>
-      <span class="col-hdr-lbl">GATE FILTER</span>
-      <span class="col-hdr-badge" id="gate-badge" style="background:rgba(245,158,11,.12);color:var(--white);border:1px solid rgba(245,158,11,.4)">0 blocked</span>
-    </div>
-    <div class="col-body" id="gate-body"><div class="empty">WAITING FOR DATA…</div></div>
-  </div>
-
-  <!-- RIGHT: Active Trades -->
-  <div class="col">
+  <!-- TOP: Active Trades (compact, auto height) -->
+  <div class="col" style="flex:0 0 auto;max-height:38vh">
     <div class="col-hdr">
       <span style="font-size:12px;color:var(--green)">◉</span>
       <span class="col-hdr-lbl">ACTIVE TRADES</span>
       <span class="col-hdr-badge" id="trade-badge" style="background:rgba(34,197,94,.1);color:var(--white);border:1px solid rgba(34,197,94,.3)">0 LIVE</span>
     </div>
     <div class="col-body" id="trade-body"><div class="empty">NO OPEN POSITIONS</div></div>
+  </div>
+
+  <!-- BOTTOM: Gate Activity (full width, majority of remaining space) -->
+  <div class="col" style="flex:1">
+    <div class="col-hdr">
+      <span style="font-size:12px;color:var(--amber)">⚡</span>
+      <span class="col-hdr-lbl">GATE ACTIVITY</span>
+      <span class="col-hdr-badge" id="gate-badge" style="background:rgba(245,158,11,.12);color:var(--white);border:1px solid rgba(245,158,11,.4)">0 blocked</span>
+    </div>
+    <div class="col-body" id="gate-body"><div class="empty">WAITING FOR DATA…</div></div>
   </div>
 </div>
 
