@@ -1226,6 +1226,63 @@ body {
       .pt-table tr.pt-pos > td:first-child { border-left:2px solid rgba(34,197,94,0.55); padding-left:4px; }
       .pt-table tr.pt-neg > td:first-child { border-left:2px solid rgba(239,68,68,0.55); padding-left:4px; }
       .pt-msg { color:#ffffff; font-weight:700; font-size:9px; padding:10px; text-align:center; font-family:var(--display); }
+
+    /* ── HOME TRI-COL ── */
+    .home-tri-col { display:grid; grid-template-columns:1fr 1fr 1fr; margin:0 16px 12px; border:1px solid #1a1a2e; border-radius:12px; overflow:hidden; background:#07071a; min-height:260px; max-height:340px; }
+    .tri-col { display:flex; flex-direction:column; overflow:hidden; border-right:1px solid #1a1a2e; }
+    .tri-col:last-child { border-right:none; }
+    .tri-col-hdr { display:flex; align-items:center; gap:7px; padding:8px 13px; border-bottom:1px solid #1a1a2e; background:#060617; flex-shrink:0; font-size:9px; font-weight:800; letter-spacing:.14em; }
+    .tri-col-icon { font-size:12px; }
+    .tri-col-title { color:#fff; flex:1; }
+    .tri-col-badge { font-size:9px; font-weight:800; padding:2px 9px; border-radius:10px; border:1px solid rgba(245,158,11,.4); background:rgba(245,158,11,.08); color:#f59e0b; }
+    .tri-col-badge.badge-blue  { border-color:rgba(129,140,248,.4); background:rgba(129,140,248,.08); color:#818cf8; }
+    .tri-col-badge.badge-green { border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.07); color:#22c55e; }
+    .tri-col-body { flex:1; overflow-y:auto; padding:8px 10px; display:flex; flex-direction:column; gap:5px; }
+    .tri-gate-row { display:flex; align-items:center; gap:7px; border-radius:7px; padding:6px 9px; border:1px solid transparent; }
+    .tri-gate-row.active { border-color:var(--gc,#888); border-color:color-mix(in srgb,var(--gc,#888) 33%,transparent); background:color-mix(in srgb,var(--gc,#888) 8%,transparent); }
+    .tri-gate-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .tri-gate-label { font-size:12px; font-weight:800; flex:1; letter-spacing:.04em; font-family:var(--display); }
+    .tri-gate-bar-wrap { flex:2; height:5px; background:#0a0a1e; border-radius:3px; overflow:hidden; }
+    .tri-gate-bar-fill { height:100%; border-radius:3px; }
+    .tri-gate-count { font-size:18px; font-family:var(--display); width:30px; text-align:right; }
+    .tri-feed-hdr { font-size:7px; color:#555577; letter-spacing:.14em; padding:5px 2px 2px; border-top:1px solid #0f0f22; margin-top:2px; flex-shrink:0; }
+    .tri-feed-row { display:flex; align-items:center; gap:5px; padding:3px 2px; }
+    .tri-feed-t  { color:#fff; font-weight:800; width:30px; flex-shrink:0; font-size:10px; }
+    .tri-feed-vc { font-size:7px; font-weight:800; padding:1px 5px; border-radius:8px; flex-shrink:0; }
+    .tri-feed-vc-hl   { color:var(--hl);   background:rgba(168,85,247,.12); border:1px solid rgba(168,85,247,.35); }
+    .tri-feed-vc-mexc { color:var(--mexc); background:rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.35); }
+    .tri-feed-pair { font-size:11px; font-weight:800; color:#fff; width:34px; flex-shrink:0; }
+    .tri-feed-dir-l { font-size:7px; font-weight:800; padding:1px 5px; border-radius:8px; color:#22c55e; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3); }
+    .tri-feed-dir-s { font-size:7px; font-weight:800; padding:1px 5px; border-radius:8px; color:#ef4444; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); }
+    .tri-feed-gate { flex:1; font-size:8px; color:#f97316; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tri-sig-stats { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:7px; }
+    .tri-sig-stat  { background:#06061a; border:1px solid #1a1a2e; border-radius:7px; padding:7px 10px; }
+    .tri-sig-stat-lbl { font-size:7px; color:#555577; letter-spacing:.1em; margin-bottom:2px; }
+    .tri-sig-stat-val { font-size:20px; font-family:var(--display); }
+    .tri-sig-tbl-hdr { display:grid; grid-template-columns:1fr 36px 36px 52px 72px; font-size:7px; color:#555577; letter-spacing:.1em; padding:5px 7px; background:#06061a; border-radius:5px 5px 0 0; flex-shrink:0; }
+    .tri-sig-tbl-row { display:grid; grid-template-columns:1fr 36px 36px 52px 72px; border-top:1px solid #0f0f22; align-items:center; }
+    .tri-sig-tbl-cell { padding:6px 7px; font-size:11px; font-weight:800; color:#fff; }
+    .tri-sig-exit-tag { font-size:7px; font-weight:800; padding:2px 5px; border-radius:6px; background:rgba(129,140,248,.1); border:1px solid rgba(129,140,248,.3); color:#818cf8; }
+    .pos-pill { border-radius:10px; padding:10px 11px; border:1px solid rgba(255,255,255,.08); flex-shrink:0; }
+    .pos-pill.vc-hl   { border-color:rgba(168,85,247,.45); background:linear-gradient(130deg,rgba(168,85,247,.07) 0%,#0a0a1a 60%); box-shadow:0 0 16px rgba(168,85,247,.1); }
+    .pos-pill.vc-mexc { border-color:rgba(249,115,22,.45); background:linear-gradient(130deg,rgba(249,115,22,.07) 0%,#0a0a1a 60%); box-shadow:0 0 16px rgba(249,115,22,.1); }
+    .pos-pill-top { display:flex; align-items:center; gap:6px; margin-bottom:7px; flex-wrap:wrap; }
+    .pos-vc-tag { font-size:9px; font-weight:800; padding:2px 8px; border-radius:10px; font-family:var(--display); letter-spacing:.04em; }
+    .pos-vc-tag.vc-hl   { color:var(--hl);   background:rgba(168,85,247,.15); border:1px solid rgba(168,85,247,.4); }
+    .pos-vc-tag.vc-mexc { color:var(--mexc); background:rgba(249,115,22,.15); border:1px solid rgba(249,115,22,.4); }
+    .pos-sym  { font-family:var(--display); font-size:20px; color:#fff; letter-spacing:.02em; }
+    .pos-dir-l { font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; color:#22c55e; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.4); }
+    .pos-dir-s { font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; color:#ef4444; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.4); }
+    .pos-sess  { font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; color:#06b6d4; border:1px solid rgba(6,182,212,.35); }
+    .pos-pnl   { margin-left:auto; font-family:var(--display); font-size:18px; }
+    .pos-r     { font-size:9px; font-weight:800; }
+    .pos-data  { display:grid; grid-template-columns:repeat(6,1fr); gap:3px; background:#07071a; border:1px solid #141428; border-radius:6px; padding:6px 7px; margin-bottom:7px; }
+    .pos-data-lbl { font-size:6px; color:#888899; letter-spacing:.1em; margin-bottom:1px; }
+    .pos-data-val { font-size:10px; font-weight:800; font-variant-numeric:tabular-nums; }
+    .pos-close-btn { width:100%; font-family:var(--display); font-size:11px; letter-spacing:.08em; padding:5px; border-radius:7px; cursor:pointer; border:1px solid rgba(239,68,68,.5); background:rgba(239,68,68,.07); color:#ef4444; transition:all .2s; }
+    .pos-close-btn:hover { background:rgba(239,68,68,.2); border-color:#ef4444; }
+    .pos-close-btn.confirming { background:rgba(239,68,68,.28); border-color:#ef4444; color:#fff; box-shadow:0 0 12px rgba(239,68,68,.3); }
+    .tri-no-pos { color:#555577; font-size:10px; font-weight:800; text-align:center; padding:28px 0; letter-spacing:.1em; }
     </style>
 </head>
 <body>
@@ -1369,6 +1426,48 @@ body {
           <div class="pnl-rail-ld-short" id="pr-ld-short-bar" style="width:0%"></div>
         </div>
         <div class="pnl-rail-ld-lbl" style="color:#ff4d4d;min-width:30px" id="pr-ld-short-pct">S</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- HOME 3-COL: GATE ACTIVITY + TODAY'S SIGNALS + ACTIVE POSITIONS -->
+  <div class="home-tri-col" id="home-tri-col">
+    <!-- LEFT: Gate Activity -->
+    <div class="tri-col">
+      <div class="tri-col-hdr">
+        <span class="tri-col-icon">&#x26A1;</span>
+        <span class="tri-col-title">GATE ACTIVITY</span>
+        <span class="tri-col-badge" id="htc-gate-badge">&#x2014; blocked</span>
+      </div>
+      <div class="tri-col-body">
+        <div id="htc-gate-bars"></div>
+        <div class="tri-feed-hdr" id="htc-feed-hdr" style="display:none">RECENT BLOCKS</div>
+        <div id="htc-gate-feed"></div>
+      </div>
+    </div>
+    <!-- MIDDLE: Today's Signals -->
+    <div class="tri-col">
+      <div class="tri-col-hdr">
+        <span class="tri-col-icon">&#x25CE;</span>
+        <span class="tri-col-title">TODAY'S SIGNALS</span>
+        <span class="tri-col-badge badge-blue" id="htc-sig-badge">&#x2014; signals</span>
+      </div>
+      <div class="tri-col-body">
+        <div class="tri-sig-stats" id="htc-sig-stats"></div>
+        <div class="tri-sig-tbl-hdr"><div>PAIR</div><div>TRD</div><div>WR%</div><div>NET P&amp;L</div><div>TOP EXIT</div></div>
+        <div id="htc-sig-table"></div>
+      </div>
+    </div>
+    <!-- RIGHT: Active Positions -->
+    <div class="tri-col" style="border-right:none">
+      <div class="tri-col-hdr">
+        <span class="tri-col-icon">&#x25C9;</span>
+        <span class="tri-col-title">ACTIVE POSITIONS</span>
+        <span class="tri-col-badge badge-green" id="htc-pos-badge">0 LIVE</span>
+      </div>
+      <div class="tri-col-body" id="htc-pos-list">
+        <div class="tri-no-pos">NO OPEN POSITIONS</div>
       </div>
     </div>
   </div>
@@ -2167,6 +2266,7 @@ async function loadLive() {
     renderJMap();
     renderFooter();
     renderFleetLink();
+    if (typeof htcRefresh === 'function') htcRefresh();
     if (typeof jmRenderChips === "function") jmRenderChips();
     if (typeof pgRender === "function" && _pgData) pgRender();
     if (typeof _opsActive !== 'undefined' && _opsActive) _opsRefresh();
@@ -2175,6 +2275,208 @@ async function loadLive() {
     _liveFail = true;
     _setFetchStatus('live-status', false, null);
   }
+}
+
+
+// ── HOME TRI-COL refresh ──
+var _htcGateData = [];
+var _htcConfirming = {};
+
+async function htcFetchGate() {
+  try {
+    var r = await fetch('/api/gate_activity', {credentials:'include'});
+    if (r.ok) { _htcGateData = await r.json(); htcRenderGates(); }
+  } catch(e) {}
+}
+
+function htcRenderGates() {
+  var cats = [
+    {label:'MA STACK',  color:'#a855f7', test:function(g){return /^MA_/.test(g);}},
+    {label:'J1H / J3H', color:'#f97316', test:function(g){return /J1H|J3H/.test(g);}},
+    {label:'J15M / RSI',color:'#f59e0b', test:function(g){return /J15M|RSI/.test(g);}},
+    {label:'COOLDOWN',  color:'#6b7280', test:function(g){return /COOLDOWN/.test(g);}},
+    {label:'SESSION',   color:'#ef4444', test:function(g){return /SESSION/.test(g);}},
+    {label:'OTHER',     color:'#818cf8', test:function(g){return true;}},
+  ];
+  var counts = cats.map(function(){return 0;});
+  _htcGateData.forEach(function(d) {
+    var gt = (d.gate_type||'').toUpperCase();
+    for (var i=0;i<cats.length;i++) { if(cats[i].test(gt)){counts[i]++;break;} }
+  });
+  var total = counts.reduce(function(a,b){return a+b;},0);
+  var maxC  = Math.max.apply(null, counts.concat([1]));
+  var bEl = document.getElementById('htc-gate-badge');
+  if (bEl) bEl.textContent = total + ' blocked';
+  var barsEl = document.getElementById('htc-gate-bars');
+  if (barsEl) {
+    barsEl.innerHTML = cats.map(function(c,i){
+      var cnt=counts[i], pct=Math.round(cnt/maxC*100);
+      var active = cnt>0;
+      return '<div class="tri-gate-row'+(active?' active':'')+'" style="--gc:'+c.color+'">'
+        +'<div class="tri-gate-dot" style="background:'+(active?c.color:'#1a1a30')+(active?';box-shadow:0 0 6px '+c.color+'77':'')+';"></div>'
+        +'<div class="tri-gate-label" style="color:'+(active?c.color:'#2a2a42')+'">'+c.label+'</div>'
+        +'<div class="tri-gate-bar-wrap"><div class="tri-gate-bar-fill" style="width:'+pct+'%;background:'+(active?c.color:'transparent')+'"></div></div>'
+        +'<div class="tri-gate-count" style="color:'+(active?'#fff':'#1a1a30')+'">'+cnt+'</div>'
+        +'</div>';
+    }).join('');
+  }
+  var feedHdr = document.getElementById('htc-feed-hdr');
+  var feedEl  = document.getElementById('htc-gate-feed');
+  if (feedEl) {
+    var recent = _htcGateData.slice(0,6);
+    if (recent.length && feedHdr) feedHdr.style.display='';
+    feedEl.innerHTML = recent.map(function(d){
+      var t   = d.fired_at ? new Date(d.fired_at).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false}) : '';
+      var vc  = (d.venue||'').toUpperCase();
+      var dir = (d.direction||'').toUpperCase();
+      return '<div class="tri-feed-row">'
+        +'<span class="tri-feed-t">'+t+'</span>'
+        +'<span class="tri-feed-vc tri-feed-vc-'+(vc==='HL'?'hl':'mexc')+'">'+vc+'</span>'
+        +'<span class="tri-feed-pair">'+(d.pair||'?')+'</span>'
+        +'<span class="tri-feed-dir-'+(dir==='LONG'?'l':'s')+'">'+dir+'</span>'
+        +'<span class="tri-feed-gate">'+(d.gate_type||'')+'</span>'
+        +'</div>';
+    }).join('') || '<div style="color:#555577;font-size:9px;padding:6px 2px">No recent blocks</div>';
+  }
+}
+
+function htcRenderPositions() {
+  if (typeof live === 'undefined' || !live) return;
+  var trades = [];
+  function _collectTrades(st, venue) {
+    if (!st) return;
+    var ot = st.open_trades;
+    var iter = Array.isArray(ot) ? ot : (ot && typeof ot==='object' ? Object.values(ot) : []);
+    iter.forEach(function(t){ if(t) trades.push({venue:venue, t:t}); });
+  }
+  _collectTrades(live.hl,   'hl');
+  _collectTrades(live.mexc, 'mexc');
+  var listEl  = document.getElementById('htc-pos-list');
+  var badgeEl = document.getElementById('htc-pos-badge');
+  if (badgeEl) badgeEl.textContent = trades.length + ' LIVE';
+  if (!listEl) return;
+  if (!trades.length) { listEl.innerHTML = '<div class="tri-no-pos">NO OPEN POSITIONS</div>'; return; }
+  function _fmtPx(v) {
+    if (v==null) return '—';
+    v=parseFloat(v);
+    if (v>1000) return v.toFixed(1);
+    if (v>10)   return v.toFixed(2);
+    return v.toFixed(4);
+  }
+  function _fmtPnl(v) {
+    if (v==null) return '—';
+    v=parseFloat(v); return (v>=0?'+ $':'- $')+Math.abs(v).toFixed(2);
+  }
+  listEl.innerHTML = trades.map(function(item){
+    var vc  = item.venue, t = item.t;
+    var sym = (t.symbol||t.pair||'').replace(/_USDT$/i,'');
+    var dir = (t.direction||'').toUpperCase();
+    var pnl = t.unrealized_pnl!=null ? parseFloat(t.unrealized_pnl) : null;
+    var rV  = t.r!=null ? parseFloat(t.r) : null;
+    var pc  = pnl==null?'#aaa':(pnl>=0?'#22c55e':'#ef4444');
+    var sess= (t.session||'').toUpperCase();
+    var key = vc+'-'+sym;
+    var cfm = !!_htcConfirming[key];
+    var fields = [
+      ['ENTRY',   _fmtPx(t.entry_price),   '#aaaacc'],
+      ['CURRENT', _fmtPx(t.current_price), pc],
+      ['SL',      _fmtPx(t.sl_price),      '#ef4444'],
+      ['TP1',     _fmtPx(t.tp1_price),     '#22c55e'],
+      ['TP2',     _fmtPx(t.tp2_price),     '#22c55e'],
+      ['BE',      _fmtPx(t.be_price),      '#06b6d4'],
+    ];
+    return '<div class="pos-pill vc-'+vc+'">'
+      +'<div class="pos-pill-top">'
+        +'<span class="pos-vc-tag vc-'+vc+'">'+vc.toUpperCase()+'</span>'
+        +'<span class="pos-sym">'+sym+'</span>'
+        +'<span class="pos-dir-'+(dir==='LONG'?'l':'s')+'">'+dir+'</span>'
+        +(sess?'<span class="pos-sess">'+sess+'</span>':'')
+        +'<span class="pos-pnl" style="color:'+pc+'">'+_fmtPnl(pnl)+'</span>'
+        +(rV!=null?'<span class="pos-r" style="color:'+pc+'">'+(rV>=0?'+':'')+rV.toFixed(2)+'R</span>':'')
+      +'</div>'
+      +'<div class="pos-data">'
+        +fields.map(function(f){return '<div><div class="pos-data-lbl">'+f[0]+'</div><div class="pos-data-val" style="color:'+f[2]+'">'+f[1]+'</div></div>';}).join('')
+      +'</div>'
+      +'<button class="pos-close-btn'+(cfm?' confirming':'')+'" onclick="htcCloseClick(''+key+'',''+vc+'',''+sym+'',''+dir+'')">'
+        +(cfm?'&#x26A0; CONFIRM CLOSE — TAP AGAIN':'&#x2715;  CLOSE POSITION')
+      +'</button>'
+      +'</div>';
+  }).join('');
+}
+
+function htcCloseClick(key, venue, pair, direction) {
+  if (!_htcConfirming[key]) {
+    _htcConfirming[key] = true;
+    htcRenderPositions();
+    setTimeout(function(){ delete _htcConfirming[key]; htcRenderPositions(); }, 5000);
+    return;
+  }
+  delete _htcConfirming[key];
+  fetch('/api/force_close', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pair:pair+'_USDT', venue:venue, direction:direction})
+  }).then(function(r){ console.log('force_close', r.status); htcRenderPositions(); })
+    .catch(function(e){ console.error('force_close', e); });
+}
+
+function htcRenderSignals() {
+  var todayPnl=null, wr=null, openCnt=0, unrealPnl=0;
+  if (typeof analytics!=='undefined' && analytics && analytics.today) {
+    todayPnl = analytics.today.net_pnl!=null ? parseFloat(analytics.today.net_pnl) : null;
+    wr       = analytics.today.wr!=null ? parseFloat(analytics.today.wr) : null;
+  }
+  if (typeof live!=='undefined' && live) {
+    ['hl','mexc'].forEach(function(v){
+      var st=live[v]; if(!st) return;
+      var ot=st.open_trades;
+      var iter=Array.isArray(ot)?ot:(ot&&typeof ot==='object'?Object.values(ot):[]);
+      openCnt += iter.length;
+      iter.forEach(function(t){ if(t&&t.unrealized_pnl) unrealPnl+=parseFloat(t.unrealized_pnl)||0; });
+    });
+  }
+  function _fv(v){ if(v==null)return '—'; return (v>=0?'+ $':'- $')+Math.abs(v).toFixed(2); }
+  function _pc(v){ return v==null?'#aaa':(v>=0?'#22c55e':'#ef4444'); }
+  function _wc(v){ return v==null?'#aaa':(v>=60?'#22c55e':v<40?'#ef4444':'#f59e0b'); }
+  var statsEl = document.getElementById('htc-sig-stats');
+  if (statsEl) {
+    statsEl.innerHTML = [
+      ['NET P&L',    _fv(todayPnl),               _pc(todayPnl)],
+      ['WIN RATE',   wr!=null?Math.round(wr)+'%':'—', _wc(wr)],
+      ['OPEN POS',   String(openCnt),              '#06b6d4'],
+      ['UNREALIZED', _fv(unrealPnl),               _pc(unrealPnl)],
+    ].map(function(r){
+      return '<div class="tri-sig-stat"><div class="tri-sig-stat-lbl">'+r[0]+'</div><div class="tri-sig-stat-val" style="color:'+r[2]+'">'+r[1]+'</div></div>';
+    }).join('');
+  }
+  var tblEl = document.getElementById('htc-sig-table');
+  if (tblEl && typeof _pgData!=='undefined' && _pgData && _pgData.length) {
+    tblEl.innerHTML = _pgData.slice(0,6).map(function(r){
+      var net=r.net_pnl!=null?parseFloat(r.net_pnl):null;
+      var wr2=r.wr!=null?parseInt(r.wr):null;
+      var vc=(r.venue||'').toUpperCase();
+      return '<div class="tri-sig-tbl-row">'
+        +'<div class="tri-sig-tbl-cell" style="display:flex;align-items:center;gap:5px">'
+          +'<span style="width:6px;height:6px;border-radius:50%;background:'+(vc==='HL'?'#a855f7':'#f97316')+';display:inline-block;flex-shrink:0"></span>'
+          +(r.pair||'?')+'</div>'
+        +'<div class="tri-sig-tbl-cell">'+(r.trade_count||'—')+'</div>'
+        +'<div class="tri-sig-tbl-cell" style="color:'+(wr2!=null?wr2>=60?'#22c55e':wr2<40?'#ef4444':'#f59e0b':'#aaa')+'">'+(wr2!=null?wr2+'%':'—')+'</div>'
+        +'<div class="tri-sig-tbl-cell" style="color:'+(net!=null?net>=0?'#22c55e':'#ef4444':'#aaa')+'">'+(net!=null?(net>=0?'+':'')+net.toFixed(0):'—')+'</div>'
+        +'<div class="tri-sig-tbl-cell"><span class="tri-sig-exit-tag">'+(r.top_exit||'—')+'</span></div>'
+        +'</div>';
+    }).join('');
+  } else if (tblEl) {
+    tblEl.innerHTML = '<div style="padding:10px 7px;color:#555577;font-size:9px;font-weight:800">LOADING…</div>';
+  }
+  var sigEl = document.getElementById('htc-sig-badge');
+  if (sigEl && typeof analytics!=='undefined' && analytics && analytics.today) {
+    sigEl.textContent = (analytics.today.signals||0)+' signals';
+  }
+}
+
+function htcRefresh() {
+  htcRenderPositions();
+  htcRenderSignals();
 }
 
 // -- FLEET LINK render --
@@ -3342,6 +3644,8 @@ function _initLogDates() {
   _initTlDate();
   await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist(), loadTimeline(), loadSentinelCoverage()]);
   setInterval(loadLive,      30_000);
+  setInterval(htcFetchGate, 30000);
+  htcFetchGate();
   setInterval(loadAnalytics, 300_000);
 })();
 
@@ -5477,3 +5781,4 @@ fleetHaltInit();
 </script>
       </body>
 </html>
+
