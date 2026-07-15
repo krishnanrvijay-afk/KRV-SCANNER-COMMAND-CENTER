@@ -20,7 +20,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .tb{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);background:#07071a;flex-shrink:0}
 .back{font-family:var(--D);font-size:13px;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;color:var(--white);text-decoration:none;letter-spacing:.06em}
 .tb-title{font-family:var(--D);font-size:22px;letter-spacing:.1em;color:var(--white)}
-.tb-sub{font-size:9px;color:#666688;letter-spacing:.18em;white-space:nowrap}
+.tb-sub{font-size:9px;color:#bbb;letter-spacing:.18em;white-space:nowrap}
 .tb-r{margin-left:auto;display:flex;align-items:center;gap:9px}
 .sess-pill{font-family:var(--D);font-size:13px;padding:3px 10px;border-radius:5px;border:1px solid;letter-spacing:.08em;font-weight:700}
 .sess-pill.ASIA{color:var(--amber);border-color:rgba(245,158,11,.5)}
@@ -30,6 +30,9 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.4;box-shadow:0 0 2px rgba(34,197,94,.3)}}
 .clk{font-size:12px;color:var(--white);font-variant-numeric:tabular-nums;letter-spacing:.04em;font-weight:700}
 .scan-badge{font-family:var(--D);font-size:12px;padding:2px 10px;border-radius:4px;border:1px solid rgba(34,211,238,.35);color:#22d3ee;letter-spacing:.08em}
+.live-pill{font-family:var(--D);font-size:11px;padding:2px 8px;border-radius:4px;letter-spacing:.08em;border:1px solid}
+.live-pill.live{color:var(--green);border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.08)}
+.live-pill.sim{color:var(--amber);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.05)}
 .sig-badge{font-family:var(--D);font-size:13px;padding:3px 12px;border-radius:4px;border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.08);color:var(--green);letter-spacing:.08em;animation:sigBadge 1.3s ease-in-out infinite;display:none}
 @keyframes sigBadge{0%,100%{box-shadow:none}50%{box-shadow:0 0 14px rgba(34,197,94,.4)}}
 
@@ -63,10 +66,13 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .vh-callsign{font-family:var(--D);font-size:19px;letter-spacing:.12em;line-height:1}
 .hl .vh-callsign{color:var(--hl)}
 .mx .vh-callsign{color:var(--mexc)}
-.vh-fullname{font-size:8px;color:#555;letter-spacing:.14em}
+.vh-fullname{font-size:8px;color:#aaa;letter-spacing:.14em}
 .vh-right{margin-left:auto;text-align:right}
 .vh-scan{font-family:var(--D);font-size:13px;color:#22d3ee;letter-spacing:.08em}
-.vh-pairs{font-size:8px;color:#444;letter-spacing:.08em}
+.vh-pairs{font-size:8px;color:#aaa;letter-spacing:.08em}
+.vh-mode{font-size:7px;letter-spacing:.1em;margin-top:1px;font-weight:700}
+.vh-mode.live{color:var(--green)}
+.vh-mode.sim{color:var(--amber)}
 
 /* ── ECG ── */
 .ecg-wrap{margin-top:8px}
@@ -92,24 +98,22 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 
 /* ── PREFLIGHT STRIP ── */
 .preflight{display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:1px solid #0e0e1a}
-.pf-lbl{font-family:var(--D);font-size:10px;letter-spacing:.12em;color:#444;width:86px;flex-shrink:0}
+.pf-lbl{font-family:var(--D);font-size:10px;letter-spacing:.12em;color:#bbb;width:86px;flex-shrink:0;font-weight:700}
 .pf-gates{display:flex;gap:10px}
-.pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em}
-.pf-ok{color:var(--green)}
-.pf-dim{color:#333}
+.pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em;color:#ccc}
 
 /* ── STAGE ROW ── */
 .stage-row{display:flex;align-items:center;gap:6px;padding:5px 10px;border-left:2px solid transparent;transition:all .3s;margin-left:2px}
 .stage-row.active-row{border-left-color:inherit;background:rgba(255,255,255,.02)}
 .stage-lbl{width:84px;flex-shrink:0}
-.stage-name{font-family:var(--D);font-size:10px;letter-spacing:.1em;line-height:1;transition:color .3s}
-.stage-sub{font-size:7px;color:#3a3a4a;letter-spacing:.06em;margin-top:1px}
+.stage-name{font-family:var(--D);font-size:10px;letter-spacing:.1em;line-height:1;transition:color .3s;font-weight:700}
+.stage-sub{font-size:7px;color:#888;letter-spacing:.06em;margin-top:2px}
 .dot-row{display:flex;gap:4px;flex-wrap:wrap;flex:1}
-.dot{width:9px;height:9px;border-radius:50%;background:#1a1a1a;border:1px solid #222;transition:background .25s,box-shadow .25s;flex-shrink:0}
+.dot{width:9px;height:9px;border-radius:50%;background:#1a1a1a;border:1px solid #333;transition:background .25s,box-shadow .25s;flex-shrink:0}
 .dot.pass{background:var(--green);border:none;box-shadow:0 0 6px 2px rgba(34,197,94,.7)}
 .dot.fail{background:var(--red);border:none;box-shadow:0 0 6px 2px rgba(239,68,68,.7)}
 .dot.checkpoint{background:#22d3ee;border:none;box-shadow:0 0 6px 2px rgba(34,211,238,.6)}
-.stage-stats{font-size:8px;font-weight:700;font-family:var(--D);letter-spacing:.05em;min-width:32px;text-align:right;flex-shrink:0}
+.stage-stats{font-size:8px;font-weight:700;font-family:var(--D);letter-spacing:.05em;min-width:32px;text-align:right;flex-shrink:0;color:#fff}
 .stat-pass{color:var(--green)}
 .stat-fail{color:var(--red)}
 
@@ -118,16 +122,15 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 
 /* ── DIR GATES HEADER ── */
 .dir-hdr{padding:3px 12px;display:flex;align-items:center;gap:8px}
-.dir-hdr-lbl{font-family:var(--D);font-size:10px;color:#3a3a4a;letter-spacing:.1em}
-.dir-legend{font-size:7px;color:#3a3a4a;margin-left:auto}
-.dir-gate-cols{font-family:var(--D);font-size:8px;color:#2a2a3a;letter-spacing:.04em;margin-left:auto}
+.dir-hdr-lbl{font-family:var(--D);font-size:10px;color:#ccc;letter-spacing:.1em;font-weight:700}
+.dir-gate-cols{font-family:var(--D);font-size:8px;color:#999;letter-spacing:.04em;margin-left:auto}
 
 /* ── PAIR DIR CARDS ── */
 .pair-cards{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 8px 6px}
-.pair-card{background:#07070e;border:1px solid #141420;border-radius:5px;padding:5px 6px;transition:all .3s}
+.pair-card{background:#07070e;border:1px solid #1e1e30;border-radius:5px;padding:5px 6px;transition:all .3s}
 .pair-card.has-signal{border-color:rgba(34,211,238,.35);box-shadow:0 0 12px rgba(34,211,238,.12)}
 .pc-top{display:flex;align-items:center;gap:4px;margin-bottom:4px}
-.pc-name{font-family:var(--D);font-size:11px;letter-spacing:.1em;line-height:1}
+.pc-name{font-family:var(--D);font-size:11px;letter-spacing:.1em;line-height:1;font-weight:700}
 .hl .pc-name{color:var(--hl)}
 .mx .pc-name{color:var(--mexc)}
 .sig-tag{font-size:7px;padding:1px 4px;border-radius:8px;font-family:var(--D);letter-spacing:.07em;animation:sigBadge 1.2s ease-in-out infinite}
@@ -135,34 +138,35 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .sig-l{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:var(--green)}
 .dir-grid{display:flex;gap:3px}
 .dir-col{display:flex;flex-direction:column;gap:2px;align-items:center}
-.sdot{width:7px;height:7px;border-radius:50%;background:#141420;border:1px solid #1e1e30;transition:background .25s,box-shadow .25s;flex-shrink:0}
+.sdot{width:7px;height:7px;border-radius:50%;background:#141420;border:1px solid #2a2a40;transition:background .25s,box-shadow .25s;flex-shrink:0}
 .sdot.pass{background:var(--green);border:none;box-shadow:0 0 5px 1px rgba(34,197,94,.65)}
 .sdot.fail{background:var(--red);border:none;box-shadow:0 0 5px 1px rgba(239,68,68,.65)}
-.pc-status{font-size:7px;color:#333;margin-top:3px;letter-spacing:.04em;line-height:1.2}
+.pc-status{font-size:7px;margin-top:3px;letter-spacing:.04em;line-height:1.3;color:#ccc}
 
 /* ── GATE LEGEND ── */
-.gate-legend{padding:3px 12px 4px;font-size:7px;color:#2a2a3a;letter-spacing:.06em;display:flex;gap:6px;flex-wrap:wrap}
-.gl-item{white-space:nowrap}
+.gate-legend{padding:3px 12px 4px;font-size:7px;color:#999;letter-spacing:.06em;display:flex;gap:6px;flex-wrap:wrap}
+.gl-item{white-space:nowrap;color:#aaa;font-weight:600}
 
 /* ── SIGNAL NODE ── */
-.signal-node{margin:3px 10px 2px;padding:7px 12px;border-radius:5px;display:flex;align-items:center;gap:10px;border:1px solid #141420;transition:all .4s}
+.signal-node{margin:3px 10px 2px;padding:7px 12px;border-radius:5px;display:flex;align-items:center;gap:10px;border:1px solid #1e1e30;transition:all .4s}
 .signal-node.fired{background:rgba(34,211,238,.06);border-color:rgba(34,211,238,.35);box-shadow:0 0 16px rgba(34,211,238,.15);animation:signalNode 1.5s ease-in-out infinite}
 @keyframes signalNode{0%,100%{box-shadow:0 0 10px rgba(34,211,238,.1)}50%{box-shadow:0 0 22px rgba(34,211,238,.3)}}
-.sn-icon{font-size:20px;color:#222;transition:color .4s;line-height:1}
+.sn-icon{font-size:20px;color:#444;transition:color .4s;line-height:1}
 .signal-node.fired .sn-icon{color:#22d3ee}
 .sn-body{flex:1}
-.sn-title{font-family:var(--D);font-size:14px;letter-spacing:.1em;color:#333;transition:color .4s;line-height:1}
+.sn-title{font-family:var(--D);font-size:14px;letter-spacing:.1em;color:#bbb;transition:color .4s;line-height:1;font-weight:700}
 .signal-node.fired .sn-title{color:#22d3ee}
-.sn-sub{font-size:8px;color:#444;letter-spacing:.08em;margin-top:2px}
+.sn-sub{font-size:8px;color:#aaa;letter-spacing:.08em;margin-top:2px}
 .sn-fl{font-family:var(--D);font-size:11px;color:#22d3ee;letter-spacing:.08em;opacity:0;transition:opacity .4s}
 .signal-node.fired .sn-fl{opacity:1}
 
 /* ── FOOTER ── */
 .footer{padding:7px 14px;border-top:1px solid var(--border);background:#07071a;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.ft-lbl{font-family:var(--D);font-size:9px;color:#333;letter-spacing:.12em}
+.ft-lbl{font-family:var(--D);font-size:9px;color:#bbb;letter-spacing:.12em;font-weight:700}
 .ft-track{position:relative;flex:1;height:2px;background:linear-gradient(90deg,rgba(168,85,247,.3),rgba(34,211,238,.3),rgba(249,115,22,.3));border-radius:1px}
 .ft-beam{position:absolute;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,.8);animation:beamTravel 1.8s linear infinite}
 .ft-dest{font-family:var(--D);font-size:12px;letter-spacing:.1em;padding:3px 12px;border-radius:4px;border:1px solid rgba(34,211,238,.3);color:#22d3ee;background:rgba(34,211,238,.06)}
+.ft-mode{font-size:8px;color:#888;margin-left:auto;letter-spacing:.08em}
 </style>
 </head>
 <body>
@@ -173,6 +177,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
   <div class="tb-title">SIGNALS</div>
   <div class="tb-sub" id="tb-sub">SCAN PIPELINE</div>
   <div class="tb-r">
+    <div class="live-pill sim" id="live-pill">SIM</div>
     <div class="scan-badge" id="scan-badge">SCAN #—</div>
     <div class="sig-badge" id="sig-badge">— SIGNALS</div>
     <div class="sess-pill" id="sess-pill">EU</div>
@@ -195,79 +200,171 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
   <div class="ft-lbl">PROMOTED SIGNALS →</div>
   <div class="ft-track"><div class="ft-beam"></div></div>
   <div class="ft-dest">FLEET LINK + ACTIVE TRADES</div>
+  <div class="ft-mode" id="ft-mode">SIMULATED</div>
 </div>
 
 <script>
 'use strict';
 
-/* ── Data ───────────────────────────────────────────────── */
+/* ── Static data ────────────────────────────────────────────────── */
 const HL_PAIRS   = ['BTC','DOGE','SUI','ETH','NEAR','XRP','SOL','WIF','AVAX','@107','LTC'];
 const MEXC_PAIRS = ['BTC','DOGE','SUI','ETH','NEAR','XRP','SOL','WIF','AVAX','KAIA','BONK','ONDO','LTC'];
 
 const PAIR_STAGES = [
-  {id:'price',  label:'PRICE FETCH',  sub:'1m · book · price',    tickAt:2,  failRate:.04},
-  {id:'indic',  label:'INDICATORS',   sub:'KDJ · RSI · ATR · ADX',tickAt:5,  failRate:0},
-  {id:'regime', label:'BTC REGIME',   sub:'J1H context gate',      tickAt:8,  failRate:.12},
-  {id:'flash',  label:'BTC FLASH',    sub:'1m crash detector',     tickAt:10, failRate:.07},
-  {id:'pstate', label:'PAIR STATE',   sub:'→ overlay (free)',      tickAt:12, failRate:0, cp:true},
+  {id:'price',  label:'PRICE FETCH',  sub:'1m · book · price',     tickAt:2,  failRate:.04},
+  {id:'indic',  label:'INDICATORS',   sub:'KDJ · RSI · ATR · ADX', tickAt:5,  failRate:0},
+  {id:'regime', label:'BTC REGIME',   sub:'J1H context gate',       tickAt:8,  failRate:.12},
+  {id:'flash',  label:'BTC FLASH',    sub:'1m crash detector',      tickAt:10, failRate:.07},
+  {id:'pstate', label:'PAIR STATE',   sub:'→ overlay (free)',       tickAt:12, failRate:0, cp:true},
 ];
 
 const DIR_GATES = [
-  {id:'adx',   label:'ADX',    tickAt:13, sfr:.05, lfr:.08},
-  {id:'j1h',   label:'J1H',    tickAt:14, sfr:.10, lfr:.10},
-  {id:'rsi',   label:'RSI',    tickAt:15, sfr:.12, lfr:.08},
-  {id:'depth', label:'DPT',    tickAt:16, sfr:.15, lfr:.18},
-  {id:'sess',  label:'SES',    tickAt:17, sfr:.08, lfr:.10},
-  {id:'cool',  label:'COL',    tickAt:18, sfr:.20, lfr:.15},
-  {id:'intrd', label:'ITR',    tickAt:19, sfr:.05, lfr:.05},
-  {id:'mkt',   label:'MKT',    tickAt:20, sfr:.08, lfr:.06},
-  {id:'score', label:'SCR',    tickAt:21, sfr:.30, lfr:.35},
-  {id:'drift', label:'DRF',    tickAt:22, sfr:.05, lfr:.05},
+  {id:'adx',   label:'ADX', tickAt:13},
+  {id:'j1h',   label:'J1H', tickAt:14},
+  {id:'rsi',   label:'RSI', tickAt:15},
+  {id:'depth', label:'DPT', tickAt:16},
+  {id:'sess',  label:'SES', tickAt:17},
+  {id:'cool',  label:'COL', tickAt:18},
+  {id:'intrd', label:'ITR', tickAt:19},
+  {id:'mkt',   label:'MKT', tickAt:20},
+  {id:'score', label:'SCR', tickAt:21},
+  {id:'drift', label:'DRF', tickAt:22},
 ];
+
+const DIR_GATES_SIM = DIR_GATES.map((g,i) => ({...g,
+  sfr:[.05,.10,.12,.15,.08,.20,.05,.08,.30,.05][i],
+  lfr:[.08,.10,.08,.18,.10,.15,.05,.06,.35,.05][i]
+}));
 
 const MAX_TICK = 32;
 
-/* ── RNG ────────────────────────────────────────────────── */
-function rng(seed) {
+/* ── Live state ─────────────────────────────────────────────────── */
+let liveData  = null;
+let liveMode  = false;
+let liveHlScan = 0, liveMxScan = 0;
+
+/* ── Seeded RNG ──────────────────────────────────────────────────── */
+function lcg(seed) {
   let s = seed >>> 0;
   return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
 }
-function seed(scan, pi, stageId, dir='') {
-  const code = (stageId+dir).split('').reduce((a,c) => a*31+c.charCodeAt(0), 0);
-  return ((scan*997 + pi*31 + code) >>> 0);
+function makeSeed(scan, pi, tag) {
+  const h = tag.split('').reduce((a,c) => a*31+c.charCodeAt(0)|0, 0);
+  return ((scan*997 + pi*31 + h) >>> 0);
 }
 
-/* ── Compute pair states ─────────────────────────────────── */
-function computeStates(scanNum, pairs, tick) {
-  return pairs.map((_, pi) => {
+/* ── Live helpers ────────────────────────────────────────────────── */
+function normSym(s) {
+  return s.replace(/_USDT$/i,'').replace(/^@/,'').toUpperCase();
+}
+
+function matchPairState(venueKey, pairName) {
+  if (!liveData) return null;
+  const st = liveData[venueKey];
+  if (!st || !Array.isArray(st.pair_states)) return null;
+  const target = normSym(pairName);
+  return st.pair_states.find(p => normSym(p.symbol || p.pair || '') === target) || null;
+}
+
+function computeRealGates(ps, dir) {
+  const adx  = parseFloat(ps.adx1h  || ps.adx   || 0);
+  const j1h  = parseFloat(ps.j1h    || ps.j_1h   || 0);
+  const j15  = parseFloat(ps.j15m   || ps.j_15m  || 0);
+  const rsi  = parseFloat(ps.rsi15m || ps.rsi    || 0);
+  const bidP = parseFloat(ps.bid_pct || 0);
+  const askP = parseFloat(ps.ask_pct || 0);
+  const sc   = parseFloat(ps.score  || 0);
+  const isS  = dir === 'SHORT';
+  return {
+    adx:   isS ? (adx >= 25)          : (adx >= 30),
+    j1h:   isS ? (j1h < 60)           : (j1h > 40),
+    rsi:   isS ? (rsi > 45)           : (rsi < 55),
+    depth: isS ? (askP >= 55)         : (bidP >= 55),
+    sess:  true,
+    cool:  true,
+    intrd: true,
+    mkt:   true,
+    score: sc >= 4,
+    drift: true,
+  };
+}
+
+function getRealScanCount(venueKey) {
+  if (!liveData) return null;
+  const st = liveData[venueKey];
+  return (st && st.scan_count) ? st.scan_count : null;
+}
+
+function getRealOpenTrades(venueKey) {
+  if (!liveData) return [];
+  const st = liveData[venueKey];
+  if (!st || !st.open_trades) return [];
+  const ot = st.open_trades;
+  return Array.isArray(ot) ? ot : Object.values(ot);
+}
+
+function isBtcFlash(venueKey) {
+  if (!liveData) return false;
+  const st = liveData[venueKey];
+  return !!(st && st.btc_flash_active);
+}
+
+/* ── Compute pair states ─────────────────────────────────────────── */
+function computeStates(scanNum, pairs, tick, venueKey) {
+  const flash = isBtcFlash(venueKey);
+  return pairs.map((pairName, pi) => {
+    const livePs = liveMode ? matchPairState(venueKey, pairName) : null;
     const pr = {}; let blocked = false;
+
     for (const st of PAIR_STAGES) {
       if (tick < st.tickAt) { pr[st.id]='idle'; continue; }
-      if (st.cp)            { pr[st.id]=blocked?'idle':'checkpoint'; continue; }
-      if (blocked)          { pr[st.id]='idle'; continue; }
-      const failed = rng(seed(scanNum,pi,st.id))() < st.failRate;
-      pr[st.id] = failed?'fail':'pass';
-      if (failed) blocked = true;
-    }
-    const db = {SHORT:blocked, LONG:blocked};
-    const dr = {SHORT:{}, LONG:{}};
-    for (const dir of ['SHORT','LONG']) {
-      for (const g of DIR_GATES) {
-        if (tick < g.tickAt)    { dr[dir][g.id]='idle'; continue; }
-        if (db[dir])            { dr[dir][g.id]='idle'; continue; }
-        const fr = dir==='SHORT'?g.sfr:g.lfr;
-        const failed = rng(seed(scanNum,pi,g.id,dir))() < fr;
-        dr[dir][g.id] = failed?'fail':'pass';
-        if (failed) db[dir] = true;
+      if (st.cp) { pr[st.id]=blocked?'idle':'checkpoint'; continue; }
+      if (blocked) { pr[st.id]='idle'; continue; }
+
+      if (livePs) {
+        if (st.id === 'flash' && flash) {
+          pr[st.id]='fail'; blocked=true;
+        } else {
+          pr[st.id]='pass';
+        }
+      } else {
+        const failed = lcg(makeSeed(scanNum, pi, st.id))() < st.failRate;
+        pr[st.id] = failed ? 'fail' : 'pass';
+        if (failed) blocked=true;
       }
     }
-    const ss = !db.SHORT && tick>=MAX_TICK-6;
-    const ls = !db.LONG  && tick>=MAX_TICK-6;
-    return {pr, dr, ss, ls};
+
+    const db = {SHORT:blocked, LONG:blocked};
+    const dr = {SHORT:{}, LONG:{}};
+    const realG = livePs ? {
+      SHORT: computeRealGates(livePs, 'SHORT'),
+      LONG:  computeRealGates(livePs, 'LONG'),
+    } : null;
+
+    for (const dir of ['SHORT','LONG']) {
+      for (const g of DIR_GATES_SIM) {
+        if (tick < g.tickAt) { dr[dir][g.id]='idle'; continue; }
+        if (db[dir])          { dr[dir][g.id]='idle'; continue; }
+
+        let pass;
+        if (realG) {
+          pass = !!realG[dir][g.id];
+        } else {
+          const fr = dir==='SHORT' ? g.sfr : g.lfr;
+          pass = lcg(makeSeed(scanNum, pi, g.id+dir))() >= fr;
+        }
+        dr[dir][g.id] = pass ? 'pass' : 'fail';
+        if (!pass) db[dir]=true;
+      }
+    }
+
+    const ss = !db.SHORT && tick >= MAX_TICK-6;
+    const ls = !db.LONG  && tick >= MAX_TICK-6;
+    return {pr, dr, ss, ls, livePs};
   });
 }
 
-/* ── Active stage ────────────────────────────────────────── */
+/* ── Active stage ────────────────────────────────────────────────── */
 function activeStage(tick) {
   for (let i=PAIR_STAGES.length-1; i>=0; i--)
     if (tick >= PAIR_STAGES[i].tickAt) return PAIR_STAGES[i].id;
@@ -275,9 +372,9 @@ function activeStage(tick) {
   return '';
 }
 
-/* ── Build DOM for a venue column ───────────────────────── */
-function buildColumn(col, venue, pairs) {
-  const isHL = venue==='HL';
+/* ── Build DOM ───────────────────────────────────────────────────── */
+function buildColumn(col, venue, pairs, venueKey) {
+  const isHL = venueKey === 'hl';
   const clr  = isHL ? '#a855f7' : '#f97316';
   const callsign = isHL ? 'HL-1' : 'MEXC-1';
   const fullname = isHL ? 'HYPERLIQUID' : 'MEXC FUTURES';
@@ -285,10 +382,7 @@ function buildColumn(col, venue, pairs) {
   col.innerHTML = `
     <div class="vessel-hdr">
       <div class="vh-top">
-        <div class="ring-wrap">
-          <div class="ring-pulse"></div>
-          <div class="ring-core"></div>
-        </div>
+        <div class="ring-wrap"><div class="ring-pulse"></div><div class="ring-core"></div></div>
         <div class="vh-id">
           <div class="vh-callsign">${callsign}</div>
           <div class="vh-fullname">${fullname}</div>
@@ -296,6 +390,7 @@ function buildColumn(col, venue, pairs) {
         <div class="vh-right">
           <div class="vh-scan" id="${venue}-scan-lbl">SCAN #—</div>
           <div class="vh-pairs">${pairs.length} PAIRS</div>
+          <div class="vh-mode sim" id="${venue}-mode-lbl">SIM</div>
         </div>
       </div>
       <div class="ecg-wrap">
@@ -303,27 +398,22 @@ function buildColumn(col, venue, pairs) {
           <path class="ecg-path" d="M0,12 L35,12 L43,4 L51,20 L59,12 L75,12 L83,2 L91,22 L99,12 L130,12 L138,6 L146,18 L154,12 L200,12"/>
         </svg>
       </div>
-      <div class="beam-track">
-        <div class="beam-p"></div>
-        <div class="beam-p beam-p2"></div>
-      </div>
+      <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
     </div>
 
     <div class="pipe-body">
-      <!-- preflight -->
       <div class="preflight" id="${venue}-preflight">
         <div class="pf-lbl">PRE-FLIGHT</div>
         <div class="pf-gates">
-          <div class="pf-gate"><div class="dot" id="${venue}-warm"></div><span class="pf-dim" id="${venue}-warm-lbl">WARMUP</span></div>
-          <div class="pf-gate"><div class="dot" id="${venue}-halt"></div><span class="pf-dim" id="${venue}-halt-lbl">FLEET HALT</span></div>
+          <div class="pf-gate"><div class="dot" id="${venue}-warm"></div><span id="${venue}-warm-lbl">WARMUP</span></div>
+          <div class="pf-gate"><div class="dot" id="${venue}-halt"></div><span id="${venue}-halt-lbl">FLEET HALT</span></div>
         </div>
       </div>
 
-      <!-- pipeline stages -->
       ${PAIR_STAGES.map(st => `
         <div class="stage-row" id="${venue}-row-${st.id}" style="border-left-color:${st.cp?'#22d3ee':clr}">
           <div class="stage-lbl">
-            <div class="stage-name" id="${venue}-sname-${st.id}" style="color:#2a2a3a">${st.label}</div>
+            <div class="stage-name" id="${venue}-sname-${st.id}" style="color:#888">${st.label}</div>
             <div class="stage-sub">${st.sub}</div>
           </div>
           <div class="dot-row" id="${venue}-dots-${st.id}">
@@ -335,18 +425,16 @@ function buildColumn(col, venue, pairs) {
 
       <div class="connector"></div>
 
-      <!-- direction gates header -->
       <div class="dir-hdr">
         <div class="dir-hdr-lbl">DIRECTION GATES</div>
         <div class="dir-gate-cols">${DIR_GATES.map(g=>g.label).join('·')}</div>
       </div>
 
-      <!-- per-pair direction cards -->
       <div class="pair-cards" id="${venue}-pair-cards">
         ${pairs.map((p,i) => `
           <div class="pair-card" id="${venue}-pc-${i}">
             <div class="pc-top">
-              <div class="pc-name">${p.replace('_USDT','')}</div>
+              <div class="pc-name">${p}</div>
               <div class="sig-tag sig-s" id="${venue}-ss-${i}" style="display:none">SHORT</div>
               <div class="sig-tag sig-l" id="${venue}-sl-${i}" style="display:none">LONG</div>
             </div>
@@ -363,17 +451,20 @@ function buildColumn(col, venue, pairs) {
         `).join('')}
       </div>
 
-      <!-- gate legend -->
       <div class="gate-legend">
-        ${DIR_GATES.map(g=>`<span class="gl-item">${g.label.toLowerCase()}=${g.id==='score'?'SCR≥4':g.id==='depth'?'DPT>55%':g.id}</span>`).join(' ')}
-        · <span>top=SHORT bot=LONG</span>
+        <span class="gl-item">ADX=trend strength</span>
+        <span class="gl-item">J1H=1h momentum</span>
+        <span class="gl-item">RSI=45-55 zone</span>
+        <span class="gl-item">DPT=book depth>55%</span>
+        <span class="gl-item">SCR≥4</span>
+        <span style="color:#777">·</span>
+        <span style="color:#999">top=SHORT bot=LONG</span>
       </div>
 
-      <!-- signal node -->
       <div class="signal-node" id="${venue}-sig-node">
         <div class="sn-icon">◎</div>
         <div class="sn-body">
-          <div class="sn-title" id="${venue}-sig-title">NO SIGNAL</div>
+          <div class="sn-title" id="${venue}-sig-title">EVALUATING…</div>
           <div class="sn-sub" id="${venue}-sig-sub"></div>
         </div>
         <div class="sn-fl">→ FLEET LINK</div>
@@ -382,64 +473,67 @@ function buildColumn(col, venue, pairs) {
   `;
 }
 
-/* ── Render (diff updates) ───────────────────────────────── */
+/* ── Render ──────────────────────────────────────────────────────── */
 function render(tick, scanNum) {
-  const prog = Math.round(tick/MAX_TICK*100);
-  document.getElementById('prog-fill').style.width = prog+'%';
-  document.getElementById('scan-badge').textContent = 'SCAN #'+scanNum;
+  document.getElementById('prog-fill').style.width = Math.round(tick/MAX_TICK*100)+'%';
 
   let totalSigs = 0;
 
-  for (const [venue, pairs] of [['HL',HL_PAIRS],['MEXC',MEXC_PAIRS]]) {
-    const states = computeStates(scanNum, pairs, tick);
+  for (const [venue, pairs, venueKey] of [['HL',HL_PAIRS,'hl'],['MEXC',MEXC_PAIRS,'mexc']]) {
+    const states = computeStates(scanNum, pairs, tick, venueKey);
     const act    = activeStage(tick);
 
-    /* preflight */
+    const realScan = getRealScanCount(venueKey);
+    const displayScan = realScan || scanNum;
+    const scanLbl = document.getElementById(venue+'-scan-lbl');
+    if (scanLbl) scanLbl.textContent = 'SCAN #'+displayScan;
+
+    const modeLbl = document.getElementById(venue+'-mode-lbl');
+    if (modeLbl) {
+      modeLbl.textContent = liveMode ? 'LIVE' : 'SIM';
+      modeLbl.className = 'vh-mode '+(liveMode?'live':'sim');
+    }
+
+    /* Preflight */
     const wDot = document.getElementById(venue+'-warm');
     const hDot = document.getElementById(venue+'-halt');
-    if (wDot) { if (tick>=1) { wDot.className='dot pass'; } }
-    if (hDot) { if (tick>=2) { hDot.className='dot pass'; } }
+    if (wDot && tick>=1) wDot.className='dot pass';
+    if (hDot && tick>=2) hDot.className='dot pass';
 
-    /* scan label */
-    const sl = document.getElementById(venue+'-scan-lbl');
-    if (sl) sl.textContent = 'SCAN #'+scanNum;
-
-    /* stage rows */
+    /* Pipeline stages */
     for (const st of PAIR_STAGES) {
-      const rowEl = document.getElementById(venue+'-row-'+st.id);
-      const nameEl = document.getElementById(venue+'-sname-'+st.id);
+      const rowEl   = document.getElementById(venue+'-row-'+st.id);
+      const nameEl  = document.getElementById(venue+'-sname-'+st.id);
       const statsEl = document.getElementById(venue+'-stats-'+st.id);
-      const isActive = act===st.id;
-
-      if (rowEl) rowEl.classList.toggle('active-row', isActive);
-      if (nameEl) nameEl.style.color = tick>=st.tickAt ? (st.cp?'#22d3ee':'inherit') : '#2a2a3a';
+      if (rowEl) rowEl.classList.toggle('active-row', act===st.id);
+      if (nameEl) nameEl.style.color = tick>=st.tickAt ? (st.cp?'#22d3ee':'#fff') : '#888';
 
       let pass=0, fail=0;
       pairs.forEach((_,pi) => {
         const dotEl = document.getElementById(venue+'-d-'+st.id+'-'+pi);
         if (!dotEl) return;
         const s = states[pi].pr[st.id];
-        dotEl.className = 'dot'+(s==='pass'?' pass':s==='fail'?' fail':s==='checkpoint'?' checkpoint':'');
+        dotEl.className='dot'+(s==='pass'?' pass':s==='fail'?' fail':s==='checkpoint'?' checkpoint':'');
         if (s==='pass'||s==='checkpoint') pass++;
         if (s==='fail') fail++;
       });
 
-      if (statsEl) {
-        statsEl.innerHTML = '';
-        if (tick>=st.tickAt) {
-          if (pass) statsEl.innerHTML += `<span class="stat-pass">${pass}✓</span>`;
-          if (fail) statsEl.innerHTML += ` <span class="stat-fail">${fail}✗</span>`;
-        }
+      if (statsEl && tick>=st.tickAt) {
+        statsEl.innerHTML =
+          (pass?`<span class="stat-pass">${pass}✓</span>`:'') +
+          (fail?` <span class="stat-fail">${fail}✗</span>`:'');
+      } else if (statsEl) {
+        statsEl.innerHTML='';
       }
     }
 
-    /* direction gate cards */
-    let venueSigs = 0;
+    /* Direction gate cards */
+    let venueSigs=0;
     pairs.forEach((_,pi) => {
-      const {dr,ss,ls} = states[pi];
-      const card = document.getElementById(venue+'-pc-'+pi);
-      const ssTag = document.getElementById(venue+'-ss-'+pi);
-      const slTag = document.getElementById(venue+'-sl-'+pi);
+      const {dr, ss, ls, livePs} = states[pi];
+      const card   = document.getElementById(venue+'-pc-'+pi);
+      const ssTag  = document.getElementById(venue+'-ss-'+pi);
+      const slTag  = document.getElementById(venue+'-sl-'+pi);
       const statEl = document.getElementById(venue+'-pcs-'+pi);
 
       if (ssTag) ssTag.style.display = ss?'':'none';
@@ -447,60 +541,84 @@ function render(tick, scanNum) {
       if (card)  card.classList.toggle('has-signal', ss||ls);
       if (ss||ls) venueSigs++;
 
-      let sBlocked=false, lBlocked=false;
       DIR_GATES.forEach(g => {
         const sDot = document.getElementById(venue+'-s-'+pi+'-'+g.id);
         const lDot = document.getElementById(venue+'-l-'+pi+'-'+g.id);
-        const ss2 = dr.SHORT[g.id];
-        const ls2 = dr.LONG[g.id];
-        if (sDot) sDot.className = 'sdot'+(ss2==='pass'?' pass':ss2==='fail'?' fail':'');
-        if (lDot) lDot.className = 'sdot'+(ls2==='pass'?' pass':ls2==='fail'?' fail':'');
-        if (ss2==='fail') sBlocked=true;
-        if (ls2==='fail') lBlocked=true;
+        const sv = dr.SHORT[g.id];
+        const lv = dr.LONG[g.id];
+        if (sDot) sDot.className='sdot'+(sv==='pass'?' pass':sv==='fail'?' fail':'');
+        if (lDot) lDot.className='sdot'+(lv==='pass'?' pass':lv==='fail'?' fail':'');
       });
 
       if (statEl && tick>=13) {
         const sf = DIR_GATES.find(g=>dr.SHORT[g.id]==='fail');
         const lf = DIR_GATES.find(g=>dr.LONG[g.id]==='fail');
-        const sAll = Object.values(dr.SHORT).every(v=>v==='idle');
-        const lAll = Object.values(dr.LONG).every(v=>v==='idle');
-        if (!sAll||!lAll) {
+        const sIdle = Object.values(dr.SHORT).every(v=>v==='idle');
+        const lIdle = Object.values(dr.LONG).every(v=>v==='idle');
+        if (!sIdle||!lIdle) {
           statEl.innerHTML =
-            (!sAll ? (sf?`<span style="color:#ef444466">S⊘${sf.label}</span>`:`<span style="color:#22c55e66">S✓</span>`) : '') +
-            ' ' +
-            (!lAll ? (lf?`<span style="color:#22c55e44">L⊘${lf.label}</span>`:`<span style="color:#22c55e66">L✓</span>`) : '');
+            (!sIdle?(sf?`<span style="color:var(--red)">S⊘${sf.label}</span>`:`<span style="color:var(--green)">S✓</span>`):'') +
+            ' '+
+            (!lIdle?(lf?`<span style="color:#ef444488">L⊘${lf.label}</span>`:`<span style="color:var(--green)">L✓</span>`):'');
+          if (livePs) {
+            const adx=parseFloat(livePs.adx1h||0), j15=parseFloat(livePs.j15m||0),
+                  bidP=parseFloat(livePs.bid_pct||0);
+            statEl.innerHTML += `<br><span style="color:#888">ADX ${adx.toFixed(0)} J ${j15.toFixed(0)} B${bidP.toFixed(0)}%</span>`;
+          }
         }
+      } else if (statEl) {
+        statEl.innerHTML='';
       }
     });
     totalSigs += venueSigs;
 
-    /* signal node */
+    /* Signal node */
     const sigNode  = document.getElementById(venue+'-sig-node');
     const sigTitle = document.getElementById(venue+'-sig-title');
     const sigSub   = document.getElementById(venue+'-sig-sub');
-    if (sigNode && tick>=MAX_TICK-6) {
+    if (!sigNode) continue;
+
+    /* In live mode, also count real open trades as signals */
+    let liveOpen = [];
+    if (liveMode) {
+      liveOpen = getRealOpenTrades(venueKey);
+    }
+
+    if (tick >= MAX_TICK-6 || liveOpen.length) {
       const sSigs = states.filter(p=>p.ss).length;
       const lSigs = states.filter(p=>p.ls).length;
-      const total = sSigs+lSigs;
-      if (total>0) {
+      const tot   = sSigs + lSigs;
+      const liveTot = liveOpen.length;
+      if (tot > 0 || liveTot > 0) {
         sigNode.className='signal-node fired';
-        if (sigTitle) sigTitle.textContent='SIGNAL FIRED';
-        if (sigSub) sigSub.innerHTML =
-          (sSigs?`<span style="color:var(--red)">${sSigs}✕SHORT </span>`:'') +
-          (lSigs?`<span style="color:var(--green)">${lSigs}✕LONG</span>`:'');
+        if (sigTitle) sigTitle.textContent = liveMode && liveTot ? 'TRADE ACTIVE' : 'SIGNAL FIRED';
+        if (sigSub) {
+          let parts=[];
+          if (liveMode && liveTot) {
+            liveOpen.forEach(t=>{
+              const sym=(t.symbol||t.pair||'').replace(/_USDT$/i,'');
+              const dir=(t.direction||'').toUpperCase();
+              parts.push(`<span style="color:${dir==='LONG'?'var(--green)':'var(--red)'}">${sym} ${dir}</span>`);
+            });
+          } else {
+            if (sSigs) parts.push(`<span style="color:var(--red)">${sSigs}×SHORT</span>`);
+            if (lSigs) parts.push(`<span style="color:var(--green)">${lSigs}×LONG</span>`);
+          }
+          sigSub.innerHTML = parts.join(' ');
+        }
       } else {
         sigNode.className='signal-node';
         if (sigTitle) sigTitle.textContent='NO SIGNAL';
-        if (sigSub) sigSub.textContent='';
+        if (sigSub)  sigSub.innerHTML='';
       }
-    } else if (sigNode && tick<MAX_TICK-6) {
+    } else {
       sigNode.className='signal-node';
       if (sigTitle) sigTitle.textContent='EVALUATING…';
-      if (sigSub) sigSub.textContent='';
+      if (sigSub)  sigSub.innerHTML='';
     }
   }
 
-  /* header signal badge */
+  /* Topbar signal badge */
   const sb = document.getElementById('sig-badge');
   if (sb) {
     if (totalSigs>0 && tick>=MAX_TICK-6) {
@@ -510,9 +628,13 @@ function render(tick, scanNum) {
       sb.style.display='none';
     }
   }
+
+  /* Topbar scan badge */
+  const topScan = getRealScanCount('hl') || getRealScanCount('mexc') || scanNum;
+  document.getElementById('scan-badge').textContent='SCAN #'+topScan;
 }
 
-/* ── Clock ───────────────────────────────────────────────── */
+/* ── Clock ───────────────────────────────────────────────────────── */
 function updateClock() {
   const now = new Date();
   document.getElementById('clk').textContent =
@@ -521,24 +643,56 @@ function updateClock() {
   const sess = h<8?'ASIA':h<17?'EU':'US';
   const pill = document.getElementById('sess-pill');
   pill.textContent=sess; pill.className='sess-pill '+sess;
-  document.getElementById('tb-sub').textContent=
-    'SCAN PIPELINE · '+sess+' SESSION';
+  document.getElementById('tb-sub').textContent='SCAN PIPELINE · '+sess+' SESSION';
 }
 
-/* ── Init ────────────────────────────────────────────────── */
-buildColumn(document.getElementById('col-hl'),   'HL',   HL_PAIRS);
-buildColumn(document.getElementById('col-mx'),   'MEXC', MEXC_PAIRS);
+/* ── Fetch live data from fleet scorecard API ────────────────────── */
+async function fetchLive() {
+  try {
+    const r = await fetch('/api/live', {credentials:'include'});
+    if (!r.ok) { setSimMode(); return; }
+    const data = await r.json();
+    liveData = data;
+    const hlOk   = !!data.hl_ok;
+    const mxOk   = !!data.mexc_ok;
+    liveMode = hlOk || mxOk;
+    const pill = document.getElementById('live-pill');
+    const ftMode = document.getElementById('ft-mode');
+    if (liveMode) {
+      pill.textContent='LIVE'; pill.className='live-pill live';
+      if (ftMode) ftMode.textContent='LIVE DATA FROM SCANNER';
+    } else {
+      setSimMode();
+    }
+  } catch(e) {
+    setSimMode();
+  }
+}
+
+function setSimMode() {
+  liveMode = false;
+  const pill = document.getElementById('live-pill');
+  if (pill) { pill.textContent='SIM'; pill.className='live-pill sim'; }
+  const ftMode = document.getElementById('ft-mode');
+  if (ftMode) ftMode.textContent='SIMULATED (scanner offline)';
+}
+
+/* ── Init ────────────────────────────────────────────────────────── */
+buildColumn(document.getElementById('col-hl'),   'HL',   HL_PAIRS,   'hl');
+buildColumn(document.getElementById('col-mx'),   'MEXC', MEXC_PAIRS, 'mexc');
 updateClock();
 setInterval(updateClock, 30000);
 
 let tick=0, scanNum=47;
 render(tick, scanNum);
-
-setInterval(()=>{
+setInterval(() => {
   tick++;
-  if (tick>MAX_TICK) { tick=0; scanNum++; }
+  if (tick > MAX_TICK) { tick=0; scanNum++; }
   render(tick, scanNum);
 }, 140);
+
+fetchLive();
+setInterval(fetchLive, 25000);
 </script>
 </body>
 </html>
