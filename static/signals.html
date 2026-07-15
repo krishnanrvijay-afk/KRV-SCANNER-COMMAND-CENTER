@@ -104,7 +104,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 
 /* ── PREFLIGHT STRIP ── */
 .preflight{display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:1px solid #0e0e1a}
-.pf-lbl{font-family:var(--D);font-size:10px;letter-spacing:.12em;color:#bbb;width:86px;flex-shrink:0;font-weight:700}
+.pf-lbl{font-family:var(--D);font-size:20px;letter-spacing:.12em;color:#fff;flex-shrink:0;font-weight:700}
 .pf-gates{display:flex;gap:10px}
 .pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em;color:#ccc}
 
@@ -128,9 +128,9 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 
 /* ── DIR GATES ── */
 .dir-hdr{padding:3px 12px;display:flex;align-items:center;gap:8px}
-.dir-hdr-lbl{font-family:var(--D);font-size:10px;color:#ccc;letter-spacing:.1em;font-weight:700}
+.dir-hdr-lbl{font-family:var(--D);font-size:20px;color:#fff;letter-spacing:.1em;font-weight:700}
 .dir-gate-cols{font-family:var(--D);font-size:8px;color:#999;letter-spacing:.04em;margin-left:auto}
-.pair-cards{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:0 8px 6px}
+.pair-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 8px 6px}
 .pair-card{background:#07070e;border:1px solid #1e1e30;border-radius:5px;padding:5px 6px;transition:all .3s}
 .pair-card.has-signal{border-color:rgba(34,211,238,.35);box-shadow:0 0 12px rgba(34,211,238,.12)}
 .pc-top{display:flex;align-items:center;gap:4px;margin-bottom:4px}
@@ -612,12 +612,12 @@ function render() {
         const lI = Object.values(dr.LONG).every(v=>v==='idle');
         if (!sI||!lI) {
           pcsEl.innerHTML =
-            (!sI?(sf?`<span style="color:var(--red)">S⊘${sf.label}</span>`:`<span style="color:var(--green)">S✓</span>`):'') +
+            (!sI?(sf?`<span style="color:#ef4444;font-weight:700">S-${sf.label}</span>`:`<span style="color:#22c55e;font-weight:700">S✓</span>`):'') +
             ' '+
-            (!lI?(lf?`<span style="color:#ef444488">L⊘${lf.label}</span>`:`<span style="color:var(--green)">L✓</span>`):'');
+            (!lI?(lf?`<span style="color:#ef4444;font-weight:700">L-${lf.label}</span>`:`<span style="color:#22c55e;font-weight:700">L✓</span>`):'');
           if (livePs) {
             const a=parseFloat(livePs.adx1h||0),j=parseFloat(livePs.j15m||0),b=parseFloat(livePs.bid_pct||0);
-            pcsEl.innerHTML+=`<br><span style="color:#888">ADX ${a.toFixed(0)} J ${j.toFixed(0)} B${b.toFixed(0)}%</span>`;
+            pcsEl.innerHTML+=`<br><span style="color:#fff;font-weight:700">ADX ${a.toFixed(0)} · J${j.toFixed(0)} · ${b.toFixed(0)}%</span>`;
           }
         }
       } else if (pcsEl) pcsEl.innerHTML='';

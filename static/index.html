@@ -1295,8 +1295,8 @@ body {
     .fp2-dir-l { font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; color:#22c55e; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.4); }
     .fp2-dir-s { font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; color:#ef4444; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.4); }
     .fp2-sess  { font-size:8px; font-weight:800; padding:2px 7px; border-radius:8px; color:#06b6d4; border:1px solid rgba(6,182,212,.35); }
-    .fp2-timer { margin-left:auto; font-size:11px; color:#555577; font-variant-numeric:tabular-nums; font-family:'JetBrains Mono',monospace; }
-    .fp2-sub   { font-size:9px; color:#555577; font-weight:700; margin-bottom:7px; letter-spacing:.04em; }
+    .fp2-timer { margin-left:auto; font-size:11px; color:#aaa; font-variant-numeric:tabular-nums; font-family:'JetBrains Mono',monospace; }
+    .fp2-sub   { font-size:9px; color:#bbb; font-weight:700; margin-bottom:7px; letter-spacing:.04em; }
     .fp2-live  { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
     .fp2-price { font-size:20px; font-weight:700; color:#fff; font-variant-numeric:tabular-nums; }
     .fp2-delta { font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
@@ -1314,22 +1314,22 @@ body {
     .fp2-dot { position:absolute; top:50%; transform:translate(-50%,-50%); width:9px; height:9px; border-radius:50%; border:2px solid #0a0a1a; }
     .fp2-metrics { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-bottom:8px; }
     .fp2-metric  { background:#06061a; border:1px solid #141428; border-radius:5px; padding:4px 6px; display:flex; flex-direction:column; gap:1px; }
-    .fp2-ml { font-size:7px; color:#888899; letter-spacing:.08em; }
+    .fp2-ml { font-size:7px; color:#ccc; letter-spacing:.08em; }
     .fp2-mv { font-size:10px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; }
     .fp2-score { font-size:13px; letter-spacing:2px; }
     .fp2-vctag { font-size:9px; font-weight:800; padding:2px 8px; border-radius:10px; font-family:var(--display); letter-spacing:.04em; }
     .fp2-vctag-hl   { color:#a855f7; background:rgba(168,85,247,.15); border:1px solid rgba(168,85,247,.4); }
     .fp2-vctag-mexc { color:#f97316; background:rgba(249,115,22,.15); border:1px solid rgba(249,115,22,.4); }
-    .fp2-close-btn { width:100%; font-family:var(--display); font-size:11px; letter-spacing:.08em; padding:6px; border-radius:7px; cursor:pointer; border:1px solid rgba(239,68,68,.5); background:rgba(239,68,68,.07); color:#ef4444; transition:all .2s; }
+    .fp2-close-btn { font-family:var(--display); font-size:10px; letter-spacing:.06em; padding:4px 10px; border-radius:6px; cursor:pointer; border:1px solid rgba(239,68,68,.5); background:rgba(239,68,68,.07); color:#ef4444; transition:all .2s; }
     .fp2-close-btn:hover { background:rgba(239,68,68,.2); border-color:#ef4444; }
     .fp2-close-btn.confirming { background:rgba(239,68,68,.28); border-color:#ef4444; color:#fff; box-shadow:0 0 12px rgba(239,68,68,.3); }
-    .fp2-close-row { display:flex; gap:6px; }
-    .fp2-close-row .fp2-close-btn { flex:1; }
+    .fp2-close-row { display:flex; gap:6px; justify-content:flex-start; }
+    .fp2-close-row .fp2-close-btn { flex:0 0 auto; }
     .fp2-paper-btn { border-color:rgba(34,197,94,.5) !important; background:rgba(34,197,94,.07) !important; color:#22c55e !important; }
     .fp2-paper-btn:hover { background:rgba(34,197,94,.2) !important; }
-    .fp2-force-btn { flex:1; font-family:var(--display); font-size:11px; letter-spacing:.08em; padding:6px; border-radius:7px; cursor:pointer; border:1px solid rgba(239,68,68,.6); background:rgba(239,68,68,.10); color:#ef4444; transition:all .2s; }
+    .fp2-force-btn { font-family:var(--display); font-size:10px; letter-spacing:.06em; padding:4px 10px; border-radius:6px; cursor:pointer; border:1px solid rgba(239,68,68,.6); background:rgba(239,68,68,.10); color:#ef4444; transition:all .2s; }
     .fp2-force-btn:hover { background:rgba(239,68,68,.22); border-color:#ef4444; }
-    .fp2-scan-info { font-size:8px; color:#444466; letter-spacing:.04em; padding:5px 2px 2px; line-height:1.5; border-top:1px solid #10101e; margin:2px 0 6px; }
+    .fp2-scan-info { font-size:8px; color:#aaa; letter-spacing:.04em; padding:5px 2px 2px; line-height:1.5; border-top:1px solid #10101e; margin:2px 0 6px; }
     </style>
 </head>
 <body>
@@ -1485,7 +1485,7 @@ body {
       <span style="font-family:var(--display);font-size:13px;font-weight:700;color:#22c55e;letter-spacing:.1em">&#x25C9; ACTIVE POSITIONS</span>
       <span class="tri-col-badge badge-green" id="htc-pos-badge" style="margin-left:auto">0 LIVE</span>
     </div>
-    <div id="htc-pos-list">
+    <div id="htc-pos-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px">
       <div class="tri-no-pos">NO OPEN POSITIONS</div>
     </div>
   </div>
