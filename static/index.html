@@ -1312,7 +1312,7 @@ body {
     .fp2-mck { width:1px; height:20px; display:block; }
     .fp2-mkb { font-size:7px; font-weight:800; margin-top:1px; white-space:nowrap; }
     .fp2-dot { position:absolute; top:50%; transform:translate(-50%,-50%); width:9px; height:9px; border-radius:50%; border:2px solid #0a0a1a; }
-    .fp2-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:8px; }
+    .fp2-metrics { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-bottom:8px; }
     .fp2-metric  { background:#06061a; border:1px solid #141428; border-radius:5px; padding:4px 6px; display:flex; flex-direction:column; gap:1px; }
     .fp2-ml { font-size:7px; color:#888899; letter-spacing:.08em; }
     .fp2-mv { font-size:10px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; }
@@ -1323,6 +1323,13 @@ body {
     .fp2-close-btn { width:100%; font-family:var(--display); font-size:11px; letter-spacing:.08em; padding:6px; border-radius:7px; cursor:pointer; border:1px solid rgba(239,68,68,.5); background:rgba(239,68,68,.07); color:#ef4444; transition:all .2s; }
     .fp2-close-btn:hover { background:rgba(239,68,68,.2); border-color:#ef4444; }
     .fp2-close-btn.confirming { background:rgba(239,68,68,.28); border-color:#ef4444; color:#fff; box-shadow:0 0 12px rgba(239,68,68,.3); }
+    .fp2-close-row { display:flex; gap:6px; }
+    .fp2-close-row .fp2-close-btn { flex:1; }
+    .fp2-paper-btn { border-color:rgba(34,197,94,.5) !important; background:rgba(34,197,94,.07) !important; color:#22c55e !important; }
+    .fp2-paper-btn:hover { background:rgba(34,197,94,.2) !important; }
+    .fp2-force-btn { flex:1; font-family:var(--display); font-size:11px; letter-spacing:.08em; padding:6px; border-radius:7px; cursor:pointer; border:1px solid rgba(239,68,68,.6); background:rgba(239,68,68,.10); color:#ef4444; transition:all .2s; }
+    .fp2-force-btn:hover { background:rgba(239,68,68,.22); border-color:#ef4444; }
+    .fp2-scan-info { font-size:8px; color:#444466; letter-spacing:.04em; padding:5px 2px 2px; line-height:1.5; border-top:1px solid #10101e; margin:2px 0 6px; }
     </style>
 </head>
 <body>
@@ -2342,6 +2349,7 @@ function htcBuildPosCard(t, venue) {
   function adxCl(v)   { return v >= 50 ? '#22c55e' : v >= 25 ? '#f59e0b' : '#fff'; }
   function jCl(v)     { return v > 80  ? '#ef4444' : v < 20  ? '#22c55e' : '#fff'; }
   function stochCl(v) { return v > 75  ? '#ef4444' : v < 25  ? '#22c55e' : '#fff'; }
+  function rsiCl(v)   { return v > 70  ? '#ef4444' : v < 30  ? '#22c55e' : '#fff'; }
   var dCol = isLong ? (bidP >= 60 ? '#22c55e' : '#ef4444') : (askP >= 60 ? '#22c55e' : '#ef4444');
 
   var oneR     = Math.abs(entry - sl) || 0.001;
@@ -2374,9 +2382,13 @@ function htcBuildPosCard(t, venue) {
   var cfm   = !!_htcConfirming[key];
   var closeLbl = (paper ? '◎ PAPER ' : '') + 'CLOSE ' + venue.toUpperCase();
 
-  var openEtStr = '';
+  var openEtStr = '', openDateStr = '';
   if (openAt) {
-    try { openEtStr = new Date(openAt * 1000).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false}) + ' ET'; } catch(e) {}
+    try {
+      var _d = new Date(openAt * 1000);
+      openDateStr = _d.toLocaleDateString('en-CA',{timeZone:'America/New_York'});
+      openEtStr   = _d.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}) + ' EDT';
+    } catch(e) {}
   }
   var marginFmt = margin >= 1000 ? '$' + (margin / 1000).toFixed(1) + 'k' : (margin > 0 ? '$' + Math.round(margin) : '');
 
@@ -2433,7 +2445,7 @@ function htcBuildPosCard(t, venue) {
       + (sess ? '<span class="fp2-sess">' + sess + '</span>' : '')
       + '<span class="fp2-timer" id="' + tmrId + '">00:00:00</span>'
     + '</div>'
-    + '<div class="fp2-sub">' + lev + 'x' + (marginFmt ? '  ' + marginFmt : '') + (openEtStr ? '  ' + openEtStr : '') + '</div>'
+    + '<div class="fp2-sub">' + lev + 'x' + (marginFmt ? '  ' + marginFmt : '') + (openDateStr ? '  ' + openDateStr : '') + (openEtStr ? '  ' + openEtStr : '') + (sess ? '  ' + sess : '') + '</div>'
     + '<div class="fp2-live">'
       + '<span class="fp2-price">' + htcFmtPx(cur) + '</span>'
       + '<span class="fp2-delta" style="color:' + dltCol + '">' + dltStr + '</span>'
@@ -2446,11 +2458,17 @@ function htcBuildPosCard(t, venue) {
       + '<div class="fp2-metric"><span class="fp2-ml">STOCH</span><span class="fp2-mv" style="color:' + stochCl(sK) + '">' + sK.toFixed(1) + '/' + sD_.toFixed(1) + '</span></div>'
       + '<div class="fp2-metric"><span class="fp2-ml">J15M</span><span class="fp2-mv" style="color:' + jCl(j15) + '">' + j15.toFixed(1) + '</span></div>'
       + '<div class="fp2-metric"><span class="fp2-ml">' + dLbl + '</span><span class="fp2-mv" style="color:' + dCol + '">' + dPct.toFixed(1) + '%</span></div>'
+      + '<div class="fp2-metric"><span class="fp2-ml">RSI</span><span class="fp2-mv" style="color:' + rsiCl(rsi) + '">' + (rsi > 0 ? rsi.toFixed(0) : '—') + '</span></div>'
     + '</div>'
-    + '<button class="fp2-close-btn' + (cfm ? ' confirming' : '') + '" data-key="' + key + '" data-vc="' + venue + '" data-sym="' + sym + '" data-dir="' + dir + '" onclick="htcCloseClick(this.dataset.key,this.dataset.vc,this.dataset.sym,this.dataset.dir)">'
+    + '<div class="fp2-scan-info">' + ('SCAN J ' + j15.toFixed(1) + ' BID% ' + bidP.toFixed(1) + '% ADX ' + adx.toFixed(1) + (rsi > 0 ? ' RSI ' + rsi.toFixed(1) : '') + ' K/D ' + sK.toFixed(0) + '/' + sD_.toFixed(0) + ' · ' + (j15 > 80 ? 'J overbought' : j15 < 20 ? 'J oversold' : j15 > 50 ? 'J rising' : 'J falling')) + '</div>'
+    + '<div class="fp2-close-row">'
+    + '<button class="fp2-close-btn' + (paper ? ' fp2-paper-btn' : '') + (cfm ? ' confirming' : '') + '" data-key="' + key + '" data-vc="' + venue + '" data-sym="' + sym + '" data-dir="' + dir + '" onclick="htcCloseClick(this.dataset.key,this.dataset.vc,this.dataset.sym,this.dataset.dir)">'
       + (cfm ? '⚠ CONFIRM CLOSE — TAP AGAIN' : closeLbl)
     + '</button>'
-  + '</div>';
+    + '<button class="fp2-force-btn" data-vc="' + venue + '" data-sym="' + sym + '" data-dir="' + dir + '" onclick="htcForceCloseNow(this.dataset.vc,this.dataset.sym,this.dataset.dir)">'
+      + 'FORCE CLOSE'
+    + '</button>'
+  + '</div></div>';
 }
 
 function htcRenderPositions() {
@@ -2513,6 +2531,16 @@ function htcCloseClick(key, venue, pair, direction) {
   }).then(function(r) { console.log('force_close', r.status); htcRenderPositions(); })
     .catch(function(e) { console.error('force_close', e); });
 }
+
+function htcForceCloseNow(venue, pair, direction) {
+  fetch('/api/force_close', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({pair:pair, venue:venue, direction:direction})
+  }).then(function(r) { console.log('force_close_direct', r.status); htcRenderPositions(); })
+    .catch(function(e) { console.error('force_close_direct', e); });
+}
+
 
 function htcRenderSignals() {
   var todayPnl=null, wr=null, openCnt=0, unrealPnl=0;
