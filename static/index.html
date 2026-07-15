@@ -2397,7 +2397,7 @@ function htcRenderPositions() {
       +'<div class="pos-data">'
         +fields.map(function(f){return '<div><div class="pos-data-lbl">'+f[0]+'</div><div class="pos-data-val" style="color:'+f[2]+'">'+f[1]+'</div></div>';}).join('')
       +'</div>'
-      +'<button class="pos-close-btn'+(cfm?' confirming':'')+'" onclick="htcCloseClick(''+key+'',''+vc+'',''+sym+'',''+dir+'')">'
+      +'<button class="pos-close-btn"+(cfm?' confirming':'')+'" data-key="'+key+'" data-vc="'+vc+'" data-sym="'+sym+'" data-dir="'+dir+'" onclick="htcCloseClick(this.dataset.key,this.dataset.vc,this.dataset.sym,this.dataset.dir)">'
         +(cfm?'&#x26A0; CONFIRM CLOSE — TAP AGAIN':'&#x2715;  CLOSE POSITION')
       +'</button>'
       +'</div>';
