@@ -208,7 +208,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 
 /* ── Static data ────────────────────────────────────────────────── */
 const HL_PAIRS   = ['BTC','DOGE','SUI','ETH','NEAR','XRP','SOL','WIF','AVAX','@107','LTC'];
-const MEXC_PAIRS = ['BTC','DOGE','SUI','ETH','NEAR','XRP','SOL','WIF','AVAX','KAIA','BONK','ONDO','LTC'];
+const MEXC_PAIRS = ['BTC','LINK','SOL','ETH','XRP','DOGE','SUI','NEAR','AVAX','ARB','WIF','HYPE','LTC'];
 
 const PAIR_STAGES = [
   {id:'price',  label:'PRICE FETCH',  sub:'1m · book · price',     tickAt:2,  failRate:.04},
@@ -266,7 +266,7 @@ function matchPairState(venueKey, pairName) {
   return st.pair_states.find(p => normSym(p.symbol || p.pair || '') === target) || null;
 }
 
-function computeRealGates(ps, dir) {
+function computeRealGates(ps, dir, venue) {
   const adx  = parseFloat(ps.adx1h  || ps.adx   || 0);
   const j1h  = parseFloat(ps.j1h    || ps.j_1h   || 0);
   const j15  = parseFloat(ps.j15m   || ps.j_15m  || 0);
@@ -275,15 +275,32 @@ function computeRealGates(ps, dir) {
   const askP = parseFloat(ps.ask_pct || 0);
   const sc   = parseFloat(ps.score  || 0);
   const isS  = dir === 'SHORT';
+  const isMx = venue === 'mexc';
+
+  /* MEXC thresholds (config.py):
+     ADX_MIN_SHORT=0  ADX_MIN_LONG=20
+     J1H_SHORT_MIN=30 J1H_SHORT_MAX=85  J1H_LONG_MAX=59
+     RSI15M_SHORT_MIN=35  (no RSI gate for LONG)
+     DEPTH_GATE_PCT=55 */
+  if (isMx) {
+    return {
+      adx:   isS ? true              : (adx >= 20),       // no ADX gate for MEXC SHORT
+      j1h:   isS ? (j1h > 30 && j1h < 85) : (j1h < 59),
+      rsi:   isS ? (rsi > 35)        : true,              // no RSI gate for MEXC LONG
+      depth: isS ? (askP >= 55)      : (bidP >= 55),
+      sess:  true, cool: true, intrd: true, mkt: true,
+      score: sc >= 4,
+      drift: true,
+    };
+  }
+
+  /* HL thresholds (memory: ADX SHORT≥25, LONG≥30; depth 55%/65%) */
   return {
     adx:   isS ? (adx >= 25)          : (adx >= 30),
     j1h:   isS ? (j1h < 60)           : (j1h > 40),
     rsi:   isS ? (rsi > 45)           : (rsi < 55),
     depth: isS ? (askP >= 55)         : (bidP >= 55),
-    sess:  true,
-    cool:  true,
-    intrd: true,
-    mkt:   true,
+    sess:  true, cool: true, intrd: true, mkt: true,
     score: sc >= 4,
     drift: true,
   };
@@ -337,8 +354,8 @@ function computeStates(scanNum, pairs, tick, venueKey) {
     const db = {SHORT:blocked, LONG:blocked};
     const dr = {SHORT:{}, LONG:{}};
     const realG = livePs ? {
-      SHORT: computeRealGates(livePs, 'SHORT'),
-      LONG:  computeRealGates(livePs, 'LONG'),
+      SHORT: computeRealGates(livePs, 'SHORT', venueKey),
+      LONG:  computeRealGates(livePs, 'LONG',  venueKey),
     } : null;
 
     for (const dir of ['SHORT','LONG']) {
