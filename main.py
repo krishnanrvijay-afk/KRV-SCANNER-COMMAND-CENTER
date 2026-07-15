@@ -1602,6 +1602,13 @@ async def lifecycle(request: Request) -> HTMLResponse:
     html = (STATIC_DIR / "lifecycle.html").read_text()
     return HTMLResponse(html)
 
+@app.get("/signals")
+async def signals(request: Request) -> HTMLResponse:
+    if not _is_authed(request):
+        return HTMLResponse(_login_html())
+    html = (STATIC_DIR / "signals.html").read_text()
+    return HTMLResponse(html)
+
 LIFECYCLE_EXPIRED_OUTCOMES = {"EXPIRED_AGE", "EXPIRED_J15M", "EXPIRED_PRICE"}
 
 def _lc_venue(row: dict) -> str:
