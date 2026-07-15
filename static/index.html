@@ -3764,7 +3764,7 @@ function _initLogDates() {
   _initReconDates();
   _initTlDate();
   await Promise.all([loadAnalytics(), loadLive(), loadReconShortlist(), loadTimeline(), loadSentinelCoverage()]);
-  setInterval(loadLive,      30_000);
+  setInterval(loadLive,       5_000);   /* positions: 5s refresh */
   setInterval(htcFetchGate, 30000);
   htcFetchGate();
   setInterval(loadAnalytics, 300_000);

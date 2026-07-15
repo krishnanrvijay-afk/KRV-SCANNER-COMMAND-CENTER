@@ -94,7 +94,7 @@ async def _poll_live() -> None:
                     _live[f"{key}_ok"] = False
                     print(f"[LIVE] {key.upper()} ERROR — {exc}", flush=True)
         _live["updated_at"] = time.time()
-        await asyncio.sleep(30)
+        await asyncio.sleep(5)   # scorecard live-state cache: 5s poll
 
 @app.on_event("startup")
 async def _startup() -> None:
