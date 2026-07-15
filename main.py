@@ -1897,6 +1897,12 @@ async def fleet_status(
 
 @app.post("/api/force_close")
 async def api_force_close(request: Request) -> JSONResponse:
+    """
+    Proxy a manual close to the scanner that owns the trade.
+    Calls scanner /api/trade/close directly — scanners handle exchange close
+    and trade-log write.  The old Supabase-patch approach is removed because
+    neither scanner polls force_close_pair from its scanner-state table.
+    """
     _require_auth(request)
     body = await request.json()
     venue     = (body.get("venue") or "").lower().strip()
@@ -1906,18 +1912,46 @@ async def api_force_close(request: Request) -> JSONResponse:
     if venue not in ("hl", "mexc") or not pair or not direction:
         raise HTTPException(400, "venue (hl|mexc), pair, direction required")
 
-    table   = "hl_scanner_state" if venue == "hl" else "mexc_scanner_state"
-    payload = {
-        "force_close_pair":      pair,
-        "force_close_direction": direction,
-        "force_close_ts":        datetime.now(timezone.utc).isoformat(),
-    }
-    ok = await _sb_patch(table, "id=eq.1", payload)
+    # Derive scanner base URL from the existing state-poll constants
+    if venue == "hl":
+        base_url = HL_STATE_URL.rsplit("/api/state", 1)[0]
+    else:
+        base_url = MEXC_STATE_URL.rsplit("/api/state", 1)[0]
+
+    close_url = base_url + "/api/trade/close"
+    print(f"[FORCE_CLOSE] {venue.upper()} {pair} {direction} → {close_url}", flush=True)
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.post(close_url, json={"symbol": pair, "direction": direction})
+    except Exception as exc:
+        print(f"[FORCE_CLOSE] ERROR reaching scanner: {exc}", flush=True)
+        raise HTTPException(502, f"Scanner unreachable: {exc}")
+
+    if r.status_code == 404:
+        return JSONResponse(
+            {"status": "not_found", "detail": f"No open trade for {pair} {direction} on {venue.upper()}"},
+            status_code=404,
+        )
+    if not r.is_success:
+        print(f"[FORCE_CLOSE] Scanner returned {r.status_code}: {r.text[:200]}", flush=True)
+        return JSONResponse(
+            {"status": "scanner_error", "http_status": r.status_code, "detail": r.text[:200]},
+            status_code=r.status_code,
+        )
+
+    try:
+        scanner_resp = r.json()
+    except Exception:
+        scanner_resp = {"raw": r.text[:200]}
+
+    print(f"[FORCE_CLOSE] {venue.upper()} {pair} {direction} closed OK", flush=True)
     return JSONResponse({
-        "status":    "queued" if ok else "patch_failed",
-        "venue":     venue,
-        "pair":      pair,
-        "direction": direction,
+        "status":           "ok",
+        "venue":            venue,
+        "pair":             pair,
+        "direction":        direction,
+        "scanner_response": scanner_resp,
     })
 
 if __name__ == "__main__":

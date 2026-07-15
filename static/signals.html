@@ -19,7 +19,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .tb{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);background:#07071a;flex-shrink:0}
 .back{font-family:var(--D);font-size:13px;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;color:var(--white);text-decoration:none;letter-spacing:.06em}
 .tb-title{font-family:var(--D);font-size:22px;letter-spacing:.1em;color:var(--white)}
-.tb-sub{font-size:9px;color:#bbb;letter-spacing:.18em;white-space:nowrap}
+.tb-sub{font-size:9px;color:#fff;font-weight:700;letter-spacing:.18em;white-space:nowrap}
 .tb-r{margin-left:auto;display:flex;align-items:center;gap:9px}
 .sess-pill{font-family:var(--D);font-size:13px;padding:3px 10px;border-radius:5px;border:1px solid;letter-spacing:.08em}
 .sess-pill.ASIA{color:var(--amber);border-color:rgba(245,158,11,.5)}
@@ -66,10 +66,10 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .vh-callsign{font-family:var(--D);font-size:19px;letter-spacing:.12em;line-height:1}
 .hl .vh-callsign{color:var(--hl)}
 .mx .vh-callsign{color:var(--mexc)}
-.vh-fullname{font-size:8px;color:#aaa;letter-spacing:.14em}
+.vh-fullname{font-size:8px;color:#fff;font-weight:700;letter-spacing:.14em}
 .vh-right{margin-left:auto;text-align:right}
 .vh-scan{font-family:var(--D);font-size:13px;color:#22d3ee;letter-spacing:.08em}
-.vh-pairs{font-size:8px;color:#aaa;letter-spacing:.08em}
+.vh-pairs{font-size:8px;color:#fff;font-weight:700;letter-spacing:.08em}
 .vh-mode{font-size:7px;letter-spacing:.1em;margin-top:1px;font-weight:700}
 .vh-mode.live{color:var(--green)}
 .vh-mode.sim{color:var(--amber)}
@@ -101,14 +101,14 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .preflight{display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:1px solid #0e0e1a}
 .pf-lbl{font-family:var(--D);font-size:20px;letter-spacing:.12em;color:#fff;flex-shrink:0;font-weight:700}
 .pf-gates{display:flex;gap:10px}
-.pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em;color:#ccc}
+.pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em;color:#fff;font-weight:700}
 
 /* ── STAGE ROW ── */
 .stage-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px 4px}.stage-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-left:2px solid transparent;transition:all .3s}
 .stage-row.active-row{border-left-color:inherit;background:rgba(255,255,255,.02)}
 .stage-lbl{width:84px;flex-shrink:0}
 .stage-name{font-family:var(--D);font-size:10px;letter-spacing:.1em;line-height:1;transition:color .3s;font-weight:700}
-.stage-sub{font-size:7px;color:#888;letter-spacing:.06em;margin-top:2px}
+.stage-sub{font-size:7px;color:#fff;font-weight:700;letter-spacing:.06em;margin-top:2px}
 .dot-row{display:flex;gap:4px;flex-wrap:wrap;flex:1}
 .dot{width:9px;height:9px;border-radius:50%;background:#1a1a1a;border:1px solid #333;transition:background .25s,box-shadow .25s;flex-shrink:0}
 .dot.pass{background:var(--green);border:none;box-shadow:0 0 6px 2px rgba(34,197,94,.7)}
@@ -123,14 +123,14 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 /* ── DIR GATES ── */
 .dir-hdr{padding:3px 12px;display:flex;align-items:center;gap:8px}
 .dir-hdr-lbl{font-family:var(--D);font-size:20px;color:#fff;letter-spacing:.1em;font-weight:700}
-.dir-gate-cols{font-family:var(--D);font-size:8px;color:#999;letter-spacing:.04em;margin-left:auto}
+.dir-gate-cols{font-family:var(--D);font-size:8px;color:#fff;font-weight:700;letter-spacing:.04em;margin-left:auto}
 .pair-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 8px 6px}
 .pair-card{background:#07070e;border:1px solid #1e1e30;border-radius:5px;padding:5px 6px;transition:all .3s}
 .pair-card.has-signal{border-color:rgba(34,211,238,.35);box-shadow:0 0 12px rgba(34,211,238,.12)}
 .pc-top{display:flex;align-items:center;gap:4px;margin-bottom:4px}
-.pc-name{font-family:var(--D);font-size:11px;letter-spacing:.1em;line-height:1;font-weight:700}
-.hl .pc-name{color:var(--hl)}
-.mx .pc-name{color:var(--mexc)}
+.pc-name{font-family:var(--D);font-size:22px;letter-spacing:.1em;line-height:1;font-weight:700;color:#fff}
+.hl .pc-name{color:#fff}
+.mx .pc-name{color:#fff}
 .sig-tag{font-size:7px;padding:1px 4px;border-radius:8px;font-family:var(--D);letter-spacing:.07em;animation:sigBadge 1.2s ease-in-out infinite}
 .sig-s{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:var(--red)}
 .sig-l{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:var(--green)}
@@ -139,9 +139,9 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .sdot{width:7px;height:7px;border-radius:50%;background:#141420;border:1px solid #2a2a40;transition:background .25s,box-shadow .25s;flex-shrink:0}
 .sdot.pass{background:var(--green);border:none;box-shadow:0 0 5px 1px rgba(34,197,94,.65)}
 .sdot.fail{background:var(--red);border:none;box-shadow:0 0 5px 1px rgba(239,68,68,.65)}
-.pc-status{font-size:7px;margin-top:3px;letter-spacing:.04em;line-height:1.3;color:#ccc}
-.gate-legend{padding:3px 12px 4px;font-size:7px;color:#999;letter-spacing:.06em;display:flex;gap:6px;flex-wrap:wrap}
-.gl-item{white-space:nowrap;color:#aaa;font-weight:600}
+.pc-status{font-size:7px;margin-top:3px;letter-spacing:.04em;line-height:1.3;color:#fff;font-weight:700}
+.gate-legend{padding:3px 12px 4px;font-size:7px;color:#fff;font-weight:700;letter-spacing:.06em;display:flex;gap:6px;flex-wrap:wrap}
+.gl-item{white-space:nowrap;color:#fff;font-weight:700}
 
 /* ── SIGNAL NODE ── */
 .signal-node{margin:3px 10px 2px;padding:7px 12px;border-radius:5px;display:flex;align-items:center;gap:10px;border:1px solid #1e1e30;transition:all .4s}
@@ -150,19 +150,19 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .sn-icon{font-size:20px;color:#444;transition:color .4s;line-height:1}
 .signal-node.fired .sn-icon{color:#22d3ee}
 .sn-body{flex:1}
-.sn-title{font-family:var(--D);font-size:14px;letter-spacing:.1em;color:#bbb;transition:color .4s;line-height:1;font-weight:700}
+.sn-title{font-family:var(--D);font-size:14px;letter-spacing:.1em;color:#fff;transition:color .4s;line-height:1;font-weight:700}
 .signal-node.fired .sn-title{color:#22d3ee}
-.sn-sub{font-size:8px;color:#aaa;letter-spacing:.08em;margin-top:2px}
+.sn-sub{font-size:8px;color:#fff;font-weight:700;letter-spacing:.08em;margin-top:2px}
 .sn-fl{font-family:var(--D);font-size:11px;color:#22d3ee;letter-spacing:.08em;opacity:0;transition:opacity .4s}
 .signal-node.fired .sn-fl{opacity:1}
 
 /* ── FOOTER ── */
 .footer{padding:7px 14px;border-top:1px solid var(--border);background:#07071a;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.ft-lbl{font-family:var(--D);font-size:9px;color:#bbb;letter-spacing:.12em;font-weight:700}
+.ft-lbl{font-family:var(--D);font-size:9px;color:#fff;letter-spacing:.12em;font-weight:700}
 .ft-track{position:relative;flex:1;height:2px;background:linear-gradient(90deg,rgba(168,85,247,.3),rgba(34,211,238,.3),rgba(249,115,22,.3));border-radius:1px}
 .ft-beam{position:absolute;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,.8);animation:beamTravel 1.8s linear infinite}
 .ft-dest{font-family:var(--D);font-size:12px;letter-spacing:.1em;padding:3px 12px;border-radius:4px;border:1px solid rgba(34,211,238,.3);color:#22d3ee;background:rgba(34,211,238,.06)}
-.ft-mode{font-size:8px;color:#888;margin-left:auto;letter-spacing:.08em}
+.ft-mode{font-size:8px;color:#fff;font-weight:700;margin-left:auto;letter-spacing:.08em}
 </style>
 </head>
 <body>
@@ -458,7 +458,7 @@ function buildPipeBody(venue, pairs) {
     ${PAIR_STAGES.map(st=>`
       <div class="stage-row" id="${venue}-row-${st.id}" style="border-left-color:${st.cp?'#22d3ee':clr}">
         <div class="stage-lbl">
-          <div class="stage-name" id="${venue}-sname-${st.id}" style="color:#888">${st.label}</div>
+          <div class="stage-name" id="${venue}-sname-${st.id}" style="color:#fff">${st.label}</div>
           <div class="stage-sub">${st.sub}</div>
         </div>
         <div class="dot-row" id="${venue}-dots-${st.id}">
@@ -503,8 +503,8 @@ function buildPipeBody(venue, pairs) {
       <span class="gl-item">RSI=scanner gate</span>
       <span class="gl-item">DPT=book depth≥55%</span>
       <span class="gl-item">SCR≥4</span>
-      <span style="color:#777">·</span>
-      <span style="color:#999">top=SHORT bot=LONG</span>
+      <span style="color:#fff;font-weight:700">·</span>
+      <span style="color:#fff;font-weight:700">top=SHORT bot=LONG</span>
     </div>
 
     <div class="signal-node" id="${venue}-sig-node">
@@ -555,7 +555,7 @@ function render() {
       const nameEl = document.getElementById(venue+'-sname-'+st.id);
       const statEl = document.getElementById(venue+'-stats-'+st.id);
       if (rowEl)  rowEl.classList.toggle('active-row', act===st.id);
-      if (nameEl) nameEl.style.color = tick>=st.tickAt ? (st.cp?'#22d3ee':'#fff') : '#888';
+      if (nameEl) nameEl.style.color = tick>=st.tickAt ? (st.cp?'#22d3ee':'#fff') : '#fff';
       let pass=0, fail=0;
       pairs.forEach((_,pi) => {
         const dotEl = document.getElementById(venue+'-d-'+st.id+'-'+pi);
