@@ -1656,15 +1656,21 @@ async def api_lifecycle_alerts(
     )
     trade_logs_by_venue = {"hl": hl_trades, "mexc": mexc_trades}
 
+    def _norm_pair(p) -> str:
+        """Strip USDT/PERP suffixes so WIF == WIF_USDT for matching."""
+        return str(p or "").upper().replace("_USDT","").replace("/USDT","").replace("_PERP","").replace("_USD","").strip()
+
     def _match_trade(a_venue: str, pair: Any, direction: Any, created_at: Any) -> Optional[dict]:
         a_dt = _parse_open_utc(created_at)
         if not a_dt:
             return None
-        window_end = a_dt + timedelta(seconds=600)
+        window_end = a_dt + timedelta(seconds=900)
+        np = _norm_pair(pair)
+        dir_up = str(direction or "").upper()
         for t in trade_logs_by_venue.get(a_venue) or []:
-            if str(t.get("pair") or "").upper() != str(pair or "").upper():
+            if _norm_pair(t.get("pair")) != np:
                 continue
-            if str(t.get("direction") or "").upper() != str(direction or "").upper():
+            if str(t.get("direction") or "").upper() != dir_up:
                 continue
             t_dt = _parse_open_utc(t.get("open_time"))
             if not t_dt:
@@ -1709,11 +1715,6 @@ async def api_lifecycle_alerts(
             "exit_price":               _f(matched_trade.get("exit_price"))  if matched_trade else None,
         })
     expired.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
-
-    for _row in expired[:5]:
-        print(f"[LIFECYCLE_DEBUG] pair={_row.get('pair')} direction={_row.get('direction')} "
-              f"created_at={_row.get('created_at')} exit_reason={_row.get('exit_reason')!r} "
-              f"pnl_dollars={_row.get('pnl_dollars')!r}")
 
     open_trades: list = []
     for v in ("hl", "mexc"):
