@@ -1872,6 +1872,28 @@ async def api_lifecycle_candles(
 
 
 
+@app.post("/api/fleet/halt-long")
+async def fleet_halt_long_toggle(
+    request: Request,
+    body: dict = Body(...),
+) -> JSONResponse:
+    halt = bool(body.get("halt", False))
+    await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": halt})
+    await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": halt})
+    return JSONResponse({"halt_long": halt, "status": "ok"})
+
+
+@app.post("/api/fleet/halt-short")
+async def fleet_halt_short_toggle(
+    request: Request,
+    body: dict = Body(...),
+) -> JSONResponse:
+    halt = bool(body.get("halt", False))
+    await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": halt})
+    await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": halt})
+    return JSONResponse({"halt_short": halt, "status": "ok"})
+
+
 @app.post("/api/fleet/halt")
 async def fleet_halt_toggle(
     request: Request,
