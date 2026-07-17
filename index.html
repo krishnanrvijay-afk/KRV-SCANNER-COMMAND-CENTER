@@ -1334,23 +1334,29 @@ body {
 /* ── BTC REGIME PILL (header) ── */
 #btc-regime-pill {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 15px;
-  letter-spacing: 0.1em;
-  padding: 5px 14px;
-  border-radius: 6px;
-  border: 1.5px solid rgba(34,211,238,0.4);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  padding: 5px 18px 6px;
+  border-radius: 999px;
+  border: 2px solid rgba(34,211,238,0.4);
   background: rgba(34,211,238,0.06);
   color: #22d3ee;
   cursor: pointer;
   transition: all 0.3s;
   white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  line-height: 1;
 }
 #btc-regime-pill:hover { transform: scale(1.03); }
-#btc-regime-pill.rg-confirmed { border-color: rgba(0,230,118,0.55); color: #00e676; background: rgba(0,230,118,0.08); box-shadow: 0 0 14px rgba(0,230,118,0.2); }
-#btc-regime-pill.rg-caution   { border-color: rgba(255,179,0,0.55); color: #ffb300; background: rgba(255,179,0,0.07); box-shadow: 0 0 14px rgba(255,179,0,0.18); }
-#btc-regime-pill.rg-stop      { border-color: rgba(255,82,82,0.6);  color: #ff4646; background: rgba(255,82,82,0.08);  animation: rgStopPulse 2s ease-in-out infinite; }
-#btc-regime-pill.rg-exempt    { border-color: #333; color: #888; background: transparent; }
-@keyframes rgStopPulse { 0%,100%{box-shadow:0 0 8px rgba(255,82,82,0.18)} 50%{box-shadow:0 0 20px rgba(255,82,82,0.40)} }
+#btc-regime-pill.rg-confirmed { border-color: rgba(0,230,118,0.70); color: #00e676; background: rgba(0,230,118,0.12); box-shadow: 0 0 20px rgba(0,230,118,0.65), 0 0 50px rgba(0,230,118,0.28), inset 0 0 3px rgba(0,230,118,0.18); }
+#btc-regime-pill.rg-caution   { border-color: rgba(255,179,0,0.70); color: #ffb300; background: rgba(255,179,0,0.11); box-shadow: 0 0 20px rgba(255,179,0,0.60), 0 0 50px rgba(255,179,0,0.25), inset 0 0 3px rgba(255,179,0,0.16); }
+#btc-regime-pill.rg-stop      { border-color: rgba(255,70,70,0.75); color: #ff4646; background: rgba(255,70,70,0.12); animation: rgStopPulse 1.8s ease-in-out infinite; }
+#btc-regime-pill.rg-exempt    { border-color: #2e2e2e; color: #555; background: transparent; box-shadow: none; }
+@keyframes rgStopPulse { 0%,100%{box-shadow:0 0 12px rgba(255,70,70,0.40),0 0 0px rgba(255,70,70,0)} 50%{box-shadow:0 0 28px rgba(255,70,70,0.80),0 0 55px rgba(255,70,70,0.35)} }
 
 /* ── BTC REGIME OVERLAY ── */
 #btc-ov-bd {
@@ -1409,7 +1415,7 @@ body {
   <div class="header">
     <div class="logo"><span class="logo-dot"></span>KRV FLEET SCORECARD</div>
     <div class="header-right">
-      <button id="btc-regime-pill" class="rg-exempt" onclick="openBtcRegimeOverlay()" title="BTC Regime Market Context">BTC REGIME</button>
+      <button id="btc-regime-pill" class="rg-exempt" onclick="openBtcRegimeOverlay()" title="BTC Regime — click for detail"><span style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:0.14em;line-height:1.1;display:block">BTC REGIME</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.08em;opacity:0.7;display:block;line-height:1.2;margin-top:1px">BTC&nbsp;J1H&nbsp;&middot;&nbsp;&mdash;</span></button>
       <div id="sentinel-gate-pill" title="SENTINEL Gate — auto HALT/LIVE based on daily PnL + BTC Regime">SENTINEL GATE</div>
       <div class="range-btns">
         <button id="btn-today" onclick="setRange('today')" class="active">TODAY</button>
@@ -6253,14 +6259,16 @@ function _refreshBtcRegimePill() {
     : rg.cls === 'caution' ? 'rg-caution'
     : rg.cls === 'stop'    ? 'rg-stop'
     :                        'rg-exempt';
-  var stateShort = rg.state === 'CONFIRMED_LONG'  ? '[LONG SAFE]'
-                 : rg.state === 'CAUTION_LONG'    ? '[CAUTION]'
-                 : rg.state === 'STOP'            ? '[STOP]'
-                 : rg.state === 'CAUTION_SHORT'   ? '[CAUTION]'
-                 : rg.state === 'CONFIRMED_SHORT' ? '[SHORT SAFE]'
-                 :                                  'BTC REGIME';
-  var j1hVal = (btc && btc.j1h != null) ? ' J=' + Math.round(btc.j1h) : '';
-  pill.textContent = 'BTC REGIME' + j1hVal + (rg.state !== 'EXEMPT' ? '  ' + stateShort : '');
+  var labelLine = rg.state === 'CONFIRMED_LONG'  ? 'CONFIRMED'
+               : rg.state === 'CAUTION_LONG'    ? 'CAUTION'
+               : rg.state === 'STOP'            ? 'STOP'
+               : rg.state === 'CAUTION_SHORT'   ? 'CAUTION'
+               : rg.state === 'CONFIRMED_SHORT' ? 'SHORT SAFE'
+               :                                  'BTC REGIME';
+  var j1hScore = (btc && btc.j1h != null) ? Math.round(btc.j1h) : '\u2014';
+  var scoreLine = 'BTC\u00a0J1H\u00a0\u00b7\u00a0' + j1hScore;
+  pill.innerHTML = '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:13px;letter-spacing:0.14em;line-height:1.1;display:block">' + labelLine + '</span>'
+    + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;font-weight:700;letter-spacing:0.08em;opacity:0.7;display:block;line-height:1.2;margin-top:1px">' + scoreLine + '</span>';
   /* If overlay is open, refresh its content too */
   var bd = document.getElementById('btc-ov-bd');
   if (bd && bd.style.display !== 'none') {
