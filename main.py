@@ -24,6 +24,9 @@ SCORECARD_SECRET   = os.environ.get("SCORECARD_SECRET") or SCORECARD_PASSWORD
 SUPABASE_URL       = os.environ.get("SUPABASE_URL", "").rstrip("/")
 SUPABASE_KEY       = os.environ.get("SUPABASE_KEY", "")
 PORT               = int(os.environ.get("PORT", "8000"))
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID   = int(os.environ.get("TELEGRAM_CHAT_ID", "0") or "0")
+TELEGRAM_ENABLED   = os.environ.get("TELEGRAM_ENABLED", "true").lower() == "true"
 
 HL_STATE_URL   = "https://bounce-scanner-deux-production-88de.up.railway.app/api/state"
 MEXC_STATE_URL = "https://web-production-d03dd.up.railway.app/api/state"
@@ -145,6 +148,19 @@ async def _sb_patch(table: str, row_filter: str, payload: dict) -> bool:
             return True
         except Exception:
             return False
+
+# ─────────────────────────── Telegram helper ───────────────────────────
+async def _tg_fleet_send(text: str) -> None:
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID or not TELEGRAM_ENABLED:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            await client.post(
+                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+                json={"chat_id": TELEGRAM_CHAT_ID, "text": text},
+            )
+    except Exception as exc:
+        print(f"[TG-FLEET] send error: {exc}", flush=True)
 
 # ─────────────────────────── type helpers ───────────────────────────
 def _f(val: Any) -> Optional[float]:
@@ -1904,6 +1920,16 @@ async def fleet_halt_toggle(
     await _sb_patch("hl_scanner_state",   "id=eq.1", {"fleet_halt": halt})
     await _sb_patch("mexc_scanner_state", "id=eq.1", {"fleet_halt": halt})
     return JSONResponse({"fleet_halt": halt, "status": "ok"})
+
+
+@app.post("/api/fleet/sentinel-notify")
+async def fleet_sentinel_notify(request: Request) -> JSONResponse:
+    _require_auth(request)
+    body = await request.json()
+    msg  = str(body.get("message", ""))[:800]
+    if msg and TELEGRAM_ENABLED:
+        asyncio.create_task(_tg_fleet_send(msg))
+    return JSONResponse({"ok": True})
 
 
 @app.get("/api/fleet/status")
