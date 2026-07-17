@@ -801,6 +801,180 @@ async def api_log(
     return JSONResponse(all_rows)
 
 
+@app.get("/api/forensics")
+async def api_forensics(
+    request: Request,
+    venue: str,
+    pair: str,
+    direction: str,
+    entry_price: float,
+    open_time: str,
+    close_time: str,
+    exit_price: float = 0.0,
+    pnl_dollars: float = 0.0,
+    r_value: float = 0.0,
+    sl_price: float = 0.0,
+    dollar_risk: float = 0.0,
+    be_price: float = 0.0,
+    exit_reason: str = "",
+) -> JSONResponse:
+    _require_auth(request)
+
+    try:
+        open_dt  = datetime.fromisoformat(open_time.replace("Z", "+00:00"))
+        close_dt = datetime.fromisoformat(close_time.replace("Z", "+00:00"))
+    except Exception:
+        raise HTTPException(400, "Invalid open_time or close_time")
+
+    # Candle window: 3 min before entry through 2 min after exit
+    start_ms = int((open_dt.timestamp() - 180) * 1000)
+    end_ms   = int((close_dt.timestamp() + 120) * 1000)
+
+    candles: list[dict] = []
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            if venue.lower() == "hl":
+                res = await client.post(
+                    "https://api.hyperliquid.xyz/info",
+                    json={"type": "candleSnapshot", "req": {
+                        "coin": pair, "interval": "1m",
+                        "startTime": start_ms, "endTime": end_ms,
+                    }},
+                )
+                raw = res.json() or []
+                # HL returns list of [t, o, h, l, c, v, ...]
+                candles = [{"t": int(c[0]), "o": float(c[1]), "h": float(c[2]),
+                            "l": float(c[3]), "c": float(c[4])} for c in raw]
+            else:
+                start_s = int(start_ms / 1000)
+                end_s   = int(end_ms   / 1000)
+                res = await client.get(
+                    f"https://contract.mexc.com/api/v1/contract/kline/{pair}"
+                    f"?interval=Min1&start={start_s}&end={end_s}",
+                )
+                raw = (res.json() or {}).get("data") or []
+                candles = [{"t": int(c[0]) * 1000, "o": float(c[1]), "h": float(c[3]),
+                            "l": float(c[4]), "c": float(c[2])} for c in raw]
+    except Exception as exc:
+        raise HTTPException(502, f"Candle fetch failed: {exc}")
+
+    if not candles:
+        return JSONResponse({"rows": [], "error": "no_candle_data"})
+
+    candles.sort(key=lambda c: c["t"])
+
+    is_long   = direction.upper() == "LONG"
+    entry_ms  = int(open_dt.timestamp()  * 1000)
+    close_ms  = int(close_dt.timestamp() * 1000)
+
+    # Derive size multiplier (contracts * lot_size) from final PNL + price move
+    price_delta_exit = (exit_price - entry_price) if is_long else (entry_price - exit_price)
+    size_mult = 0.0
+    if abs(price_delta_exit) > 1e-9 and pnl_dollars != 0.0:
+        size_mult = abs(pnl_dollars) / abs(price_delta_exit)
+
+    # Dollar risk per 1R
+    dr = dollar_risk
+    if dr <= 0 and abs(r_value) > 1e-9 and pnl_dollars != 0.0:
+        dr = abs(pnl_dollars) / abs(r_value)
+    if dr <= 0:
+        dr = 200.0  # safe fallback
+
+    # be_price (price level that triggers armed state)
+    bp = be_price
+    if bp <= 0:
+        if sl_price > 0:
+            sl_dist = abs(sl_price - entry_price)
+            # Armed at 50% of SL distance in profitable direction
+            bp = (entry_price - sl_dist * 0.5) if not is_long else (entry_price + sl_dist * 0.5)
+        else:
+            # Approximate: 0.1% from entry
+            bp = entry_price * (0.999 if not is_long else 1.001)
+
+    # Decimal precision for price display
+    dec = 6 if entry_price < 0.01 else 5 if entry_price < 1 else 4 if entry_price < 100 else 3 if entry_price < 1000 else 2
+
+    armed     = False
+    peak_pnl  = 0.0
+    streak    = 0
+    prev_cpnl: Optional[float] = None
+    rows_out: list[dict] = []
+
+    for c in candles:
+        t_ms        = int(c["t"])
+        # A candle covers [t_ms, t_ms + 60 000)
+        is_pre      = (t_ms + 60000) <= entry_ms
+        is_entry_c  = t_ms <= entry_ms < (t_ms + 60000)
+        is_exit_c   = t_ms <= close_ms < (t_ms + 60000)
+
+        if size_mult > 0:
+            cpnl = ((entry_price - c["c"]) if not is_long else (c["c"] - entry_price)) * size_mult
+        else:
+            cpnl = 0.0
+
+        events: list[str] = []
+
+        if is_pre:
+            armed     = False
+            peak_pnl  = 0.0
+            streak    = 0
+            prev_cpnl = None
+        else:
+            # be_armed state machine
+            if not armed:
+                triggered = (not is_long and c["c"] <= bp) or (is_long and c["c"] >= bp)
+                if triggered:
+                    armed = True
+                    events.append(f"🟢 be_ARMED @ {round(c['c'], dec)}")
+
+            if armed:
+                if cpnl > peak_pnl:
+                    peak_pnl = cpnl
+                if prev_cpnl is not None:
+                    streak = (streak + 1) if cpnl < prev_cpnl else 0
+                prev_cpnl = cpnl
+
+            if is_exit_c:
+                label = exit_reason or "EXIT"
+                events.append(f"❌ {label}  exit≈{'+$' if pnl_dollars>=0 else '-$'}{abs(round(pnl_dollars,2))}")
+
+        t_dt  = datetime.fromtimestamp(t_ms / 1000, tz=timezone.utc)
+        et_dt = t_dt.astimezone(ET)
+
+        rows_out.append({
+            "utc":    t_dt.strftime("%H:%M"),
+            "edt":    et_dt.strftime("%H:%M"),
+            "open":   round(c["o"], dec),
+            "high":   round(c["h"], dec),
+            "low":    round(c["l"], dec),
+            "close":  round(c["c"], dec),
+            "cpnl":   round(cpnl, 2),
+            "r":      round(cpnl / dr, 3) if dr > 0 else 0.0,
+            "armed":  armed and not is_pre,
+            "peak":   round(peak_pnl, 2) if (armed and not is_pre) else None,
+            "streak": streak if (armed and not is_pre) else None,
+            "events": events,
+            "is_pre":   is_pre,
+            "is_entry": is_entry_c,
+            "is_exit":  is_exit_c,
+        })
+
+    return JSONResponse({
+        "rows": rows_out,
+        "meta": {
+            "pair":         pair,
+            "venue":        venue.upper(),
+            "direction":    direction.upper(),
+            "entry_price":  round(entry_price, dec),
+            "exit_price":   round(exit_price,  dec),
+            "exit_reason":  exit_reason,
+            "pnl_dollars":  round(pnl_dollars, 2),
+            "dollar_risk":  round(dr, 2),
+            "be_price":     round(bp, dec),
+        },
+    })
+
+
 @app.get("/api/trades")
 async def api_trades(
     request: Request,
