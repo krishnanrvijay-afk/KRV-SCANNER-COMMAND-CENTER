@@ -3676,6 +3676,18 @@ function renderLog() {
             ejacPill = `<span onclick="event.stopPropagation();openKzSheet('${rd}')" style="display:inline-block;margin-left:4px;padding:1px 5px;background:#1a1a00;color:#fbbf24;border:1px solid #fbbf24;border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.05em;font-family:'JetBrains Mono',monospace">EJAC 10</span>`;
           }
 
+          // Forensics pill â every row
+          const _frd = encodeURIComponent(JSON.stringify({
+            venue:       r._venue,       pair:        r.pair,
+            direction:   r.direction,    entry_price: r.entry_price,
+            exit_price:  r.exit_price,   open_time:   r.open_time,
+            close_time:  r.close_time,   pnl_dollars: r.pnl_dollars,
+            r_value:     r.r_value,      sl_price:    r.sl_price,
+            dollar_risk: r.dollar_risk,  be_price:    r.be_price,
+            exit_reason: r.exit_reason,
+          }));
+          const forensicsPill = `<span onclick="event.stopPropagation();openForensicsSheet('${_frd}')" style="display:inline-block;margin-left:4px;padding:1px 6px;background:#1a0800;color:#fb923c;border:1px solid #fb923c;border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.05em;font-family:'JetBrains Mono',monospace">FORENSICS</span>`;
+
         const maeV   = r.mae_r != null ? parseFloat(r.mae_r) : null;
         const maeStr = maeV != null ? fmtNum(maeV, 2) + 'R' : 'Ã¢ÂÂ';
         const maeCol = maeV != null ? (maeV < 0 ? C.red : '#ffffff') : '#ffffff';
@@ -3692,7 +3704,7 @@ function renderLog() {
           <td style="color:#ffffff;font-weight:700;font-size:11px">${tier}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${sessStr}</td>
           <td style="color:#ffffff;font-weight:700;font-size:11px">${closeFmt}</td>
-          <td style="color:#ffffff;font-weight:700;font-size:11px;letter-spacing:.03em">${exitStr}${kzPill}${ejacPill}</td>
+          <td style="color:#ffffff;font-weight:700;font-size:11px;letter-spacing:.03em">${exitStr}${kzPill}${ejacPill}${forensicsPill}</td>
           <td style="color:${pnlCol};font-weight:700">${pnlStr}</td>
           <td style="color:${rvCol};font-weight:700">${rvStr}</td>
           <td style="color:${maeCol};font-weight:700;font-size:11px">${maeStr}</td>
@@ -4314,6 +4326,107 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       function closeKzSheet() {
         document.getElementById('kz-scrim').classList.remove('open');
         document.body.style.overflow = '';
+      }
+
+      function closeForensicsSheet() {
+        document.getElementById('forensics-scrim').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      async function openForensicsSheet(rdEncoded) {
+        const r = JSON.parse(decodeURIComponent(rdEncoded));
+        const body = document.getElementById('forensics-sheet-body');
+        body.innerHTML = '<div style="color:#666;padding:24px;text-align:center;font-family:\'JetBrains Mono\',monospace">FETCHING CANDLESâ¦</div>';
+        document.getElementById('forensics-scrim').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        // Update title immediately
+        document.getElementById('forensics-sheet-title').textContent =
+          (r.pair || '') + ' ' + (r.direction || '') + ' â ' + (r.exit_reason || 'TRADE');
+        try {
+          const params = new URLSearchParams({
+            venue:       r.venue        || '',
+            pair:        r.pair         || '',
+            direction:   r.direction    || '',
+            entry_price: r.entry_price  || 0,
+            open_time:   r.open_time    || '',
+            close_time:  r.close_time   || '',
+            exit_price:  r.exit_price   || 0,
+            pnl_dollars: r.pnl_dollars  || 0,
+            r_value:     r.r_value      || 0,
+            sl_price:    r.sl_price     || 0,
+            dollar_risk: r.dollar_risk  || 0,
+            be_price:    r.be_price     || 0,
+            exit_reason: r.exit_reason  || '',
+          });
+          const res  = await fetch('/api/forensics?' + params.toString());
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          if (data.error || !data.rows || !data.rows.length) {
+            body.innerHTML = '<div style="color:#666;padding:24px;text-align:center">NO CANDLE DATA AVAILABLE</div>';
+            return;
+          }
+          body.innerHTML = _renderForensicsTable(data);
+        } catch(e) {
+          body.innerHTML = '<div style="color:#ef4444;padding:24px;font-family:\'JetBrains Mono\',monospace">ERROR: ' + e.message + '</div>';
+        }
+      }
+
+      function _renderForensicsTable(data) {
+        const rows = data.rows || [];
+        const m    = data.meta || {};
+        const ep   = m.entry_price || 0;
+        const dec  = ep < 0.01 ? 6 : ep < 1 ? 5 : ep < 100 ? 4 : ep < 1000 ? 3 : 2;
+        function fp(v)  { return v != null ? v.toFixed(dec) : '--'; }
+        function pad(s, n) { s = String(s); return s.length >= n ? s : s + ' '.repeat(n - s.length); }
+        function lpad(s, n) { s = String(s); return s.length >= n ? s : ' '.repeat(n - s.length) + s; }
+        const SEP = 'â'.repeat(116);
+        let html = '<div style="overflow-x:auto;padding:4px 8px 16px">';
+        // Meta banner
+        const pnlSign = m.pnl_dollars >= 0 ? '+' : '-';
+        const pnlCol  = m.pnl_dollars >= 0 ? '#22c55e' : '#ef4444';
+        html += '<div style="padding:10px 0 14px;font-family:\'JetBrains Mono\',monospace;font-size:11px">';
+        html += '<span style="color:#fb923c;font-weight:700">' + (m.venue||'') + '</span>  ';
+        html += '<span style="color:#fff;font-weight:700">' + (m.pair||'') + ' ' + (m.direction||'') + '</span>  ';
+        html += '<span style="color:#888">ENTRY</span> <span style="color:#fff">' + fp(m.entry_price) + '</span>  ';
+        html += '<span style="color:#888">EXIT</span> <span style="color:#fff">' + fp(m.exit_price) + '</span>  ';
+        html += '<span style="color:#888">1R</span> <span style="color:#fff">$' + (m.dollar_risk||0).toFixed(2) + '</span>  ';
+        html += '<span style="color:#888">PNL</span> <span style="color:' + pnlCol + '">' + pnlSign + '$' + Math.abs(m.pnl_dollars||0).toFixed(2) + '</span>  ';
+        html += '<span style="color:#888">EXIT GATE</span> <span style="color:#fb923c">' + (m.exit_reason||'â') + '</span>';
+        html += '</div>';
+        html += '<pre style="margin:0;font-family:\'JetBrains Mono\',monospace;font-size:11px;line-height:1.6;color:#ccc">';
+        html += '<span style="color:#555">' + pad('UTC',5)+'  '+pad('EDT',5)+'  '+pad('OPEN',dec+4)+'  '+pad('HIGH',dec+4)+'  '+pad('LOW',dec+4)+'  '+pad('CLOSE',dec+4)+'  '+pad('cPNL$',10)+'  '+pad('R',9)+'  '+pad('bArm',5)+'  '+pad('peak$',9)+'  '+pad('str',3)+'  EVENT</span>\n';
+        html += '<span style="color:#222">' + SEP + '</span>\n';
+        for (const row of rows) {
+          if (row.is_entry) {
+            html += '<span style="color:#22d3ee">ââââ ENTRY ' + (m.direction||'') + ' @ ' + fp(m.entry_price) + ' ' + 'â'.repeat(80) + '</span>\n';
+          }
+          const cpnl    = row.cpnl;
+          const cpnlStr = cpnl == null ? '  $0.00' : (cpnl >= 0 ? '+$' : '-$') + Math.abs(cpnl).toFixed(2);
+          const rStr    = row.r  == null ? '0.000R' : (row.r >= 0 ? '+' : '') + row.r.toFixed(3) + 'R';
+          const cpnlCol = cpnl > 0 ? '#22c55e' : cpnl < 0 ? '#ef4444' : '#666';
+          const rCol    = row.r  > 0 ? '#22c55e' : row.r  < 0 ? '#ef4444' : '#666';
+          const armed   = row.armed ? 'YES' : 'âââ';
+          const peakStr = row.peak   != null ? (row.peak  >= 0 ? '+$' : '-$') + Math.abs(row.peak).toFixed(0)  : 'âââââ';
+          const strStr  = row.streak != null ? String(row.streak) : 'âââ';
+          const lineCol = row.is_pre ? '#444' : '#ccc';
+          const evStr   = (row.events && row.events.length) ? row.events.join('  ') : (row.is_pre ? '[pre-entry]' : '');
+          html += '<span style="color:' + lineCol + '">';
+          html += pad(row.utc,5)+'  '+pad(row.edt,5)+'  ';
+          html += pad(fp(row.open),dec+4)+'  '+pad(fp(row.high),dec+4)+'  '+pad(fp(row.low),dec+4)+'  '+pad(fp(row.close),dec+4)+'  ';
+          html += '</span>';
+          html += '<span style="color:'+cpnlCol+'">' + pad(cpnlStr,10) + '</span>  ';
+          html += '<span style="color:'+rCol+'">'    + pad(rStr,9)     + '</span>  ';
+          html += '<span style="color:'+(row.armed ? '#22d3ee' : '#444')+'">' + pad(armed,5) + '</span>  ';
+          html += '<span style="color:'+(row.peak != null && row.peak > 0 ? '#22c55e' : '#444')+'">' + pad(peakStr,9) + '</span>  ';
+          html += '<span style="color:#888">' + pad(strStr,3) + '</span>';
+          if (evStr) html += '  <span style="color:#fb923c">' + evStr + '</span>';
+          html += '\n';
+          if (row.is_exit) {
+            html += '<span style="color:#ef4444">ââââ EXIT ' + (m.exit_reason||'EXIT') + ' @ ' + fp(m.exit_price) + ' ' + 'â'.repeat(78) + '</span>\n';
+          }
+        }
+        html += '</pre></div>';
+        return html;
       }
 
       async function openKzSheet(rdEncoded) {
@@ -5852,6 +5965,16 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           <div id="kz-sheet-body" style="font-family:'JetBrains Mono',monospace;font-size:12px"></div>
         </div>
       </div>
+
+    <div id="forensics-scrim" class="exc-scrim" onclick="closeForensicsSheet()">
+      <div class="exc-sheet" onclick="event.stopPropagation()" style="max-height:90vh;max-width:920px;width:96%">
+        <div class="exc-sheet-header">
+          <span class="exc-sheet-title" id="forensics-sheet-title" style="color:#fb923c;font-size:15px">FORENSICS</span>
+          <button class="exc-sheet-close" onclick="closeForensicsSheet()">&#x2715;</button>
+        </div>
+        <div id="forensics-sheet-body" style="overflow-y:auto"></div>
+      </div>
+    </div>
 
 <!-- ALERTS OVERLAY -->
 <div id="alert-overlay" style="display:none;position:fixed;inset:0;background:#050508;z-index:999;flex-direction:column">
