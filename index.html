@@ -6259,7 +6259,8 @@ function _refreshBtcRegimePill() {
                  : rg.state === 'CAUTION_SHORT'   ? '[CAUTION]'
                  : rg.state === 'CONFIRMED_SHORT' ? '[SHORT SAFE]'
                  :                                  'BTC REGIME';
-  pill.textContent = 'BTC REGIME ' + (rg.state !== 'EXEMPT' ? stateShort : '');
+  var j1hVal = (btc && btc.j1h != null) ? ' J=' + Math.round(btc.j1h) : '';
+  pill.textContent = 'BTC REGIME' + j1hVal + (rg.state !== 'EXEMPT' ? '  ' + stateShort : '');
   /* If overlay is open, refresh its content too */
   var bd = document.getElementById('btc-ov-bd');
   if (bd && bd.style.display !== 'none') {
