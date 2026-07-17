@@ -1893,10 +1893,16 @@ async def fleet_halt_long_toggle(
     request: Request,
     body: dict = Body(...),
 ) -> JSONResponse:
+    _require_auth(request)
     halt = bool(body.get("halt", False))
-    await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": halt})
-    await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": halt})
-    return JSONResponse({"halt_long": halt, "status": "ok"})
+    _hl_ok = await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": halt})
+    _mx_ok = await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": halt})
+    return JSONResponse({
+        "halt_long": halt,
+        "hl_ok":  _hl_ok,
+        "mx_ok":  _mx_ok,
+        "status": "ok" if (_hl_ok and _mx_ok) else "partial",
+    })
 
 
 @app.post("/api/fleet/halt-short")
@@ -1904,10 +1910,16 @@ async def fleet_halt_short_toggle(
     request: Request,
     body: dict = Body(...),
 ) -> JSONResponse:
+    _require_auth(request)
     halt = bool(body.get("halt", False))
-    await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": halt})
-    await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": halt})
-    return JSONResponse({"halt_short": halt, "status": "ok"})
+    _hl_ok = await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": halt})
+    _mx_ok = await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": halt})
+    return JSONResponse({
+        "halt_short": halt,
+        "hl_ok":  _hl_ok,
+        "mx_ok":  _mx_ok,
+        "status": "ok" if (_hl_ok and _mx_ok) else "partial",
+    })
 
 
 @app.post("/api/fleet/halt")
@@ -1917,9 +1929,14 @@ async def fleet_halt_toggle(
     _require_auth(request)
     body = await request.json()
     halt = bool(body.get("halt", False))
-    await _sb_patch("hl_scanner_state",   "id=eq.1", {"fleet_halt": halt})
-    await _sb_patch("mexc_scanner_state", "id=eq.1", {"fleet_halt": halt})
-    return JSONResponse({"fleet_halt": halt, "status": "ok"})
+    _hl_ok = await _sb_patch("hl_scanner_state",   "id=eq.1", {"fleet_halt": halt})
+    _mx_ok = await _sb_patch("mexc_scanner_state", "id=eq.1", {"fleet_halt": halt})
+    return JSONResponse({
+        "fleet_halt": halt,
+        "hl_ok":  _hl_ok,
+        "mx_ok":  _mx_ok,
+        "status": "ok" if (_hl_ok and _mx_ok) else "partial",
+    })
 
 
 @app.post("/api/fleet/sentinel-notify")
@@ -1937,9 +1954,30 @@ async def fleet_status(
     request: Request,
 ) -> JSONResponse:
     _require_auth(request)
-    rows = await _sb_fetch("hl_scanner_state", {"id": "eq.1", "select": "fleet_halt"})
-    halt = rows[0].get("fleet_halt", False) if rows else False
-    return JSONResponse({"fleet_halt": halt})
+    hl_rows, mx_rows = await asyncio.gather(
+        _sb_fetch("hl_scanner_state",   {"id": "eq.1", "select": "fleet_halt,halt_long,halt_short"}),
+        _sb_fetch("mexc_scanner_state", {"id": "eq.1", "select": "fleet_halt,halt_long,halt_short"}),
+    )
+    def _extract(rows: list) -> dict:
+        if not rows:
+            return {"fleet_halt": None, "halt_long": None, "halt_short": None}
+        r = rows[0]
+        return {
+            "fleet_halt":  r.get("fleet_halt"),
+            "halt_long":   r.get("halt_long"),
+            "halt_short":  r.get("halt_short"),
+        }
+    hl = _extract(hl_rows)
+    mx = _extract(mx_rows)
+    hl_fh = hl["fleet_halt"]
+    mx_fh = mx["fleet_halt"]
+    agreed = (hl_fh is not None and mx_fh is not None and hl_fh == mx_fh)
+    return JSONResponse({
+        "hl":          hl,
+        "mexc":        mx,
+        "agreed":      agreed,
+        "fleet_halt":  hl_fh,
+    })
 
 
 

@@ -1405,6 +1405,19 @@ body {
 #sentinel-gate-pill.sg-halt    { border-color:rgba(239,68,68,0.60);  color:#ef4444; background:rgba(239,68,68,0.08);  animation:sgHaltPulse 1.8s ease-in-out infinite; }
 @keyframes sgProtectPulse { 0%,100%{box-shadow:0 0 6px rgba(251,191,36,0.15)} 50%{box-shadow:0 0 18px rgba(251,191,36,0.38)} }
 @keyframes sgHaltPulse    { 0%,100%{box-shadow:0 0 8px rgba(239,68,68,0.18)}  50%{box-shadow:0 0 24px rgba(239,68,68,0.48)} }
+/* ── FLEET CTRL ROW (header) ── */
+#fleet-ctrl-row { display:flex; align-items:center; gap:6px; margin-left:auto; margin-right:12px; }
+#fleet-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; padding:7px 16px; border-radius:6px; border:2px solid transparent; cursor:pointer; color:#ffffff; min-width:148px; transition:all 0.2s; white-space:nowrap; }
+#fleet-halt-btn.fh-live   { background:#22c55e; border-color:#22c55e; }
+#fleet-halt-btn.fh-halted { background:#ef4444; border-color:#ef4444; }
+#fleet-halt-btn.fh-split  { background:#ef4444; border-color:#f59e0b; }
+#fleet-halt-btn.fh-failed { background:#111111; border-color:#f59e0b; color:#f59e0b; }
+.fc-pill { font-family:'Bebas Neue',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:5px 10px; border-radius:5px; border:1.5px solid #2a2a2a; background:#0a0a0a; color:#ffffff; white-space:nowrap; user-select:none; }
+.fc-dot { display:inline-block; width:7px; height:7px; border-radius:50%; vertical-align:middle; margin:0 2px; }
+.fc-dot-live { background:#22c55e; animation:fl-livedot 1.4s ease-in-out infinite; }
+.fc-dot-halt { background:#ef4444; animation:fc-haltdot 1.8s ease-in-out infinite; }
+.fc-dot-unkn { background:#f59e0b; }
+@keyframes fc-haltdot { 0%,100%{opacity:1;box-shadow:0 0 4px 1px rgba(239,68,68,0.8)} 50%{opacity:0.5;box-shadow:0 0 2px 0 rgba(239,68,68,0.3)} }
 </style>
 </head>
 <body>
@@ -1424,8 +1437,10 @@ body {
       </div>
       <div id="analytics-status" class="fetch-status"></div>
         <div class="badge-paper">PAPER</div>
-      <div id="fleet-halt-wrap" style="display:flex;align-items:center;margin-left:auto;margin-right:12px;">
-        <button id="fleet-halt-btn" onclick="fleetHaltToggle()" style="font-family:'Bebas Neue',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;padding:8px 24px;border-radius:6px;border:none;cursor:pointer;color:#ffffff;background:#22c55e;min-width:120px;">◎ LIVE</button>
+      <div id="fleet-ctrl-row">
+        <div id="fleet-venue-pill" class="fc-pill">HL&nbsp;<span class="fc-dot fc-dot-unkn"></span>&nbsp;|&nbsp;MX&nbsp;<span class="fc-dot fc-dot-unkn"></span></div>
+        <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
+        <button id="fleet-halt-btn" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
       </div>
     </div>
   </div>
@@ -6023,13 +6038,65 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
 <script>
 var _fleetHalted = false;
+var _fs = { hl_fh: null, mx_fh: null, hl_long: null, mx_long: null, hl_short: null, mx_short: null };
+
+function _renderFleetPills(override) {
+  var btn = document.getElementById('fleet-halt-btn');
+  if (btn) {
+    var hl = _fs.hl_fh, mx = _fs.mx_fh;
+    var label, cls;
+    if (override === 'WRITE FAILED') {
+      label = '\u25CE WRITE FAILED'; cls = 'fh-failed';
+    } else if (hl === null || mx === null) {
+      label = '\u25CE WRITE FAILED'; cls = 'fh-failed';
+    } else if (!hl && !mx) {
+      label = '\u25CE FLEET LIVE'; cls = 'fh-live';
+    } else if (hl && mx) {
+      label = '\u25CE FLEET HALTED'; cls = 'fh-halted';
+    } else {
+      label = '\u25CE FLEET SPLIT'; cls = 'fh-split';
+    }
+    btn.textContent = label;
+    btn.className   = cls;
+  }
+  var vp = document.getElementById('fleet-venue-pill');
+  if (vp) {
+    function _vdot(v) { return 'fc-dot ' + (v === null ? 'fc-dot-unkn' : (v ? 'fc-dot-halt' : 'fc-dot-live')); }
+    vp.innerHTML = 'HL\u00a0<span class="' + _vdot(_fs.hl_fh) + '"></span>'
+                 + '\u00a0|\u00a0MX\u00a0<span class="' + _vdot(_fs.mx_fh) + '"></span>';
+  }
+  var dp = document.getElementById('fleet-dir-pill');
+  if (dp) {
+    if (_fs.hl_long === null && _fs.mx_long === null && _fs.hl_short === null && _fs.mx_short === null) {
+      dp.innerHTML   = 'DIR\u00a0UNKNOWN';
+      dp.style.color = '#f59e0b';
+    } else {
+      function _ddot(v) { return 'fc-dot ' + (v === null ? 'fc-dot-unkn' : (v ? 'fc-dot-halt' : 'fc-dot-live')); }
+      var longHalt  = _fs.hl_long  || _fs.mx_long;
+      var shortHalt = _fs.hl_short || _fs.mx_short;
+      var longNull  = (_fs.hl_long  === null || _fs.mx_long  === null);
+      var shortNull = (_fs.hl_short === null || _fs.mx_short === null);
+      dp.innerHTML = 'DIR\u00a0L\u00a0<span class="' + _ddot(longNull  ? null : longHalt)  + '"></span>'
+                   + '\u00a0|\u00a0S\u00a0<span class="' + _ddot(shortNull ? null : shortHalt) + '"></span>';
+      dp.style.color = '#ffffff';
+    }
+  }
+}
 
 async function fleetHaltInit() {
   try {
     var r = await fetch('/api/fleet/status');
     var d = await r.json();
-    _fleetHalted = d.fleet_halt || false;
-    _updateHaltBtn();
+    var hl = d.hl   || {};
+    var mx = d.mexc || {};
+    _fs.hl_fh    = hl.fleet_halt  !== undefined ? hl.fleet_halt  : null;
+    _fs.mx_fh    = mx.fleet_halt  !== undefined ? mx.fleet_halt  : null;
+    _fs.hl_long  = hl.halt_long   !== undefined ? hl.halt_long   : null;
+    _fs.mx_long  = mx.halt_long   !== undefined ? mx.halt_long   : null;
+    _fs.hl_short = hl.halt_short  !== undefined ? hl.halt_short  : null;
+    _fs.mx_short = mx.halt_short  !== undefined ? mx.halt_short  : null;
+    _fleetHalted = _fs.hl_fh === true;
+    _renderFleetPills();
   } catch(e) {
     console.error('Fleet status error:', e);
   }
@@ -6037,32 +6104,49 @@ async function fleetHaltInit() {
 
 async function fleetHaltToggle() {
   _btcAutoHalted = false;
+  var _prevHalted = _fleetHalted;
+  var _prevFs = { hl_fh: _fs.hl_fh, mx_fh: _fs.mx_fh,
+                  hl_long: _fs.hl_long, mx_long: _fs.mx_long,
+                  hl_short: _fs.hl_short, mx_short: _fs.mx_short };
   _fleetHalted = !_fleetHalted;
-  _updateHaltBtn();
+  _fs.hl_fh    = _fleetHalted;
+  _fs.mx_fh    = _fleetHalted;
+  _renderFleetPills();
   try {
-    await fetch('/api/fleet/halt', {
+    var resp = await fetch('/api/fleet/halt', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({halt: _fleetHalted})
     });
+    if (!resp.ok) {
+      _fleetHalted = _prevHalted;
+      Object.assign(_fs, _prevFs);
+      _renderFleetPills('WRITE FAILED');
+      console.error('Fleet halt HTTP error:', resp.status);
+      return;
+    }
+    var d = await resp.json();
+    if (d.status !== 'ok') {
+      _fleetHalted = _prevHalted;
+      Object.assign(_fs, _prevFs);
+      _renderFleetPills('WRITE FAILED');
+      console.error('Fleet halt write non-ok:', d);
+      return;
+    }
+    if (d.hl_ok !== undefined) {
+      _fs.hl_fh = d.hl_ok ? _fleetHalted : _prevFs.hl_fh;
+      _fs.mx_fh = d.mx_ok ? _fleetHalted : _prevFs.mx_fh;
+    }
+    _renderFleetPills();
   } catch(e) {
-    _fleetHalted = !_fleetHalted;
-    _updateHaltBtn();
+    _fleetHalted = _prevHalted;
+    Object.assign(_fs, _prevFs);
+    _renderFleetPills('WRITE FAILED');
     console.error('Fleet halt error:', e);
   }
 }
 
-function _updateHaltBtn() {
-  var btn = document.getElementById('fleet-halt-btn');
-  if (!btn) return;
-  if (_fleetHalted) {
-    btn.textContent = '◎ HALTED';
-    btn.style.background = '#ef4444';
-  } else {
-    btn.textContent = '◎ LIVE';
-    btn.style.background = '#22c55e';
-  }
-}
+function _updateHaltBtn() { _renderFleetPills(); }
 
 fleetHaltInit();
 
@@ -6212,9 +6296,9 @@ function _btcRegimeCardHtml(sym, btc, regime, corr) {
   return p.join('');
 }
 
-function _getBtcState() {
-  /* BTC pair_state: both scanners track BTC in pair_states.
-     HL primary, MEXC fallback. Normalize symbol variants. */
+function _getBtcBothVenues() {
+  /* Returns {hlBtc, mxBtc, hl_j1h, mx_j1h, hl_regime, mx_regime, diverge}.
+     diverge=true when both venues have data AND resolve to DIFFERENT regime labels. */
   function normBtc(arr) {
     if (!Array.isArray(arr)) return null;
     return arr.find(function(p) {
@@ -6224,7 +6308,22 @@ function _getBtcState() {
   }
   var hlPairs   = (typeof live !== 'undefined' && live && live.hl   && live.hl.pair_states)   || [];
   var mexcPairs = (typeof live !== 'undefined' && live && live.mexc && live.mexc.pair_states) || [];
-  return normBtc(hlPairs) || normBtc(mexcPairs) || null;
+  var hlBtc  = normBtc(hlPairs);
+  var mxBtc  = normBtc(mexcPairs);
+  var hlJ1h  = (hlBtc  && hlBtc.j1h  != null) ? hlBtc.j1h  : null;
+  var mxJ1h  = (mxBtc  && mxBtc.j1h  != null) ? mxBtc.j1h  : null;
+  var hlRg   = _btcRegime(hlBtc);
+  var mxRg   = _btcRegime(mxBtc);
+  var diverge = (hlJ1h !== null && mxJ1h !== null && hlRg.label !== mxRg.label);
+  return { hlBtc: hlBtc, mxBtc: mxBtc,
+           hl_j1h: hlJ1h, mx_j1h: mxJ1h,
+           hl_regime: hlRg, mx_regime: mxRg, diverge: diverge };
+}
+
+function _getBtcState() {
+  /* Compatibility shim — returns HL BTC entry (MEXC fallback) for overlay/sentinel. */
+  var bv = _getBtcBothVenues();
+  return bv.hlBtc || bv.mxBtc || null;
 }
 
 function openBtcRegimeOverlay() {
@@ -6252,30 +6351,45 @@ function _btcOvKeyClose(e) {
 function _refreshBtcRegimePill() {
   var pill = document.getElementById('btc-regime-pill');
   if (!pill) return;
-  var btc = _getBtcState();
-  var rg  = _btcRegime(btc);
-  pill.className = rg.cls === 'confirmed'
-    ? (rg.state === 'CONFIRMED_LONG' ? 'rg-confirmed' : 'rg-confirmed')
-    : rg.cls === 'caution' ? 'rg-caution'
-    : rg.cls === 'stop'    ? 'rg-stop'
-    :                        'rg-exempt';
-  var labelLine = rg.state === 'CONFIRMED_LONG'  ? 'CONFIRMED'
-               : rg.state === 'CAUTION_LONG'    ? 'CAUTION'
-               : rg.state === 'STOP'            ? 'STOP'
-               : rg.state === 'CAUTION_SHORT'   ? 'CAUTION'
-               : rg.state === 'CONFIRMED_SHORT' ? 'SHORT SAFE'
-               :                                  'BTC REGIME';
-  var j1hScore = (btc && btc.j1h != null) ? Math.round(btc.j1h) : '\u2014';
-  var scoreLine = 'BTC\u00a0J1H\u00a0\u00b7\u00a0' + j1hScore;
-  pill.innerHTML = '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:13px;letter-spacing:0.14em;line-height:1.1;display:block">' + labelLine + '</span>'
-    + '<span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;font-weight:700;letter-spacing:0.08em;opacity:0.7;display:block;line-height:1.2;margin-top:1px">' + scoreLine + '</span>';
-  /* If overlay is open, refresh its content too */
+  var bv  = _getBtcBothVenues();
+  var rg  = bv.hl_regime;
+
+  /* Pill CSS class: diverge → amber caution; otherwise follow HL regime */
+  if (bv.diverge) {
+    pill.className = 'rg-caution';
+  } else {
+    pill.className = rg.cls === 'confirmed' ? 'rg-confirmed'
+                   : rg.cls === 'caution'   ? 'rg-caution'
+                   : rg.cls === 'stop'      ? 'rg-stop'
+                   :                          'rg-exempt';
+  }
+
+  /* Line 1: "BTC  HL 62 | MX 61" */
+  var hlStr = bv.hl_j1h !== null ? Math.round(bv.hl_j1h) : '?';
+  var mxStr = bv.mx_j1h !== null ? Math.round(bv.mx_j1h) : '?';
+  var line1 = 'BTC\u00a0\u00a0HL\u00a0' + hlStr + '\u00a0|\u00a0MX\u00a0' + mxStr;
+
+  /* Line 2: regime label — DIVERGE (amber) or the resolved state */
+  var regimeLabel = bv.diverge ? 'DIVERGE'
+    : rg.state === 'CONFIRMED_LONG'  ? 'CONFIRMED'
+    : rg.state === 'CAUTION_LONG'    ? 'CAUTION'
+    : rg.state === 'STOP'            ? 'STOP'
+    : rg.state === 'CAUTION_SHORT'   ? 'CAUTION'
+    : rg.state === 'CONFIRMED_SHORT' ? 'SHORT SAFE'
+    :                                   'BTC REGIME';
+
+  var line2Color = bv.diverge ? '#f59e0b' : 'inherit';
+  pill.innerHTML =
+    '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;line-height:1.1;display:block;color:#ffffff">' + line1 + '</span>'
+    + '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:13px;letter-spacing:0.14em;display:block;line-height:1.2;margin-top:1px;color:' + line2Color + '">' + regimeLabel + '</span>';
+
+  /* If overlay is open, refresh its content too (use HL primary) */
   var bd = document.getElementById('btc-ov-bd');
   if (bd && bd.style.display !== 'none') {
     var pn = document.getElementById('btc-ov-pn');
     if (pn) {
       pn.className = rg.cls;
-      pn.innerHTML = _btcRegimeCardHtml('FLEET', btc, rg, 1.0);
+      pn.innerHTML = _btcRegimeCardHtml('FLEET', bv.hlBtc || bv.mxBtc, rg, 1.0);
     }
   }
   _sentinelGateCheck();
@@ -6352,17 +6466,46 @@ function _sentinelGateCheck() {
 }
 
 async function _applyAutoHalt(halt, posture, rgState, dailyPnl) {
+  var _prevHalted = _fleetHalted;
+  var _prevFs = { hl_fh: _fs.hl_fh, mx_fh: _fs.mx_fh,
+                  hl_long: _fs.hl_long, mx_long: _fs.mx_long,
+                  hl_short: _fs.hl_short, mx_short: _fs.mx_short };
   _fleetHalted = halt;
-  _updateHaltBtn();
+  _fs.hl_fh = halt; _fs.mx_fh = halt;
+  _renderFleetPills();
 
   try {
-    await fetch('/api/fleet/halt', {
+    var _resp = await fetch('/api/fleet/halt', {
       method:  'POST',
       headers: {'Content-Type': 'application/json'},
       body:    JSON.stringify({halt: halt})
     });
+    if (!_resp.ok) {
+      _fleetHalted = _prevHalted;
+      Object.assign(_fs, _prevFs);
+      _renderFleetPills('WRITE FAILED');
+      console.error('[SENTINEL] halt HTTP error:', _resp.status);
+      return;
+    }
+    var _d = await _resp.json();
+    if (_d.status !== 'ok') {
+      _fleetHalted = _prevHalted;
+      Object.assign(_fs, _prevFs);
+      _renderFleetPills('WRITE FAILED');
+      console.error('[SENTINEL] halt write non-ok:', _d);
+      return;
+    }
+    if (_d.hl_ok !== undefined) {
+      _fs.hl_fh = _d.hl_ok ? halt : _prevFs.hl_fh;
+      _fs.mx_fh = _d.mx_ok ? halt : _prevFs.mx_fh;
+    }
+    _renderFleetPills();
   } catch(e) {
+    _fleetHalted = _prevHalted;
+    Object.assign(_fs, _prevFs);
+    _renderFleetPills('WRITE FAILED');
     console.error('[SENTINEL] halt write error:', e);
+    return;
   }
 
   var rgLabels = {
