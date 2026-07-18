@@ -1599,6 +1599,76 @@ body {
   70%  { opacity:0.9; transform:scaleX(0.5); box-shadow:0 0 10px 4px rgba(100,255,150,0.9); }
   100% { opacity:1;   transform:scaleX(1.5); box-shadow:0 0 6px 2px rgba(34,197,94,1.0); }
 }
+
+/* ── Session Timeline Strip ── */
+#stl-strip {
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+#stl-bar {
+  position: relative;
+  height: 28px;
+  border-radius: 3px;
+  background: #060606;
+  border: 1px solid #1e1e1e;
+  overflow: hidden;
+  transition: box-shadow .4s, border-color .4s;
+}
+#stl-bar.stl-clear  { box-shadow: 0 0 16px rgba(0,230,118,0.14); }
+#stl-bar.stl-halted { box-shadow: 0 0 20px rgba(239,68,68,0.28); border-color: rgba(239,68,68,0.30); }
+.stl-seg { position:absolute; top:0; bottom:0; border-right:1px solid rgba(0,0,0,0.30); }
+.stl-seg-asia { background:rgba(79,70,229,0.38);  }
+.stl-seg-eu   { background:rgba(124,58,237,0.38); }
+.stl-seg-euus { background:rgba(8,145,178,0.38);  }
+.stl-seg-us   { background:rgba(245,158,11,0.38); }
+.stl-seg-off  { background:rgba(55,65,81,0.18);   }
+.stl-seg.stl-seg-active { filter:brightness(1.45); }
+.stl-tick { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,0.05); pointer-events:none; }
+.stl-bz {
+  position:absolute; top:0; bottom:0;
+  background-image:repeating-linear-gradient(-45deg,rgba(239,68,68,0.10) 0,rgba(239,68,68,0.10) 3px,transparent 3px,transparent 14px);
+  border:1px solid rgba(239,68,68,0.28); border-radius:2px; z-index:3;
+}
+.stl-bz.stl-bz-active {
+  background-image:repeating-linear-gradient(-45deg,rgba(239,68,68,0.22) 0,rgba(239,68,68,0.22) 3px,transparent 3px,transparent 14px);
+  border-color:rgba(239,68,68,0.80);
+  box-shadow:inset 0 0 16px rgba(239,68,68,0.20);
+  animation:stlBzStrobe .85s ease-in-out infinite;
+}
+@keyframes stlBzStrobe { 0%,100%{border-color:rgba(239,68,68,0.6)} 50%{border-color:rgba(239,68,68,1);box-shadow:inset 0 0 22px rgba(239,68,68,0.30)} }
+.stl-cursor {
+  position:absolute; top:-2px; bottom:-2px; width:2px; border-radius:1px;
+  background:var(--teal); box-shadow:0 0 12px 3px rgba(34,211,238,0.8);
+  animation:stlCursorPulse 1.8s ease-in-out infinite; z-index:10; pointer-events:none;
+}
+@keyframes stlCursorPulse { 0%,100%{opacity:1;box-shadow:0 0 12px 3px rgba(34,211,238,0.6)} 50%{opacity:.8;box-shadow:0 0 22px 6px rgba(34,211,238,1)} }
+.stl-safe-glow {
+  position:absolute; height:3px; bottom:-5px; border-radius:2px;
+  background:rgba(0,230,118,0.55); box-shadow:0 0 10px 3px rgba(0,230,118,0.40);
+  animation:stlSafePulse 2.6s ease-in-out infinite;
+}
+@keyframes stlSafePulse { 0%,100%{box-shadow:0 0 8px 2px rgba(0,230,118,0.30)} 50%{box-shadow:0 0 16px 4px rgba(0,230,118,0.60)} }
+.stl-axis { position:relative; height:15px; margin-top:10px; }
+.stl-axis-lbl {
+  position:absolute; font-size:9px; font-weight:700; color:#3a3a3a;
+  transform:translateX(-50%); white-space:nowrap; letter-spacing:.03em;
+}
+.stl-bz-lbl {
+  position:absolute; bottom:-21px; left:50%; transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif; font-size:9px; letter-spacing:.13em;
+  color:#5a1a1a; white-space:nowrap; pointer-events:none;
+}
+.stl-bz-lbl.stl-bz-lbl-active { color:#ef4444; animation:stlBzStrobe .85s ease-in-out infinite; }
+.stl-safe-lbl {
+  position:absolute; bottom:-21px; left:50%; transform:translateX(-50%);
+  font-family:'Bebas Neue',sans-serif; font-size:9px; letter-spacing:.10em;
+  color:#1a3a22; white-space:nowrap; pointer-events:none;
+}
+#halt-source-pill.hsp-session {
+  display:block; color:#f59e0b;
+  border-color:rgba(245,158,11,0.55); background:rgba(245,158,11,0.09);
+}
 </style>
 </head>
 <body>
@@ -1640,6 +1710,12 @@ body {
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- SESSION TIMELINE STRIP -->
+  <div id="stl-strip">
+    <div id="stl-bar" class="stl-clear"></div>
+    <div id="stl-axis" class="stl-axis"></div>
   </div>
 
   <!-- FLEET LINK -->
@@ -6613,6 +6689,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
 <script>
 var _fleetHalted = false;
+var _sessionHalted = false;
 
 async function fleetHaltInit() {
   try {
@@ -6627,6 +6704,7 @@ async function fleetHaltInit() {
 
 async function fleetHaltToggle() {
   _btcAutoHalted = false;  /* manual override clears auto flag */
+  _sessionHalted = false;  /* manual override clears session flag */
   _fleetHalted = !_fleetHalted;
   _updateHaltBtn();
   try {
@@ -6667,7 +6745,11 @@ function _updateSourcePill() {
     return;
   }
   /* halted — show source */
-  if (_btcAutoHalted) {
+  if (_sessionHalted && !_btcAutoHalted) {
+    pill.className = 'hsp-session';
+    pill.textContent = '⚡ SESSION';
+    bolt.className = 'bolt-auto';
+  } else if (_btcAutoHalted) {
     pill.className = 'hsp-auto';
     pill.textContent = '⚡ AUTO';
     bolt.className = 'bolt-auto';
@@ -6679,6 +6761,136 @@ function _updateSourcePill() {
 }
 
 fleetHaltInit();
+
+/* ══════════════════════════════════════════════════════════════════════
+   SESSION TIMELINE STRIP — auto-halt blackout zones
+   Three blackout windows auto-halt HL+MEXC fleet:
+   1. ASIA LOW LIQ  : midnight–4 AM ET  (thin books, erratic moves)
+   2. EU J-STALE    : 5 AM–8 AM ET      (ASIA J-scores still elevated)
+   3. US WHIPSAW    : 9:30–10:15 AM ET  (US open cook-down)
+   ══════════════════════════════════════════════════════════════════════ */
+
+var _STL_SEGS = [
+  {cls:'stl-seg-asia', start:0,   end:4   },
+  {cls:'stl-seg-eu',   start:4,   end:9.5 },
+  {cls:'stl-seg-euus', start:9.5, end:12  },
+  {cls:'stl-seg-us',   start:12,  end:17  },
+  {cls:'stl-seg-off',  start:17,  end:20  },
+  {cls:'stl-seg-asia', start:20,  end:24  },
+];
+var _STL_BZ = [
+  {key:'BZ1', label:'ASIA LOW LIQ', start:0,   end:4    },
+  {key:'BZ2', label:'EU J-STALE',   start:5,   end:8    },
+  {key:'BZ3', label:'US WHIPSAW',   start:9.5, end:10.25},
+];
+var _STL_SAFE = [
+  {start:4,    end:5   },
+  {start:8,    end:9.5 },
+  {start:10.25,end:17  },
+  {start:20,   end:24  },
+];
+
+function _stlEtH() {
+  var d = new Date();
+  var s = d.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,
+    hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var p = s.split(':').map(Number);
+  return p[0] + p[1]/60 + p[2]/3600;
+}
+function _stlPct(h) { return (h/24*100).toFixed(4)+'%'; }
+function _stlFmt(h) {
+  var hh = Math.floor(h)%24, mm = Math.round((h-Math.floor(h))*60);
+  var ap = hh<12?'AM':'PM', d = hh===0?12:hh>12?hh-12:hh;
+  return d+':'+(mm<10?'0':'')+mm+ap;
+}
+
+function _stlRender() {
+  var bar  = document.getElementById('stl-bar');
+  var axis = document.getElementById('stl-axis');
+  if (!bar || !axis) return;
+  var now = _stlEtH();
+  var bz  = null;
+  for (var i=0; i<_STL_BZ.length; i++) {
+    if (now >= _STL_BZ[i].start && now < _STL_BZ[i].end) { bz = _STL_BZ[i]; break; }
+  }
+  var curSeg = -1;
+  for (var j=0; j<_STL_SEGS.length; j++) {
+    if (now >= _STL_SEGS[j].start && now < _STL_SEGS[j].end) { curSeg = j; break; }
+  }
+
+  bar.className = 'stl-' + (bz ? 'halted' : 'clear');
+
+  var h = '';
+  /* segments */
+  _STL_SEGS.forEach(function(s,i) {
+    var w = ((s.end-s.start)/24*100).toFixed(4);
+    var ac = i===curSeg ? ' stl-seg-active' : '';
+    h += '<div class="stl-seg '+s.cls+ac+'" style="left:'+_stlPct(s.start)+';width:'+w+'%"></div>';
+  });
+  /* ticks */
+  [0,2,4,6,8,10,12,14,16,18,20,22].forEach(function(t) {
+    h += '<div class="stl-tick" style="left:'+_stlPct(t)+'"></div>';
+  });
+  /* safe-zone glow strips */
+  _STL_SAFE.forEach(function(z) {
+    var w = ((z.end-z.start)/24*100).toFixed(4);
+    h += '<div class="stl-safe-glow" style="left:'+_stlPct(z.start)+';width:'+w+'%">';
+    h += '<div class="stl-safe-lbl">✓</div>';
+    h += '</div>';
+  });
+  /* blackout overlays */
+  _STL_BZ.forEach(function(b) {
+    var w = ((b.end-b.start)/24*100).toFixed(4);
+    var ac = (b===bz) ? ' stl-bz-active' : '';
+    h += '<div class="stl-bz'+ac+'" style="left:'+_stlPct(b.start)+';width:'+w+'%">';
+    h += '<div class="stl-bz-lbl'+(b===bz?' stl-bz-lbl-active':'')+'">'+(b===bz?'⛔ ':'')+b.label+'</div>';
+    h += '</div>';
+  });
+  /* cursor */
+  h += '<div class="stl-cursor" style="left:'+_stlPct(now)+'"></div>';
+  bar.innerHTML = h;
+
+  /* axis labels */
+  var ax = '';
+  [0,4,5,8,9.5,10.25,12,17,20,24].forEach(function(t) {
+    ax += '<div class="stl-axis-lbl" style="left:'+_stlPct(t)+'">'+_stlFmt(t===24?0:t)+'</div>';
+  });
+  axis.innerHTML = ax;
+
+  /* halt logic */
+  _stlCheckHalt(bz);
+}
+
+function _stlCheckHalt(bz) {
+  var shouldHalt = bz !== null;
+  if (shouldHalt && !_fleetHalted) {
+    _sessionHalted = true;
+    _stlApplyHalt(true);
+  } else if (!shouldHalt && _fleetHalted && _sessionHalted && !_btcAutoHalted) {
+    _sessionHalted = false;
+    _stlApplyHalt(false);
+  }
+}
+
+async function _stlApplyHalt(halt) {
+  var prev = _fleetHalted;
+  _fleetHalted = halt;
+  _updateHaltBtn();
+  try {
+    var r = await fetch('/api/fleet/halt', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({halt: halt})
+    });
+    if (!r.ok) { _fleetHalted = prev; _updateHaltBtn(); console.error('[STL] halt HTTP err:', r.status); return; }
+    var d = await r.json();
+    if (d.status !== 'ok') { _fleetHalted = prev; _updateHaltBtn(); return; }
+    _updateHaltBtn();
+  } catch(e) { _fleetHalted = prev; _updateHaltBtn(); console.error('[STL] halt error:', e); }
+}
+
+setInterval(_stlRender, 30000);
+_stlRender();
+
 
 /* ══════════════════════════════════════════════════════════════════════
    BTC REGIME OVERLAY — ported from HL/MEXC scanner dashboard.js
