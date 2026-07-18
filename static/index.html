@@ -4355,7 +4355,9 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
                 req: { coin: r.pair, interval: '1m', startTime: startMs, endTime: endMs } })
             });
             const data = await res.json();
-            candles = (data || []).map(c => ({ t: +c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }));
+            candles = (Array.isArray(data) ? data : []).map(c => Array.isArray(c)
+              ? { t: +c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }
+              : { t: +(c.t||c.T||0), o: +(c.o||0), h: +(c.h||0), l: +(c.l||0), c: +(c.c||0) });
           } else {
             const startSec = Math.floor(startMs / 1000);
             const endSec   = Math.floor(endMs   / 1000);
@@ -4539,7 +4541,9 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
               })
             });
             const data = await res.json();
-            candles = (data || []).map(c => ({ t: c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }));
+            candles = (Array.isArray(data) ? data : []).map(c => Array.isArray(c)
+              ? { t: +c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }
+              : { t: +(c.t||c.T||0), o: +(c.o||0), h: +(c.h||0), l: +(c.l||0), c: +(c.c||0) });
           } else {
             // MEXC futures public API
             const startSec = Math.floor(closeMs / 1000);
