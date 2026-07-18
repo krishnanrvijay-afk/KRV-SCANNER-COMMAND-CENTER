@@ -6256,6 +6256,7 @@ async function fleetHaltInit() {
 }
 
 async function fleetHaltToggle() {
+  _btcAutoHalted = false;  /* manual override clears auto flag */
   _fleetHalted = !_fleetHalted;
   _updateHaltBtn();
   try {
@@ -6596,37 +6597,33 @@ function _sentinelGateCheck() {
 }
 
 async function _applyAutoHalt(halt, posture, rgState, dailyPnl) {
+  /* Optimistic update: set _fleetHalted + call _updateHaltBtn,
+     then write to Supabase. On any failure rollback both.
+     Root-only helpers (fleet-state object + pill renderer) removed;
+     _prevHalted + _updateHaltBtn() are the correct equivalents here. */
   var _prevHalted = _fleetHalted;
-  var _prevFs = { hl_fh: _fs.hl_fh, mx_fh: _fs.mx_fh,
-                  hl_long: _fs.hl_long, mx_long: _fs.mx_long,
-                  hl_short: _fs.hl_short, mx_short: _fs.mx_short };
   _fleetHalted = halt;
-  _fs.hl_fh = halt; _fs.mx_fh = halt;
-  _renderFleetPills();
+  _updateHaltBtn();
   try {
     var _resp = await fetch('/api/fleet/halt', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({halt: halt})
     });
     if (!_resp.ok) {
-      _fleetHalted = _prevHalted; Object.assign(_fs, _prevFs);
-      _renderFleetPills('WRITE FAILED');
+      _fleetHalted = _prevHalted;
+      _updateHaltBtn();
       console.error('[SENTINEL] halt HTTP error:', _resp.status); return;
     }
     var _d = await _resp.json();
     if (_d.status !== 'ok') {
-      _fleetHalted = _prevHalted; Object.assign(_fs, _prevFs);
-      _renderFleetPills('WRITE FAILED');
+      _fleetHalted = _prevHalted;
+      _updateHaltBtn();
       console.error('[SENTINEL] halt write non-ok:', _d); return;
     }
-    if (_d.hl_ok !== undefined) {
-      _fs.hl_fh = _d.hl_ok ? halt : _prevFs.hl_fh;
-      _fs.mx_fh = _d.mx_ok ? halt : _prevFs.mx_fh;
-    }
-    _renderFleetPills();
+    _updateHaltBtn();
   } catch(e) {
-    _fleetHalted = _prevHalted; Object.assign(_fs, _prevFs);
-    _renderFleetPills('WRITE FAILED');
+    _fleetHalted = _prevHalted;
+    _updateHaltBtn();
     console.error('[SENTINEL] halt write error:', e); return;
   }
   var rgLabels = {
