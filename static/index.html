@@ -1334,23 +1334,29 @@ body {
 /* ── BTC REGIME PILL (header) ── */
 #btc-regime-pill {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 15px;
-  letter-spacing: 0.1em;
-  padding: 5px 14px;
-  border-radius: 6px;
-  border: 1.5px solid rgba(34,211,238,0.4);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  padding: 5px 18px 6px;
+  border-radius: 999px;
+  border: 2px solid rgba(34,211,238,0.4);
   background: rgba(34,211,238,0.06);
   color: #22d3ee;
   cursor: pointer;
   transition: all 0.3s;
   white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  line-height: 1;
 }
 #btc-regime-pill:hover { transform: scale(1.03); }
-#btc-regime-pill.rg-confirmed { border-color: rgba(0,230,118,0.55); color: #00e676; background: rgba(0,230,118,0.08); box-shadow: 0 0 14px rgba(0,230,118,0.2); }
-#btc-regime-pill.rg-caution   { border-color: rgba(255,179,0,0.55); color: #ffb300; background: rgba(255,179,0,0.07); box-shadow: 0 0 14px rgba(255,179,0,0.18); }
-#btc-regime-pill.rg-stop      { border-color: rgba(255,82,82,0.6);  color: #ff4646; background: rgba(255,82,82,0.08);  animation: rgStopPulse 2s ease-in-out infinite; }
-#btc-regime-pill.rg-exempt    { border-color: #333; color: #888; background: transparent; }
-@keyframes rgStopPulse { 0%,100%{box-shadow:0 0 8px rgba(255,82,82,0.18)} 50%{box-shadow:0 0 20px rgba(255,82,82,0.40)} }
+#btc-regime-pill.rg-confirmed { border-color: rgba(0,230,118,0.70); color: #00e676; background: rgba(0,230,118,0.12); box-shadow: 0 0 20px rgba(0,230,118,0.65), 0 0 50px rgba(0,230,118,0.28), inset 0 0 3px rgba(0,230,118,0.18); }
+#btc-regime-pill.rg-caution   { border-color: rgba(255,179,0,0.70); color: #ffb300; background: rgba(255,179,0,0.11); box-shadow: 0 0 20px rgba(255,179,0,0.60), 0 0 50px rgba(255,179,0,0.25), inset 0 0 3px rgba(255,179,0,0.16); }
+#btc-regime-pill.rg-stop      { border-color: rgba(255,70,70,0.75); color: #ff4646; background: rgba(255,70,70,0.12); animation: rgStopPulse 1.8s ease-in-out infinite; }
+#btc-regime-pill.rg-exempt    { border-color: #2e2e2e; color: #555; background: transparent; box-shadow: none; }
+@keyframes rgStopPulse { 0%,100%{box-shadow:0 0 12px rgba(255,70,70,0.40),0 0 0px rgba(255,70,70,0)} 50%{box-shadow:0 0 28px rgba(255,70,70,0.80),0 0 55px rgba(255,70,70,0.35)} }
 
 /* ── BTC REGIME OVERLAY ── */
 #btc-ov-bd {
@@ -1378,6 +1384,40 @@ body {
 #btc-ov-pn .tz-stop  { flex:2; background:rgba(255,70,70,0.35); border-left:1px solid #ff464444; border-right:1px solid #ff464444; }
 #btc-ov-pn .tz-caut2 { flex:2; background:rgba(255,179,0,0.25); border-right:1px solid #ffb30044; }
 #btc-ov-pn .tz-safe2 { flex:2; background:rgba(255,70,70,0.30); border-radius:0 3px 3px 0; }
+
+/* ── SENTINEL GATE PILL (header) ── */
+#sentinel-gate-pill {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+  color: #888;
+  white-space: nowrap;
+  transition: all 0.3s;
+  cursor: default;
+  user-select: none;
+}
+#sentinel-gate-pill.sg-earn    { border-color:rgba(34,197,94,0.55);  color:#22c55e; background:rgba(34,197,94,0.07); }
+#sentinel-gate-pill.sg-protect { border-color:rgba(251,191,36,0.55); color:#fbbf24; background:rgba(251,191,36,0.07); animation:sgProtectPulse 2.5s ease-in-out infinite; }
+#sentinel-gate-pill.sg-halt    { border-color:rgba(239,68,68,0.60);  color:#ef4444; background:rgba(239,68,68,0.08);  animation:sgHaltPulse 1.8s ease-in-out infinite; }
+@keyframes sgProtectPulse { 0%,100%{box-shadow:0 0 6px rgba(251,191,36,0.15)} 50%{box-shadow:0 0 18px rgba(251,191,36,0.38)} }
+@keyframes sgHaltPulse    { 0%,100%{box-shadow:0 0 8px rgba(239,68,68,0.18)}  50%{box-shadow:0 0 24px rgba(239,68,68,0.48)} }
+/* ── FLEET CTRL ROW (header) ── */
+#fleet-ctrl-row { display:flex; align-items:center; gap:6px; margin-left:auto; margin-right:12px; }
+#fleet-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; padding:7px 16px; border-radius:6px; border:2px solid transparent; cursor:pointer; color:#ffffff; min-width:148px; transition:all 0.2s; white-space:nowrap; }
+#fleet-halt-btn.fh-live   { background:#22c55e; border-color:#22c55e; }
+#fleet-halt-btn.fh-halted { background:#ef4444; border-color:#ef4444; }
+#fleet-halt-btn.fh-split  { background:#ef4444; border-color:#f59e0b; }
+#fleet-halt-btn.fh-failed { background:#111111; border-color:#f59e0b; color:#f59e0b; }
+.fc-pill { font-family:'Bebas Neue',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.06em; padding:5px 10px; border-radius:5px; border:1.5px solid #2a2a2a; background:#0a0a0a; color:#ffffff; white-space:nowrap; user-select:none; }
+.fc-dot { display:inline-block; width:7px; height:7px; border-radius:50%; vertical-align:middle; margin:0 2px; }
+.fc-dot-live { background:#22c55e; animation:fl-livedot 1.4s ease-in-out infinite; }
+.fc-dot-halt { background:#ef4444; animation:fc-haltdot 1.8s ease-in-out infinite; }
+.fc-dot-unkn { background:#f59e0b; }
+@keyframes fc-haltdot { 0%,100%{opacity:1;box-shadow:0 0 4px 1px rgba(239,68,68,0.8)} 50%{opacity:0.5;box-shadow:0 0 2px 0 rgba(239,68,68,0.3)} }
 </style>
 </head>
 <body>
@@ -1388,7 +1428,8 @@ body {
   <div class="header">
     <div class="logo"><span class="logo-dot"></span>KRV FLEET SCORECARD</div>
     <div class="header-right">
-      <button id="btc-regime-pill" class="rg-exempt" onclick="openBtcRegimeOverlay()" title="BTC Regime Market Context">BTC REGIME</button>
+      <button id="btc-regime-pill" class="rg-exempt" onclick="openBtcRegimeOverlay()" title="BTC Regime — click for detail"><span style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:0.14em;line-height:1.1;display:block">BTC REGIME</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.08em;opacity:0.7;display:block;line-height:1.2;margin-top:1px">BTC&nbsp;J1H&nbsp;&middot;&nbsp;&mdash;</span></button>
+      <div id="sentinel-gate-pill" title="SENTINEL Gate — auto HALT/LIVE based on daily PnL + BTC Regime">SENTINEL GATE</div>
       <div class="range-btns">
         <button id="btn-today" onclick="setRange('today')" class="active">TODAY</button>
         <button id="btn-week"  onclick="setRange('week')">WEEK</button>
@@ -1396,8 +1437,10 @@ body {
       </div>
       <div id="analytics-status" class="fetch-status"></div>
         <div class="badge-paper">PAPER</div>
-      <div id="fleet-halt-wrap" style="display:flex;align-items:center;margin-left:auto;margin-right:12px;">
-        <button id="fleet-halt-btn" onclick="fleetHaltToggle()" style="font-family:'Bebas Neue',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;padding:8px 24px;border-radius:6px;border:none;cursor:pointer;color:#ffffff;background:#22c55e;min-width:120px;">◎ LIVE</button>
+      <div id="fleet-ctrl-row">
+        <div id="fleet-venue-pill" class="fc-pill">HL&nbsp;<span class="fc-dot fc-dot-unkn"></span>&nbsp;|&nbsp;MX&nbsp;<span class="fc-dot fc-dot-unkn"></span></div>
+        <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
+        <button id="fleet-halt-btn" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
       </div>
     </div>
   </div>
@@ -6388,9 +6431,9 @@ function _btcRegimeCardHtml(sym, btc, regime, corr) {
   return p.join('');
 }
 
-function _getBtcState() {
-  /* BTC pair_state: both scanners track BTC in pair_states.
-     HL primary, MEXC fallback. Normalize symbol variants. */
+function _getBtcBothVenues() {
+  /* Returns {hlBtc, mxBtc, hl_j1h, mx_j1h, hl_regime, mx_regime, diverge}.
+     diverge=true when both venues have data AND resolve to DIFFERENT regime labels. */
   function normBtc(arr) {
     if (!Array.isArray(arr)) return null;
     return arr.find(function(p) {
@@ -6400,7 +6443,22 @@ function _getBtcState() {
   }
   var hlPairs   = (typeof live !== 'undefined' && live && live.hl   && live.hl.pair_states)   || [];
   var mexcPairs = (typeof live !== 'undefined' && live && live.mexc && live.mexc.pair_states) || [];
-  return normBtc(hlPairs) || normBtc(mexcPairs) || null;
+  var hlBtc  = normBtc(hlPairs);
+  var mxBtc  = normBtc(mexcPairs);
+  var hlJ1h  = (hlBtc  && hlBtc.j1h  != null) ? hlBtc.j1h  : null;
+  var mxJ1h  = (mxBtc  && mxBtc.j1h  != null) ? mxBtc.j1h  : null;
+  var hlRg   = _btcRegime(hlBtc);
+  var mxRg   = _btcRegime(mxBtc);
+  var diverge = (hlJ1h !== null && mxJ1h !== null && hlRg.label !== mxRg.label);
+  return { hlBtc: hlBtc, mxBtc: mxBtc,
+           hl_j1h: hlJ1h, mx_j1h: mxJ1h,
+           hl_regime: hlRg, mx_regime: mxRg, diverge: diverge };
+}
+
+function _getBtcState() {
+  /* Compatibility shim — returns HL BTC entry (MEXC fallback) for overlay/sentinel. */
+  var bv = _getBtcBothVenues();
+  return bv.hlBtc || bv.mxBtc || null;
 }
 
 function openBtcRegimeOverlay() {
@@ -6428,31 +6486,185 @@ function _btcOvKeyClose(e) {
 function _refreshBtcRegimePill() {
   var pill = document.getElementById('btc-regime-pill');
   if (!pill) return;
-  var btc = _getBtcState();
-  var rg  = _btcRegime(btc);
-  pill.className = rg.cls === 'confirmed'
-    ? (rg.state === 'CONFIRMED_LONG' ? 'rg-confirmed' : 'rg-confirmed')
-    : rg.cls === 'caution' ? 'rg-caution'
-    : rg.cls === 'stop'    ? 'rg-stop'
-    :                        'rg-exempt';
-  var stateShort = rg.state === 'CONFIRMED_LONG'  ? '[LONG SAFE]'
-                 : rg.state === 'CAUTION_LONG'    ? '[CAUTION]'
-                 : rg.state === 'STOP'            ? '[STOP]'
-                 : rg.state === 'CAUTION_SHORT'   ? '[CAUTION]'
-                 : rg.state === 'CONFIRMED_SHORT' ? '[SHORT SAFE]'
-                 :                                  'BTC REGIME';
-  pill.textContent = 'BTC REGIME ' + (rg.state !== 'EXEMPT' ? stateShort : '');
-  /* If overlay is open, refresh its content too */
+  var bv  = _getBtcBothVenues();
+  var rg  = bv.hl_regime;
+
+  /* Pill CSS class: diverge → amber caution; otherwise follow HL regime */
+  if (bv.diverge) {
+    pill.className = 'rg-caution';
+  } else {
+    pill.className = rg.cls === 'confirmed' ? 'rg-confirmed'
+                   : rg.cls === 'caution'   ? 'rg-caution'
+                   : rg.cls === 'stop'      ? 'rg-stop'
+                   :                          'rg-exempt';
+  }
+
+  /* Line 1: "BTC  HL 62 | MX 61" */
+  var hlStr = bv.hl_j1h !== null ? Math.round(bv.hl_j1h) : '?';
+  var mxStr = bv.mx_j1h !== null ? Math.round(bv.mx_j1h) : '?';
+  var line1 = 'BTC  HL ' + hlStr + ' | MX ' + mxStr;
+
+  /* Line 2: regime label — DIVERGE (amber) or the resolved state */
+  var regimeLabel = bv.diverge ? 'DIVERGE'
+    : rg.state === 'CONFIRMED_LONG'  ? 'CONFIRMED'
+    : rg.state === 'CAUTION_LONG'    ? 'CAUTION'
+    : rg.state === 'STOP'            ? 'STOP'
+    : rg.state === 'CAUTION_SHORT'   ? 'CAUTION'
+    : rg.state === 'CONFIRMED_SHORT' ? 'SHORT SAFE'
+    :                                   'BTC REGIME';
+
+  var line2Color = bv.diverge ? '#f59e0b' : 'inherit';
+  pill.innerHTML =
+    '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;line-height:1.1;display:block;color:#ffffff">' + line1 + '</span>'
+    + '<span style="font-family:\'Bebas Neue\',sans-serif;font-size:13px;letter-spacing:0.14em;display:block;line-height:1.2;margin-top:1px;color:' + line2Color + '">' + regimeLabel + '</span>';
+
+  /* If overlay is open, refresh its content too (use HL primary) */
   var bd = document.getElementById('btc-ov-bd');
   if (bd && bd.style.display !== 'none') {
     var pn = document.getElementById('btc-ov-pn');
     if (pn) {
       pn.className = rg.cls;
-      pn.innerHTML = _btcRegimeCardHtml('FLEET', btc, rg, 1.0);
+      pn.innerHTML = _btcRegimeCardHtml('FLEET', bv.hlBtc || bv.mxBtc, rg, 1.0);
     }
+  }
+  _sentinelGateCheck();
+}
+
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   SENTINEL GATE — Cardinal Rule 1-A two-posture auto HALT/LIVE system
+   Earn Mode    (daily < $1,000): HALT on STOP only
+   Protect Mode (daily ≥ $1,000): LIVE only on LONG SAFE or SHORT SAFE
+   Manual toggle always clears auto flag (_btcAutoHalted = false)
+   Auto-LIVE only fires if _btcAutoHalted is true (auto set it, not human)
+   ══════════════════════════════════════════════════════════════════════ */
+
+var _btcAutoHalted          = false;
+var _sentinelDailyPnl       = 0;
+var _sentinelLastShouldHalt = null;
+var SENTINEL_THRESHOLD      = 1000;
+
+function _sentinelShouldHalt(rgState, dailyPnl) {
+  if (!rgState || rgState === 'EXEMPT') return null;
+  if (dailyPnl < SENTINEL_THRESHOLD) {
+    return rgState === 'STOP';
+  } else {
+    return rgState !== 'CONFIRMED_LONG' && rgState !== 'CONFIRMED_SHORT';
   }
 }
 
+function _updateSentinelPill(posture, rgState, dailyPnl, shouldHalt) {
+  var el = document.getElementById('sentinel-gate-pill');
+  if (!el) return;
+  var postureLabel = posture === 'EARN' ? 'EARN' : 'PROTECT FLOOR';
+  var sign         = dailyPnl >= 0 ? '+' : '-';
+  var pnlStr       = sign + '$' + Math.abs(Math.round(dailyPnl));
+  var statusIcon   = shouldHalt === null ? '' : (shouldHalt ? '  ⛔ HALT' : '  ✓ LIVE');
+  el.textContent   = 'SENTINEL  ' + postureLabel + '  ' + pnlStr + statusIcon;
+  if (shouldHalt === true) {
+    el.className = 'sg-halt';
+  } else if (posture === 'PROTECT') {
+    el.className = 'sg-protect';
+  } else {
+    el.className = 'sg-earn';
+  }
+}
+
+function _sentinelGateCheck() {
+  var btc      = _getBtcState();
+  var rg       = _btcRegime(btc);
+  var state    = rg.state;
+  var posture  = _sentinelDailyPnl < SENTINEL_THRESHOLD ? 'EARN' : 'PROTECT';
+  var shouldHalt = _sentinelShouldHalt(state, _sentinelDailyPnl);
+  _updateSentinelPill(posture, state, _sentinelDailyPnl, shouldHalt);
+  if (shouldHalt === null) return;
+  if (shouldHalt && !_fleetHalted) {
+    _btcAutoHalted          = true;
+    _sentinelLastShouldHalt = true;
+    _applyAutoHalt(true, posture, state, _sentinelDailyPnl);
+    return;
+  }
+  if (!shouldHalt && _fleetHalted && _btcAutoHalted) {
+    _btcAutoHalted          = false;
+    _sentinelLastShouldHalt = false;
+    _applyAutoHalt(false, posture, state, _sentinelDailyPnl);
+    return;
+  }
+  _sentinelLastShouldHalt = shouldHalt;
+}
+
+async function _applyAutoHalt(halt, posture, rgState, dailyPnl) {
+  var _prevHalted = _fleetHalted;
+  var _prevFs = { hl_fh: _fs.hl_fh, mx_fh: _fs.mx_fh,
+                  hl_long: _fs.hl_long, mx_long: _fs.mx_long,
+                  hl_short: _fs.hl_short, mx_short: _fs.mx_short };
+  _fleetHalted = halt;
+  _fs.hl_fh = halt; _fs.mx_fh = halt;
+  _renderFleetPills();
+  try {
+    var _resp = await fetch('/api/fleet/halt', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({halt: halt})
+    });
+    if (!_resp.ok) {
+      _fleetHalted = _prevHalted; Object.assign(_fs, _prevFs);
+      _renderFleetPills('WRITE FAILED');
+      console.error('[SENTINEL] halt HTTP error:', _resp.status); return;
+    }
+    var _d = await _resp.json();
+    if (_d.status !== 'ok') {
+      _fleetHalted = _prevHalted; Object.assign(_fs, _prevFs);
+      _renderFleetPills('WRITE FAILED');
+      console.error('[SENTINEL] halt write non-ok:', _d); return;
+    }
+    if (_d.hl_ok !== undefined) {
+      _fs.hl_fh = _d.hl_ok ? halt : _prevFs.hl_fh;
+      _fs.mx_fh = _d.mx_ok ? halt : _prevFs.mx_fh;
+    }
+    _renderFleetPills();
+  } catch(e) {
+    _fleetHalted = _prevHalted; Object.assign(_fs, _prevFs);
+    _renderFleetPills('WRITE FAILED');
+    console.error('[SENTINEL] halt write error:', e); return;
+  }
+  var rgLabels = {
+    'CONFIRMED_LONG': 'LONG SAFE (J1H < 20)', 'CAUTION_LONG': 'CAUTION (J1H 20-40)',
+    'STOP': 'STOP (J1H 40-60)', 'CAUTION_SHORT': 'CAUTION SHORT (J1H 60-80)',
+    'CONFIRMED_SHORT': 'SHORT SAFE (J1H > 80)'
+  };
+  var rgLabel = rgLabels[rgState] || rgState;
+  var btc = _getBtcState();
+  var j1h = (btc && btc.j1h != null) ? Number(btc.j1h).toFixed(0) : '--';
+  var pnlSign = dailyPnl >= 0 ? '+' : '';
+  var pnlStr  = pnlSign + '$' + Math.round(Math.abs(dailyPnl));
+  var postureLabel = posture === 'EARN' ? 'EARN MODE  (daily PnL < $1,000)' : 'PROTECT FLOOR  (daily PnL ≥ $1,000)';
+  var msg = (halt ? '⛔ SENTINEL GATE — AUTO HALT' : '✅ SENTINEL GATE — AUTO LIVE')
+    + '\n' + postureLabel
+    + '\nBTC Regime: ' + rgLabel + '  (J1H=' + j1h + ')'
+    + '\nDaily P&L: ' + pnlSign + pnlStr
+    + '\n— Both HL + MEXC affected';
+  try {
+    await fetch('/api/fleet/sentinel-notify', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: msg})
+    });
+  } catch(e) { console.error('[SENTINEL] TG notify error:', e); }
+}
+
+async function _fetchSentinelPnl() {
+  try {
+    var r = await fetch('/api/analytics?range=today');
+    if (!r.ok) return;
+    var d = await r.json();
+    _sentinelDailyPnl = parseFloat((d && d.fleet && d.fleet.pnl) || 0);
+    _sentinelGateCheck();
+  } catch(e) { console.error('[SENTINEL] PnL fetch error:', e); }
+}
+
+setInterval(_fetchSentinelPnl, 30000);
+_fetchSentinelPnl();
 </script>
       
 <!-- BTC REGIME OVERLAY -->
