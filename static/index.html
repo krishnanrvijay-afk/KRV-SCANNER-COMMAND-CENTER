@@ -2751,9 +2751,7 @@ function renderFleetLink() {
   var bsEl=document.getElementById("fl-beam-secondary");
   if(bsEl) bsEl.textContent="OPEN "+(hlOpen+mxOpen)+" · SCANS "+(hlScans+mxScans);
   _flCombinedPnl=flPnl;
-  var fpEl = document.getElementById("fl-fleet-pnl");
-  if (fpEl) { fpEl.textContent=_flFmt(flPnl); fpEl.className="fl-foot-val"+(flPnl!=null?(flPnl>=0?" pos":" neg"):""); }
-  el=document.getElementById("fl-fleet-open"); if(el) el.textContent=hlOpen+mxOpen;
+
   var txtEl = document.getElementById("fl-live-text");
   var tagEl = document.getElementById("fl-live-tag");
   if (txtEl && tagEl) {
@@ -4266,6 +4264,20 @@ function renderPnlRail() {
     var lt = 0, st = 0;
     sessions.forEach(function(s){ lt += (s.long_trades||0); st += (s.short_trades||0); });
     subEl.innerHTML = 'L ' + lt + ' TRADES &nbsp;/&nbsp; S ' + st + ' TRADES';
+  }
+  // ── Direction pill: LONG BIAS / SHORT BIAS / MIXED ──
+  var _dirPill = document.getElementById('fleet-dir-pill');
+  if (_dirPill && f) {
+    var _lc = f.long_count || 0, _sc = f.short_count || 0, _tot = _lc + _sc;
+    var _dlbl, _dcol;
+    if (_tot === 0) { _dlbl = 'DIR UNKNOWN'; _dcol = '#f59e0b'; }
+    else { var _lpct = _lc / _tot;
+      if      (_lpct >= 0.65) { _dlbl = 'LONG BIAS';  _dcol = '#00e676'; }
+      else if (_lpct <= 0.35) { _dlbl = 'SHORT BIAS'; _dcol = '#ff4d4d'; }
+      else                    { _dlbl = 'MIXED';            _dcol = '#f59e0b'; }
+    }
+    _dirPill.textContent = _dlbl;
+    _dirPill.style.color = _dcol;
   }
 }
 
