@@ -4376,6 +4376,54 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         document.body.style.overflow = '';
       }
 
+      function downloadForensicsCSV() {
+        const d = window._forensicsLastData;
+        if (!d || !d.rows || !d.rows.length) return;
+        const m   = d.meta || {};
+        const ep  = m.entry_price || 0;
+        const dec = ep < 0.01 ? 6 : ep < 1 ? 5 : ep < 100 ? 4 : ep < 1000 ? 3 : 2;
+        function fp(v) { return v != null ? v.toFixed(dec) : ''; }
+        const hdr = ['UTC','EDT','OPEN','HIGH','LOW','CLOSE',
+                     'cPNL_USD','R','be_ARMED','PEAK_USD','STREAK','EVENTS'];
+        const dataRows = d.rows.map(row => [
+          row.utc,
+          row.edt,
+          fp(row.open),
+          fp(row.high),
+          fp(row.low),
+          fp(row.close),
+          row.cpnl   != null ? row.cpnl.toFixed(2)   : '',
+          row.r      != null ? row.r.toFixed(4)       : '',
+          row.armed  ? 'YES' : 'NO',
+          row.peak   != null ? row.peak.toFixed(2)    : '',
+          row.streak != null ? String(row.streak)     : '',
+          (row.events || []).join(' | ').replace(/,/g,' ')
+        ]);
+        const metaRows = [
+          ['# VENUE', m.venue||''],
+          ['# PAIR',  m.pair||''],
+          ['# DIR',   m.direction||''],
+          ['# ENTRY', ep.toFixed(dec)],
+          ['# EXIT',  (m.exit_price||0).toFixed(dec)],
+          ['# 1R_USD',(m.dollar_risk||0).toFixed(2)],
+          ['# PNL',   (m.pnl_dollars||0).toFixed(2)],
+          ['# GATE',  m.exit_reason||''],
+          [],
+        ];
+        const allRows = [...metaRows, hdr, ...dataRows];
+        const csv = allRows.map(r => r.map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('
+');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        const ts   = new Date().toISOString().slice(0,16).replace('T','_').replace(':','h');
+        a.href = url;
+        a.download = 'forensics_' + (m.pair||'').replace('/','') + '_' +
+                     (m.direction||'') + '_' + (m.exit_reason||'EXIT') + '_' + ts + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
       async function openForensicsSheet(rdEncoded) {
         const r = JSON.parse(decodeURIComponent(rdEncoded));
         const body = document.getElementById('forensics-sheet-body');
@@ -4490,6 +4538,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       }
 
       function _renderForensicsTable(data) {
+        window._forensicsLastData = data;
         const rows = data.rows || [];
         const m    = data.meta || {};
         const ep   = m.entry_price || 0;
@@ -6079,7 +6128,10 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
       <div class="exc-sheet" onclick="event.stopPropagation()" style="max-height:90vh;max-width:920px;width:96%">
         <div class="exc-sheet-header">
           <span class="exc-sheet-title" id="forensics-sheet-title" style="color:#fb923c;font-size:15px">FORENSICS</span>
-          <button class="exc-sheet-close" onclick="closeForensicsSheet()">&#x2715;</button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onclick="downloadForensicsCSV()" style="font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.08em;padding:5px 14px;border-radius:20px;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;cursor:pointer" title="Download forensics as CSV">&#11015; CSV</button>
+            <button class="exc-sheet-close" onclick="closeForensicsSheet()">&#x2715;</button>
+          </div>
         </div>
         <div id="forensics-sheet-body" style="overflow-y:auto"></div>
       </div>
