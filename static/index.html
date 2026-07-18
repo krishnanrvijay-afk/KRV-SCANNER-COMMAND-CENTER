@@ -1406,6 +1406,11 @@ body {
 #sentinel-gate-pill.sg-halt    { border-color:rgba(239,68,68,0.70);  color:#ef4444; background:rgba(239,68,68,0.09);  animation:sgHaltPulse 1.8s ease-in-out infinite; }
 @keyframes sgProtectPulse { 0%,100%{box-shadow:0 0 14px rgba(251,191,36,0.35),0 0 0 1px rgba(251,191,36,0.08)} 50%{box-shadow:0 0 28px rgba(251,191,36,0.72),0 0 50px rgba(251,191,36,0.20)} }
 @keyframes sgHaltPulse    { 0%,100%{box-shadow:0 0 12px rgba(239,68,68,0.40),0 0 0 1px rgba(239,68,68,0.08)} 50%{box-shadow:0 0 28px rgba(239,68,68,0.80),0 0 55px rgba(239,68,68,0.22)} }
+/* ── FLEET STATUS COMPOSITE PILL ── */
+#fleet-status-pill { display:inline-flex; align-items:center; padding:5px 13px; border-radius:6px; font-size:11px; font-weight:700; letter-spacing:.10em; border:1px solid transparent; cursor:default; transition:all 0.3s; white-space:nowrap; }
+#fleet-status-pill.fs-trade     { border-color:rgba(0,230,118,0.70); color:#00e676; background:rgba(0,230,118,0.10); box-shadow:0 0 10px rgba(0,230,118,0.25); }
+#fleet-status-pill.fs-caution   { border-color:rgba(255,179,0,0.70); color:#ffb300; background:rgba(255,179,0,0.10); box-shadow:0 0 8px rgba(255,179,0,0.20); }
+#fleet-status-pill.fs-standdown { border-color:rgba(255,70,70,0.75); color:#ff4646; background:rgba(255,70,70,0.10); box-shadow:0 0 10px rgba(255,70,70,0.30); animation:sgHaltPulse 1.8s ease-in-out infinite; }
 /* ── FLEET CTRL ROW (header) ── */
 #fleet-ctrl-row { display:flex; align-items:center; gap:6px; margin-left:auto; margin-right:12px; }
 #fleet-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; padding:7px 16px; border-radius:6px; border:2px solid transparent; cursor:pointer; color:#ffffff; min-width:148px; transition:all 0.2s; white-space:nowrap; }
@@ -1627,6 +1632,7 @@ body {
       <div id="fleet-ctrl-row">
         <div id="fleet-venue-pill" class="fc-pill">HL&nbsp;<span class="fc-dot fc-dot-unkn"></span>&nbsp;|&nbsp;MX&nbsp;<span class="fc-dot fc-dot-unkn"></span></div>
         <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
+        <div id="fleet-status-pill" class="fs-caution">&#9650; CAUTION &#8212; LOADING</div>
         <div id="halt-wrap">
           <button id="fleet-halt-btn" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
           <div id="halt-bolt"></div>
@@ -2500,6 +2506,7 @@ async function loadLive() {
     renderFleetLink();
     renderSentinelStrip();
     renderFleetConvergence();
+    renderFleetStatus();
     if (typeof htcRefresh === 'function') htcRefresh();
     if (typeof jmRenderChips === "function") jmRenderChips();
     if (typeof pgRender === "function" && _pgData) pgRender();
@@ -4549,6 +4556,54 @@ function renderFleetConvergence() {
   }
 }
 
+
+function renderFleetStatus() {
+  var pill = document.getElementById('fleet-status-pill');
+  if (!pill) return;
+
+  var fc      = (live && live.fleet_convergence) || {};
+  var btcPill = document.getElementById('btc-regime-pill');
+  var sgPill  = document.getElementById('sentinel-gate-pill');
+
+  var btcStop   = btcPill && btcPill.classList.contains('rg-stop');
+  var sgHalt    = sgPill  && sgPill.classList.contains('sg-halt');
+  var sgProtect = sgPill  && sgPill.classList.contains('sg-protect');
+
+  var velAvg     = ((fc.hl_sync_vel || 0) + (fc.mx_sync_vel || 0)) / 2;
+  var velDead    = velAvg <= 0.03;
+  var convActive = fc.short || fc.long;
+
+  var cls, label, reason;
+
+  if (btcStop || sgHalt || fc.exit_signal) {
+    cls    = 'fs-standdown';
+    label  = 'STAND DOWN';
+    reason = btcStop ? 'BTC REGIME CLOSED' : sgHalt ? 'SENTINEL HALT' : 'EXIT SIGNAL';
+  } else if (sgProtect && velDead) {
+    cls    = 'fs-standdown';
+    label  = 'STAND DOWN';
+    reason = 'TARGET HIT · VELOCITY ZERO';
+  } else if (convActive && !velDead && !sgProtect) {
+    cls    = 'fs-trade';
+    label  = 'TRADE';
+    reason = (fc.short ? 'SHORT' : 'LONG') + ' · vel ' + (velAvg * 100).toFixed(1) + '%';
+  } else if (convActive && !velDead && sgProtect) {
+    cls    = 'fs-caution';
+    label  = 'CAUTION';
+    reason = 'TARGET HIT · CONV ACTIVE';
+  } else if (sgProtect) {
+    cls    = 'fs-caution';
+    label  = 'CAUTION';
+    reason = 'TARGET HIT';
+  } else {
+    cls    = 'fs-caution';
+    label  = 'CAUTION';
+    reason = convActive ? 'LOW VELOCITY' : 'NO CONVERGENCE';
+  }
+
+  pill.className   = cls;
+  pill.textContent = label + ' — ' + reason;
+}
 
 function openSessDirSheet()  { document.getElementById('sess-dir-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; }
 function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classList.remove('open'); document.body.style.overflow = ''; }
