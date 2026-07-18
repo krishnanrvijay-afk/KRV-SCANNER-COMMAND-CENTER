@@ -2044,7 +2044,7 @@ function setTab(name) {
     }
   }
 
-  // ââ PAIR PERFORMANCE GRID ââ
+  // ── PAIR PERFORMANCE GRID ──
   var _pgTime = 'today';
   var _pgData = null;
 
@@ -3719,7 +3719,7 @@ function renderLog() {
             ejacPill = `<span onclick="event.stopPropagation();openKzSheet('${rd}')" style="display:inline-block;margin-left:4px;padding:1px 5px;background:#1a1a00;color:#fbbf24;border:1px solid #fbbf24;border-radius:3px;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.05em;font-family:'JetBrains Mono',monospace">EJAC 10</span>`;
           }
 
-          // Forensics pill â every row
+          // Forensics pill — every row
           const _frd = encodeURIComponent(JSON.stringify({
             venue:       r._venue,       pair:        r.pair,
             direction:   r.direction,    entry_price: r.entry_price,
@@ -4390,27 +4390,22 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           const startMs = openMs  - 180000;
           const endMs   = closeMs + 120000;
           let candles = [];
-          if ((r.venue||'').toLowerCase() === 'hl') {
-            const res = await fetch('https://api.hyperliquid.xyz/info', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'candleSnapshot',
-                req: { coin: r.pair, interval: '1m', startTime: startMs, endTime: endMs } })
-            });
-            const data = await res.json();
-            candles = (Array.isArray(data) ? data : []).map(c => Array.isArray(c)
-              ? { t: +c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }
-              : { t: +(c.t||c.T||0), o: +(c.o||0), h: +(c.h||0), l: +(c.l||0), c: +(c.c||0) });
-          } else {
-            const startSec = Math.floor(startMs / 1000);
-            const endSec   = Math.floor(endMs   / 1000);
-            const res = await fetch(
-              'https://contract.mexc.com/api/v1/contract/kline/' + r.pair +
-              '?interval=Min1&start=' + startSec + '&end=' + endSec);
-            const data = await res.json();
-            const arr  = (data && data.data) ? data.data : [];
-            candles = arr.map(c => ({ t: +c[0]*1000, o: +c[1], h: +c[3], l: +c[4], c: +c[2] }));
-          }
+          /* Both venues proxied through backend:
+             - MEXC CORS block avoided (no direct browser→MEXC call)
+             - HL @107 mapped to HYPE via server-side HL_COIN_MAP
+             - Consistent {time_ms,open,high,low,close} shape for both */
+          const startSec = Math.floor(startMs / 1000);
+          const endSec   = Math.floor(endMs   / 1000);
+          const ven      = (r.venue || 'hl').toLowerCase();
+          const res      = await fetch(
+            '/api/candles/' + ven +
+            '?pair=' + encodeURIComponent(r.pair) +
+            '&start=' + startSec + '&end=' + endSec);
+          if (!res.ok) throw new Error('Candles fetch failed: HTTP ' + res.status);
+          const raw = await res.json();
+          candles = (Array.isArray(raw) ? raw : []).map(c => ({
+            t: c.time_ms, o: c.open, h: c.high, l: c.low, c: c.close
+          }));
           if (!candles.length) {
             body.innerHTML = '<div style="color:#666;padding:24px;text-align:center">NO CANDLE DATA</div>';
             return;
@@ -4502,7 +4497,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         function fp(v)  { return v != null ? v.toFixed(dec) : '--'; }
         function pad(s, n) { s = String(s); return s.length >= n ? s : s + ' '.repeat(n - s.length); }
         function lpad(s, n) { s = String(s); return s.length >= n ? s : ' '.repeat(n - s.length) + s; }
-        const SEP = 'â'.repeat(116);
+        const SEP = '─'.repeat(116);
         let html = '<div style="overflow-x:auto;padding:4px 8px 16px">';
         // Meta banner
         const pnlSign = m.pnl_dollars >= 0 ? '+' : '-';
@@ -4514,23 +4509,23 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
         html += '<span style="color:#888">EXIT</span> <span style="color:#fff">' + fp(m.exit_price) + '</span>  ';
         html += '<span style="color:#888">1R</span> <span style="color:#fff">$' + (m.dollar_risk||0).toFixed(2) + '</span>  ';
         html += '<span style="color:#888">PNL</span> <span style="color:' + pnlCol + '">' + pnlSign + '$' + Math.abs(m.pnl_dollars||0).toFixed(2) + '</span>  ';
-        html += '<span style="color:#888">EXIT GATE</span> <span style="color:#fb923c">' + (m.exit_reason||'â') + '</span>';
+        html += '<span style="color:#888">EXIT GATE</span> <span style="color:#fb923c">' + (m.exit_reason||'—') + '</span>';
         html += '</div>';
         html += '<pre style="margin:0;font-family:\'JetBrains Mono\',monospace;font-size:11px;line-height:1.6;color:#ccc">';
         html += '<span style="color:#555">' + pad('UTC',5)+'  '+pad('EDT',5)+'  '+pad('OPEN',dec+4)+'  '+pad('HIGH',dec+4)+'  '+pad('LOW',dec+4)+'  '+pad('CLOSE',dec+4)+'  '+pad('cPNL$',10)+'  '+pad('R',9)+'  '+pad('bArm',5)+'  '+pad('peak$',9)+'  '+pad('str',3)+'  EVENT</span>\n';
         html += '<span style="color:#222">' + SEP + '</span>\n';
         for (const row of rows) {
           if (row.is_entry) {
-            html += '<span style="color:#22d3ee">ââââ ENTRY ' + (m.direction||'') + ' @ ' + fp(m.entry_price) + ' ' + 'â'.repeat(80) + '</span>\n';
+            html += '<span style="color:#22d3ee">──── ENTRY ' + (m.direction||'') + ' @ ' + fp(m.entry_price) + ' ' + '─'.repeat(80) + '</span>\n';
           }
           const cpnl    = row.cpnl;
           const cpnlStr = cpnl == null ? '  $0.00' : (cpnl >= 0 ? '+$' : '-$') + Math.abs(cpnl).toFixed(2);
           const rStr    = row.r  == null ? '0.000R' : (row.r >= 0 ? '+' : '') + row.r.toFixed(3) + 'R';
           const cpnlCol = cpnl > 0 ? '#22c55e' : cpnl < 0 ? '#ef4444' : '#666';
           const rCol    = row.r  > 0 ? '#22c55e' : row.r  < 0 ? '#ef4444' : '#666';
-          const armed   = row.armed ? 'YES' : 'âââ';
-          const peakStr = row.peak   != null ? (row.peak  >= 0 ? '+$' : '-$') + Math.abs(row.peak).toFixed(0)  : 'âââââ';
-          const strStr  = row.streak != null ? String(row.streak) : 'âââ';
+          const armed   = row.armed ? 'YES' : '———';
+          const peakStr = row.peak   != null ? (row.peak  >= 0 ? '+$' : '-$') + Math.abs(row.peak).toFixed(0)  : '—————';
+          const strStr  = row.streak != null ? String(row.streak) : '———';
           const lineCol = row.is_pre ? '#444' : '#ccc';
           const evStr   = (row.events && row.events.length) ? row.events.join('  ') : (row.is_pre ? '[pre-entry]' : '');
           html += '<span style="color:' + lineCol + '">';
@@ -4545,7 +4540,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           if (evStr) html += '  <span style="color:#fb923c">' + evStr + '</span>';
           html += '\n';
           if (row.is_exit) {
-            html += '<span style="color:#ef4444">ââââ EXIT ' + (m.exit_reason||'EXIT') + ' @ ' + fp(m.exit_price) + ' ' + 'â'.repeat(78) + '</span>\n';
+            html += '<span style="color:#ef4444">──── EXIT ' + (m.exit_reason||'EXIT') + ' @ ' + fp(m.exit_price) + ' ' + '─'.repeat(78) + '</span>\n';
           }
         }
         html += '</pre></div>';
@@ -4573,31 +4568,20 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           const endMs   = closeMs + 1800000;
           let candles   = [];
 
-          if (r.venue === 'hl') {
-            // Hyperliquid public API
-            const res = await fetch('https://api.hyperliquid.xyz/info', {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({
-                type: 'candleSnapshot',
-                req: { coin: r.pair, interval: '1m', startTime: closeMs, endTime: endMs }
-              })
-            });
-            const data = await res.json();
-            candles = (Array.isArray(data) ? data : []).map(c => Array.isArray(c)
-              ? { t: +c[0], o: +c[1], h: +c[2], l: +c[3], c: +c[4] }
-              : { t: +(c.t||c.T||0), o: +(c.o||0), h: +(c.h||0), l: +(c.l||0), c: +(c.c||0) });
-          } else {
-            // MEXC futures public API
-            const startSec = Math.floor(closeMs / 1000);
-            const endSec   = Math.floor(endMs   / 1000);
-            const res = await fetch(
-              'https://contract.mexc.com/api/v1/contract/kline/' + r.pair +
-              '?interval=Min1&start=' + startSec + '&end=' + endSec);
-            const data = await res.json();
-            const arr  = (data && data.data) ? data.data : [];
-            candles = arr.map(c => ({ t: +c[0] * 1000, o: +c[1], h: +c[3], l: +c[4], c: +c[2] }));
-          }
+          /* Proxy through backend — same reason as forensics overlay:
+             MEXC CORS + @107 coin-map + consistent response shape */
+          const kzStartSec = Math.floor(closeMs / 1000);
+          const kzEndSec   = Math.floor(endMs   / 1000);
+          const kzVen      = (r.venue || 'hl').toLowerCase();
+          const kzRes      = await fetch(
+            '/api/candles/' + kzVen +
+            '?pair=' + encodeURIComponent(r.pair) +
+            '&start=' + kzStartSec + '&end=' + kzEndSec);
+          if (!kzRes.ok) throw new Error('KZ candles failed: HTTP ' + kzRes.status);
+          const kzRaw = await kzRes.json();
+          candles = (Array.isArray(kzRaw) ? kzRaw : []).map(c => ({
+            t: c.time_ms, o: c.open, h: c.high, l: c.low, c: c.close
+          }));
 
           if (!candles.length) {
             body.innerHTML = '<div style="color:#666;padding:24px;text-align:center">NO CANDLE DATA AVAILABLE</div>';

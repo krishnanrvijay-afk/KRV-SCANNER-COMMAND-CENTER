@@ -1049,6 +1049,34 @@ def _parse_open_utc(ts_str: str) -> Optional[datetime]:
         return None
 
 
+# ─────────────────────────── candle proxy ───────────────────────────
+
+@app.get("/api/candles/{venue}")
+async def api_candles_proxy(
+    request:  Request,
+    venue:    str,
+    pair:     str = Query(...),
+    start:    int = Query(...),
+    end:      int = Query(...),
+) -> JSONResponse:
+    """Server-side 1m candle proxy.
+    Avoids CORS on direct browser fetches to exchange APIs.
+    HL: applies HL_COIN_MAP (@107 -> HYPE) before calling the API.
+    MEXC: uses named-array response (open/high/low/close) correctly.
+    Returns a flat list of {time_ms, open, high, low, close} dicts.
+    """
+    _require_auth(request)
+    if venue == "hl":
+        candles = await _fetch_hl_candles(_hl_coin(pair), "1m",
+                                          start * 1000, end * 1000)
+    elif venue == "mexc":
+        sym = pair if "_USDT" in pair else pair + "_USDT"
+        candles = await _fetch_mexc_candles(sym, "Min1", start, end)
+    else:
+        raise HTTPException(400, "venue must be hl or mexc")
+    return JSONResponse(candles)
+
+
 # ─────────────────────────── reconstruct endpoints ───────────────────────────
 
 @app.get("/api/reconstruct/shortlist")
