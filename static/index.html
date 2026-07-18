@@ -4423,8 +4423,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
           [],
         ];
         const allRows = [...metaRows, hdr, ...dataRows];
-        const csv = allRows.map(r => r.map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('
-');
+        const csv = allRows.map(r => r.map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url  = URL.createObjectURL(blob);
         const a    = document.createElement('a');
