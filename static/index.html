@@ -1418,6 +1418,108 @@ body {
 .fc-dot-halt { background:#ef4444; animation:fc-haltdot 1.8s ease-in-out infinite; }
 .fc-dot-unkn { background:#f59e0b; }
 @keyframes fc-haltdot { 0%,100%{opacity:1;box-shadow:0 0 4px 1px rgba(239,68,68,0.8)} 50%{opacity:0.5;box-shadow:0 0 2px 0 rgba(239,68,68,0.3)} }
+
+/* ── Sentinel Strip (Phase A) ── */
+#sentinel-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px;
+  background: rgba(15,15,25,0.85);
+  border: 1px solid #1e2030;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: #666;
+  flex-wrap: wrap;
+}
+#sentinel-strip .sr-regime { font-weight: 700; letter-spacing: .12em; font-size: 11px; }
+#sentinel-strip .sr-regime.sr-cascade  { color: #ff4d4d; }
+#sentinel-strip .sr-regime.sr-trending { color: #fbbf24; }
+#sentinel-strip .sr-regime.sr-squeeze  { color: #f97316; }
+#sentinel-strip .sr-regime.sr-chop     { color: #94a3b8; }
+#sentinel-strip .sr-regime.sr-normal   { color: #4ade80; }
+#sentinel-strip .sr-sep { color: #2a2a3a; }
+#sentinel-strip .sr-lbl { color: #444; }
+#sentinel-strip .sr-val { color: #aaa; }
+
+/* ── Fleet Convergence Banner (Phase B) ── */
+#fleet-conv-banner {
+  display: none;
+  width: 100%;
+  padding: 10px 18px;
+  background: rgba(255,77,77,0.08);
+  border: 1.5px solid rgba(255,77,77,0.45);
+  border-radius: 8px;
+  font-family: var(--display);
+  font-size: 13px;
+  letter-spacing: .18em;
+  color: #ff4d4d;
+  text-align: center;
+  margin-bottom: 8px;
+  animation: fcbPulse 2s ease-in-out infinite;
+}
+#fleet-conv-banner.fcb-long {
+  background: rgba(0,230,118,0.08);
+  border-color: rgba(0,230,118,0.45);
+  color: #00e676;
+}
+#fleet-conv-banner .fcb-sub {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: #888;
+  margin-top: 3px;
+  animation: none;
+}
+@keyframes fcbPulse {
+  0%,100% { box-shadow: 0 0 0 0 transparent; }
+  50%      { box-shadow: 0 0 18px rgba(255,77,77,0.25); }
+}
+#fleet-conv-banner.fcb-long { animation-name: fcbPulseLong; }
+@keyframes fcbPulseLong {
+  0%,100% { box-shadow: 0 0 0 0 transparent; }
+  50%      { box-shadow: 0 0 18px rgba(0,230,118,0.25); }
+}
+
+/* ── Fleet Exit Signal (Phase C) ── */
+#fleet-exit-banner {
+  display: none;
+  width: 100%;
+  padding: 8px 18px;
+  background: rgba(251,191,36,0.08);
+  border: 1.5px solid rgba(251,191,36,0.5);
+  border-radius: 8px;
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: .16em;
+  color: #fbbf24;
+  text-align: center;
+  margin-bottom: 8px;
+}
+#fleet-exit-banner .fxb-sub {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  color: #888;
+  margin-top: 3px;
+}
+
+/* ── Tier-1 Floor mode on fleet-conv-banner (Phase D) ── */
+#fleet-conv-banner.fcb-tier1 {
+  background: linear-gradient(90deg,rgba(255,77,77,0.12),rgba(251,191,36,0.12));
+  border-color: rgba(251,191,36,0.7);
+  color: #fbbf24;
+  font-size: 14px;
+}
+#fleet-conv-banner.fcb-tier1.fcb-long {
+  background: linear-gradient(90deg,rgba(0,230,118,0.10),rgba(251,191,36,0.10));
+  border-color: rgba(251,191,36,0.7);
+  color: #fbbf24;
+}
 </style>
 </head>
 <body>
@@ -1430,6 +1532,17 @@ body {
     <div class="header-right">
       <button id="btc-regime-pill" class="rg-exempt" onclick="openBtcRegimeOverlay()" title="BTC Regime — click for detail"><span style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:0.14em;line-height:1.1;display:block">BTC REGIME</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.08em;opacity:0.7;display:block;line-height:1.2;margin-top:1px">BTC&nbsp;J1H&nbsp;&middot;&nbsp;&mdash;</span></button>
       <div id="sentinel-gate-pill" title="SENTINEL Gate — auto HALT/LIVE based on daily PnL + BTC Regime">SENTINEL GATE</div>
+      <!-- Sentinel Strip Phase A -->
+      <div id="sentinel-strip" title="Sentinel regime + fleet metrics">
+        <span class="sr-regime sr-normal" id="sr-regime-lbl">NORMAL</span>
+        <span class="sr-sep">|</span>
+        <span class="sr-lbl">vel</span><span class="sr-val" id="sr-vel">&#8212;</span>
+        <span class="sr-sep">|</span>
+        <span class="sr-lbl">b&#8595;</span><span class="sr-val" id="sr-bdn">&#8212;</span>
+        <span class="sr-lbl">b&#8593;</span><span class="sr-val" id="sr-bup">&#8212;</span>
+        <span class="sr-sep">|</span>
+        <span class="sr-lbl">adx</span><span class="sr-val" id="sr-adx">&#8212;</span>
+      </div>
       <div class="range-btns">
         <button id="btn-today" onclick="setRange('today')" class="active">TODAY</button>
         <button id="btn-week"  onclick="setRange('week')">WEEK</button>
@@ -1447,6 +1560,10 @@ body {
 
   <!-- FLEET LINK -->
   <div class="fleet-link-section">
+    <!-- Phase B: Fleet Convergence Banner -->
+    <div id="fleet-conv-banner"></div>
+    <!-- Phase C: Fleet Exit Signal -->
+    <div id="fleet-exit-banner"></div>
     <div class="fl-header">
       <span class="fl-title">FLEET LINK</span>
       <div class="fl-live-tag" id="fl-live-tag"><span class="fl-live-dot"></span><span id="fl-live-text">BOTH VESSELS REPORTING</span></div>
@@ -2303,6 +2420,8 @@ async function loadLive() {
     renderJMap();
     renderFooter();
     renderFleetLink();
+    renderSentinelStrip();
+    renderFleetConvergence();
     if (typeof htcRefresh === 'function') htcRefresh();
     if (typeof jmRenderChips === "function") jmRenderChips();
     if (typeof pgRender === "function" && _pgData) pgRender();
@@ -4282,6 +4401,75 @@ function renderPnlRail() {
 }
 
 // ── SESSIONÃÂDIR overlay ──
+
+// ── Sentinel Strip renderer (Phase A) ──
+function renderSentinelStrip() {
+  var sm = {};
+  try {
+    if (live && live.fleet_convergence) sm = live.fleet_convergence;
+  } catch(e) {}
+  var hl_sm = {};
+  try { hl_sm = (live.hl && live.hl.market_health && live.hl.market_health.sentinel_metrics) || {}; } catch(e) {}
+
+  var regime  = (hl_sm.regime  || "NORMAL").toUpperCase();
+  var vel     = typeof sm.hl_sync_vel  === "number" ? (sm.hl_sync_vel  * 100).toFixed(1) + "%" : "—";
+  var bdn     = typeof sm.hl_breadth_dn === "number" ? Math.round(sm.hl_breadth_dn * 100) + "%" : "—";
+  var bup     = typeof sm.hl_breadth_up === "number" ? Math.round(sm.hl_breadth_up * 100) + "%" : "—";
+  var adx     = typeof sm.hl_avg_adx   === "number" ? sm.hl_avg_adx.toFixed(1) : "—";
+
+  var rEl = document.getElementById("sr-regime-lbl");
+  if (rEl) {
+    rEl.textContent = regime;
+    rEl.className = "sr-regime sr-" + regime.toLowerCase();
+  }
+  var setTxt = function(id, v){ var e = document.getElementById(id); if(e) e.textContent = v; };
+  setTxt("sr-vel", vel);
+  setTxt("sr-bdn", bdn);
+  setTxt("sr-bup", bup);
+  setTxt("sr-adx", adx);
+}
+
+// ── Fleet Convergence + Exit Signal renderer (Phase B/C/D) ──
+function renderFleetConvergence() {
+  var fc = {};
+  try { fc = (live && live.fleet_convergence) || {}; } catch(e) {}
+
+  var convEl = document.getElementById("fleet-conv-banner");
+  var exitEl = document.getElementById("fleet-exit-banner");
+  if (!convEl || !exitEl) return;
+
+  // Phase D: check if sentinel protect-floor is active (sg-protect class on sentinel-gate-pill)
+  var sgPill = document.getElementById("sentinel-gate-pill");
+  var floorActive = sgPill && sgPill.classList.contains("sg-protect");
+
+  // Phase B: fleet convergence
+  if (fc.short || fc.long) {
+    var dir = fc.short ? "SHORT" : "LONG";
+    var isTier1 = floorActive;  // Phase D: Tier-1 if protect-floor is also active
+    var hl_r = (fc.hl_regime || "NORMAL");
+    var mx_r = (fc.mx_regime || "NORMAL");
+    var velAvg = ((fc.hl_sync_vel || 0) + (fc.mx_sync_vel || 0)) / 2;
+    var sub = "HL:" + hl_r + " MX:" + mx_r + "  vel:" + (velAvg * 100).toFixed(1) + "%"
+            + (isTier1 ? "  ⚠ PROTECT THE FLOOR ACTIVE — TIER-1 EVENT" : "");
+    convEl.className = "fcb-" + dir.toLowerCase() + (isTier1 ? " fcb-tier1" : "");
+    convEl.innerHTML = "⚡ FLEET CONVERGENCE — " + dir + " <span class='fcb-sub'>" + sub + "</span>";
+    convEl.style.display = "block";
+  } else {
+    convEl.style.display = "none";
+  }
+
+  // Phase C: fleet exit signal
+  if (fc.exit_signal) {
+    var hl_r2 = (fc.hl_regime || "NORMAL");
+    exitEl.innerHTML = "⚠ FLEET EXIT SIGNAL — CASCADE EXHAUSTING — CONSIDER CLOSING CONVERGED POSITIONS"
+      + "<span class='fxb-sub'>velocity draining to zero · " + hl_r2 + " → NORMAL transition in progress</span>";
+    exitEl.style.display = "block";
+  } else {
+    exitEl.style.display = "none";
+  }
+}
+
+
 function openSessDirSheet()  { document.getElementById('sess-dir-scrim').classList.add('open');  document.body.style.overflow = 'hidden'; }
 function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classList.remove('open'); document.body.style.overflow = ''; }
 
