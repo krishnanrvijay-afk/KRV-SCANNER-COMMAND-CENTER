@@ -39,6 +39,7 @@ _live: dict[str, Any] = {
     "hl": None, "mexc": None,
     "hl_ok": False, "mexc_ok": False,
     "updated_at": 0.0,
+    "fleet_convergence": {},
 }
 
 # ─────────────────────────── app & signer ───────────────────────────
@@ -96,6 +97,24 @@ async def _poll_live() -> None:
                 except Exception as exc:
                     _live[f"{key}_ok"] = False
                     print(f"[LIVE] {key.upper()} ERROR — {exc}", flush=True)
+        # -- Phase B/C: aggregate fleet convergence from both scanners --
+        _hl_sm  = (_live["hl"]   or {}).get("market_health", {}).get("sentinel_metrics", {})
+        _mx_sm  = (_live["mexc"] or {}).get("market_health", {}).get("sentinel_metrics", {})
+        _live["fleet_convergence"] = {
+            "short":         bool(_hl_sm.get("fleet_convergence_short") and _mx_sm.get("fleet_convergence_short")),
+            "long":          bool(_hl_sm.get("fleet_convergence_long")  and _mx_sm.get("fleet_convergence_long")),
+            "exit_signal":   bool(_hl_sm.get("fleet_exit_signal")       or  _mx_sm.get("fleet_exit_signal")),
+            "hl_regime":     _hl_sm.get("regime",     "NORMAL"),
+            "mx_regime":     _mx_sm.get("regime",     "NORMAL"),
+            "hl_sync_vel":   round(float(_hl_sm.get("sync_vel",  0.0)), 4),
+            "mx_sync_vel":   round(float(_mx_sm.get("sync_vel",  0.0)), 4),
+            "hl_breadth_dn": round(float(_hl_sm.get("breadth_dn", 0.0)), 2),
+            "hl_breadth_up": round(float(_hl_sm.get("breadth_up", 0.0)), 2),
+            "mx_breadth_dn": round(float(_mx_sm.get("breadth_dn", 0.0)), 2),
+            "mx_breadth_up": round(float(_mx_sm.get("breadth_up", 0.0)), 2),
+            "hl_avg_adx":    round(float(_hl_sm.get("avg_adx",   0.0)), 1),
+            "mx_avg_adx":    round(float(_mx_sm.get("avg_adx",   0.0)), 1),
+        }
         _live["updated_at"] = time.time()
         await asyncio.sleep(5)   # scorecard live-state cache: 5s poll
 
@@ -745,11 +764,12 @@ async def logout() -> RedirectResponse:
 async def api_live(request: Request) -> JSONResponse:
     _require_auth(request)
     return JSONResponse({
-        "hl":         _live["hl"],
-        "mexc":       _live["mexc"],
-        "hl_ok":      _live["hl_ok"],
-        "mexc_ok":    _live["mexc_ok"],
-        "updated_at": _live["updated_at"],
+        "hl":                _live["hl"],
+        "mexc":              _live["mexc"],
+        "hl_ok":             _live["hl_ok"],
+        "mexc_ok":           _live["mexc_ok"],
+        "updated_at":        _live["updated_at"],
+        "fleet_convergence": _live.get("fleet_convergence", {}),
     })
 
 @app.get("/api/analytics")
