@@ -715,7 +715,11 @@ async def root(request: Request) -> HTMLResponse:
     if not _is_authed(request):
         return HTMLResponse(_login_html())
     html = (STATIC_DIR / "index.html").read_text()
-    return HTMLResponse(html)
+    return HTMLResponse(html, headers={
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    })
 
 @app.post("/login", response_model=None)
 async def login(request: Request):
