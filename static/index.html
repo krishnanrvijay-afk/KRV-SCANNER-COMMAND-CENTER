@@ -6785,13 +6785,17 @@ var _STL_SEGS = [
   {cls:'stl-seg-asia', label:'ASIA',  start:20,  end:24  },
 ];
 var _STL_BZ = [
-  {key:'BZ1', label:'ASIA LOW LIQ', start:0,   end:4    },
-  {key:'BZ2', label:'EU J-STALE',   start:5,   end:8    },
+  {key:'BZ1', label:'ASIA LOW LIQ', start:0,   end:1    },  // midnight–1AM  (50% WR)
+  {key:'BZ1', label:'ASIA LOW LIQ', start:2,   end:4    },  // 2AM–4AM       (45% WR)
+  // 1AM–2AM ET opened: 79% WR 15/19 trades — Jul 2026 analysis
+  {key:'BZ2', label:'EU J-STALE',   start:5,   end:7    },  // 5AM–7AM       (50–67% WR)
+  // 7AM–9:30AM ET opened: 82% WR 14/17 trades — Jul 2026 analysis
   {key:'BZ3', label:'US WHIPSAW',   start:9.5, end:10.25},
 ];
 var _STL_SAFE = [
-  {start:4,    end:5   },
-  {start:8,    end:9.5 },
+  {start:1,    end:2   },  // 1AM–2AM   NEW — 79% WR
+  {start:4,    end:5   },  // 4AM–5AM   existing BZ1→BZ2 gap
+  {start:7,    end:9.5 },  // 7AM–9:30AM — was 8AM, gained 1h (82% WR at 7AM)
   {start:10.25,end:17  },
   {start:20,   end:24  },
 ];
