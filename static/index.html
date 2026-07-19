@@ -362,7 +362,7 @@ body {
     display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
   }
   .tl-sess-name { font-family: var(--display); font-size: 15px; letter-spacing: .15em; color: #ffffff; }
-  .tl-sess-meta { font-size: 11px; color: #666; font-weight: 700; letter-spacing: .06em; }
+  .tl-sess-meta { font-size: 11px; color: #ffffff; font-weight: 700; letter-spacing: .06em; }
   .tl-track-outer { position: relative; padding-bottom: 18px; margin-bottom: 6px; }
   .tl-track-wrap  { position: relative; }
   .tl-grid-line {
@@ -1651,7 +1651,7 @@ body {
 @keyframes stlSafePulse { 0%,100%{box-shadow:0 0 8px 2px rgba(0,230,118,0.30)} 50%{box-shadow:0 0 16px 4px rgba(0,230,118,0.60)} }
 .stl-axis { position:relative; height:15px; margin-top:10px; }
 .stl-axis-lbl {
-  position:absolute; font-size:9px; font-weight:700; color:#3a3a3a;
+  position:absolute; font-size:10px; font-weight:700; color:#ffffff;
   transform:translateX(-50%); white-space:nowrap; letter-spacing:.03em;
 }
 .stl-bz-lbl {
@@ -1664,6 +1664,12 @@ body {
   position:absolute; bottom:-21px; left:50%; transform:translateX(-50%);
   font-family:'Bebas Neue',sans-serif; font-size:9px; letter-spacing:.10em;
   color:#1a3a22; white-space:nowrap; pointer-events:none;
+}
+.stl-seg-name {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-family:'Bebas Neue',sans-serif; font-size:11px; font-weight:700;
+  color:#ffffff; letter-spacing:.18em; white-space:nowrap; pointer-events:none;
+  text-shadow:0 0 8px rgba(0,0,0,0.9); z-index:5;
 }
 #halt-source-pill.hsp-session {
   display:block; color:#f59e0b;
@@ -6771,12 +6777,12 @@ fleetHaltInit();
    ══════════════════════════════════════════════════════════════════════ */
 
 var _STL_SEGS = [
-  {cls:'stl-seg-asia', start:0,   end:4   },
-  {cls:'stl-seg-eu',   start:4,   end:9.5 },
-  {cls:'stl-seg-euus', start:9.5, end:12  },
-  {cls:'stl-seg-us',   start:12,  end:17  },
-  {cls:'stl-seg-off',  start:17,  end:20  },
-  {cls:'stl-seg-asia', start:20,  end:24  },
+  {cls:'stl-seg-asia', label:'ASIA',  start:0,   end:4   },
+  {cls:'stl-seg-eu',   label:'EU',    start:4,   end:9.5 },
+  {cls:'stl-seg-euus', label:'EU/US', start:9.5, end:12  },
+  {cls:'stl-seg-us',   label:'US',    start:12,  end:17  },
+  {cls:'stl-seg-off',  label:'OFF',   start:17,  end:20  },
+  {cls:'stl-seg-asia', label:'ASIA',  start:20,  end:24  },
 ];
 var _STL_BZ = [
   {key:'BZ1', label:'ASIA LOW LIQ', start:0,   end:4    },
@@ -6825,7 +6831,9 @@ function _stlRender() {
   _STL_SEGS.forEach(function(s,i) {
     var w = ((s.end-s.start)/24*100).toFixed(4);
     var ac = i===curSeg ? ' stl-seg-active' : '';
-    h += '<div class="stl-seg '+s.cls+ac+'" style="left:'+_stlPct(s.start)+';width:'+w+'%"></div>';
+    h += '<div class="stl-seg '+s.cls+ac+'" style="left:'+_stlPct(s.start)+';width:'+w+'%;position:absolute;top:0;bottom:0;">'
+       + '<span class="stl-seg-name">'+s.label+'</span>'
+       + '</div>';
   });
   /* ticks */
   [0,2,4,6,8,10,12,14,16,18,20,22].forEach(function(t) {
@@ -7143,7 +7151,7 @@ function _refreshBtcRegimePill() {
 /* ══════════════════════════════════════════════════════════════════════
    SENTINEL GATE — Cardinal Rule 1-A two-posture auto HALT/LIVE system
    Earn Mode    (daily < $1,000): HALT on STOP only
-   Protect Mode (daily ≥ $1,000): LIVE only on LONG SAFE or SHORT SAFE
+   Protect Mode (daily ≥ $1,000): HALT on STOP only — allow CAUTION / CONFIRMED
    Manual toggle always clears auto flag (_btcAutoHalted = false)
    Auto-LIVE only fires if _btcAutoHalted is true (auto set it, not human)
    ══════════════════════════════════════════════════════════════════════ */
@@ -7155,11 +7163,7 @@ var SENTINEL_THRESHOLD      = 1000;
 
 function _sentinelShouldHalt(rgState, dailyPnl) {
   if (!rgState || rgState === 'EXEMPT') return null;
-  if (dailyPnl < SENTINEL_THRESHOLD) {
-    return rgState === 'STOP';
-  } else {
-    return rgState !== 'CONFIRMED_LONG' && rgState !== 'CONFIRMED_SHORT';
-  }
+  return rgState === 'STOP';
 }
 
 function _updateSentinelPill(posture, rgState, dailyPnl, shouldHalt) {
