@@ -6748,30 +6748,18 @@ function _updateSourcePill() {
     bolt.style.display = 'none';
     return;
   }
-  /* halted — show source */
-  if (_sessionHalted && !_btcAutoHalted) {
-    pill.className = 'hsp-session';
-    pill.textContent = '⚡ SESSION';
-    bolt.className = 'bolt-auto';
-  } else if (_btcAutoHalted) {
-    pill.className = 'hsp-auto';
-    pill.textContent = '⚡ AUTO';
-    bolt.className = 'bolt-auto';
-  } else {
-    pill.className = 'hsp-manual';
-    pill.textContent = '⚡ MANUAL';
-    bolt.className = 'bolt-manual';
-  }
+  /* halted — manual only */
+  pill.className = 'hsp-manual';
+  pill.textContent = '⚡ MANUAL';
+  bolt.className = 'bolt-manual';
 }
 
 fleetHaltInit();
 
 /* ══════════════════════════════════════════════════════════════════════
-   SESSION TIMELINE STRIP — auto-halt blackout zones
-   Three blackout windows auto-halt HL+MEXC fleet:
-   1. ASIA LOW LIQ  : midnight–4 AM ET  (thin books, erratic moves)  [HALT — red]
-   2. EU J-STALE    : 5 AM–8 AM ET      (ASIA J-scores still elevated) [HALT — red]
-   3. US WHIPSAW    : 9:30–10:15 AM ET  (US open cook-down)
+   SESSION TIMELINE STRIP — visual reference only.
+   Shows session windows and historical blackout zones for awareness.
+   Does NOT auto-halt. Use the FLEET LIVE / FLEET HALT button.
    ══════════════════════════════════════════════════════════════════════ */
 
 var _STL_SEGS = [
