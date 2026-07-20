@@ -6880,12 +6880,9 @@ function _stlCheckHalt(bz) {
   if (shouldHalt && !_fleetHalted && !_manualOverrideLive) {
     _sessionHalted = true;
     _stlApplyHalt(true);
-  } else if (!shouldHalt) {
-    _manualOverrideLive = false; /* blackout zone ended — override no longer needed */
-    if (_fleetHalted && _sessionHalted && !_btcAutoHalted) {
-      _sessionHalted = false;
-      _stlApplyHalt(false);
-    }
+  } else if (!shouldHalt && _fleetHalted && _sessionHalted && !_btcAutoHalted) {
+    _sessionHalted = false;
+    _stlApplyHalt(false);
   }
 }
 
@@ -7206,14 +7203,11 @@ function _sentinelGateCheck() {
     _applyAutoHalt(true, posture, state, _sentinelDailyPnl);
     return;
   }
-  if (!shouldHalt) {
-    _manualOverrideLive = false; /* BTC condition cleared — override no longer needed */
-    if (_fleetHalted && _btcAutoHalted) {
-      _btcAutoHalted          = false;
-      _sentinelLastShouldHalt = false;
-      _applyAutoHalt(false, posture, state, _sentinelDailyPnl);
-      return;
-    }
+  if (!shouldHalt && _fleetHalted && _btcAutoHalted) {
+    _btcAutoHalted          = false;
+    _sentinelLastShouldHalt = false;
+    _applyAutoHalt(false, posture, state, _sentinelDailyPnl);
+    return;
   }
   _sentinelLastShouldHalt = shouldHalt;
 }
