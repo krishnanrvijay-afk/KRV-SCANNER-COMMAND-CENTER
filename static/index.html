@@ -1418,6 +1418,15 @@ body {
 #fleet-halt-btn.fh-halted { background:#ef4444; border-color:#ef4444; }
 #fleet-halt-btn.fh-split  { background:#ef4444; border-color:#f59e0b; }
 #fleet-halt-btn.fh-failed { background:#111111; border-color:#f59e0b; color:#f59e0b; }
+/* ── Directional halt buttons (SHORT / LONG) ── */
+.dir-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; padding:5px 12px; border-radius:6px; border:2px solid transparent; cursor:pointer; color:#ffffff; transition:all 0.2s; white-space:nowrap; }
+.dir-halt-btn.dh-live  { background:#22c55e; border-color:#22c55e; }
+.dir-halt-btn.dh-halt  { background:#ef4444; border-color:#ef4444; }
+.dir-halt-btn.dh-auto  { background:rgba(30,20,0,0.9); border-color:#f59e0b; color:#f59e0b; animation:dirAutoPulse 2s ease-in-out infinite; }
+@keyframes dirAutoPulse { 0%,100%{box-shadow:0 0 6px rgba(245,158,11,0.5)} 50%{box-shadow:0 0 14px rgba(245,158,11,0.9)} }
+/* ── Convergence RESET button ── */
+.fcb-reset-btn { font-family:'Bebas Neue',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:4px; border:1px solid currentColor; cursor:pointer; background:rgba(0,0,0,0.35); color:inherit; margin-left:10px; vertical-align:middle; opacity:0.85; transition:opacity 0.15s; }
+.fcb-reset-btn:hover { opacity:1; background:rgba(0,0,0,0.6); }
 .fc-pill { font-family:'Bebas Neue',sans-serif; font-size:12px; font-weight:700; letter-spacing:0.10em; padding:5px 14px 6px; border-radius:999px; border:2px solid rgba(255,255,255,0.12); color:#777; background:transparent; white-space:nowrap; cursor:default; transition:all 0.3s; user-select:none; }
 #fleet-venue-pill { border-color:rgba(34,211,238,0.48); color:#22d3ee; background:rgba(34,211,238,0.07); box-shadow:0 0 16px rgba(34,211,238,0.32),0 0 0 1px rgba(34,211,238,0.09); }
 #fleet-dir-pill.fd-long    { border-color:rgba(0,230,118,0.65);   color:#00e676; background:rgba(0,230,118,0.09);   box-shadow:0 0 18px rgba(0,230,118,0.48),0 0 0 1px rgba(0,230,118,0.10); }
@@ -1710,7 +1719,9 @@ body {
         <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
         <div id="fleet-status-pill" class="fs-caution">&#9650; CAUTION &#8212; LOADING</div>
         <div id="halt-wrap">
-          <button id="fleet-halt-btn" title="build:20Jul-57f9eb" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
+          <button id="dir-short-btn" class="dir-halt-btn dh-live" onclick="dirHaltToggle('short')" title="SHORT entries: LIVE / session-paused">&#9661; SHORT LIVE</button>
+          <button id="dir-long-btn"  class="dir-halt-btn dh-live" onclick="dirHaltToggle('long')"  title="LONG entries: LIVE / session-paused">&#9651; LONG LIVE</button>
+          <button id="fleet-halt-btn" title="build:20Jul-dirhalt" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
           <div id="halt-bolt"></div>
           <div id="halt-source-pill"></div>
         </div>
@@ -4621,7 +4632,15 @@ function renderFleetConvergence() {
     var sub = "HL:" + hl_r + " MX:" + mx_r + "  vel:" + (velAvg * 100).toFixed(1) + "%"
             + (isTier1 ? "  ⚠ PROTECT THE FLOOR ACTIVE — TIER-1 EVENT" : "");
     convEl.className = "fcb-" + dir.toLowerCase() + (isTier1 ? " fcb-tier1" : "");
-    convEl.innerHTML = "⚡ FLEET CONVERGENCE — " + dir + " <span class='fcb-sub'>" + sub + "</span>";
+    var _hPaused = (dir === "SHORT" && _haltShort) || (dir === "LONG" && _haltLong);
+    var _resetBtn = _hPaused
+      ? " <button class='fcb-reset-btn' onclick='resetDirHalt(\""
+        + dir.toLowerCase() + "\")'>&#8635; RESET " + dir + " PAUSE</button>"
+      : "";
+    convEl.innerHTML = "⚡ FLEET CONVERGENCE — " + dir
+      + " <span class='fcb-sub'>" + sub
+      + (_hPaused ? " · ⚠ " + dir + " PAUSED — tap to re-engage" : "")
+      + "</span>" + _resetBtn;
     convEl.style.display = "block";
   } else {
     convEl.style.display = "none";
@@ -6696,16 +6715,75 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 <script>
 console.log("[FLEET] build=20Jul-manual-only");
 var _fleetHalted = false;
+var _haltShort   = false;
+var _haltLong    = false;
 
 async function fleetHaltInit() {
   try {
     var r = await fetch('/api/fleet/status');
     var d = await r.json();
-    _fleetHalted = d.fleet_halt || false;
+    _fleetHalted = d.fleet_halt  || false;
+    _haltShort   = d.halt_short  || false;
+    _haltLong    = d.halt_long   || false;
     _updateHaltBtn();
+    _updateDirBtns();
   } catch(e) {
     console.error('Fleet status error:', e);
   }
+}
+
+/* Periodic refresh so auto-pauses triggered by scanner appear within 10s */
+setInterval(fleetHaltInit, 10000);
+
+async function dirHaltToggle(dir) {
+  var isShort = (dir === 'short');
+  var newVal  = isShort ? !_haltShort : !_haltLong;
+  if (isShort) _haltShort = newVal; else _haltLong = newVal;
+  _updateDirBtns();
+  try {
+    await fetch('/api/fleet/halt-' + dir, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({halt: newVal})
+    });
+  } catch(e) {
+    if (isShort) _haltShort = !newVal; else _haltLong = !newVal;
+    _updateDirBtns();
+    console.error('Dir halt error:', e);
+  }
+}
+
+async function resetDirHalt(dir) {
+  var isShort = (dir === 'short');
+  if (isShort) _haltShort = false; else _haltLong = false;
+  _updateDirBtns();
+  try {
+    await fetch('/api/fleet/halt-' + dir, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({halt: false})
+    });
+  } catch(e) {
+    if (isShort) _haltShort = true; else _haltLong = true;
+    _updateDirBtns();
+    console.error('Dir halt reset error:', e);
+  }
+}
+
+function _updateDirBtns() {
+  var sb = document.getElementById('dir-short-btn');
+  var lb = document.getElementById('dir-long-btn');
+  if (sb) {
+    sb.className = 'dir-halt-btn ' + (_haltShort ? 'dh-halt' : 'dh-live');
+    sb.textContent = _haltShort ? '▽ SHORT PAUSED' : '▽ SHORT LIVE';
+    sb.title = _haltShort ? 'SHORT paused (auto or manual) — tap to re-enable' : 'Tap to pause SHORT entries';
+  }
+  if (lb) {
+    lb.className = 'dir-halt-btn ' + (_haltLong ? 'dh-halt' : 'dh-live');
+    lb.textContent = _haltLong ? '△ LONG PAUSED' : '△ LONG LIVE';
+    lb.title = _haltLong ? 'LONG paused (auto or manual) — tap to re-enable' : 'Tap to pause LONG entries';
+  }
+  try { renderFleetConvergence(); } catch(e) {}
 }
 
 async function fleetHaltToggle() {
