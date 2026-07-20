@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SIGNALS — KRV FLEET</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --hl:#a855f7;--mexc:#f97316;--green:#22c55e;--red:#ef4444;
+  --amber:#f59e0b;--cyan:#06b6d4;--white:#ffffff;
+  --bg:#05050f;--card:#09090f;--border:#1a1a2e;
+  --D:'Bebas Neue',sans-serif;--M:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+.tb{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);background:#07071a;flex-shrink:0}
+.back{font-family:var(--D);font-size:13px;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;color:var(--white);text-decoration:none;letter-spacing:.06em}
+.tb-title{font-family:var(--D);font-size:22px;letter-spacing:.1em;color:var(--white)}
+.tb-sub{font-size:9px;color:#fff;font-weight:700;letter-spacing:.18em;white-space:nowrap}
+.tb-r{margin-left:auto;display:flex;align-items:center;gap:9px}
+.sess-pill{font-family:var(--D);font-size:13px;padding:3px 10px;border-radius:5px;border:1px solid;letter-spacing:.08em}
+.sess-pill.ASIA{color:var(--amber);border-color:rgba(245,158,11,.5)}
+.sess-pill.EU{color:var(--cyan);border-color:rgba(6,182,212,.5)}
+.sess-pill.US{color:var(--green);border-color:rgba(34,197,94,.5)}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.4s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.4;box-shadow:0 0 2px rgba(34,197,94,.3)}}
+.clk{font-size:12px;color:var(--white);font-variant-numeric:tabular-nums;letter-spacing:.04em;font-weight:700}
+.scan-badge{font-family:var(--D);font-size:12px;padding:2px 10px;border-radius:4px;border:1px solid rgba(34,211,238,.35);color:#22d3ee;letter-spacing:.08em}
+.live-pill{font-family:var(--D);font-size:11px;padding:2px 8px;border-radius:4px;letter-spacing:.08em;border:1px solid}
+.live-pill.live{color:var(--green);border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.08)}
+.live-pill.sim{color:var(--amber);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.05)}
+.live-pill.init{color:#888;border-color:#333;background:transparent}
+.sig-badge{font-family:var(--D);font-size:13px;padding:3px 12px;border-radius:4px;border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.08);color:var(--green);letter-spacing:.08em;animation:sigBadge 1.3s ease-in-out infinite;display:none}
+@keyframes sigBadge{0%,100%{box-shadow:none}50%{box-shadow:0 0 14px rgba(34,197,94,.4)}}
+
+/* ── PROGRESS RAIL ── */
+.prog-rail{height:2px;background:#111;flex-shrink:0;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--hl),#22d3ee);transition:width .14s linear;box-shadow:0 0 8px rgba(34,211,238,.5)}
+
+/* ── MAIN GRID ── */
+.pipe-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;overflow:hidden;min-height:0}
+
+/* ── VENUE COLUMN ── */
+.venue-col{background:var(--card);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;border:1px solid}
+.venue-col.hl{border-color:rgba(168,85,247,.25);box-shadow:0 0 30px rgba(168,85,247,.06)}
+.venue-col.mx{border-color:rgba(249,115,22,.25);box-shadow:0 0 30px rgba(249,115,22,.06)}
+
+/* ── VESSEL HEADER ── */
+.vessel-hdr{padding:10px 14px 8px;background:#08080e;border-bottom:1px solid var(--border);flex-shrink:0;position:relative;overflow:hidden}
+.vessel-hdr::before{content:'';position:absolute;top:-40px;width:200px;height:80px;border-radius:50%;pointer-events:none;opacity:.15}
+.hl .vessel-hdr::before{left:-20px;background:radial-gradient(ellipse,var(--hl),transparent 70%)}
+.mx .vessel-hdr::before{right:-20px;background:radial-gradient(ellipse,var(--mexc),transparent 70%)}
+.vh-top{display:flex;align-items:center;gap:10px;position:relative}
+.ring-wrap{position:relative;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ring-pulse{position:absolute;inset:0;border-radius:50%;border:1.5px solid;animation:ringPulse 1.8s ease-out infinite}
+.hl .ring-pulse{border-color:var(--hl)}
+.mx .ring-pulse{border-color:var(--mexc)}
+.ring-core{width:8px;height:8px;border-radius:50%}
+.hl .ring-core{background:var(--hl);box-shadow:0 0 8px 3px var(--hl)}
+.mx .ring-core{background:var(--mexc);box-shadow:0 0 8px 3px var(--mexc)}
+@keyframes ringPulse{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.vh-id{display:flex;flex-direction:column}
+.vh-callsign{font-family:var(--D);font-size:19px;letter-spacing:.12em;line-height:1}
+.hl .vh-callsign{color:var(--hl)}
+.mx .vh-callsign{color:var(--mexc)}
+.vh-fullname{font-size:8px;color:#fff;font-weight:700;letter-spacing:.14em}
+.vh-right{margin-left:auto;text-align:right}
+.vh-scan{font-family:var(--D);font-size:13px;color:#22d3ee;letter-spacing:.08em}
+.vh-pairs{font-size:8px;color:#fff;font-weight:700;letter-spacing:.08em}
+.vh-mode{font-size:7px;letter-spacing:.1em;margin-top:1px;font-weight:700}
+.vh-mode.live{color:var(--green)}
+.vh-mode.sim{color:var(--amber)}
+.vh-mode.init{color:#666}
+
+
+
+/* ── BEAM ── */
+.beam-track{position:relative;height:3px;margin-top:6px;border-radius:2px;overflow:visible}
+.hl .beam-track{background:linear-gradient(90deg,transparent,rgba(168,85,247,.3),transparent)}
+.mx .beam-track{background:linear-gradient(90deg,transparent,rgba(249,115,22,.3),transparent)}
+.beam-p{position:absolute;top:50%;transform:translateY(-50%);width:7px;height:7px;border-radius:50%;animation:beamTravel 2.2s linear infinite}
+.hl .beam-p{background:var(--hl);box-shadow:0 0 10px 4px var(--hl)}
+.mx .beam-p{background:var(--mexc);box-shadow:0 0 10px 4px var(--mexc)}
+.beam-p2{animation-delay:.9s;background:#22d3ee !important;box-shadow:0 0 8px 3px rgba(34,211,238,.8) !important}
+@keyframes beamTravel{0%{left:0%;opacity:0}8%{opacity:1}92%{opacity:1}100%{left:100%;opacity:0}}
+
+/* ── PIPELINE BODY ── */
+.pipe-body{flex:1;overflow-y:auto;padding:4px 0}
+.pipe-body::-webkit-scrollbar{width:2px}
+.pipe-body::-webkit-scrollbar-thumb{background:#1a1a2e;border-radius:2px}
+
+/* ── LOADING STATE ── */
+.scan-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:#444;font-family:var(--D);font-size:13px;letter-spacing:.12em}
+.scan-loading .spin{width:20px;height:20px;border:2px solid #222;border-top-color:#555;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── PREFLIGHT STRIP ── */
+.preflight{display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:1px solid #0e0e1a}
+.pf-lbl{font-family:var(--D);font-size:20px;letter-spacing:.12em;color:#fff;flex-shrink:0;font-weight:700}
+.pf-gates{display:flex;gap:10px}
+.pf-gate{display:flex;align-items:center;gap:4px;font-size:8px;letter-spacing:.08em;color:#fff;font-weight:700}
+
+/* ── STAGE ROW ── */
+.stage-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px 4px}.stage-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-left:2px solid transparent;transition:all .3s}
+.stage-row.active-row{border-left-color:inherit;background:rgba(255,255,255,.02)}
+.stage-lbl{width:84px;flex-shrink:0}
+.stage-name{font-family:var(--D);font-size:10px;letter-spacing:.1em;line-height:1;transition:color .3s;font-weight:700}
+.stage-sub{font-size:7px;color:#fff;font-weight:700;letter-spacing:.06em;margin-top:2px}
+.dot-row{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.dot{width:9px;height:9px;border-radius:50%;background:#1a1a1a;border:1px solid #333;transition:background .25s,box-shadow .25s;flex-shrink:0}
+.dot.pass{background:var(--green);border:none;box-shadow:0 0 6px 2px rgba(34,197,94,.7)}
+.dot.fail{background:var(--red);border:none;box-shadow:0 0 6px 2px rgba(239,68,68,.7)}
+.dot.checkpoint{background:#22d3ee;border:none;box-shadow:0 0 6px 2px rgba(34,211,238,.6)}
+.stage-stats{font-size:8px;font-weight:700;font-family:var(--D);letter-spacing:.05em;min-width:32px;text-align:right;flex-shrink:0;color:#fff}
+.stat-pass{color:var(--green)}
+.stat-fail{color:var(--red)}
+
+.connector{display:none}
+
+/* ── DIR GATES ── */
+.dir-hdr{padding:3px 12px;display:flex;align-items:center;gap:8px}
+.dir-hdr-lbl{font-family:var(--D);font-size:20px;color:#fff;letter-spacing:.1em;font-weight:700}
+.dir-gate-cols{font-family:var(--D);font-size:8px;color:#fff;font-weight:700;letter-spacing:.04em;margin-left:auto}
+.pair-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 8px 6px}
+.pair-card{background:#07070e;border:1px solid #1e1e30;border-radius:5px;padding:5px 6px;transition:all .3s}
+.pair-card.has-signal{border-color:rgba(34,211,238,.35);box-shadow:0 0 12px rgba(34,211,238,.12)}
+.pc-top{display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.pc-name{font-family:var(--D);font-size:22px;letter-spacing:.1em;line-height:1;font-weight:700;color:#fff}
+.hl .pc-name{color:#fff}
+.mx .pc-name{color:#fff}
+.sig-tag{font-size:7px;padding:1px 4px;border-radius:8px;font-family:var(--D);letter-spacing:.07em;animation:sigBadge 1.2s ease-in-out infinite}
+.sig-s{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);color:var(--red)}
+.sig-l{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:var(--green)}
+.dir-grid{display:flex;gap:3px}
+.dir-col{display:flex;flex-direction:column;gap:2px;align-items:center}
+.sdot{width:7px;height:7px;border-radius:50%;background:#141420;border:1px solid #2a2a40;transition:background .25s,box-shadow .25s;flex-shrink:0}
+.sdot.pass{background:var(--green);border:none;box-shadow:0 0 5px 1px rgba(34,197,94,.65)}
+.sdot.fail{background:var(--red);border:none;box-shadow:0 0 5px 1px rgba(239,68,68,.65)}
+.pc-status{font-size:7px;margin-top:3px;letter-spacing:.04em;line-height:1.3;color:#fff;font-weight:700}
+.gate-legend{padding:3px 12px 4px;font-size:7px;color:#fff;font-weight:700;letter-spacing:.06em;display:flex;gap:6px;flex-wrap:wrap}
+.gl-item{white-space:nowrap;color:#fff;font-weight:700}
+
+/* ── SIGNAL NODE ── */
+.signal-node{margin:3px 10px 2px;padding:7px 12px;border-radius:5px;display:flex;align-items:center;gap:10px;border:1px solid #1e1e30;transition:all .4s}
+.signal-node.fired{background:rgba(34,211,238,.06);border-color:rgba(34,211,238,.35);box-shadow:0 0 16px rgba(34,211,238,.15);animation:signalNode 1.5s ease-in-out infinite}
+@keyframes signalNode{0%,100%{box-shadow:0 0 10px rgba(34,211,238,.1)}50%{box-shadow:0 0 22px rgba(34,211,238,.3)}}
+.sn-icon{font-size:20px;color:#444;transition:color .4s;line-height:1}
+.signal-node.fired .sn-icon{color:#22d3ee}
+.sn-body{flex:1}
+.sn-title{font-family:var(--D);font-size:14px;letter-spacing:.1em;color:#fff;transition:color .4s;line-height:1;font-weight:700}
+.signal-node.fired .sn-title{color:#22d3ee}
+.sn-sub{font-size:8px;color:#fff;font-weight:700;letter-spacing:.08em;margin-top:2px}
+.sn-fl{font-family:var(--D);font-size:11px;color:#22d3ee;letter-spacing:.08em;opacity:0;transition:opacity .4s}
+.signal-node.fired .sn-fl{opacity:1}
+
+/* ── FOOTER ── */
+.footer{padding:7px 14px;border-top:1px solid var(--border);background:#07071a;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ft-lbl{font-family:var(--D);font-size:9px;color:#fff;letter-spacing:.12em;font-weight:700}
+.ft-track{position:relative;flex:1;height:2px;background:linear-gradient(90deg,rgba(168,85,247,.3),rgba(34,211,238,.3),rgba(249,115,22,.3));border-radius:1px}
+.ft-beam{position:absolute;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px rgba(34,211,238,.8);animation:beamTravel 1.8s linear infinite}
+.ft-dest{font-family:var(--D);font-size:12px;letter-spacing:.1em;padding:3px 12px;border-radius:4px;border:1px solid rgba(34,211,238,.3);color:#22d3ee;background:rgba(34,211,238,.06)}
+.ft-mode{font-size:8px;color:#fff;font-weight:700;margin-left:auto;letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="tb">
+  <a class="back" href="/">← FLEET</a>
+  <div class="tb-title">SIGNALS</div>
+  <div class="tb-sub" id="tb-sub">SCAN PIPELINE</div>
+  <div class="tb-r">
+    <div class="live-pill init" id="live-pill">INIT</div>
+    <div class="scan-badge" id="scan-badge">SCAN #—</div>
+    <div class="sig-badge" id="sig-badge">— SIGNALS</div>
+    <div class="sess-pill EU" id="sess-pill">EU</div>
+    <div class="dot-live"></div>
+    <div class="clk" id="clk">—</div>
+  </div>
+</div>
+<div class="prog-rail"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+
+<!-- ── TWO-COLUMN PIPELINE (static shell; body rebuilt from live data) ── -->
+<div class="pipe-grid">
+  <div class="venue-col hl" id="col-hl">
+    <div class="vessel-hdr">
+      <div class="vh-top">
+        <div class="ring-wrap"><div class="ring-pulse"></div><div class="ring-core"></div></div>
+        <div class="vh-id"><div class="vh-callsign">HL-1</div><div class="vh-fullname">HYPERLIQUID</div></div>
+        <div class="vh-right">
+          <div class="vh-scan" id="HL-scan-lbl">CONNECTING…</div>
+          <div class="vh-pairs" id="HL-pairs-lbl">— PAIRS</div>
+          <div class="vh-mode init" id="HL-mode-lbl">INIT</div>
+        </div>
+      </div>
+      <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
+    </div>
+    <div class="pipe-body" id="HL-pipe-body">
+      <div class="scan-loading"><div class="spin"></div>CONNECTING TO SCANNER</div>
+    </div>
+  </div>
+
+  <div class="venue-col mx" id="col-mx">
+    <div class="vessel-hdr">
+      <div class="vh-top">
+        <div class="ring-wrap"><div class="ring-pulse"></div><div class="ring-core"></div></div>
+        <div class="vh-id"><div class="vh-callsign">MEXC-1</div><div class="vh-fullname">MEXC FUTURES</div></div>
+        <div class="vh-right">
+          <div class="vh-scan" id="MEXC-scan-lbl">CONNECTING…</div>
+          <div class="vh-pairs" id="MEXC-pairs-lbl">— PAIRS</div>
+          <div class="vh-mode init" id="MEXC-mode-lbl">INIT</div>
+        </div>
+      </div>
+      <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
+    </div>
+    <div class="pipe-body" id="MEXC-pipe-body">
+      <div class="scan-loading"><div class="spin"></div>CONNECTING TO SCANNER</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="ft-lbl">PROMOTED SIGNALS →</div>
+  <div class="ft-track"><div class="ft-beam"></div></div>
+  <div class="ft-dest">FLEET LINK + ACTIVE TRADES</div>
+  <div class="ft-mode" id="ft-mode">AWAITING SCANNER</div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════
+   Pipeline stage definitions — no pair data here.
+   These are scanner-agnostic: both HL and MEXC run the same
+   conceptual stages; the gates within each stage are scanner-
+   specific and evaluated using real pair_state values.
+   ═══════════════════════════════════════════════════════════ */
+const PAIR_STAGES = [
+  {id:'price',  label:'PRICE FETCH',  sub:'1m · book · price',      tickAt:2,  failRate:.04},
+  {id:'indic',  label:'INDICATORS',   sub:'KDJ · RSI · ATR · ADX',  tickAt:5,  failRate:0},
+  {id:'regime', label:'BTC REGIME',   sub:'J1H context gate',        tickAt:8,  failRate:.12},
+  {id:'flash',  label:'BTC FLASH',    sub:'1m crash detector',       tickAt:10, failRate:.07},
+  {id:'pstate', label:'PAIR STATE',   sub:'→ overlay (free)',        tickAt:12, failRate:0, cp:true},
+];
+
+/* Direction gates — labels only; pass/fail computed from real pair_states */
+const DIR_GATE_DEFS = [
+  {id:'j1h',   label:'J1H', tickAt:13},
+  {id:'rsi',   label:'RSI', tickAt:14},
+  {id:'depth', label:'DPT', tickAt:15},
+  {id:'sess',  label:'SES', tickAt:16},
+  {id:'cool',  label:'COL', tickAt:17},
+];
+/* Simulation fail-rates (only used when scanner offline and no cached data) */
+const SIM_FAIL = {
+  j1h:  {s:.10,l:.10}, rsi:  {s:.12,l:.08},
+  depth:{s:.15,l:.18}, sess: {s:.08,l:.10}, cool: {s:.20,l:.15},
+};
+
+const MAX_TICK = 32;
+
+/* ═══════════════════════════════════════════════════════════
+   Live state — derived entirely from /api/live
+   ═══════════════════════════════════════════════════════════ */
+let liveData  = null;
+let liveMode  = false;
+/* colPairs: populated exclusively from pair_states in /api/live response */
+const colPairs   = { HL: [], MEXC: [] };
+const colBuilt   = { HL: false, MEXC: false };
+let   scanNum    = 1;
+let   tickHandle = null;
+let   tick       = 0;
+
+/* ═══════════════════════════════════════════════════════════
+   Seeded RNG (sim fallback only)
+   ═══════════════════════════════════════════════════════════ */
+function lcg(seed) {
+  let s = seed >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+}
+function mkSeed(scan, pi, tag) {
+  const h = tag.split('').reduce((a,c)=>a*31+c.charCodeAt(0)|0,0);
+  return ((scan * 997 + pi * 31 + h) >>> 0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Live data helpers
+   ═══════════════════════════════════════════════════════════ */
+function normSym(s) {
+  return (s || '').replace(/_USDT$/i,'').replace(/^@/,'').toUpperCase();
+}
+
+/* Extract ordered pair list from pair_states — scanner is sole source of truth */
+function extractPairs(venueKey) {
+  const st = liveData && liveData[venueKey.toLowerCase()];
+  if (!st || !Array.isArray(st.pair_states) || !st.pair_states.length) return [];
+  return st.pair_states.map(ps => normSym(ps.symbol || ps.pair || '')).filter(Boolean);
+}
+
+function getPairState(venueKey, pairName) {
+  const st = liveData && liveData[venueKey.toLowerCase()];
+  if (!st || !Array.isArray(st.pair_states)) return null;
+  return st.pair_states.find(ps => normSym(ps.symbol || ps.pair || '') === pairName) || null;
+}
+
+function getScanCount(venueKey) {
+  const st = liveData && liveData[venueKey.toLowerCase()];
+  return (st && st.scan_count) ? st.scan_count : scanNum;
+}
+
+function getOpenTrades(venueKey) {
+  const st = liveData && liveData[venueKey.toLowerCase()];
+  if (!st || !st.open_trades) return [];
+  const ot = st.open_trades;
+  return Array.isArray(ot) ? ot : Object.values(ot);
+}
+
+function isBtcFlash(venueKey) {
+  const st = liveData && liveData[venueKey.toLowerCase()];
+  return !!(st && st.btc_flash_active);
+}
+
+/* Hard gate thresholds — both scanners share identical config.py values.
+   Scanner exports session_blocked_short/long and cooldown_short/long
+   per pair in pair_states, so SES and COL are fully live-wired.           */
+function computeGates(ps, dir, venueKey) {
+  const j1h  = parseFloat(ps.j1h     || ps.j_1h  || 0);
+  const rsi  = parseFloat(ps.rsi15m  || ps.rsi   || 0);
+  const bidP = parseFloat(ps.bid_pct || 0);
+  const askP = parseFloat(ps.ask_pct || 0);
+  const isS  = dir === 'SHORT';
+
+  /* SES — scanner writes session_blocked_short/long to pair_states */
+  const sesBlk  = isS ? !!ps.session_blocked_short : !!ps.session_blocked_long;
+  /* COL — scanner writes cooldown_short/long (seconds remaining) */
+  const coolBlk = isS
+    ? (parseFloat(ps.cooldown_short || 0) > 0)
+    : (parseFloat(ps.cooldown_long  || 0) > 0);
+
+  /* J1H_SHORT_MIN=30, J1H_SHORT_MAX=85, J1H_LONG_MAX=59             */
+  /* RSI15M_SHORT_MIN=35, RSI15M_LONG_MAX=50, DEPTH_GATE_PCT=55       */
+  return {
+    j1h:   isS ? (j1h > 30 && j1h < 85) : (j1h < 59),
+    rsi:   isS ? (rsi > 35)              : (rsi < 50),
+    depth: isS ? (askP >= 55)            : (bidP >= 55),
+    sess:  !sesBlk,
+    cool:  !coolBlk,
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Compute per-pair pipeline + gate states
+   ═══════════════════════════════════════════════════════════ */
+function computeStates(venueKey, pairs, tick) {
+  const flash = isBtcFlash(venueKey);
+  return pairs.map((name, pi) => {
+    const livePs = liveMode ? getPairState(venueKey, name) : null;
+    const pr = {}; let blocked = false;
+
+    /* Pipeline stages */
+    for (const st of PAIR_STAGES) {
+      if (tick < st.tickAt) { pr[st.id]='idle'; continue; }
+      if (st.cp)             { pr[st.id]=blocked?'idle':'checkpoint'; continue; }
+      if (blocked)           { pr[st.id]='idle'; continue; }
+      if (livePs) {
+        pr[st.id] = (st.id==='flash' && flash) ? 'fail' : 'pass';
+        if (st.id==='flash' && flash) blocked=true;
+      } else {
+        const failed = lcg(mkSeed(scanNum,pi,st.id))() < st.failRate;
+        pr[st.id] = failed?'fail':'pass';
+        if (failed) blocked=true;
+      }
+    }
+
+    /* Direction gates */
+    const db  = {SHORT:blocked, LONG:blocked};
+    const dr  = {SHORT:{}, LONG:{}};
+    const rg  = livePs ? {
+      SHORT: computeGates(livePs,'SHORT',venueKey),
+      LONG:  computeGates(livePs,'LONG', venueKey),
+    } : null;
+
+    for (const dir of ['SHORT','LONG']) {
+      for (const g of DIR_GATE_DEFS) {
+        if (tick < g.tickAt) { dr[dir][g.id]='idle'; continue; }
+        if (db[dir])          { dr[dir][g.id]='idle'; continue; }
+        let pass;
+        if (rg) {
+          pass = !!rg[dir][g.id];
+        } else {
+          const fr = dir==='SHORT' ? SIM_FAIL[g.id].s : SIM_FAIL[g.id].l;
+          pass = lcg(mkSeed(scanNum,pi,g.id+dir))() >= fr;
+        }
+        dr[dir][g.id] = pass ? 'pass' : 'fail';
+        if (!pass) db[dir]=true;
+      }
+    }
+
+    const ss = !db.SHORT && tick >= MAX_TICK-6;
+    const ls = !db.LONG  && tick >= MAX_TICK-6;
+    return {pr, dr, ss, ls, livePs};
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Build column body — called once per venue after live data
+   arrives, and again if pair list changes
+   ═══════════════════════════════════════════════════════════ */
+function buildPipeBody(venue, pairs) {
+  const vk  = venue.toLowerCase();
+  const clr = vk==='hl' ? '#a855f7' : '#f97316';
+  const body = document.getElementById(venue+'-pipe-body');
+  if (!body) return;
+
+  body.innerHTML = `
+    <div class="preflight" id="${venue}-preflight">
+      <div class="pf-lbl">PRE-FLIGHT</div>
+      <div class="pf-gates">
+        <div class="pf-gate"><div class="dot" id="${venue}-warm"></div><span>WARMUP</span></div>
+        <div class="pf-gate"><div class="dot" id="${venue}-halt"></div><span>FLEET HALT</span></div>
+      </div>
+    </div>
+
+    <div class="stage-grid">
+    ${PAIR_STAGES.map(st=>`
+      <div class="stage-row" id="${venue}-row-${st.id}" style="border-left-color:${st.cp?'#22d3ee':clr}">
+        <div class="stage-lbl">
+          <div class="stage-name" id="${venue}-sname-${st.id}" style="color:#fff">${st.label}</div>
+          <div class="stage-sub">${st.sub}</div>
+        </div>
+        <div class="dot-row" id="${venue}-dots-${st.id}">
+          ${pairs.map((_,i)=>`<div class="dot" id="${venue}-d-${st.id}-${i}"></div>`).join('')}
+        </div>
+        <div class="stage-stats" id="${venue}-stats-${st.id}"></div>
+      </div>
+    `).join('')}
+    </div>
+
+    <div class="connector"></div>
+
+    <div class="dir-hdr">
+      <div class="dir-hdr-lbl">DIRECTION GATES</div>
+      <div class="dir-gate-cols">${DIR_GATE_DEFS.map(g=>g.label).join('·')}</div>
+    </div>
+
+    <div class="pair-cards" id="${venue}-pair-cards">
+      ${pairs.map((p,i)=>`
+        <div class="pair-card" id="${venue}-pc-${i}">
+          <div class="pc-top">
+            <div class="pc-name">${p}</div>
+            <div class="sig-tag sig-s" id="${venue}-ss-${i}" style="display:none">SHORT</div>
+            <div class="sig-tag sig-l" id="${venue}-sl-${i}" style="display:none">LONG</div>
+          </div>
+          <div class="dir-grid">
+            ${DIR_GATE_DEFS.map(g=>`
+              <div class="dir-col">
+                <div class="sdot" id="${venue}-s-${i}-${g.id}"></div>
+                <div class="sdot" id="${venue}-l-${i}-${g.id}"></div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="pc-status" id="${venue}-pcs-${i}"></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="gate-legend">
+      <span class="gl-item">J1H=1h momentum gate</span>
+      <span class="gl-item">RSI=15m RSI gate</span>
+      <span class="gl-item">DPT=book depth≥55%</span>
+      <span class="gl-item">SES=session open</span>
+      <span class="gl-item">COL=cooldown clear</span>
+      <span style="color:#fff;font-weight:700">·</span>
+      <span style="color:#fff;font-weight:700">top=SHORT bot=LONG</span>
+    </div>
+
+    <div class="signal-node" id="${venue}-sig-node">
+      <div class="sn-icon">◎</div>
+      <div class="sn-body">
+        <div class="sn-title" id="${venue}-sig-title">EVALUATING…</div>
+        <div class="sn-sub" id="${venue}-sig-sub"></div>
+      </div>
+      <div class="sn-fl">→ FLEET LINK</div>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Render tick — operates on whatever pairs are currently loaded
+   ═══════════════════════════════════════════════════════════ */
+function activeStage(t) {
+  for (let i=PAIR_STAGES.length-1; i>=0; i--)
+    if (t >= PAIR_STAGES[i].tickAt) return PAIR_STAGES[i].id;
+  return t>=1 ? 'preflight' : '';
+}
+
+function render() {
+  document.getElementById('prog-fill').style.width = Math.round(tick/MAX_TICK*100)+'%';
+  let totalSigs = 0;
+
+  for (const [venue, vk] of [['HL','hl'],['MEXC','mexc']]) {
+    const pairs = colPairs[venue];
+    if (!pairs.length) continue;   /* still connecting */
+
+    const states = computeStates(venue, pairs, tick);
+    const act    = activeStage(tick);
+    const realScan = getScanCount(vk);
+
+    /* Header updates */
+    const scanLbl = document.getElementById(venue+'-scan-lbl');
+    if (scanLbl) scanLbl.textContent = 'SCAN #'+realScan;
+
+    /* Preflight */
+    const wDot = document.getElementById(venue+'-warm');
+    const hDot = document.getElementById(venue+'-halt');
+    if (wDot && tick>=1) wDot.className='dot pass';
+    if (hDot && tick>=2) hDot.className='dot pass';
+
+    /* Pipeline stages */
+    for (const st of PAIR_STAGES) {
+      const rowEl  = document.getElementById(venue+'-row-'+st.id);
+      const nameEl = document.getElementById(venue+'-sname-'+st.id);
+      const statEl = document.getElementById(venue+'-stats-'+st.id);
+      if (rowEl)  rowEl.classList.toggle('active-row', act===st.id);
+      if (nameEl) nameEl.style.color = tick>=st.tickAt ? (st.cp?'#22d3ee':'#fff') : '#fff';
+      let pass=0, fail=0;
+      pairs.forEach((_,pi) => {
+        const dotEl = document.getElementById(venue+'-d-'+st.id+'-'+pi);
+        if (!dotEl) return;
+        const s = states[pi].pr[st.id];
+        dotEl.className='dot'+(s==='pass'?' pass':s==='fail'?' fail':s==='checkpoint'?' checkpoint':'');
+        if (s==='pass'||s==='checkpoint') pass++;
+        if (s==='fail') fail++;
+      });
+      if (statEl && tick>=st.tickAt) {
+        statEl.innerHTML =
+          (pass?`<span class="stat-pass">${pass}✓</span>`:'') +
+          (fail?` <span class="stat-fail">${fail}✗</span>`:'');
+      } else if (statEl) statEl.innerHTML='';
+    }
+
+    /* Direction gate cards */
+    let vSigs=0;
+    pairs.forEach((_,pi) => {
+      const {dr, ss, ls, livePs} = states[pi];
+      const card  = document.getElementById(venue+'-pc-'+pi);
+      const ssTag = document.getElementById(venue+'-ss-'+pi);
+      const slTag = document.getElementById(venue+'-sl-'+pi);
+      const pcsEl = document.getElementById(venue+'-pcs-'+pi);
+      if (ssTag) ssTag.style.display = ss?'':'none';
+      if (slTag) slTag.style.display = ls?'':'none';
+      if (card)  card.classList.toggle('has-signal', ss||ls);
+      if (ss||ls) vSigs++;
+      DIR_GATE_DEFS.forEach(g => {
+        const sd = document.getElementById(venue+'-s-'+pi+'-'+g.id);
+        const ld = document.getElementById(venue+'-l-'+pi+'-'+g.id);
+        const sv = dr.SHORT[g.id], lv = dr.LONG[g.id];
+        if (sd) sd.className='sdot'+(sv==='pass'?' pass':sv==='fail'?' fail':'');
+        if (ld) ld.className='sdot'+(lv==='pass'?' pass':lv==='fail'?' fail':'');
+      });
+      if (pcsEl && tick>=13) {
+        const sf = DIR_GATE_DEFS.find(g=>dr.SHORT[g.id]==='fail');
+        const lf = DIR_GATE_DEFS.find(g=>dr.LONG[g.id]==='fail');
+        const sI = Object.values(dr.SHORT).every(v=>v==='idle');
+        const lI = Object.values(dr.LONG).every(v=>v==='idle');
+        if (!sI||!lI) {
+          pcsEl.innerHTML =
+            (!sI?(sf?`<span style="color:#ef4444;font-weight:700">S-${sf.label}</span>`:`<span style="color:#22c55e;font-weight:700">S✓</span>`):'') +
+            ' '+
+            (!lI?(lf?`<span style="color:#ef4444;font-weight:700">L-${lf.label}</span>`:`<span style="color:#22c55e;font-weight:700">L✓</span>`):'');
+          if (livePs) {
+            const a=parseFloat(livePs.adx1h||0),j=parseFloat(livePs.j15m||0),b=parseFloat(livePs.bid_pct||0);
+            pcsEl.innerHTML+=`<br><span style="color:#fff;font-weight:700">ADX ${a.toFixed(0)} · J${j.toFixed(0)} · ${b.toFixed(0)}%</span>`;
+          }
+        }
+      } else if (pcsEl) pcsEl.innerHTML='';
+    });
+    totalSigs += vSigs;
+
+    /* Signal node */
+    const sigNode  = document.getElementById(venue+'-sig-node');
+    const sigTitle = document.getElementById(venue+'-sig-title');
+    const sigSub   = document.getElementById(venue+'-sig-sub');
+    if (!sigNode) continue;
+
+    const liveOpen = liveMode ? getOpenTrades(vk) : [];
+    if (tick >= MAX_TICK-6 || liveOpen.length) {
+      const sSigs = states.filter(p=>p.ss).length;
+      const lSigs = states.filter(p=>p.ls).length;
+      const tot   = sSigs+lSigs;
+      if (tot>0 || liveOpen.length) {
+        sigNode.className='signal-node fired';
+        if (sigTitle) sigTitle.textContent = (liveMode&&liveOpen.length) ? 'TRADE ACTIVE' : 'SIGNAL FIRED';
+        if (sigSub) {
+          let parts=[];
+          if (liveMode&&liveOpen.length) {
+            liveOpen.forEach(t=>{
+              const sym=normSym(t.symbol||t.pair||'');
+              const dir=(t.direction||'').toUpperCase();
+              parts.push(`<span style="color:${dir==='LONG'?'var(--green)':'var(--red)'}">${sym} ${dir}</span>`);
+            });
+          } else {
+            if (sSigs) parts.push(`<span style="color:var(--red)">${sSigs}×SHORT</span>`);
+            if (lSigs) parts.push(`<span style="color:var(--green)">${lSigs}×LONG</span>`);
+          }
+          sigSub.innerHTML=parts.join(' ');
+        }
+      } else {
+        sigNode.className='signal-node';
+        if (sigTitle) sigTitle.textContent='NO SIGNAL';
+        if (sigSub)  sigSub.innerHTML='';
+      }
+    } else {
+      sigNode.className='signal-node';
+      if (sigTitle) sigTitle.textContent='EVALUATING…';
+      if (sigSub)  sigSub.innerHTML='';
+    }
+  }
+
+  /* Topbar signal badge */
+  const sb = document.getElementById('sig-badge');
+  if (sb) {
+    if (totalSigs>0 && tick>=MAX_TICK-6) {
+      sb.style.display=''; sb.textContent=totalSigs+' SIGNAL'+(totalSigs!==1?'S':'');
+    } else sb.style.display='none';
+  }
+  document.getElementById('scan-badge').textContent =
+    'SCAN #'+(getScanCount('hl')||getScanCount('mexc')||scanNum);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Initialize columns from live data — no pair lists hardcoded
+   ═══════════════════════════════════════════════════════════ */
+function initColumnsFromLive() {
+  for (const [venue, vk] of [['HL','hl'],['MEXC','mexc']]) {
+    const newPairs = extractPairs(venue);
+    if (!newPairs.length) continue;                           /* scanner not ready yet */
+    const changed = JSON.stringify(newPairs) !== JSON.stringify(colPairs[venue]);
+    if (changed || !colBuilt[venue]) {
+      colPairs[venue] = newPairs;
+      buildPipeBody(venue, newPairs);
+      colBuilt[venue] = true;
+      /* Update pairs count label */
+      const pl = document.getElementById(venue+'-pairs-lbl');
+      if (pl) pl.textContent = newPairs.length+' PAIRS';
+    }
+    /* Mode label */
+    const ml = document.getElementById(venue+'-mode-lbl');
+    const ok = !!(liveData && liveData[vk+'_ok']);
+    if (ml) { ml.textContent=ok?'LIVE':'SIM'; ml.className='vh-mode '+(ok?'live':'sim'); }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Fetch /api/live — scanner is source of truth
+   ═══════════════════════════════════════════════════════════ */
+async function fetchLive() {
+  try {
+    const r = await fetch('/api/live', {credentials:'include'});
+    if (!r.ok) { setOffline(); return; }
+    liveData = await r.json();
+    liveMode = !!(liveData.hl_ok || liveData.mexc_ok);
+
+    initColumnsFromLive();
+
+    /* Topbar mode pill */
+    const pill  = document.getElementById('live-pill');
+    const ftm   = document.getElementById('ft-mode');
+    if (liveMode) {
+      if (pill) { pill.textContent='LIVE'; pill.className='live-pill live'; }
+      if (ftm)  ftm.textContent='LIVE DATA FROM SCANNER';
+    } else {
+      if (pill) { pill.textContent='SIM'; pill.className='live-pill sim'; }
+      if (ftm)  ftm.textContent='SCANNER RETURNED EMPTY (SIM MODE)';
+    }
+
+    /* Start tick loop on first successful fetch */
+    if (!tickHandle) startTick();
+
+  } catch(e) {
+    setOffline();
+  }
+}
+
+function setOffline() {
+  liveMode = false;
+  const pill = document.getElementById('live-pill');
+  const ftm  = document.getElementById('ft-mode');
+  if (pill) { pill.textContent='OFFLINE'; pill.className='live-pill sim'; }
+  if (ftm)  ftm.textContent='SCANNER OFFLINE — NO LIVE DATA';
+  /* If we've previously loaded pairs, keep the animation running on cached data */
+  if (!tickHandle && (colPairs.HL.length || colPairs.MEXC.length)) startTick();
+  /* Else: stay on loading state */
+}
+
+function startTick() {
+  tick=0;
+  render();
+  tickHandle = setInterval(()=>{
+    tick++;
+    if (tick>MAX_TICK){ tick=0; scanNum++; }
+    render();
+  }, 140);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Clock + session
+   ═══════════════════════════════════════════════════════════ */
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clk').textContent = now.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:false})+' EDT';
+  const h    = now.getUTCHours();
+  const sess = h<8?'ASIA':h<17?'EU':'US';
+  const pill = document.getElementById('sess-pill');
+  if (pill) { pill.textContent=sess; pill.className='sess-pill '+sess; }
+  document.getElementById('tb-sub').textContent='SCAN PIPELINE · '+sess+' SESSION';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Boot
+   ═══════════════════════════════════════════════════════════ */
+updateClock();
+setInterval(updateClock, 30000);
+fetchLive();                          /* pairs come from scanner, not this file */
+setInterval(fetchLive, 25000);        /* re-sync; rebuilds if pair list changes */
+</script>
+</body>
+</html>
