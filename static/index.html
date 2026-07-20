@@ -1710,7 +1710,7 @@ body {
         <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
         <div id="fleet-status-pill" class="fs-caution">&#9650; CAUTION &#8212; LOADING</div>
         <div id="halt-wrap">
-          <button id="fleet-halt-btn" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
+          <button id="fleet-halt-btn" title="build:20Jul-57f9eb" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
           <div id="halt-bolt"></div>
           <div id="halt-source-pill"></div>
         </div>
@@ -6694,6 +6694,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
 
 <script>
+console.log("[FLEET] build=20Jul-57f9eb halt-override=v3");
 var _fleetHalted = false;
 var _sessionHalted = false;
 var _manualOverrideLive = false; /* true when user manually overrides to LIVE — suppresses auto-halt until condition clears or user reverts */
