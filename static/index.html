@@ -6694,10 +6694,8 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
 
 <script>
-console.log("[FLEET] build=20Jul-57f9eb halt-override=v3");
+console.log("[FLEET] build=20Jul-manual-only");
 var _fleetHalted = false;
-var _sessionHalted = false;
-var _manualOverrideLive = false; /* true when user manually overrides to LIVE — suppresses auto-halt until condition clears or user reverts */
 
 async function fleetHaltInit() {
   try {
@@ -6711,10 +6709,7 @@ async function fleetHaltInit() {
 }
 
 async function fleetHaltToggle() {
-  _btcAutoHalted = false;  /* manual override clears auto flag */
-  _sessionHalted = false;  /* manual override clears session flag */
   _fleetHalted = !_fleetHalted;
-  _manualOverrideLive = !_fleetHalted; /* going LIVE sets override; going HALT clears it */
   _updateHaltBtn();
   try {
     await fetch('/api/fleet/halt', {
@@ -6872,35 +6867,6 @@ function _stlRender() {
   });
   axis.innerHTML = ax;
 
-  /* halt logic */
-  _stlCheckHalt(bz);
-}
-
-function _stlCheckHalt(bz) {
-  var shouldHalt = bz !== null;
-  if (shouldHalt && !_fleetHalted && !_manualOverrideLive) {
-    _sessionHalted = true;
-    _stlApplyHalt(true);
-  } else if (!shouldHalt && _fleetHalted && _sessionHalted && !_btcAutoHalted) {
-    _sessionHalted = false;
-    _stlApplyHalt(false);
-  }
-}
-
-async function _stlApplyHalt(halt) {
-  var prev = _fleetHalted;
-  _fleetHalted = halt;
-  _updateHaltBtn();
-  try {
-    var r = await fetch('/api/fleet/halt', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({halt: halt})
-    });
-    if (!r.ok) { _fleetHalted = prev; _updateHaltBtn(); console.error('[STL] halt HTTP err:', r.status); return; }
-    var d = await r.json();
-    if (d.status !== 'ok') { _fleetHalted = prev; _updateHaltBtn(); return; }
-    _updateHaltBtn();
-  } catch(e) { _fleetHalted = prev; _updateHaltBtn(); console.error('[STL] halt error:', e); }
 }
 
 setInterval(_stlRender, 30000);
@@ -7156,115 +7122,28 @@ function _refreshBtcRegimePill() {
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════
-   SENTINEL GATE — Cardinal Rule 1-A two-posture auto HALT/LIVE system
-   Earn Mode    (daily < $1,000): HALT on STOP only
-   Protect Mode (daily ≥ $1,000): HALT on STOP only — allow CAUTION / CONFIRMED
-   Manual toggle always clears auto flag (_btcAutoHalted = false)
-   Auto-LIVE only fires if _btcAutoHalted is true (auto set it, not human)
+   SENTINEL GATE — informational display only.
+   No auto-halt. Manual fleetHaltToggle() is the sole halt authority.
    ══════════════════════════════════════════════════════════════════════ */
 
-var _btcAutoHalted          = false;
-var _sentinelDailyPnl       = 0;
-var _sentinelLastShouldHalt = null;
-var SENTINEL_THRESHOLD      = 1000;
+var _sentinelDailyPnl  = 0;
+var SENTINEL_THRESHOLD = 1000;
 
-function _sentinelShouldHalt(rgState, dailyPnl) {
-  if (!rgState || rgState === 'EXEMPT') return null;
-  return rgState === 'STOP';
-}
-
-function _updateSentinelPill(posture, rgState, dailyPnl, shouldHalt) {
+function _updateSentinelPill(posture, rgState, dailyPnl) {
   var el = document.getElementById('sentinel-gate-pill');
   if (!el) return;
   var postureLabel = posture === 'EARN' ? 'EARN' : 'PROTECT FLOOR';
-  var sign         = dailyPnl >= 0 ? '+' : '-';
-  var pnlStr       = sign + '$' + Math.abs(Math.round(dailyPnl));
-  var statusIcon   = shouldHalt === null ? '' : (shouldHalt ? '  ⛔ HALT' : '  ✓ LIVE');
-  el.textContent   = 'SENTINEL  ' + postureLabel + '  ' + pnlStr + statusIcon;
-  if (shouldHalt === true) {
-    el.className = 'sg-halt';
-  } else if (posture === 'PROTECT') {
-    el.className = 'sg-protect';
-  } else {
-    el.className = 'sg-earn';
-  }
+  var sign   = dailyPnl >= 0 ? '+' : '-';
+  var pnlStr = sign + '$' + Math.abs(Math.round(dailyPnl));
+  el.textContent = 'SENTINEL  ' + postureLabel + '  ' + pnlStr;
+  el.className   = posture === 'PROTECT' ? 'sg-protect' : 'sg-earn';
 }
 
 function _sentinelGateCheck() {
-  var btc      = _getBtcState();
-  var rg       = _btcRegime(btc);
-  var state    = rg.state;
-  var posture  = _sentinelDailyPnl < SENTINEL_THRESHOLD ? 'EARN' : 'PROTECT';
-  var shouldHalt = _sentinelShouldHalt(state, _sentinelDailyPnl);
-  _updateSentinelPill(posture, state, _sentinelDailyPnl, shouldHalt);
-  if (shouldHalt === null) return;
-  if (shouldHalt && !_fleetHalted && !_manualOverrideLive) {
-    _btcAutoHalted          = true;
-    _sentinelLastShouldHalt = true;
-    _applyAutoHalt(true, posture, state, _sentinelDailyPnl);
-    return;
-  }
-  if (!shouldHalt && _fleetHalted && _btcAutoHalted) {
-    _btcAutoHalted          = false;
-    _sentinelLastShouldHalt = false;
-    _applyAutoHalt(false, posture, state, _sentinelDailyPnl);
-    return;
-  }
-  _sentinelLastShouldHalt = shouldHalt;
-}
-
-async function _applyAutoHalt(halt, posture, rgState, dailyPnl) {
-  /* Optimistic update: set _fleetHalted + call _updateHaltBtn,
-     then write to Supabase. On any failure rollback both.
-     Root-only helpers (fleet-state object + pill renderer) removed;
-     _prevHalted + _updateHaltBtn() are the correct equivalents here. */
-  var _prevHalted = _fleetHalted;
-  _fleetHalted = halt;
-  _updateHaltBtn();
-  try {
-    var _resp = await fetch('/api/fleet/halt', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({halt: halt})
-    });
-    if (!_resp.ok) {
-      _fleetHalted = _prevHalted;
-      _updateHaltBtn();
-      console.error('[SENTINEL] halt HTTP error:', _resp.status); return;
-    }
-    var _d = await _resp.json();
-    if (_d.status !== 'ok') {
-      _fleetHalted = _prevHalted;
-      _updateHaltBtn();
-      console.error('[SENTINEL] halt write non-ok:', _d); return;
-    }
-    _updateHaltBtn();
-  } catch(e) {
-    _fleetHalted = _prevHalted;
-    _updateHaltBtn();
-    console.error('[SENTINEL] halt write error:', e); return;
-  }
-  var rgLabels = {
-    'CONFIRMED_LONG': 'LONG SAFE (J1H < 20)', 'CAUTION_LONG': 'CAUTION (J1H 20-40)',
-    'STOP': 'STOP (J1H 40-60)', 'CAUTION_SHORT': 'CAUTION SHORT (J1H 60-80)',
-    'CONFIRMED_SHORT': 'SHORT SAFE (J1H > 80)'
-  };
-  var rgLabel = rgLabels[rgState] || rgState;
-  var btc = _getBtcState();
-  var j1h = (btc && btc.j1h != null) ? Number(btc.j1h).toFixed(0) : '--';
-  var pnlSign = dailyPnl >= 0 ? '+' : '';
-  var pnlStr  = pnlSign + '$' + Math.round(Math.abs(dailyPnl));
-  var postureLabel = posture === 'EARN' ? 'EARN MODE  (daily PnL < $1,000)' : 'PROTECT FLOOR  (daily PnL ≥ $1,000)';
-  var msg = (halt ? '⛔ SENTINEL GATE — AUTO HALT' : '✅ SENTINEL GATE — AUTO LIVE')
-    + '\n' + postureLabel
-    + '\nBTC Regime: ' + rgLabel + '  (J1H=' + j1h + ')'
-    + '\nDaily P&L: ' + pnlSign + pnlStr
-    + '\n— Both HL + MEXC affected';
-  try {
-    await fetch('/api/fleet/sentinel-notify', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg})
-    });
-  } catch(e) { console.error('[SENTINEL] TG notify error:', e); }
+  var btc     = _getBtcState();
+  var rg      = _btcRegime(btc);
+  var posture = _sentinelDailyPnl < SENTINEL_THRESHOLD ? 'EARN' : 'PROTECT';
+  _updateSentinelPill(posture, rg.state, _sentinelDailyPnl);
 }
 
 async function _fetchSentinelPnl() {
