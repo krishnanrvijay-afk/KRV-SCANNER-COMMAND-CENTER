@@ -248,23 +248,16 @@ const PAIR_STAGES = [
 
 /* Direction gates — labels only; pass/fail computed from real pair_states */
 const DIR_GATE_DEFS = [
-  {id:'adx',   label:'ADX', tickAt:13},
-  {id:'j1h',   label:'J1H', tickAt:14},
-  {id:'rsi',   label:'RSI', tickAt:15},
-  {id:'depth', label:'DPT', tickAt:16},
-  {id:'sess',  label:'SES', tickAt:17},
-  {id:'cool',  label:'COL', tickAt:18},
-  {id:'intrd', label:'ITR', tickAt:19},
-  {id:'mkt',   label:'MKT', tickAt:20},
-  {id:'score', label:'SCR', tickAt:21},
-  {id:'drift', label:'DRF', tickAt:22},
+  {id:'j1h',   label:'J1H', tickAt:13},
+  {id:'rsi',   label:'RSI', tickAt:14},
+  {id:'depth', label:'DPT', tickAt:15},
+  {id:'sess',  label:'SES', tickAt:16},
+  {id:'cool',  label:'COL', tickAt:17},
 ];
 /* Simulation fail-rates (only used when scanner offline and no cached data) */
 const SIM_FAIL = {
-  adx:  {s:.05,l:.08}, j1h: {s:.10,l:.10}, rsi: {s:.12,l:.08},
-  depth:{s:.15,l:.18}, sess:{s:.08,l:.10}, cool:{s:.20,l:.15},
-  intrd:{s:.05,l:.05}, mkt: {s:.08,l:.06}, score:{s:.30,l:.35},
-  drift:{s:.05,l:.05},
+  j1h:  {s:.10,l:.10}, rsi:  {s:.12,l:.08},
+  depth:{s:.15,l:.18}, sess: {s:.08,l:.10}, cool: {s:.20,l:.15},
 };
 
 const MAX_TICK = 32;
@@ -330,54 +323,31 @@ function isBtcFlash(venueKey) {
   return !!(st && st.btc_flash_active);
 }
 
-/* ── Gate thresholds are derived from pair_state values and scanner config  ──
-   The scanner exposes numeric values per pair (adx1h, j1h, rsi15m, bid_pct,
-   ask_pct, score) via pair_states. Gate outcomes are computed by matching
-   these values against the thresholds each scanner enforces.
-
-   Both scanners share DEPTH_GATE_PCT=55 and score>=4 minimum.
-   ADX / J1H / RSI gates differ by venue — read from pair_states metadata
-   when available; otherwise use known documented values as fallback.
-   All of these come from scanner config, not hardcoded here for UX.         */
+/* Hard gate thresholds — both scanners share identical config.py values.
+   Scanner exports session_blocked_short/long and cooldown_short/long
+   per pair in pair_states, so SES and COL are fully live-wired.           */
 function computeGates(ps, dir, venueKey) {
-  /* Raw values from scanner's pair_state export */
-  const adx  = parseFloat(ps.adx1h   || ps.adx    || 0);
-  const j1h  = parseFloat(ps.j1h     || ps.j_1h   || 0);
-  const j15  = parseFloat(ps.j15m    || ps.j_15m  || 0);
-  const rsi  = parseFloat(ps.rsi15m  || ps.rsi    || 0);
+  const j1h  = parseFloat(ps.j1h     || ps.j_1h  || 0);
+  const rsi  = parseFloat(ps.rsi15m  || ps.rsi   || 0);
   const bidP = parseFloat(ps.bid_pct || 0);
   const askP = parseFloat(ps.ask_pct || 0);
-  const sc   = parseFloat(ps.score   || 0);
   const isS  = dir === 'SHORT';
 
-  /* Per-venue gate config — derived from scanner config.py / main.py.
-     If the scanner later exports its thresholds via pair_states, read them
-     from ps.gate_config and remove this branch entirely.                   */
-  if (venueKey.toLowerCase() === 'mexc') {
-    /* MEXC config.py: ADX_MIN_SHORT=0, ADX_MIN_LONG=20
-       J1H_SHORT_MIN=30, J1H_SHORT_MAX=85, J1H_LONG_MAX=59
-       RSI15M_SHORT_MIN=35, no RSI gate for LONG
-       DEPTH_GATE_PCT=55                                                     */
-    return {
-      adx:   isS ? true                   : (adx  >= 20),
-      j1h:   isS ? (j1h > 30 && j1h < 85): (j1h  <  59),
-      rsi:   isS ? (rsi > 35)             : true,
-      depth: isS ? (askP >= 55)           : (bidP >= 55),
-      sess:  true, cool: true, intrd: true, mkt: true,
-      score: sc >= 4,
-      drift: true,
-    };
-  }
+  /* SES — scanner writes session_blocked_short/long to pair_states */
+  const sesBlk  = isS ? !!ps.session_blocked_short : !!ps.session_blocked_long;
+  /* COL — scanner writes cooldown_short/long (seconds remaining) */
+  const coolBlk = isS
+    ? (parseFloat(ps.cooldown_short || 0) > 0)
+    : (parseFloat(ps.cooldown_long  || 0) > 0);
 
-  /* HL scanner (bounce-scanner-deux) documented thresholds */
+  /* J1H_SHORT_MIN=30, J1H_SHORT_MAX=85, J1H_LONG_MAX=59             */
+  /* RSI15M_SHORT_MIN=35, RSI15M_LONG_MAX=50, DEPTH_GATE_PCT=55       */
   return {
-    adx:   isS ? (adx  >= 25)  : (adx  >= 30),
-    j1h:   isS ? (j1h  <  60)  : (j1h  >  40),
-    rsi:   isS ? (rsi  >  45)  : (rsi  <  55),
-    depth: isS ? (askP >= 55)  : (bidP >= 55),
-    sess:  true, cool: true, intrd: true, mkt: true,
-    score: sc >= 4,
-    drift: true,
+    j1h:   isS ? (j1h > 30 && j1h < 85) : (j1h < 59),
+    rsi:   isS ? (rsi > 35)              : (rsi < 50),
+    depth: isS ? (askP >= 55)            : (bidP >= 55),
+    sess:  !sesBlk,
+    cool:  !coolBlk,
   };
 }
 
@@ -498,11 +468,11 @@ function buildPipeBody(venue, pairs) {
     </div>
 
     <div class="gate-legend">
-      <span class="gl-item">ADX=trend strength</span>
-      <span class="gl-item">J1H=1h momentum</span>
-      <span class="gl-item">RSI=scanner gate</span>
+      <span class="gl-item">J1H=1h momentum gate</span>
+      <span class="gl-item">RSI=15m RSI gate</span>
       <span class="gl-item">DPT=book depth≥55%</span>
-      <span class="gl-item">SCR≥4</span>
+      <span class="gl-item">SES=session open</span>
+      <span class="gl-item">COL=cooldown clear</span>
       <span style="color:#fff;font-weight:700">·</span>
       <span style="color:#fff;font-weight:700">top=SHORT bot=LONG</span>
     </div>
