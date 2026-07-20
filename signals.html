@@ -142,6 +142,11 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .pc-status{font-size:7px;margin-top:3px;letter-spacing:.04em;line-height:1.3;color:#fff;font-weight:700}
 .gate-legend{padding:3px 12px 4px;font-size:7px;color:#fff;font-weight:700;letter-spacing:.06em;display:flex;gap:6px;flex-wrap:wrap}
 .gl-item{white-space:nowrap;color:#fff;font-weight:700}
+.gate-hdr{display:flex;gap:5px;padding:0 0 2px 26px;font-size:7px;color:#555;font-weight:700;letter-spacing:.08em}
+.gate-hdr span{width:9px;text-align:center}
+.gate-rows{display:flex;flex-direction:column;gap:2px;margin:2px 0}
+.gate-row{display:flex;align-items:center;gap:5px}
+.gate-lbl-txt{font-size:6px;color:#555;font-weight:700;letter-spacing:.04em;width:22px;flex-shrink:0;line-height:1}
 
 /* ── SIGNAL NODE ── */
 .signal-node{margin:3px 10px 2px;padding:7px 12px;border-radius:5px;display:flex;align-items:center;gap:10px;border:1px solid #1e1e30;transition:all .4s}
@@ -246,19 +251,17 @@ const PAIR_STAGES = [
   {id:'pstate', label:'PAIR STATE',   sub:'→ overlay (free)',        tickAt:12, failRate:0, cp:true},
 ];
 
-/* Direction gates — labels only; pass/fail computed from real pair_states */
+/* Direction gates — scanner is sole source of truth (gates_long/gates_short arrays)
+   Order MUST match scanner gate_long/gate_short: [J15M, J1H, RSI, DPT, SES, COL] */
 const DIR_GATE_DEFS = [
-  {id:'j1h',   label:'J1H', tickAt:13},
-  {id:'rsi',   label:'RSI', tickAt:14},
-  {id:'depth', label:'DPT', tickAt:15},
-  {id:'sess',  label:'SES', tickAt:16},
-  {id:'cool',  label:'COL', tickAt:17},
+  {id:'j15m',  label:'J15M', idx:0},
+  {id:'j1h',   label:'J1H',  idx:1},
+  {id:'rsi',   label:'RSI',  idx:2},
+  {id:'depth', label:'DPT',  idx:3},
+  {id:'sess',  label:'SES',  idx:4},
+  {id:'cool',  label:'COL',  idx:5},
 ];
-/* Simulation fail-rates (only used when scanner offline and no cached data) */
-const SIM_FAIL = {
-  j1h:  {s:.10,l:.10}, rsi:  {s:.12,l:.08},
-  depth:{s:.15,l:.18}, sess: {s:.08,l:.10}, cool: {s:.20,l:.15},
-};
+const GATE_TICK = 13; /* gates appear once pair state is ready */
 
 const MAX_TICK = 32;
 
@@ -323,33 +326,9 @@ function isBtcFlash(venueKey) {
   return !!(st && st.btc_flash_active);
 }
 
-/* Hard gate thresholds — both scanners share identical config.py values.
-   Scanner exports session_blocked_short/long and cooldown_short/long
-   per pair in pair_states, so SES and COL are fully live-wired.           */
-function computeGates(ps, dir, venueKey) {
-  const j1h  = parseFloat(ps.j1h     || ps.j_1h  || 0);
-  const rsi  = parseFloat(ps.rsi15m  || ps.rsi   || 0);
-  const bidP = parseFloat(ps.bid_pct || 0);
-  const askP = parseFloat(ps.ask_pct || 0);
-  const isS  = dir === 'SHORT';
-
-  /* SES — scanner writes session_blocked_short/long to pair_states */
-  const sesBlk  = isS ? !!ps.session_blocked_short : !!ps.session_blocked_long;
-  /* COL — scanner writes cooldown_short/long (seconds remaining) */
-  const coolBlk = isS
-    ? (parseFloat(ps.cooldown_short || 0) > 0)
-    : (parseFloat(ps.cooldown_long  || 0) > 0);
-
-  /* J1H_SHORT_MIN=30, J1H_SHORT_MAX=85, J1H_LONG_MAX=59             */
-  /* RSI15M_SHORT_MIN=35, RSI15M_LONG_MAX=50, DEPTH_GATE_PCT=55       */
-  return {
-    j1h:   isS ? (j1h > 30 && j1h < 85) : (j1h < 59),
-    rsi:   isS ? (rsi > 35)              : (rsi < 50),
-    depth: isS ? (askP >= 55)            : (bidP >= 55),
-    sess:  !sesBlk,
-    cool:  !coolBlk,
-  };
-}
+/* Gate pass/fail read directly from scanner pair_states.gates_long / gates_short.
+   Order: [J15M=0, J1H=1, RSI=2, DPT=3, SES=4, COL=5]
+   The scanner is the sole compute authority — no local recomputation here. */
 
 /* ═══════════════════════════════════════════════════════════
    Compute per-pair pipeline + gate states
@@ -375,32 +354,26 @@ function computeStates(venueKey, pairs, tick) {
       }
     }
 
-    /* Direction gates */
+    /* Direction gates — read pre-computed bool arrays from scanner (source of truth).
+       gates_long/gates_short order: [J15M, J1H, RSI, DPT, SES, COL]               */
     const db  = {SHORT:blocked, LONG:blocked};
     const dr  = {SHORT:{}, LONG:{}};
-    const rg  = livePs ? {
-      SHORT: computeGates(livePs,'SHORT',venueKey),
-      LONG:  computeGates(livePs,'LONG', venueKey),
-    } : null;
+    const gl  = livePs ? livePs.gates_long  : null;
+    const gs  = livePs ? livePs.gates_short : null;
 
     for (const dir of ['SHORT','LONG']) {
-      for (const g of DIR_GATE_DEFS) {
-        if (tick < g.tickAt) { dr[dir][g.id]='idle'; continue; }
-        if (db[dir])          { dr[dir][g.id]='idle'; continue; }
-        let pass;
-        if (rg) {
-          pass = !!rg[dir][g.id];
-        } else {
-          const fr = dir==='SHORT' ? SIM_FAIL[g.id].s : SIM_FAIL[g.id].l;
-          pass = lcg(mkSeed(scanNum,pi,g.id+dir))() >= fr;
-        }
+      const gArr = dir==='SHORT' ? gs : gl;
+      DIR_GATE_DEFS.forEach(g => {
+        if (tick < GATE_TICK) { dr[dir][g.id]='idle'; return; }
+        if (db[dir])          { dr[dir][g.id]='idle'; return; }
+        const pass = gArr ? !!gArr[g.idx] : false;
         dr[dir][g.id] = pass ? 'pass' : 'fail';
-        if (!pass) db[dir]=true;
-      }
+        if (!pass) db[dir] = true;
+      });
     }
 
-    const ss = !db.SHORT && tick >= MAX_TICK-6;
-    const ls = !db.LONG  && tick >= MAX_TICK-6;
+    const ss = livePs ? !!(gs && gs.every(v=>v)) : (!db.SHORT && tick >= MAX_TICK-6);
+    const ls = livePs ? !!(gl && gl.every(v=>v)) : (!db.LONG  && tick >= MAX_TICK-6);
     return {pr, dr, ss, ls, livePs};
   });
 }
@@ -442,8 +415,8 @@ function buildPipeBody(venue, pairs) {
     <div class="connector"></div>
 
     <div class="dir-hdr">
-      <div class="dir-hdr-lbl">DIRECTION GATES</div>
-      <div class="dir-gate-cols">${DIR_GATE_DEFS.map(g=>g.label).join('·')}</div>
+      <div class="dir-hdr-lbl">GATE STATUS · PER PAIR</div>
+      <div class="dir-gate-cols">S=SHORT · L=LONG</div>
     </div>
 
     <div class="pair-cards" id="${venue}-pair-cards">
@@ -451,12 +424,16 @@ function buildPipeBody(venue, pairs) {
         <div class="pair-card" id="${venue}-pc-${i}">
           <div class="pc-top">
             <div class="pc-name">${p}</div>
-            <div class="sig-tag sig-s" id="${venue}-ss-${i}" style="display:none">SHORT</div>
-            <div class="sig-tag sig-l" id="${venue}-sl-${i}" style="display:none">LONG</div>
+            <div style="display:flex;gap:2px;align-items:center">
+              <div class="sig-tag sig-s" id="${venue}-ss-${i}" style="display:none">S</div>
+              <div class="sig-tag sig-l" id="${venue}-sl-${i}" style="display:none">L</div>
+            </div>
           </div>
-          <div class="dir-grid">
+          <div class="gate-hdr"><span>S</span><span>L</span></div>
+          <div class="gate-rows">
             ${DIR_GATE_DEFS.map(g=>`
-              <div class="dir-col">
+              <div class="gate-row">
+                <span class="gate-lbl-txt">${g.label}</span>
                 <div class="sdot" id="${venue}-s-${i}-${g.id}"></div>
                 <div class="sdot" id="${venue}-l-${i}-${g.id}"></div>
               </div>
@@ -468,13 +445,12 @@ function buildPipeBody(venue, pairs) {
     </div>
 
     <div class="gate-legend">
-      <span class="gl-item">J1H=1h momentum gate</span>
-      <span class="gl-item">RSI=15m RSI gate</span>
-      <span class="gl-item">DPT=book depth≥55%</span>
-      <span class="gl-item">SES=session open</span>
-      <span class="gl-item">COL=cooldown clear</span>
-      <span style="color:#fff;font-weight:700">·</span>
-      <span style="color:#fff;font-weight:700">top=SHORT bot=LONG</span>
+      <span class="gl-item">J15M=15m J gate</span>
+      <span class="gl-item">J1H=1h J gate</span>
+      <span class="gl-item">RSI=15m RSI</span>
+      <span class="gl-item">DPT=depth≥55%</span>
+      <span class="gl-item">SES=session</span>
+      <span class="gl-item">COL=cooldown</span>
     </div>
 
     <div class="signal-node" id="${venue}-sig-node">
@@ -572,8 +548,8 @@ function render() {
             ' '+
             (!lI?(lf?`<span style="color:#ef4444;font-weight:700">L-${lf.label}</span>`:`<span style="color:#22c55e;font-weight:700">L✓</span>`):'');
           if (livePs) {
-            const a=parseFloat(livePs.adx1h||0),j=parseFloat(livePs.j15m||0),b=parseFloat(livePs.bid_pct||0);
-            pcsEl.innerHTML+=`<br><span style="color:#fff;font-weight:700">ADX ${a.toFixed(0)} · J${j.toFixed(0)} · ${b.toFixed(0)}%</span>`;
+            const j15=parseFloat(livePs.j15m||0),j1h=parseFloat(livePs.j1h||0),rsi=parseFloat(livePs.rsi15m||0);
+            pcsEl.innerHTML+=`<br><span style="color:#555;font-weight:700">J15M:${j15.toFixed(0)} J1H:${j1h.toFixed(0)} RSI:${rsi.toFixed(0)}</span>`;
           }
         }
       } else if (pcsEl) pcsEl.innerHTML='';
