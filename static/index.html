@@ -6696,6 +6696,7 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 <script>
 var _fleetHalted = false;
 var _sessionHalted = false;
+var _manualOverrideLive = false; /* true when user manually overrides to LIVE — suppresses auto-halt until condition clears or user reverts */
 
 async function fleetHaltInit() {
   try {
@@ -6712,6 +6713,7 @@ async function fleetHaltToggle() {
   _btcAutoHalted = false;  /* manual override clears auto flag */
   _sessionHalted = false;  /* manual override clears session flag */
   _fleetHalted = !_fleetHalted;
+  _manualOverrideLive = !_fleetHalted; /* going LIVE sets override; going HALT clears it */
   _updateHaltBtn();
   try {
     await fetch('/api/fleet/halt', {
@@ -6875,12 +6877,15 @@ function _stlRender() {
 
 function _stlCheckHalt(bz) {
   var shouldHalt = bz !== null;
-  if (shouldHalt && !_fleetHalted) {
+  if (shouldHalt && !_fleetHalted && !_manualOverrideLive) {
     _sessionHalted = true;
     _stlApplyHalt(true);
-  } else if (!shouldHalt && _fleetHalted && _sessionHalted && !_btcAutoHalted) {
-    _sessionHalted = false;
-    _stlApplyHalt(false);
+  } else if (!shouldHalt) {
+    _manualOverrideLive = false; /* blackout zone ended — override no longer needed */
+    if (_fleetHalted && _sessionHalted && !_btcAutoHalted) {
+      _sessionHalted = false;
+      _stlApplyHalt(false);
+    }
   }
 }
 
@@ -7195,17 +7200,20 @@ function _sentinelGateCheck() {
   var shouldHalt = _sentinelShouldHalt(state, _sentinelDailyPnl);
   _updateSentinelPill(posture, state, _sentinelDailyPnl, shouldHalt);
   if (shouldHalt === null) return;
-  if (shouldHalt && !_fleetHalted) {
+  if (shouldHalt && !_fleetHalted && !_manualOverrideLive) {
     _btcAutoHalted          = true;
     _sentinelLastShouldHalt = true;
     _applyAutoHalt(true, posture, state, _sentinelDailyPnl);
     return;
   }
-  if (!shouldHalt && _fleetHalted && _btcAutoHalted) {
-    _btcAutoHalted          = false;
-    _sentinelLastShouldHalt = false;
-    _applyAutoHalt(false, posture, state, _sentinelDailyPnl);
-    return;
+  if (!shouldHalt) {
+    _manualOverrideLive = false; /* BTC condition cleared — override no longer needed */
+    if (_fleetHalted && _btcAutoHalted) {
+      _btcAutoHalted          = false;
+      _sentinelLastShouldHalt = false;
+      _applyAutoHalt(false, posture, state, _sentinelDailyPnl);
+      return;
+    }
   }
   _sentinelLastShouldHalt = shouldHalt;
 }
