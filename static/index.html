@@ -1427,7 +1427,8 @@ body {
 .dir-halt-btn.dh-auto  { background:rgba(30,20,0,0.9); border-color:#f59e0b; color:#f59e0b; animation:dirAutoPulse 2s ease-in-out infinite; }
 @keyframes dirAutoPulse { 0%,100%{box-shadow:0 0 6px rgba(245,158,11,0.5)} 50%{box-shadow:0 0 14px rgba(245,158,11,0.9)} }
 /* ── Convergence RESET button ── */
-.dir-halt-btn.dh-regime-lock { background:#92400e; color:#fbbf24; cursor:not-allowed; border:1px solid #b45309; opacity:0.95; }
+.dir-halt-btn.dh-regime-lock    { background:#7f1d1d; color:#fca5a5; cursor:not-allowed; border:2px solid #ef4444; opacity:1; }
+.dir-halt-btn.dh-regime-neutral { background:#78350f; color:#fcd34d; cursor:pointer; border:1px solid #f59e0b; opacity:0.95; }
 .fcb-reset-btn { font-family:'Bebas Neue',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:4px; border:1px solid currentColor; cursor:pointer; background:rgba(0,0,0,0.35); color:inherit; margin-left:10px; vertical-align:middle; opacity:0.85; transition:opacity 0.15s; }
 .fcb-reset-btn:hover { opacity:1; background:rgba(0,0,0,0.6); }
 .fc-pill { font-family:'Bebas Neue',sans-serif; font-size:12px; font-weight:700; letter-spacing:0.10em; padding:5px 14px 6px; border-radius:999px; border:2px solid rgba(255,255,255,0.12); color:#777; background:transparent; white-space:nowrap; cursor:default; transition:all 0.3s; user-select:none; }
@@ -6750,11 +6751,11 @@ setInterval(fleetHaltInit, 10000);
 
 async function dirHaltToggle(dir) {
   var isShort = (dir === 'short');
-  // R3: prevent manual toggle when BTC regime hard-blocks this direction
+  // R3: prevent manual toggle when BTC hard-blocks this direction; neutral zone is always clickable
   var _btcJ1h = (live && live.hl && live.hl.btc_j1h) || (live && live.mexc && live.mexc.btc_j1h) || 50;
   var _rg = _btcRegime({j1h: _btcJ1h});
-  if (!isShort && _rg.state === 'CONFIRMED_SHORT') return;  // BTC>=80: LONG regime-locked
-  if ( isShort && _rg.state === 'CONFIRMED_LONG')  return;  // BTC<20:  SHORT regime-locked
+  if (!isShort && _rg.state === 'CONFIRMED_SHORT') return;  // BTC>=80: LONG hard-blocked
+  if ( isShort && _rg.state === 'CONFIRMED_LONG')  return;  // BTC<20:  SHORT hard-blocked
   var newVal  = isShort ? !_haltShort : !_haltLong;
   if (isShort) _haltShort = newVal; else _haltLong = newVal;
   _updateDirBtns();
@@ -6791,35 +6792,48 @@ async function resetDirHalt(dir) {
 function _updateDirBtns() {
   var sb = document.getElementById('dir-short-btn');
   var lb = document.getElementById('dir-long-btn');
-  // R3: read BTC regime to lock buttons in stop zones (no manual override allowed)
+  // R3: read BTC regime — hard block (red/disabled), neutral (amber/clickable), clear (green/normal)
   var _btcJ1h = (live && live.hl && live.hl.btc_j1h) || (live && live.mexc && live.mexc.btc_j1h) || 50;
   var _rg = _btcRegime({j1h: _btcJ1h});
-  var _longRegimeLock  = (_rg.state === 'CONFIRMED_SHORT');  // BTC J1H >= 80
-  var _shortRegimeLock = (_rg.state === 'CONFIRMED_LONG');   // BTC J1H < 20
+  var _longHardBlock  = (_rg.state === 'CONFIRMED_SHORT');  // BTC J1H >= 80 — LONGs hard-blocked
+  var _shortHardBlock = (_rg.state === 'CONFIRMED_LONG');   // BTC J1H <  20 — SHORTs hard-blocked
+  var _neutralZone    = (_rg.state === 'STOP');             // BTC J1H 40-60 — amber, trades free
+  // SHORT button
   if (sb) {
-    if (_shortRegimeLock) {
-      sb.className = 'dir-halt-btn dh-regime-lock';
-      sb.textContent = '▽ SHORT — REGIME LOCK';
-      sb.title = 'BTC J1H < 20 — regime hard-blocks SHORT entries. Cannot override.';
+    if (_shortHardBlock) {
       sb.disabled = true;
+      sb.className = 'dir-halt-btn dh-regime-lock';
+      sb.textContent = '▽ SHORT — HARD BLOCK';
+      sb.title = 'BTC J1H < 20 — regime hard-blocks SHORT entries. No manual override.';
+    } else if (_neutralZone) {
+      sb.disabled = false;
+      sb.className = 'dir-halt-btn dh-regime-neutral';
+      sb.textContent = '▽ SHORT — NEUTRAL';
+      sb.title = 'BTC J1H 40–60 — neutral zone. Trades move freely. Tap to pause.';
     } else {
       sb.disabled = false;
       sb.className = 'dir-halt-btn ' + (_haltShort ? 'dh-halt' : 'dh-live');
       sb.textContent = _haltShort ? '▽ SHORT PAUSED' : '▽ SHORT LIVE';
-      sb.title = _haltShort ? 'SHORT paused (auto or manual) — tap to re-enable' : 'Tap to pause SHORT entries';
+      sb.title = _haltShort ? 'SHORT paused — tap to re-enable' : 'Tap to pause SHORT entries';
     }
   }
+  // LONG button
   if (lb) {
-    if (_longRegimeLock) {
-      lb.className = 'dir-halt-btn dh-regime-lock';
-      lb.textContent = '△ LONG — REGIME LOCK';
-      lb.title = 'BTC J1H ≥ 80 — regime hard-blocks LONG entries. Cannot override.';
+    if (_longHardBlock) {
       lb.disabled = true;
+      lb.className = 'dir-halt-btn dh-regime-lock';
+      lb.textContent = '△ LONG — HARD BLOCK';
+      lb.title = 'BTC J1H ≥ 80 — regime hard-blocks LONG entries. No manual override.';
+    } else if (_neutralZone) {
+      lb.disabled = false;
+      lb.className = 'dir-halt-btn dh-regime-neutral';
+      lb.textContent = '△ LONG — NEUTRAL';
+      lb.title = 'BTC J1H 40–60 — neutral zone. Trades move freely. Tap to pause.';
     } else {
       lb.disabled = false;
       lb.className = 'dir-halt-btn ' + (_haltLong ? 'dh-halt' : 'dh-live');
       lb.textContent = _haltLong ? '△ LONG PAUSED' : '△ LONG LIVE';
-      lb.title = _haltLong ? 'LONG paused (auto or manual) — tap to re-enable' : 'Tap to pause LONG entries';
+      lb.title = _haltLong ? 'LONG paused — tap to re-enable' : 'Tap to pause LONG entries';
     }
   }
   try { renderFleetConvergence(); } catch(e) {}
