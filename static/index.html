@@ -6728,9 +6728,11 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
 <script>
 console.log("[FLEET] build=20Jul-manual-only");
-var _fleetHalted = false;
-var _haltShort   = false;
-var _haltLong    = false;
+var _fleetHalted      = false;
+var _haltShort        = false;
+var _haltLong         = false;
+var _regimeAutoHalted  = false;  // true = LIVE was auto-halted by STOP zone regime
+var _userOverrodeRegime = false;  // true = user manually un-halted during regime (suppresses re-auto-halt)
 
 async function fleetHaltInit() {
   try {
@@ -6756,6 +6758,7 @@ async function dirHaltToggle(dir) {
   var _rg = _btcRegime({j1h: _btcJ1h});
   if (!isShort && _rg.state === 'CONFIRMED_SHORT') return;  // BTC>=80: LONG hard-blocked
   if ( isShort && _rg.state === 'CONFIRMED_LONG')  return;  // BTC<20:  SHORT hard-blocked
+  if (_rg.state === 'STOP') return;                          // BTC 40-60: stop zone — both blocked
   var newVal  = isShort ? !_haltShort : !_haltLong;
   if (isShort) _haltShort = newVal; else _haltLong = newVal;
   _updateDirBtns();
@@ -6792,12 +6795,27 @@ async function resetDirHalt(dir) {
 function _updateDirBtns() {
   var sb = document.getElementById('dir-short-btn');
   var lb = document.getElementById('dir-long-btn');
-  // R3: read BTC regime — hard block (red/disabled), neutral (amber/clickable), clear (green/normal)
+  // R3: read BTC regime — CONFIRMED_SHORT/LONG = one direction locked; STOP = both locked + auto-halt LIVE
   var _btcJ1h = (live && live.hl && live.hl.btc_j1h) || (live && live.mexc && live.mexc.btc_j1h) || 50;
   var _rg = _btcRegime({j1h: _btcJ1h});
   var _longHardBlock  = (_rg.state === 'CONFIRMED_SHORT');  // BTC J1H >= 80 — LONGs hard-blocked
   var _shortHardBlock = (_rg.state === 'CONFIRMED_LONG');   // BTC J1H <  20 — SHORTs hard-blocked
-  var _neutralZone    = (_rg.state === 'STOP');             // BTC J1H 40-60 — amber, trades free
+  var _stopZone       = (_rg.state === 'STOP');             // BTC J1H 40-60 — both directions blocked
+  // Auto-halt LIVE when BTC enters STOP zone; auto-release when it leaves
+  if (_stopZone && !_fleetHalted && !_userOverrodeRegime) {
+    _regimeAutoHalted = true;
+    _fleetHalted = true;
+    _updateHaltBtn();
+    fetch('/api/fleet/halt', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({halt: true})})
+      .catch(function(e) { console.error('Regime auto-halt error:', e); });
+  } else if (!_stopZone && _regimeAutoHalted) {
+    _regimeAutoHalted = false;
+    _userOverrodeRegime = false;
+    _fleetHalted = false;
+    _updateHaltBtn();
+    fetch('/api/fleet/halt', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({halt: false})})
+      .catch(function(e) { console.error('Regime auto-release error:', e); });
+  }
   // SHORT button
   if (sb) {
     if (_shortHardBlock) {
@@ -6805,11 +6823,11 @@ function _updateDirBtns() {
       sb.className = 'dir-halt-btn dh-regime-lock';
       sb.textContent = '▽ SHORT — HARD BLOCK';
       sb.title = 'BTC J1H < 20 — regime hard-blocks SHORT entries. No manual override.';
-    } else if (_neutralZone) {
-      sb.disabled = false;
-      sb.className = 'dir-halt-btn dh-regime-neutral';
-      sb.textContent = '▽ SHORT — NEUTRAL';
-      sb.title = 'BTC J1H 40–60 — neutral zone. Trades move freely. Tap to pause.';
+    } else if (_stopZone) {
+      sb.disabled = true;
+      sb.className = 'dir-halt-btn dh-regime-lock';
+      sb.textContent = '▽ SHORT — STOP ZONE';
+      sb.title = 'BTC J1H 40–60 — stop zone. Both directions blocked. No entries.';
     } else {
       sb.disabled = false;
       sb.className = 'dir-halt-btn ' + (_haltShort ? 'dh-halt' : 'dh-live');
@@ -6824,11 +6842,11 @@ function _updateDirBtns() {
       lb.className = 'dir-halt-btn dh-regime-lock';
       lb.textContent = '△ LONG — HARD BLOCK';
       lb.title = 'BTC J1H ≥ 80 — regime hard-blocks LONG entries. No manual override.';
-    } else if (_neutralZone) {
-      lb.disabled = false;
-      lb.className = 'dir-halt-btn dh-regime-neutral';
-      lb.textContent = '△ LONG — NEUTRAL';
-      lb.title = 'BTC J1H 40–60 — neutral zone. Trades move freely. Tap to pause.';
+    } else if (_stopZone) {
+      lb.disabled = true;
+      lb.className = 'dir-halt-btn dh-regime-lock';
+      lb.textContent = '△ LONG — STOP ZONE';
+      lb.title = 'BTC J1H 40–60 — stop zone. Both directions blocked. No entries.';
     } else {
       lb.disabled = false;
       lb.className = 'dir-halt-btn ' + (_haltLong ? 'dh-halt' : 'dh-live');
@@ -6840,7 +6858,13 @@ function _updateDirBtns() {
 }
 
 async function fleetHaltToggle() {
+  var _wasHalted = _fleetHalted;
   _fleetHalted = !_fleetHalted;
+  // If user manually un-halts while regime auto-halt is active, record override
+  if (_wasHalted && !_fleetHalted && _regimeAutoHalted) {
+    _userOverrodeRegime = true;
+    _regimeAutoHalted   = false;
+  }
   _updateHaltBtn();
   try {
     await fetch('/api/fleet/halt', {
