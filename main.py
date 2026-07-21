@@ -40,10 +40,10 @@ _live: dict[str, Any] = {
     "hl_ok": False, "mexc_ok": False,
     "updated_at": 0.0,
     "fleet_convergence": {},
+}
 # Tracks which directional halts were auto-written by fleet convergence (not manual).
 # Only releases a halt if this module set it — avoids clobbering manual pauses.
 _conv_halt: dict = {"long": False, "short": False}
-}
 
 # ─────────────────────────── app & signer ───────────────────────────
 app = FastAPI(docs_url=None, redoc_url=None)
