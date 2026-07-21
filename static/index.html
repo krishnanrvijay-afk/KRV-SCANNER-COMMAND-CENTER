@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>KRV FLEET SCORECARD</title>
+<title>KRV FLEET COMMAND CENTER</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -60,7 +60,7 @@ body {
   gap: 10px;
   border-bottom: 1px solid var(--border);
 }
-.logo { font-family: var(--display); font-size: 1.9rem; letter-spacing: .1em; display: flex; align-items: center; gap: 9px; }
+.logo { font-family: var(--display); font-size: 1.9rem; letter-spacing: .1em; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .logo-dot {
   display: inline-block;
   width: 11px;
@@ -100,13 +100,15 @@ body {
 
 .badge-paper {
   background: #120d00;
-  border: 1px solid #ffb30030;
+  border: 2px solid rgba(255,179,0,0.55);
   color: var(--amber);
-  padding: 4px 10px;
+  padding: 5px 14px;
   font-family: var(--display);
-  font-size: .85rem;
-  letter-spacing: .2em;
+  font-size: 18px;
+  letter-spacing: .15em;
   border-radius: 999px;
+  cursor: default;
+  user-select: none;
 }
 
 /* ── Tab bar ── */
@@ -1412,14 +1414,14 @@ body {
 #fleet-status-pill.fs-caution   { border-color:rgba(255,179,0,0.70); color:#ffb300; background:rgba(255,179,0,0.10); box-shadow:0 0 8px rgba(255,179,0,0.20); }
 #fleet-status-pill.fs-standdown { border-color:rgba(255,70,70,0.75); color:#ff4646; background:rgba(255,70,70,0.10); box-shadow:0 0 10px rgba(255,70,70,0.30); animation:sgHaltPulse 1.8s ease-in-out infinite; }
 /* ── FLEET CTRL ROW (header) ── */
-#fleet-ctrl-row { display:flex; align-items:center; gap:6px; margin-left:auto; margin-right:12px; }
-#fleet-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; padding:7px 16px; border-radius:6px; border:2px solid transparent; cursor:pointer; color:#ffffff; min-width:148px; transition:all 0.2s; white-space:nowrap; }
+#fleet-ctrl-row { display:flex; align-items:center; gap:6px; }
+#fleet-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:18px; font-weight:700; letter-spacing:.15em; padding:5px 14px; border-radius:999px; border:2px solid transparent; cursor:pointer; color:#ffffff; min-width:unset; transition:all 0.2s; white-space:nowrap; }
 #fleet-halt-btn.fh-live   { background:#22c55e; border-color:#22c55e; }
 #fleet-halt-btn.fh-halted { background:#ef4444; border-color:#ef4444; }
 #fleet-halt-btn.fh-split  { background:#ef4444; border-color:#f59e0b; }
 #fleet-halt-btn.fh-failed { background:#111111; border-color:#f59e0b; color:#f59e0b; }
 /* ── Directional halt buttons (SHORT / LONG) ── */
-.dir-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; padding:5px 12px; border-radius:6px; border:2px solid transparent; cursor:pointer; color:#ffffff; transition:all 0.2s; white-space:nowrap; }
+.dir-halt-btn { font-family:'Bebas Neue',sans-serif; font-size:18px; font-weight:700; letter-spacing:.15em; padding:5px 14px; border-radius:999px; border:2px solid transparent; cursor:pointer; color:#ffffff; transition:all 0.2s; white-space:nowrap; }
 .dir-halt-btn.dh-live  { background:#22c55e; border-color:#22c55e; }
 .dir-halt-btn.dh-halt  { background:#ef4444; border-color:#ef4444; }
 .dir-halt-btn.dh-auto  { background:rgba(30,20,0,0.9); border-color:#f59e0b; color:#f59e0b; animation:dirAutoPulse 2s ease-in-out infinite; }
@@ -1548,9 +1550,9 @@ body {
 /* ── Halt Source Pill + Bolt (manual/auto) ── */
 #halt-wrap {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0;
+  gap: 6px;
 }
 #halt-source-pill {
   display: none;
@@ -1692,7 +1694,16 @@ body {
 
   <!-- A. HEADER -->
   <div class="header">
-    <div class="logo"><span class="logo-dot"></span>KRV FLEET SCORECARD</div>
+    <div class="logo"><span class="logo-dot"></span>KRV FLEET COMMAND CENTER
+      <div class="badge-paper">PAPER</div>
+      <div id="halt-wrap">
+        <button id="dir-short-btn" class="dir-halt-btn dh-live" onclick="dirHaltToggle('short')" title="SHORT entries: LIVE / session-paused">&#9661; SHORT LIVE</button>
+        <button id="dir-long-btn"  class="dir-halt-btn dh-live" onclick="dirHaltToggle('long')"  title="LONG entries: LIVE / session-paused">&#9651; LONG LIVE</button>
+        <button id="fleet-halt-btn" title="build:21Jul-cmdcenter" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
+        <div id="halt-bolt"></div>
+        <div id="halt-source-pill"></div>
+      </div>
+    </div>
     <div class="header-right">
       <button id="btc-regime-pill" class="rg-exempt" onclick="openBtcRegimeOverlay()" title="BTC Regime — click for detail"><span style="font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:0.14em;line-height:1.1;display:block">BTC REGIME</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.08em;opacity:0.7;display:block;line-height:1.2;margin-top:1px">BTC&nbsp;J1H&nbsp;&middot;&nbsp;&mdash;</span></button>
       <div id="sentinel-gate-pill" title="SENTINEL Gate — auto HALT/LIVE based on daily PnL + BTC Regime">SENTINEL GATE</div>
@@ -1713,18 +1724,10 @@ body {
         <button id="btn-all"   onclick="setRange('all')">ALL</button>
       </div>
       <div id="analytics-status" class="fetch-status"></div>
-        <div class="badge-paper">PAPER</div>
       <div id="fleet-ctrl-row">
         <div id="fleet-venue-pill" class="fc-pill">HL&nbsp;<span class="fc-dot fc-dot-unkn"></span>&nbsp;|&nbsp;MX&nbsp;<span class="fc-dot fc-dot-unkn"></span></div>
         <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
         <div id="fleet-status-pill" class="fs-caution">&#9650; CAUTION &#8212; LOADING</div>
-        <div id="halt-wrap">
-          <button id="dir-short-btn" class="dir-halt-btn dh-live" onclick="dirHaltToggle('short')" title="SHORT entries: LIVE / session-paused">&#9661; SHORT LIVE</button>
-          <button id="dir-long-btn"  class="dir-halt-btn dh-live" onclick="dirHaltToggle('long')"  title="LONG entries: LIVE / session-paused">&#9651; LONG LIVE</button>
-          <button id="fleet-halt-btn" title="build:20Jul-dirhalt" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
-          <div id="halt-bolt"></div>
-          <div id="halt-source-pill"></div>
-        </div>
       </div>
     </div>
   </div>
