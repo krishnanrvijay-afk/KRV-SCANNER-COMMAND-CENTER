@@ -40,6 +40,9 @@ _live: dict[str, Any] = {
     "hl_ok": False, "mexc_ok": False,
     "updated_at": 0.0,
     "fleet_convergence": {},
+# Tracks which directional halts were auto-written by fleet convergence (not manual).
+# Only releases a halt if this module set it — avoids clobbering manual pauses.
+_conv_halt: dict = {"long": False, "short": False}
 }
 
 # ─────────────────────────── app & signer ───────────────────────────
@@ -115,6 +118,32 @@ async def _poll_live() -> None:
             "hl_avg_adx":    round(float(_hl_sm.get("avg_adx",   0.0)), 1),
             "mx_avg_adx":    round(float(_mx_sm.get("avg_adx",   0.0)), 1),
         }
+        # R5: fleet convergence auto-halt — write halt flags when both venues agree
+        # Uses _conv_halt to track what WE set so we never release a manual halt.
+        _fc = _live["fleet_convergence"]
+        global _conv_halt
+        # convergence SHORT active => block LONGs
+        if _fc.get("short") and not _conv_halt["long"]:
+            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": True}) and \
+               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": True}):
+                _conv_halt["long"] = True
+                print("[CONV] Auto-halted LONG — fleet convergence SHORT active", flush=True)
+        elif not _fc.get("short") and _conv_halt["long"]:
+            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": False}) and \
+               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": False}):
+                _conv_halt["long"] = False
+                print("[CONV] Auto-released LONG halt — fleet convergence SHORT cleared", flush=True)
+        # convergence LONG active => block SHORTs
+        if _fc.get("long") and not _conv_halt["short"]:
+            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": True}) and \
+               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": True}):
+                _conv_halt["short"] = True
+                print("[CONV] Auto-halted SHORT — fleet convergence LONG active", flush=True)
+        elif not _fc.get("long") and _conv_halt["short"]:
+            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": False}) and \
+               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": False}):
+                _conv_halt["short"] = False
+                print("[CONV] Auto-released SHORT halt — fleet convergence LONG cleared", flush=True)
         _live["updated_at"] = time.time()
         await asyncio.sleep(5)   # scorecard live-state cache: 5s poll
 
