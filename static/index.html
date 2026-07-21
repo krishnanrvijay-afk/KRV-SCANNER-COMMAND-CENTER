@@ -787,14 +787,14 @@ body {
     .fl-vessel.fl-hl::after { background:radial-gradient(ellipse at 20% 0%, rgba(179,136,255,0.12), transparent 70%); }
     .fl-vessel.fl-mx::after { background:radial-gradient(ellipse at 80% 0%, rgba(255,145,0,0.12), transparent 70%); }
     .fl-v-top { display:flex; align-items:center; gap:9px; margin-bottom:10px; position:relative; z-index:2; }
-    .fl-v-ring { position:relative; width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .fl-v-ring { position:relative; width:60px; height:60px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .fl-v-ring-pulse { position:absolute; inset:0; border-radius:50%; border:1.5px solid currentColor; animation:fl-ringpulse 1.8s ease-out infinite; }
     .fl-vessel.fl-hl .fl-v-ring-pulse { color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-ring-pulse { color:var(--mexc); }
     .fl-vessel.fl-ring-amber .fl-v-ring-pulse { color:var(--amber) !important; animation-duration:3s; }
     .fl-vessel.fl-ring-red   .fl-v-ring-pulse { color:var(--red)   !important; animation-duration:6s; }
     @keyframes fl-ringpulse { 0%{ transform:scale(0.5); opacity:0.9; } 100%{ transform:scale(1.6); opacity:0; } }
-    .fl-v-ring-core { width:9px; height:9px; border-radius:50%; box-shadow:0 0 8px 2px currentColor; }
+    .fl-v-ring-core { width:18px; height:18px; border-radius:50%; box-shadow:0 0 16px 4px currentColor; }
     .fl-vessel.fl-hl .fl-v-ring-core { background:var(--hl); color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-ring-core { background:var(--mexc); color:var(--mexc); }
     .fl-vessel.fl-ring-amber .fl-v-ring-core { background:var(--amber) !important; color:var(--amber) !important; }
@@ -1435,10 +1435,14 @@ body {
 #fleet-dir-pill.fd-short   { border-color:rgba(255,70,70,0.70);   color:#ff4646; background:rgba(255,70,70,0.09);   box-shadow:0 0 18px rgba(255,70,70,0.48),0 0 0 1px rgba(255,70,70,0.10); }
 #fleet-dir-pill.fd-mixed   { border-color:rgba(255,179,0,0.65);   color:#ffb300; background:rgba(255,179,0,0.09);   box-shadow:0 0 14px rgba(255,179,0,0.42),0 0 0 1px rgba(255,179,0,0.10); }
 #fleet-dir-pill.fd-unknown { border-color:rgba(148,163,184,0.25); color:#94a3b8; background:transparent; box-shadow:none; }
-.fc-dot { display:inline-block; width:7px; height:7px; border-radius:50%; vertical-align:middle; margin:0 2px; }
+.fc-dot { display:inline-block; width:14px; height:14px; border-radius:50%; vertical-align:middle; margin:0 3px; }
+.fc-dot-hl   { background:#b388ff; animation:fc-dot-hl-pulse 1.6s ease-in-out infinite; }
+.fc-dot-mx   { background:#ff9100; animation:fc-dot-mx-pulse 1.6s ease-in-out infinite; }
 .fc-dot-live { background:#22c55e; animation:fl-livedot 1.4s ease-in-out infinite; }
 .fc-dot-halt { background:#ef4444; animation:fc-haltdot 1.8s ease-in-out infinite; }
 .fc-dot-unkn { background:#f59e0b; }
+@keyframes fc-dot-hl-pulse { 0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(179,136,255,0.9),0 0 8px 3px rgba(179,136,255,0.5); } 50%{ opacity:0.7; box-shadow:0 0 0 7px rgba(179,136,255,0),0 0 4px 1px rgba(179,136,255,0.2); } }
+@keyframes fc-dot-mx-pulse  { 0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(255,145,0,0.9),0 0 8px 3px rgba(255,145,0,0.5); } 50%{ opacity:0.7; box-shadow:0 0 0 7px rgba(255,145,0,0),0 0 4px 1px rgba(255,145,0,0.2); } }
 @keyframes fc-haltdot { 0%,100%{opacity:1;box-shadow:0 0 4px 1px rgba(239,68,68,0.8)} 50%{opacity:0.5;box-shadow:0 0 2px 0 rgba(239,68,68,0.3)} }
 
 /* ── Sentinel Strip (Phase A) — BTC Regime pill format, regime-color-aware ── */
@@ -1725,7 +1729,7 @@ body {
       </div>
       <div id="analytics-status" class="fetch-status"></div>
       <div id="fleet-ctrl-row">
-        <div id="fleet-venue-pill" class="fc-pill">HL&nbsp;<span class="fc-dot fc-dot-unkn"></span>&nbsp;|&nbsp;MX&nbsp;<span class="fc-dot fc-dot-unkn"></span></div>
+        <div id="fleet-venue-pill" class="fc-pill">HL&nbsp;<span id="fc-dot-hl" class="fc-dot fc-dot-hl"></span>&nbsp;|&nbsp;MX&nbsp;<span id="fc-dot-mx" class="fc-dot fc-dot-mx"></span></div>
         <div id="fleet-dir-pill" class="fc-pill" style="color:#f59e0b">DIR&nbsp;UNKNOWN</div>
         <div id="fleet-status-pill" class="fs-caution">&#9650; CAUTION &#8212; LOADING</div>
       </div>
@@ -3023,12 +3027,17 @@ function renderFleetLink() {
   function _flFreshCls(tsMs) {
     if (!tsMs) return "fl-ring-red";
     var s = (Date.now() - tsMs) / 1000;
-    if (s < 15)  return "";
-    if (s < 90)  return "fl-ring-amber";
+    if (s < 30)  return "";
+    if (s < 120) return "fl-ring-amber";
     return "fl-ring-red";
   }
   if (live.hl_ok)   _flTs.hl = Date.now();
   if (live.mexc_ok) _flTs.mx = Date.now();
+  (function(){
+    var dh=document.getElementById("fc-dot-hl"),dm=document.getElementById("fc-dot-mx");
+    if(dh){ dh.className="fc-dot "+(live.hl_ok   ? "fc-dot-hl" : "fc-dot-halt"); }
+    if(dm){ dm.className="fc-dot "+(live.mexc_ok  ? "fc-dot-mx" : "fc-dot-halt"); }
+  })();
   var hlOpen  = _flOpen(live.hl),  mxOpen  = _flOpen(live.mexc);
   var hlScans = _flScans(live.hl), mxScans = _flScans(live.mexc);
   var hlPnl   = _flPnl(live.hl),  mxPnl   = _flPnl(live.mexc);
