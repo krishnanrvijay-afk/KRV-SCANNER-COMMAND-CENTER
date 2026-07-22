@@ -4642,15 +4642,7 @@ function renderFleetConvergence() {
     var sub = "HL:" + hl_r + " MX:" + mx_r + "  vel:" + (velAvg * 100).toFixed(1) + "%"
             + (isTier1 ? "  ⚠ PROTECT THE FLOOR ACTIVE — TIER-1 EVENT" : "");
     convEl.className = "fcb-" + dir.toLowerCase() + (isTier1 ? " fcb-tier1" : "");
-    var _hPaused = false;  // informational only — single toggle controls everything
-    var _resetBtn = _hPaused
-      ? " <button class='fcb-reset-btn' onclick='resetDirHalt(\""
-        + dir.toLowerCase() + "\")'>&#8635; RESET " + dir + " PAUSE</button>"
-      : "";
-    convEl.innerHTML = "⚡ FLEET CONVERGENCE — " + dir
-      + " <span class='fcb-sub'>" + sub
-      + (_hPaused ? " · ⚠ " + dir + " PAUSED — tap to re-engage" : "")
-      + "</span>" + _resetBtn;
+    convEl.innerHTML = "⚡ FLEET CONVERGENCE — " + dir + " <span class='fcb-sub'>" + sub + "</span>";
     convEl.style.display = "block";
   } else {
     convEl.style.display = "none";
