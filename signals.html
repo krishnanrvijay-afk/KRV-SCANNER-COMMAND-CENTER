@@ -74,6 +74,10 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .vh-mode.live{color:var(--green)}
 .vh-mode.sim{color:var(--amber)}
 .vh-mode.init{color:#666}
+.regime-pill{font-size:8px;font-weight:700;letter-spacing:.12em;margin-top:3px;padding:1px 7px;border-radius:3px;border:1px solid;display:inline-block;line-height:1.6}
+.regime-pill.bull{color:#22c55e;border-color:rgba(34,197,94,.5);background:rgba(34,197,94,.08)}
+.regime-pill.bear{color:#ef4444;border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.08)}
+.regime-pill.ranging{color:#555;border-color:#333;background:transparent}
 
 
 
@@ -199,6 +203,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
           <div class="vh-scan" id="HL-scan-lbl">CONNECTING…</div>
           <div class="vh-pairs" id="HL-pairs-lbl">— PAIRS</div>
           <div class="vh-mode init" id="HL-mode-lbl">INIT</div>
+          <div class="regime-pill ranging" id="HL-regime-pill">—</div>
         </div>
       </div>
       <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
@@ -217,6 +222,7 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
           <div class="vh-scan" id="MEXC-scan-lbl">CONNECTING…</div>
           <div class="vh-pairs" id="MEXC-pairs-lbl">— PAIRS</div>
           <div class="vh-mode init" id="MEXC-mode-lbl">INIT</div>
+          <div class="regime-pill ranging" id="MEXC-regime-pill">—</div>
         </div>
       </div>
       <div class="beam-track"><div class="beam-p"></div><div class="beam-p beam-p2"></div></div>
@@ -459,7 +465,10 @@ function buildPipeBody(venue, pairs) {
         <div class="sn-title" id="${venue}-sig-title">EVALUATING…</div>
         <div class="sn-sub" id="${venue}-sig-sub"></div>
       </div>
-      <div class="sn-fl">→ FLEET LINK</div>
+      <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+        <div class="regime-pill ranging" id="${venue}-sn-regime">—</div>
+        <div class="sn-fl">→ FLEET LINK</div>
+      </div>
     </div>
   `;
 }
@@ -641,6 +650,26 @@ async function fetchLive() {
     liveMode = !!(liveData.hl_ok || liveData.mexc_ok);
 
     initColumnsFromLive();
+
+    /* Regime pills per venue */
+    {
+      const fc = liveData.fleet_convergence || {};
+      for (const [venue, regKey, j1hKey] of [
+          ['HL','hl_regime','hl_btc_j1h'],
+          ['MEXC','mx_regime','mx_btc_j1h']
+      ]) {
+        const rp  = document.getElementById(venue+'-regime-pill');
+        const sp  = document.getElementById(venue+'-sn-regime');
+        const regime = (fc[regKey] || 'RANGING');
+        const j1h    = fc[j1hKey] != null ? ' J1H='+fc[j1hKey] : '';
+        let cls, txt;
+        if (regime === 'BULL_TREND')      { cls='regime-pill bull';    txt='BULL TREND'+j1h; }
+        else if (regime === 'BEAR_TREND') { cls='regime-pill bear';    txt='BEAR TREND'+j1h; }
+        else                              { cls='regime-pill ranging'; txt='RANGING'+j1h; }
+        if (rp) { rp.className=cls; rp.textContent=txt; }
+        if (sp) { sp.className=cls; sp.textContent=txt; }
+      }
+    }
 
     /* Topbar mode pill */
     const pill  = document.getElementById('live-pill');
