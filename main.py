@@ -28,9 +28,9 @@ TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID   = int(os.environ.get("TELEGRAM_CHAT_ID", "0") or "0")
 TELEGRAM_ENABLED   = os.environ.get("TELEGRAM_ENABLED", "true").lower() == "true"
 
-HL_STATE_URL   = "https://bounce-scanner-deux-production-88de.up.railway.app/api/state"
-MEXC_STATE_URL  = "https://web-production-d03dd.up.railway.app/api/state"
-OKX_STATE_URL = os.environ.get("OKX_STATE_URL", "")
+HL_STATE_URL   = os.environ.get("HL_STATE_URL",   "https://bounce-scanner-deux-production-88de.up.railway.app/api/state")
+MEXC_STATE_URL = os.environ.get("MEXC_STATE_URL", "https://web-production-d03dd.up.railway.app/api/state")
+OKX_STATE_URL  = os.environ.get("OKX_STATE_URL",  "")
 
 COOKIE_NAME     = "aria_session"
 SESSION_MAX_AGE = 30 * 24 * 3600  # 30 days
