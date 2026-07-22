@@ -13,6 +13,7 @@
   --green:  #00e676;
   --red:    #ff4d4d;
   --amber:  #ffb300;
+  --okx:    #ec4899;
   --teal:   #22d3ee;
   --bg:     #000;
   --card:   #060606;
@@ -822,9 +823,9 @@ body {
     .fl-vessel.fl-hl .fl-v-callsign { color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-callsign { color:var(--mexc); }
     .fl-vessel.fl-byt .fl-v-callsign { color:var(--okx); }
-    .fl-v-fullname { font-size:8px; font-weight:700; letter-spacing:0.06em; color:var(--text); opacity:1; }
+    .fl-v-fullname { font-size:8px; font-weight:800; letter-spacing:0.06em; color:#94a3b8; }
     .fl-v-contact { margin-left:auto; text-align:right; }
-    .fl-v-contact-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:1; }
+    .fl-v-contact-label { font-size:7px; font-weight:800; letter-spacing:0.05em; color:#94a3b8; }
     .fl-v-contact-val { font-size:10px; font-weight:700; color:var(--green); }
     .fl-v-ecg { height:22px; margin-bottom:10px; position:relative; z-index:2; }
     .fl-v-ecg svg { width:100%; height:100%; }
@@ -835,8 +836,8 @@ body {
     @keyframes fl-ecgdraw { 0%{ stroke-dashoffset:120; } 50%{ stroke-dashoffset:0; } 100%{ stroke-dashoffset:-120; } }
     .fl-v-vitals { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; position:relative; z-index:2; }
     .fl-vit { display:flex; flex-direction:column; gap:2px; }
-    .fl-vit-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:1; }
-    .fl-vit-val { font-size:13px; font-weight:700; color:var(--text); }
+    .fl-vit-label { font-size:7px; font-weight:800; letter-spacing:0.05em; color:#cbd5e1; }
+    .fl-vit-val { font-size:13px; font-weight:800; color:#ffffff; }
     .fl-vit-val.pos { color:var(--green); }
     .fl-vit-val.neg { color:var(--red); }
     /* fl-beam-col removed — replaced by fl-center-pnl */
@@ -966,7 +967,7 @@ body {
     .fl-v-stats { display:flex; gap:6px; align-items:center; margin-top:8px; flex-wrap:wrap; padding-top:8px; border-top:1px solid rgba(255,255,255,0.07); }
     .fl-stat-wr  { font-size:11px; font-weight:700; }
     .fl-stat-sep { color:rgba(255,255,255,0.25); font-size:10px; font-weight:600; }
-    .fl-stat-txt { font-size:11px; font-weight:600; color:#ffffff; }
+    .fl-stat-txt { font-size:11px; font-weight:700; color:#e2e8f0; }
 
 
   /* ── OPERATIONS TAB ─────────────────────────────────────── */
