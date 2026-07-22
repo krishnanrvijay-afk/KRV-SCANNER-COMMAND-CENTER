@@ -41,9 +41,6 @@ _live: dict[str, Any] = {
     "updated_at": 0.0,
     "fleet_convergence": {},
 }
-# Tracks which directional halts were auto-written by fleet convergence (not manual).
-# Only releases a halt if this module set it — avoids clobbering manual pauses.
-_conv_halt: dict = {"long": False, "short": False}
 
 # ─────────────────────────── app & signer ───────────────────────────
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -118,32 +115,6 @@ async def _poll_live() -> None:
             "hl_avg_adx":    round(float(_hl_sm.get("avg_adx",   0.0)), 1),
             "mx_avg_adx":    round(float(_mx_sm.get("avg_adx",   0.0)), 1),
         }
-        # R5: fleet convergence auto-halt — write halt flags when both venues agree
-        # Uses _conv_halt to track what WE set so we never release a manual halt.
-        _fc = _live["fleet_convergence"]
-        global _conv_halt
-        # convergence SHORT active => block LONGs
-        if _fc.get("short") and not _conv_halt["long"]:
-            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": True}) and \
-               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": True}):
-                _conv_halt["long"] = True
-                print("[CONV] Auto-halted LONG — fleet convergence SHORT active", flush=True)
-        elif not _fc.get("short") and _conv_halt["long"]:
-            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": False}) and \
-               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": False}):
-                _conv_halt["long"] = False
-                print("[CONV] Auto-released LONG halt — fleet convergence SHORT cleared", flush=True)
-        # convergence LONG active => block SHORTs
-        if _fc.get("long") and not _conv_halt["short"]:
-            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": True}) and \
-               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": True}):
-                _conv_halt["short"] = True
-                print("[CONV] Auto-halted SHORT — fleet convergence LONG active", flush=True)
-        elif not _fc.get("long") and _conv_halt["short"]:
-            if await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": False}) and \
-               await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": False}):
-                _conv_halt["short"] = False
-                print("[CONV] Auto-released SHORT halt — fleet convergence LONG cleared", flush=True)
         _live["updated_at"] = time.time()
         await asyncio.sleep(5)   # scorecard live-state cache: 5s poll
 
@@ -1970,38 +1941,8 @@ async def api_lifecycle_candles(
 
 
 
-@app.post("/api/fleet/halt-long")
-async def fleet_halt_long_toggle(
-    request: Request,
-    body: dict = Body(...),
-) -> JSONResponse:
-    _require_auth(request)
-    halt = bool(body.get("halt", False))
-    _hl_ok = await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_long": halt})
-    _mx_ok = await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_long": halt})
-    return JSONResponse({
-        "halt_long": halt,
-        "hl_ok":  _hl_ok,
-        "mx_ok":  _mx_ok,
-        "status": "ok" if (_hl_ok and _mx_ok) else "partial",
-    })
 
 
-@app.post("/api/fleet/halt-short")
-async def fleet_halt_short_toggle(
-    request: Request,
-    body: dict = Body(...),
-) -> JSONResponse:
-    _require_auth(request)
-    halt = bool(body.get("halt", False))
-    _hl_ok = await _sb_patch("hl_scanner_state",   "id=eq.1", {"halt_short": halt})
-    _mx_ok = await _sb_patch("mexc_scanner_state", "id=eq.1", {"halt_short": halt})
-    return JSONResponse({
-        "halt_short": halt,
-        "hl_ok":  _hl_ok,
-        "mx_ok":  _mx_ok,
-        "status": "ok" if (_hl_ok and _mx_ok) else "partial",
-    })
 
 
 @app.post("/api/fleet/halt")
@@ -2037,28 +1978,15 @@ async def fleet_status(
 ) -> JSONResponse:
     _require_auth(request)
     hl_rows, mx_rows = await asyncio.gather(
-        _sb_fetch("hl_scanner_state",   {"id": "eq.1", "select": "fleet_halt,halt_long,halt_short"}),
-        _sb_fetch("mexc_scanner_state", {"id": "eq.1", "select": "fleet_halt,halt_long,halt_short"}),
+        _sb_fetch("hl_scanner_state",   {"id": "eq.1", "select": "fleet_halt"}),
+        _sb_fetch("mexc_scanner_state", {"id": "eq.1", "select": "fleet_halt"}),
     )
-    def _extract(rows: list) -> dict:
-        if not rows:
-            return {"fleet_halt": None, "halt_long": None, "halt_short": None}
-        r = rows[0]
-        return {
-            "fleet_halt":  r.get("fleet_halt"),
-            "halt_long":   r.get("halt_long"),
-            "halt_short":  r.get("halt_short"),
-        }
-    hl = _extract(hl_rows)
-    mx = _extract(mx_rows)
-    hl_fh = hl["fleet_halt"]
-    mx_fh = mx["fleet_halt"]
+    hl_fh = hl_rows[0].get("fleet_halt") if hl_rows else None
+    mx_fh = mx_rows[0].get("fleet_halt") if mx_rows else None
     agreed = (hl_fh is not None and mx_fh is not None and hl_fh == mx_fh)
     return JSONResponse({
-        "hl":          hl,
-        "mexc":        mx,
-        "agreed":      agreed,
-        "fleet_halt":  hl_fh,
+        "fleet_halt": hl_fh,
+        "agreed":     agreed,
     })
 
 
