@@ -779,30 +779,35 @@ body {
     }
     .fl-live-dot { width:5px; height:5px; border-radius:50%; background:var(--green); animation:fl-livedot 1.4s ease-in-out infinite; }
     @keyframes fl-livedot { 0%,100%{ opacity:1; box-shadow:0 0 4px 1px rgba(0,230,118,0.8); } 50%{ opacity:0.4; box-shadow:0 0 2px 0 rgba(0,230,118,0.3); } }
-    .fl-grid { display:grid; grid-template-columns:1fr 110px 1fr; align-items:center; gap:8px; position:relative; z-index:2; }
+    .fl-grid { display:grid; grid-template-columns:1fr 80px 1fr 80px 1fr; align-items:center; gap:8px; position:relative; z-index:2; }
     .fl-vessel { position:relative; background:#0a0a0c; border-radius:12px; padding:14px 16px; overflow:hidden; }
     .fl-vessel.fl-hl { border:1px solid rgba(179,136,255,0.3); }
     .fl-vessel.fl-mx { border:1px solid rgba(255,145,0,0.3); }
+    .fl-vessel.fl-byt { border:1px solid rgba(236,72,153,0.3); }
     .fl-vessel::after { content:""; position:absolute; top:0; left:0; right:0; height:60px; pointer-events:none; }
     .fl-vessel.fl-hl::after { background:radial-gradient(ellipse at 20% 0%, rgba(179,136,255,0.12), transparent 70%); }
     .fl-vessel.fl-mx::after { background:radial-gradient(ellipse at 80% 0%, rgba(255,145,0,0.12), transparent 70%); }
+    .fl-vessel.fl-byt::after { background:radial-gradient(ellipse at 80% 0%, rgba(236,72,153,0.12), transparent 70%); }
     .fl-v-top { display:flex; align-items:center; gap:9px; margin-bottom:10px; position:relative; z-index:2; }
     .fl-v-ring { position:relative; width:60px; height:60px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .fl-v-ring-pulse { position:absolute; inset:0; border-radius:50%; border:1.5px solid currentColor; animation:fl-ringpulse 1.8s ease-out infinite; }
     .fl-vessel.fl-hl .fl-v-ring-pulse { color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-ring-pulse { color:var(--mexc); }
+    .fl-vessel.fl-byt .fl-v-ring-pulse { color:var(--okx); }
     .fl-vessel.fl-ring-amber .fl-v-ring-pulse { color:var(--amber) !important; animation-duration:3s; }
     .fl-vessel.fl-ring-red   .fl-v-ring-pulse { color:var(--red)   !important; animation-duration:6s; }
     @keyframes fl-ringpulse { 0%{ transform:scale(0.5); opacity:0.9; } 100%{ transform:scale(1.6); opacity:0; } }
     .fl-v-ring-core { width:18px; height:18px; border-radius:50%; box-shadow:0 0 16px 4px currentColor; }
     .fl-vessel.fl-hl .fl-v-ring-core { background:var(--hl); color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-ring-core { background:var(--mexc); color:var(--mexc); }
+    .fl-vessel.fl-byt .fl-v-ring-core { background:var(--okx); color:var(--okx); }
     .fl-vessel.fl-ring-amber .fl-v-ring-core { background:var(--amber) !important; color:var(--amber) !important; }
     .fl-vessel.fl-ring-red   .fl-v-ring-core { background:var(--red)   !important; color:var(--red)   !important; }
     .fl-v-id { display:flex; flex-direction:column; gap:1px; }
     .fl-v-callsign { font-size:16px; letter-spacing:0.03em; font-family:var(--display); line-height:1; }
     .fl-vessel.fl-hl .fl-v-callsign { color:var(--hl); }
     .fl-vessel.fl-mx .fl-v-callsign { color:var(--mexc); }
+    .fl-vessel.fl-byt .fl-v-callsign { color:var(--okx); }
     .fl-v-fullname { font-size:8px; font-weight:700; letter-spacing:0.06em; color:var(--text); opacity:1; }
     .fl-v-contact { margin-left:auto; text-align:right; }
     .fl-v-contact-label { font-size:7px; font-weight:700; letter-spacing:0.05em; color:var(--text); opacity:1; }
@@ -812,6 +817,7 @@ body {
     .fl-v-ecg-path { fill:none; stroke-width:1.5; stroke-dasharray:120; stroke-dashoffset:120; animation:fl-ecgdraw 2.4s linear infinite; }
     .fl-vessel.fl-hl .fl-v-ecg-path { stroke:var(--hl); }
     .fl-vessel.fl-mx .fl-v-ecg-path { stroke:var(--mexc); }
+    .fl-vessel.fl-byt .fl-v-ecg-path { stroke:var(--okx); }
     @keyframes fl-ecgdraw { 0%{ stroke-dashoffset:120; } 50%{ stroke-dashoffset:0; } 100%{ stroke-dashoffset:-120; } }
     .fl-v-vitals { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; position:relative; z-index:2; }
     .fl-vit { display:flex; flex-direction:column; gap:2px; }
@@ -1830,7 +1836,7 @@ body {
           <div class="fl-beam-particle p2"></div>
           <div class="fl-beam-particle p3"></div>
         </div>
-        <div class="fl-beam-label">BYBIT LINK</div>
+        <div class="fl-beam-label">OKX LINK</div>
         <div class="fl-beam-pnl" id="fl-byt-beam-pnl">&#x2014;</div>
         <div class="fl-beam-secondary" id="fl-byt-beam-secondary">OPEN &#x2014;</div>
       </div>
@@ -1838,8 +1844,8 @@ body {
         <div class="fl-v-top">
           <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
           <div class="fl-v-id">
-            <span class="fl-v-callsign">BYBIT-1</span>
-            <span class="fl-v-fullname">BYBIT FUTURES</span>
+            <span class="fl-v-callsign">OKX-1</span>
+            <span class="fl-v-fullname">OKX FUTURES</span>
           </div>
           <div class="fl-v-regime ranging" id="fl-byt-regime">—</div>
           <div class="fl-v-contact">
@@ -3107,9 +3113,9 @@ function renderFleetLink() {
   var tagEl = document.getElementById("fl-live-tag");
   if (txtEl && tagEl) {
     var both = live.hl_ok && live.mexc_ok;
-    var bybitActive = !!live.bybit_ok;
-    var one  = live.hl_ok || live.mexc_ok || bybitActive;
-    var activeCount = (live.hl_ok?1:0)+(live.mexc_ok?1:0)+(bybitActive?1:0);
+    var okxActive = !!live.okx_ok;
+    var one  = live.hl_ok || live.mexc_ok || okxActive;
+    var activeCount = (live.hl_ok?1:0)+(live.mexc_ok?1:0)+(okxActive?1:0);
     txtEl.textContent = activeCount===3 ? "ALL VESSELS REPORTING" : activeCount===2 ? "2 VESSELS REPORTING" : activeCount===1 ? "1 VESSEL REPORTING" : "NO CONTACT";
     var gc  = both ? "var(--green)" : one ? "var(--amber)" : "var(--red)";
     var gbd = both ? "rgba(0,230,118,0.3)"  : one ? "rgba(255,179,0,0.3)"  : "rgba(255,77,77,0.3)";
@@ -3144,7 +3150,7 @@ function renderFleetLink() {
   _setRegime('fl-mx-regime', _fc2.mx_regime, _fc2.mx_btc_j1h);
   _setRegime('fl-byt-regime', _fc2.by_regime, _fc2.by_btc_j1h);
   // -- Bybit vessel vitals --
-  var bytV = live.bybit;
+  var bytV = live.okx;
   var bytPnl = bytV ? (_flPnl ? _flPnl(bytV) : null) : null;
   var bpEl2 = document.getElementById('fl-byt-pnl');
   if (bpEl2) { bpEl2.textContent = _flFmt(bytPnl); bpEl2.className = 'fl-vit-val' + (bytPnl!=null?(bytPnl>=0?' pos':' neg'):''); }
@@ -3156,13 +3162,13 @@ function renderFleetLink() {
   // Vessel freshness ring
   var bytVEl = document.getElementById('fl-vessel-byt');
   if (bytVEl) {
-    if (live.bybit_ok) _flTs.byt = Date.now();
+    if (live.okx_ok) _flTs.byt = Date.now();
     bytVEl.classList.remove('fl-ring-amber','fl-ring-red');
     var bc = _flFreshCls(_flTs.byt); if(bc) bytVEl.classList.add(bc);
   }
   // Analytics stats
   if (typeof analytics !== 'undefined' && analytics) {
-    var _aByt = analytics.bybit || {};
+    var _aByt = analytics.okx || {};
     var bwp = Math.round((_aByt.win_rate || 0) * 100);
     el2=document.getElementById('fl-byt-wr');      if(el2){el2.textContent='WR '+bwp+'%'; el2.style.color=_flWrCol ? _flWrCol(bwp) : '#fff';}
     el2=document.getElementById('fl-byt-signals'); if(el2) el2.textContent=(_aByt.trade_count||0)+' signals';
