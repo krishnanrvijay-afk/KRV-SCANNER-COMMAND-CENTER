@@ -779,7 +779,21 @@ body {
     }
     .fl-live-dot { width:5px; height:5px; border-radius:50%; background:var(--green); animation:fl-livedot 1.4s ease-in-out infinite; }
     @keyframes fl-livedot { 0%,100%{ opacity:1; box-shadow:0 0 4px 1px rgba(0,230,118,0.8); } 50%{ opacity:0.4; box-shadow:0 0 2px 0 rgba(0,230,118,0.3); } }
-    .fl-grid { display:grid; grid-template-columns:1fr 80px 1fr 80px 1fr; align-items:center; gap:8px; position:relative; z-index:2; }
+    .fl-grid { display:grid; grid-template-columns:1fr 204px 1fr; grid-template-rows:auto auto; gap:10px; position:relative; z-index:2; }
+    .fl-center-pnl { grid-column:2; grid-row:1/span 2; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:20; }
+    .fl-center-card { border:1px solid rgba(74,222,128,0.25); background:radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.10), transparent 70%), #07070f; border-radius:14px; padding:18px 14px; display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; animation:center-pulse 3s ease-in-out infinite; }
+    .fl-center-dot  { width:8px; height:8px; border-radius:50%; background:#4ade80; box-shadow:0 0 10px #4ade80; }
+    .fl-center-lbl  { font-size:8px; font-weight:700; letter-spacing:0.18em; color:#475569; }
+    .fl-center-total { font-size:26px; font-family:var(--display); line-height:1; color:#4ade80; text-shadow:0 0 20px rgba(74,222,128,0.55); }
+    .fl-center-total.neg { color:#ef4444; text-shadow:0 0 20px rgba(239,68,68,0.55); }
+    .fl-center-div  { width:100%; height:1px; background:rgba(255,255,255,0.06); margin:2px 0; }
+    .fl-center-row  { width:100%; display:flex; justify-content:space-between; align-items:center; }
+    .fl-center-vname { font-size:8px; font-weight:700; letter-spacing:0.14em; }
+    .fl-center-vpnl  { font-size:9px; font-weight:700; font-family:monospace; color:#4ade80; }
+    .fl-center-vpnl.neg { color:#ef4444; }
+    .fl-slot4 { border:1px dashed rgba(71,85,105,0.35); background:rgba(15,23,42,0.4); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:14px; }
+    .fl-beam-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:10; overflow:visible; }
+    @keyframes center-pulse { 0%,100%{box-shadow:0 0 12px rgba(74,222,128,0.12),0 0 0 1px rgba(74,222,128,0.15) inset;}50%{box-shadow:0 0 28px rgba(74,222,128,0.30),0 0 0 1px rgba(74,222,128,0.28) inset;} }
     .fl-vessel { position:relative; background:#0a0a0c; border-radius:12px; padding:14px 16px; overflow:hidden; }
     .fl-vessel.fl-hl { border:1px solid rgba(179,136,255,0.3); }
     .fl-vessel.fl-mx { border:1px solid rgba(255,145,0,0.3); }
@@ -825,7 +839,7 @@ body {
     .fl-vit-val { font-size:13px; font-weight:700; color:var(--text); }
     .fl-vit-val.pos { color:var(--green); }
     .fl-vit-val.neg { color:var(--red); }
-    .fl-beam-col { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; position:relative; }
+    /* fl-beam-col removed — replaced by fl-center-pnl */
     .fl-beam-track { position:relative; width:100%; height:3px; background:linear-gradient(90deg,var(--hl),var(--teal),var(--mexc)); border-radius:2px; opacity:0.35; margin-bottom:8px; }
     .fl-beam-particle { position:absolute; top:50%; width:6px; height:6px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px 3px rgba(34,211,238,0.8); transform:translateY(-50%); animation:fl-travel 2.2s linear infinite; }
     .fl-beam-particle.p2 { animation-delay:.7s; background:var(--hl); box-shadow:0 0 8px 3px rgba(179,136,255,0.8); }
@@ -843,8 +857,8 @@ body {
     .fl-foot-val.pos { color:var(--green); }
     .fl-foot-val.neg { color:var(--red); }
     @media (max-width:600px) {
-      .fl-grid { grid-template-columns:1fr; }
-      .fl-beam-col { flex-direction:row; gap:8px; padding:8px 0; }
+      .fl-grid { grid-template-columns:1fr; grid-template-rows:auto; }
+      .fl-center-pnl { grid-column:1; grid-row:auto; }
       .fl-beam-track { width:60px; margin-bottom:0; }
     }
     .log-summary { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:10px; padding:10px 14px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:4px; }
@@ -1757,15 +1771,31 @@ body {
       <span class="fl-title">FLEET LINK</span>
       <div class="fl-live-tag" id="fl-live-tag"><span class="fl-live-dot"></span><span id="fl-live-text">BOTH VESSELS REPORTING</span></div>
     </div>
-    <div class="fl-grid">
-      <div class="fl-vessel fl-hl" id="fl-vessel-hl">
+    <div class="fl-grid" id="fl-grid" style="position:relative">
+      <!-- SVG animated beams overlay -->
+      <svg class="fl-beam-svg" id="fl-beam-svg" aria-hidden="true">
+        <defs>
+          <filter id="fglow-hl"  x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="fglow-mx"  x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="fglow-byt" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <path id="fl-bp-hl"  fill="none" stroke="#b388ff" stroke-width="1" opacity="0.18" stroke-dasharray="4 6"/>
+        <circle id="fl-bd-hl"  r="3.5" fill="#b388ff" opacity="0" filter="url(#fglow-hl)"/>
+        <path id="fl-bp-mx"  fill="none" stroke="#ff9100" stroke-width="1" opacity="0.18" stroke-dasharray="4 6"/>
+        <circle id="fl-bd-mx"  r="3.5" fill="#ff9100" opacity="0" filter="url(#fglow-mx)"/>
+        <path id="fl-bp-byt" fill="none" stroke="#ec4899" stroke-width="1" opacity="0.18" stroke-dasharray="4 6"/>
+        <circle id="fl-bd-byt" r="3.5" fill="#ec4899" opacity="0" filter="url(#fglow-byt)"/>
+      </svg>
+
+      <!-- TL: HL-1 -->
+      <div class="fl-vessel fl-hl" id="fl-vessel-hl" style="grid-column:1;grid-row:1">
         <div class="fl-v-top">
           <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
           <div class="fl-v-id">
             <span class="fl-v-callsign">HL-1</span>
             <span class="fl-v-fullname">HYPERLIQUID</span>
           </div>
-          <div class="fl-v-regime ranging" id="fl-hl-regime">—</div>
+          <div class="fl-v-regime ranging" id="fl-hl-regime">&#x2014;</div>
           <div class="fl-v-contact">
             <div class="fl-v-contact-label">LAST CONTACT</div>
             <div class="fl-v-contact-val" id="fl-contact-hl">&#x2014;</div>
@@ -1789,24 +1819,44 @@ body {
           <span class="fl-stat-txt" id="fl-hl-closed">-- closed</span>
         </div>
       </div>
-      <div class="fl-beam-col">
-        <div class="fl-beam-track">
-          <div class="fl-beam-particle"></div>
-          <div class="fl-beam-particle p2"></div>
-          <div class="fl-beam-particle p3"></div>
+
+      <!-- CENTER: Combined Fleet P&L — spans both rows -->
+      <div class="fl-center-pnl" style="grid-column:2;grid-row:1/span 2">
+        <div class="fl-center-card">
+          <div class="fl-center-dot"></div>
+          <div class="fl-center-lbl">COMBINED</div>
+          <div class="fl-center-lbl">DAILY P&amp;L</div>
+          <div class="fl-center-total pos" id="fl-center-total">&#x2014;</div>
+          <div class="fl-center-div"></div>
+          <div class="fl-center-row">
+            <span class="fl-center-vname" style="color:var(--hl)">HL-1</span>
+            <span class="fl-center-vpnl" id="fl-center-hl-pnl">&#x2014;</span>
+          </div>
+          <div class="fl-center-row">
+            <span class="fl-center-vname" style="color:var(--mexc)">MEXC-1</span>
+            <span class="fl-center-vpnl" id="fl-center-mx-pnl">&#x2014;</span>
+          </div>
+          <div class="fl-center-row">
+            <span class="fl-center-vname" style="color:var(--okx)">OKX-1</span>
+            <span class="fl-center-vpnl" id="fl-center-byt-pnl">&#x2014;</span>
+          </div>
+          <div class="fl-center-row" style="border-top:1px solid rgba(255,255,255,0.05);padding-top:4px;margin-top:2px">
+            <span class="fl-center-vname" style="color:#334155">SLOT-4</span>
+            <span class="fl-center-vpnl" style="color:#334155">&#x2014;</span>
+          </div>
+          <div class="fl-center-dot" style="margin-top:2px"></div>
         </div>
-        <div class="fl-beam-label">COMBINED DAILY P&amp;L</div>
-        <div class="fl-beam-pnl" id="fl-beam-pnl">&#x2014;</div>
-        <div class="fl-beam-secondary" id="fl-beam-secondary">OPEN &#x2014; &middot; SCANS &#x2014;</div>
       </div>
-      <div class="fl-vessel fl-mx" id="fl-vessel-mx">
+
+      <!-- TR: MEXC-1 -->
+      <div class="fl-vessel fl-mx" id="fl-vessel-mx" style="grid-column:3;grid-row:1">
         <div class="fl-v-top">
           <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
           <div class="fl-v-id">
             <span class="fl-v-callsign">MEXC-1</span>
             <span class="fl-v-fullname">MEXC FUTURES</span>
           </div>
-          <div class="fl-v-regime ranging" id="fl-mx-regime">—</div>
+          <div class="fl-v-regime ranging" id="fl-mx-regime">&#x2014;</div>
           <div class="fl-v-contact">
             <div class="fl-v-contact-label">LAST CONTACT</div>
             <div class="fl-v-contact-val" id="fl-contact-mx">&#x2014;</div>
@@ -1830,24 +1880,16 @@ body {
           <span class="fl-stat-txt" id="fl-mx-closed">-- closed</span>
         </div>
       </div>
-      <div class="fl-beam-col">
-        <div class="fl-beam-track">
-          <div class="fl-beam-particle"></div>
-          <div class="fl-beam-particle p2"></div>
-          <div class="fl-beam-particle p3"></div>
-        </div>
-        <div class="fl-beam-label">OKX LINK</div>
-        <div class="fl-beam-pnl" id="fl-byt-beam-pnl">&#x2014;</div>
-        <div class="fl-beam-secondary" id="fl-byt-beam-secondary">OPEN &#x2014;</div>
-      </div>
-      <div class="fl-vessel fl-byt" id="fl-vessel-byt">
+
+      <!-- BL: OKX-1 -->
+      <div class="fl-vessel fl-byt" id="fl-vessel-byt" style="grid-column:1;grid-row:2">
         <div class="fl-v-top">
           <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
           <div class="fl-v-id">
             <span class="fl-v-callsign">OKX-1</span>
             <span class="fl-v-fullname">OKX FUTURES</span>
           </div>
-          <div class="fl-v-regime ranging" id="fl-byt-regime">—</div>
+          <div class="fl-v-regime ranging" id="fl-byt-regime">&#x2014;</div>
           <div class="fl-v-contact">
             <div class="fl-v-contact-label">LAST CONTACT</div>
             <div class="fl-v-contact-val" id="fl-contact-byt">&#x2014;</div>
@@ -1870,6 +1912,15 @@ body {
           <span class="fl-stat-sep">&middot;</span>
           <span class="fl-stat-txt" id="fl-byt-closed">-- closed</span>
         </div>
+      </div>
+
+      <!-- BR: Slot 4 placeholder -->
+      <div class="fl-slot4" style="grid-column:3;grid-row:2">
+        <div style="width:36px;height:36px;border-radius:50%;border:2px dashed rgba(71,85,105,0.35);display:flex;align-items:center;justify-content:center">
+          <span style="color:#475569;font-size:20px;line-height:1">+</span>
+        </div>
+        <span style="font-size:9px;font-weight:700;color:#475569;letter-spacing:0.14em">SLOT 4</span>
+        <span style="font-size:8px;color:#334155;letter-spacing:0.1em">FUTURE VENUE</span>
       </div>
     </div>
     <div class="pnl-rail" style="margin-top:12px">
@@ -3045,6 +3096,85 @@ function htcRefresh() {
   htcRenderPositions();
   // signals rendered in lifecycle/ops tab
 }
+// -- FLEET LINK helpers --
+var _flCountUpRAF = {};
+function _flCountUp(el, target, dur) {
+  var key = el.id || "x";
+  if (_flCountUpRAF[key]) cancelAnimationFrame(_flCountUpRAF[key]);
+  var start = null, from = parseFloat(el.dataset.target || 0) || 0;
+  el.dataset.target = target;
+  function step(ts) {
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / dur, 1);
+    var ease = 1 - Math.pow(1 - p, 3);
+    var cur = from + (target - from) * ease;
+    var sign = cur >= 0 ? "+" : "-"; el.textContent = sign + "$" + Math.abs(cur).toFixed(2);
+    if (p < 1) _flCountUpRAF[key] = requestAnimationFrame(step);
+  }
+  _flCountUpRAF[key] = requestAnimationFrame(step);
+}
+
+// Beam SVG: compute curve paths from DOM rects and animate dots along them
+var _flBeamAnims = {};
+function _flUpdateBeams() {
+  var grid = document.getElementById("fl-grid");
+  var svg  = document.getElementById("fl-beam-svg");
+  var hlEl  = document.getElementById("fl-vessel-hl");
+  var mxEl  = document.getElementById("fl-vessel-mx");
+  var bytEl = document.getElementById("fl-vessel-byt");
+  var ctrEl = document.querySelector(".fl-center-card");
+  if (!grid || !svg || !hlEl || !mxEl || !bytEl || !ctrEl) return;
+  var gr  = grid.getBoundingClientRect();
+  function _midRight(el) {
+    var r = el.getBoundingClientRect();
+    return { x: r.right - gr.left, y: r.top + r.height/2 - gr.top };
+  }
+  function _midLeft(el) {
+    var r = el.getBoundingClientRect();
+    return { x: r.left - gr.left, y: r.top + r.height/2 - gr.top };
+  }
+  var cr  = ctrEl.getBoundingClientRect();
+  var cL  = cr.left  - gr.left;
+  var cR  = cr.right - gr.left;
+  var cMY = cr.top + cr.height/2 - gr.top;
+  var hl  = _midRight(hlEl);
+  var mx  = _midLeft(mxEl);
+  var byt = _midRight(bytEl);
+  var beams = [
+    { id:"hl",  x1:hl.x,  y1:hl.y,  x2:cL,  y2:cMY - 28, color:"#b388ff" },
+    { id:"mx",  x1:mx.x,  y1:mx.y,  x2:cR,  y2:cMY - 28, color:"#ff9100" },
+    { id:"byt", x1:byt.x, y1:byt.y, x2:cL,  y2:cMY + 28, color:"#ec4899" },
+  ];
+  beams.forEach(function(b) {
+    var mx2 = (b.x1 + b.x2) / 2;
+    var d   = "M"+b.x1+","+b.y1+" Q"+mx2+","+b.y1+" "+b.x2+","+b.y2;
+    var pathEl = document.getElementById("fl-bp-"+b.id);
+    var dotEl  = document.getElementById("fl-bd-"+b.id);
+    if (pathEl) pathEl.setAttribute("d", d);
+    if (!dotEl) return;
+    if (_flBeamAnims[b.id]) return; // already running
+    var len = pathEl ? (pathEl.getTotalLength ? pathEl.getTotalLength() : 300) : 300;
+    var dur = 1800 + (b.id==="mx" ? 600 : b.id==="byt" ? 1200 : 0);
+    var startT = null, delay = (b.id==="hl" ? 0 : b.id==="mx" ? 600 : 1200);
+    function anim(ts) {
+      if (!startT) startT = ts;
+      var elapsed = ts - startT - delay;
+      if (elapsed < 0) { _flBeamAnims[b.id] = requestAnimationFrame(anim); return; }
+      var t = (elapsed % dur) / dur;
+      var ease = t < 0.1 ? t/0.1 : t > 0.85 ? (1-t)/0.15 : 1;
+      dotEl.setAttribute("opacity", String(ease * 0.9));
+      if (pathEl && pathEl.getPointAtLength) {
+        var pt = pathEl.getPointAtLength(t * pathEl.getTotalLength());
+        dotEl.setAttribute("cx", pt.x); dotEl.setAttribute("cy", pt.y);
+      }
+      _flBeamAnims[b.id] = requestAnimationFrame(anim);
+    }
+    _flBeamAnims[b.id] = requestAnimationFrame(anim);
+  });
+}
+// Recompute beam paths on resize
+window.addEventListener("resize", function() { _flBeamAnims = {}; _flUpdateBeams(); });
+
 // -- FLEET LINK render --
 function renderFleetLink() {
   if (!live) return;
@@ -3102,12 +3232,30 @@ function renderFleetLink() {
   el=document.getElementById("fl-mx-open");   if(el) el.textContent=live.mexc ? mxOpen  : "—";
   el=document.getElementById("fl-hl-scans");  if(el) el.textContent=live.hl   ? hlScans : "—";
   el=document.getElementById("fl-mx-scans");  if(el) el.textContent=live.mexc ? mxScans : "—";
-  var flPnl = (hlPnl!=null||mxPnl!=null) ? (hlPnl||0)+(mxPnl||0) : null;
-  var bpEl=document.getElementById("fl-beam-pnl");
-  if(bpEl){bpEl.textContent=_flFmt(flPnl);bpEl.className="fl-beam-pnl"+(flPnl!=null?(flPnl>=0?" pos":" neg"):"");}
-  var bsEl=document.getElementById("fl-beam-secondary");
-  if(bsEl) bsEl.textContent="OPEN "+(hlOpen+mxOpen)+" · SCANS "+(hlScans+mxScans);
-  _flCombinedPnl=flPnl;
+  var bytV2 = live.okx;
+  var bytPnl2 = bytV2 ? _flPnl(bytV2) : null;
+  var flPnl = [hlPnl, mxPnl, bytPnl2].reduce(function(s,v){ return v!=null ? s+v : s; }, null);
+  // Centre panel total
+  var ctEl = document.getElementById("fl-center-total");
+  if (ctEl) {
+    if (flPnl != null) {
+      _flCountUp(ctEl, flPnl, 1000);
+      ctEl.className = "fl-center-total" + (flPnl >= 0 ? " pos" : " neg");
+    } else { ctEl.textContent = "—"; ctEl.className = "fl-center-total pos"; }
+  }
+  // Per-venue rows in centre panel
+  function _setCtrPnl(elId, v) {
+    var e = document.getElementById(elId);
+    if (!e) return;
+    e.textContent = _flFmt(v);
+    e.className = "fl-center-vpnl" + (v!=null?(v>=0?"":" neg"):"");
+  }
+  _setCtrPnl("fl-center-hl-pnl",  hlPnl);
+  _setCtrPnl("fl-center-mx-pnl",  mxPnl);
+  _setCtrPnl("fl-center-byt-pnl", bytPnl2);
+  _flCombinedPnl = flPnl;
+  // Beam SVG animation
+  _flUpdateBeams();
 
   var txtEl = document.getElementById("fl-live-text");
   var tagEl = document.getElementById("fl-live-tag");
@@ -3183,8 +3331,9 @@ setInterval(function() {
     if (s < 3600) return Math.floor(s/60) + "m ago";
     return Math.floor(s/3600) + "h ago";
   }
-  var h=document.getElementById("fl-contact-hl"); if(h) h.textContent=_flRel(_flTs.hl);
-  var m=document.getElementById("fl-contact-mx"); if(m) m.textContent=_flRel(_flTs.mx);
+  var h=document.getElementById("fl-contact-hl");  if(h) h.textContent=_flRel(_flTs.hl);
+  var m=document.getElementById("fl-contact-mx");  if(m) m.textContent=_flRel(_flTs.mx);
+  var b=document.getElementById("fl-contact-byt"); if(b) b.textContent=_flRel(_flTs.byt);
 }, 1000);
 
 // ── B. Fleet ──
