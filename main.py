@@ -28,9 +28,15 @@ TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID   = int(os.environ.get("TELEGRAM_CHAT_ID", "0") or "0")
 TELEGRAM_ENABLED   = os.environ.get("TELEGRAM_ENABLED", "true").lower() == "true"
 
-HL_STATE_URL   = os.environ.get("HL_STATE_URL",   "")
-MEXC_STATE_URL = os.environ.get("MEXC_STATE_URL", "")
-OKX_STATE_URL  = os.environ.get("OKX_STATE_URL",  "")
+def _norm_state_url(u: str) -> str:
+    u = u.strip().rstrip("/")
+    if u and not u.endswith("/api/state"):
+        u += "/api/state"
+    return u
+
+HL_STATE_URL   = _norm_state_url(os.environ.get("HL_STATE_URL",   ""))
+MEXC_STATE_URL = _norm_state_url(os.environ.get("MEXC_STATE_URL", ""))
+OKX_STATE_URL  = _norm_state_url(os.environ.get("OKX_STATE_URL",  ""))
 
 COOKIE_NAME     = "aria_session"
 SESSION_MAX_AGE = 30 * 24 * 3600  # 30 days
