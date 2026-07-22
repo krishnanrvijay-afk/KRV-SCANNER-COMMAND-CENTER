@@ -28,8 +28,8 @@ TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID   = int(os.environ.get("TELEGRAM_CHAT_ID", "0") or "0")
 TELEGRAM_ENABLED   = os.environ.get("TELEGRAM_ENABLED", "true").lower() == "true"
 
-HL_STATE_URL   = os.environ.get("HL_STATE_URL",   "https://bounce-scanner-deux-production-88de.up.railway.app/api/state")
-MEXC_STATE_URL = os.environ.get("MEXC_STATE_URL", "https://web-production-d03dd.up.railway.app/api/state")
+HL_STATE_URL   = os.environ.get("HL_STATE_URL",   "")
+MEXC_STATE_URL = os.environ.get("MEXC_STATE_URL", "")
 OKX_STATE_URL  = os.environ.get("OKX_STATE_URL",  "")
 
 COOKIE_NAME     = "aria_session"
@@ -71,7 +71,7 @@ def _require_auth(request: Request) -> None:
 async def _poll_live() -> None:
     while True:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            for key, url in [("hl", HL_STATE_URL), ("mexc", MEXC_STATE_URL)] + ([("okx", OKX_STATE_URL)] if OKX_STATE_URL else []):
+            for key, url in [(k, u) for k, u in [("hl", HL_STATE_URL), ("mexc", MEXC_STATE_URL), ("okx", OKX_STATE_URL)] if u]:
                 try:
                     r = await client.get(url)
                     r.raise_for_status()
