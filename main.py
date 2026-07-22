@@ -41,6 +41,7 @@ _live: dict[str, Any] = {
     "updated_at": 0.0,
     "fleet_convergence": {},
 }
+_vls:  dict[str, Any] = {}    # venue_live_state cache — Supabase, refreshed every 30s
 
 # ─────────────────────────── app & signer ───────────────────────────
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -104,8 +105,12 @@ async def _poll_live() -> None:
             "short":         bool(_hl_sm.get("fleet_convergence_short") and _mx_sm.get("fleet_convergence_short")),
             "long":          bool(_hl_sm.get("fleet_convergence_long")  and _mx_sm.get("fleet_convergence_long")),
             "exit_signal":   bool(_hl_sm.get("fleet_exit_signal")       or  _mx_sm.get("fleet_exit_signal")),
-            "hl_regime":     _hl_sm.get("regime",     "NORMAL"),
-            "mx_regime":     _mx_sm.get("regime",     "NORMAL"),
+            "hl_regime":           _vls.get("HL",   {}).get("regime",             "RANGING"),
+            "mx_regime":           _vls.get("MEXC", {}).get("regime",             "RANGING"),
+            "hl_regime_confidence": _vls.get("HL",   {}).get("regime_confidence",   "—"),
+            "mx_regime_confidence": _vls.get("MEXC", {}).get("regime_confidence",   "—"),
+            "hl_btc_j1h":          round(float(_vls.get("HL",   {}).get("btc_j1h", 50.0)), 1),
+            "mx_btc_j1h":          round(float(_vls.get("MEXC", {}).get("btc_j1h", 50.0)), 1),
             "hl_sync_vel":   round(float(_hl_sm.get("sync_vel",  0.0)), 4),
             "mx_sync_vel":   round(float(_mx_sm.get("sync_vel",  0.0)), 4),
             "hl_breadth_dn": round(float(_hl_sm.get("breadth_dn", 0.0)), 2),
@@ -116,6 +121,16 @@ async def _poll_live() -> None:
             "mx_avg_adx":    round(float(_mx_sm.get("avg_adx",   0.0)), 1),
         }
         _live["updated_at"] = time.time()
+
+        # -- venue_live_state refresh (Supabase) every ~30s (every 6th 5s tick) --
+        _poll_live._vls_tick = getattr(_poll_live, "_vls_tick", 0) + 1
+        if _poll_live._vls_tick % 6 == 1:
+            _vls_rows = await _sb_fetch("venue_live_state")
+            for _vls_row in _vls_rows:
+                _v = _vls_row.get("venue", "")
+                if _v:
+                    _vls[_v] = _vls_row
+
         await asyncio.sleep(5)   # scorecard live-state cache: 5s poll
 
 @app.on_event("startup")
@@ -771,6 +786,15 @@ async def api_live(request: Request) -> JSONResponse:
         "updated_at":        _live["updated_at"],
         "fleet_convergence": _live.get("fleet_convergence", {}),
     })
+
+@app.get("/api/venue-state/{venue}")
+async def api_venue_state(request: Request, venue: str) -> JSONResponse:
+    _require_auth(request)
+    v = venue.upper()
+    row = _vls.get(v)
+    if row is None:
+        return JSONResponse({"error": "venue not found", "venue": v}, status_code=404)
+    return JSONResponse(row)
 
 @app.get("/api/analytics")
 async def api_analytics(request: Request, range: str = "today") -> JSONResponse:
