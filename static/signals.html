@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --hl:#a855f7;--mexc:#f97316;--green:#22c55e;--red:#ef4444;
+  --hl:#a855f7;--mexc:#f97316;--bybit:#06b6d4;--green:#22c55e;--red:#ef4444;
   --amber:#f59e0b;--cyan:#06b6d4;--white:#ffffff;
   --bg:#05050f;--card:#09090f;--border:#1a1a2e;
   --D:'Bebas Neue',sans-serif;--M:'IBM Plex Mono',monospace;
@@ -41,12 +41,13 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
 .prog-fill{height:100%;background:linear-gradient(90deg,var(--hl),#22d3ee);transition:width .14s linear;box-shadow:0 0 8px rgba(34,211,238,.5)}
 
 /* ── MAIN GRID ── */
-.pipe-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;overflow:hidden;min-height:0}
+.pipe-grid{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:8px;overflow:hidden;min-height:0}
 
 /* ── VENUE COLUMN ── */
 .venue-col{background:var(--card);border-radius:8px;display:flex;flex-direction:column;overflow:hidden;border:1px solid}
 .venue-col.hl{border-color:rgba(168,85,247,.25);box-shadow:0 0 30px rgba(168,85,247,.06)}
 .venue-col.mx{border-color:rgba(249,115,22,.25);box-shadow:0 0 30px rgba(249,115,22,.06)}
+.venue-col.byt{border-color:rgba(6,182,212,.25);box-shadow:0 0 30px rgba(6,182,212,.06)}
 
 /* ── VESSEL HEADER ── */
 .vessel-hdr{padding:10px 14px 8px;background:#08080e;border-bottom:1px solid var(--border);flex-shrink:0;position:relative;overflow:hidden}
@@ -220,6 +221,23 @@ body{background:var(--bg);color:var(--white);font-family:var(--M);height:100vh;d
       <div class="scan-loading"><div class="spin"></div>CONNECTING TO SCANNER</div>
     </div>
   </div>
+  <div class="venue-col byt" id="col-byt">
+    <div class="vessel-hdr">
+      <div class="vh-top">
+        <div class="ring-wrap"><div class="ring-pulse" style="border-color:rgba(6,182,212,.35)"></div><div class="ring-core" style="background:#06b6d4;box-shadow:0 0 14px rgba(6,182,212,.6)"></div></div>
+        <div class="vh-id"><div class="vh-callsign" style="color:#06b6d4">BYBIT-1</div><div class="vh-fullname">BYBIT FUTURES</div></div>
+        <div class="vh-right">
+          <div class="vh-scan" id="BYBIT-scan-lbl">CONNECTING…</div>
+          <div class="vh-pairs" id="BYBIT-pairs-lbl">— PAIRS</div>
+          <div class="vh-mode init" id="BYBIT-mode-lbl">INIT</div>
+        </div>
+      </div>
+      <div class="beam-track"><div class="beam-p" style="background:#06b6d4;box-shadow:0 0 6px rgba(6,182,212,.8)"></div><div class="beam-p beam-p2" style="background:#06b6d4;box-shadow:0 0 6px rgba(6,182,212,.8)"></div></div>
+    </div>
+    <div class="pipe-body" id="BYBIT-pipe-body">
+      <div class="scan-loading"><div class="spin"></div>CONNECTING TO SCANNER</div>
+    </div>
+  </div>
 </div>
 
 <div class="footer">
@@ -269,8 +287,8 @@ const MAX_TICK = 32;
 let liveData  = null;
 let liveMode  = false;
 /* colPairs: populated exclusively from pair_states in /api/live response */
-const colPairs   = { HL: [], MEXC: [] };
-const colBuilt   = { HL: false, MEXC: false };
+const colPairs   = { HL: [], MEXC: [], BYBIT: [] };
+const colBuilt   = { HL: false, MEXC: false, BYBIT: false };
 let   scanNum    = 1;
 let   tickHandle = null;
 let   tick       = 0;
@@ -505,7 +523,7 @@ function render() {
   document.getElementById('prog-fill').style.width = Math.round(tick/MAX_TICK*100)+'%';
   let totalSigs = 0;
 
-  for (const [venue, vk] of [['HL','hl'],['MEXC','mexc']]) {
+  for (const [venue, vk] of [['HL','hl'],['MEXC','mexc'],['BYBIT','bybit']]) {
     const pairs = colPairs[venue];
     if (!pairs.length) continue;   /* still connecting */
 
@@ -639,7 +657,7 @@ function render() {
    Initialize columns from live data — no pair lists hardcoded
    ═══════════════════════════════════════════════════════════ */
 function initColumnsFromLive() {
-  for (const [venue, vk] of [['HL','hl'],['MEXC','mexc']]) {
+  for (const [venue, vk] of [['HL','hl'],['MEXC','mexc'],['BYBIT','bybit']]) {
     const newPairs = extractPairs(venue);
     if (!newPairs.length) continue;                           /* scanner not ready yet */
     const changed = JSON.stringify(newPairs) !== JSON.stringify(colPairs[venue]);
@@ -696,7 +714,7 @@ function setOffline() {
   if (pill) { pill.textContent='OFFLINE'; pill.className='live-pill sim'; }
   if (ftm)  ftm.textContent='SCANNER OFFLINE — NO LIVE DATA';
   /* If we've previously loaded pairs, keep the animation running on cached data */
-  if (!tickHandle && (colPairs.HL.length || colPairs.MEXC.length)) startTick();
+  if (!tickHandle && (colPairs.HL.length || colPairs.MEXC.length || colPairs.BYBIT.length)) startTick();
   /* Else: stay on loading state */
 }
 
