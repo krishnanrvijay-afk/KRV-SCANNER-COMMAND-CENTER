@@ -1358,6 +1358,12 @@ body {
 #btc-regime-pill.rg-caution   { border-color: rgba(255,179,0,0.70); color: #ffb300; background: rgba(255,179,0,0.11); box-shadow: 0 0 20px rgba(255,179,0,0.60), 0 0 50px rgba(255,179,0,0.25), inset 0 0 3px rgba(255,179,0,0.16); }
 #btc-regime-pill.rg-stop      { border-color: rgba(255,70,70,0.75); color: #ff4646; background: rgba(255,70,70,0.12); animation: rgStopPulse 1.8s ease-in-out infinite; }
 #btc-regime-pill.rg-exempt    { border-color: #2e2e2e; color: #555; background: transparent; box-shadow: none; }
+
+/* ── VESSEL REGIME PILL (fleet link card) ── */
+.fl-v-regime{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:.12em;padding:2px 9px;border-radius:4px;border:1px solid;display:inline-block;margin-top:5px;line-height:1.6}
+.fl-v-regime.bull{color:#22c55e;border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.09)}
+.fl-v-regime.bear{color:#ef4444;border-color:rgba(239,68,68,.55);background:rgba(239,68,68,.09)}
+.fl-v-regime.ranging{color:#555;border-color:#2a2a2a;background:transparent}
 @keyframes rgStopPulse { 0%,100%{box-shadow:0 0 12px rgba(255,70,70,0.40),0 0 0px rgba(255,70,70,0)} 50%{box-shadow:0 0 28px rgba(255,70,70,0.80),0 0 55px rgba(255,70,70,0.35)} }
 
 /* ── BTC REGIME OVERLAY ── */
@@ -1780,6 +1786,7 @@ body {
           <span class="fl-stat-sep">&middot;</span>
           <span class="fl-stat-txt" id="fl-hl-closed">-- closed</span>
         </div>
+        <div class="fl-v-regime ranging" id="fl-hl-regime">—</div>
       </div>
       <div class="fl-beam-col">
         <div class="fl-beam-track">
@@ -1820,6 +1827,7 @@ body {
           <span class="fl-stat-sep">&middot;</span>
           <span class="fl-stat-txt" id="fl-mx-closed">-- closed</span>
         </div>
+        <div class="fl-v-regime ranging" id="fl-mx-regime">—</div>
       </div>
     </div>
     <div class="pnl-rail" style="margin-top:12px">
@@ -3084,6 +3092,18 @@ function renderFleetLink() {
     el=document.getElementById('fl-mx-signals'); if(el) el.textContent=(_aMx.trade_count||0)+' signals';
     el=document.getElementById('fl-mx-closed');  if(el) el.textContent=(_aMx.trade_count||0)+' closed';
   }
+  // -- Regime pills per vessel --
+  var _fc2 = (live && live.fleet_convergence) || {};
+  var _setRegime = function(elId, regime, j1h) {
+    var _el = document.getElementById(elId);
+    if (!_el) return;
+    var _j = (j1h != null) ? ' J1H=' + j1h : '';
+    if (regime === 'BULL_TREND')      { _el.className='fl-v-regime bull';    _el.textContent='BULL TREND'+_j; }
+    else if (regime === 'BEAR_TREND') { _el.className='fl-v-regime bear';    _el.textContent='BEAR TREND'+_j; }
+    else                              { _el.className='fl-v-regime ranging'; _el.textContent='RANGING'+_j; }
+  };
+  _setRegime('fl-hl-regime', _fc2.hl_regime, _fc2.hl_btc_j1h);
+  _setRegime('fl-mx-regime', _fc2.mx_regime, _fc2.mx_btc_j1h);
 }
 setInterval(function() {
   function _flRel(tsMs) {
