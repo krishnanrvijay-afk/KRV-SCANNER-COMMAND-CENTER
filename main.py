@@ -98,7 +98,11 @@ async def _poll_live() -> None:
                         print(f"[LIVE] {key.upper()} WARNING — pair_states is empty or wrong type: {type(ps).__name__}", flush=True)
                 except Exception as exc:
                     _live[f"{key}_ok"] = False
-                    print(f"[LIVE] {key.upper()} ERROR — {exc}", flush=True)
+                    try:
+                        _dbg = f"status={r.status_code} body={r.text[:300]!r}"
+                    except Exception:
+                        _dbg = "(no response)"
+                    print(f"[LIVE] {key.upper()} ERROR — {exc} | {_dbg}", flush=True)
         # -- Phase B/C: aggregate fleet convergence from both scanners --
         _hl_sm  = (_live["hl"]   or {}).get("market_health", {}).get("sentinel_metrics", {})
         _mx_sm  = (_live["mexc"] or {}).get("market_health", {}).get("sentinel_metrics", {})
