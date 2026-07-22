@@ -37,8 +37,8 @@ SESSION_MAX_AGE = 30 * 24 * 3600  # 30 days
 
 # ─────────────────────────── live-state cache ───────────────────────────
 _live: dict[str, Any] = {
-    "hl": None, "mexc": None, "bybit": None,
-    "hl_ok": False, "mexc_ok": False, "bybit_ok": False,
+    "hl": None, "mexc": None, "okx": None,
+    "hl_ok": False, "mexc_ok": False, "okx_ok": False,
     "updated_at": 0.0,
     "fleet_convergence": {},
 }
@@ -71,7 +71,7 @@ def _require_auth(request: Request) -> None:
 async def _poll_live() -> None:
     while True:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            for key, url in [("hl", HL_STATE_URL), ("mexc", MEXC_STATE_URL)] + ([("bybit", OKX_STATE_URL)] if OKX_STATE_URL else []):
+            for key, url in [("hl", HL_STATE_URL), ("mexc", MEXC_STATE_URL)] + ([("okx", OKX_STATE_URL)] if OKX_STATE_URL else []):
                 try:
                     r = await client.get(url)
                     r.raise_for_status()
@@ -786,8 +786,8 @@ async def api_live(request: Request) -> JSONResponse:
         "mexc": _live["mexc"],
         "hl_ok":    _live["hl_ok"],
         "mexc_ok":  _live["mexc_ok"],
-        "bybit":    _live.get("bybit"),
-        "bybit_ok": _live.get("bybit_ok", False),
+        "okx":      _live.get("okx"),
+        "okx_ok":   _live.get("okx_ok", False),
         "updated_at":        _live["updated_at"],
         "fleet_convergence": _live.get("fleet_convergence", {}),
     })
