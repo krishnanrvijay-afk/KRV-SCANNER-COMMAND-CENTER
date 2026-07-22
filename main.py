@@ -29,15 +29,16 @@ TELEGRAM_CHAT_ID   = int(os.environ.get("TELEGRAM_CHAT_ID", "0") or "0")
 TELEGRAM_ENABLED   = os.environ.get("TELEGRAM_ENABLED", "true").lower() == "true"
 
 HL_STATE_URL   = "https://bounce-scanner-deux-production-88de.up.railway.app/api/state"
-MEXC_STATE_URL = "https://web-production-d03dd.up.railway.app/api/state"
+MEXC_STATE_URL  = "https://web-production-d03dd.up.railway.app/api/state"
+BYBIT_STATE_URL = os.environ.get("BYBIT_STATE_URL", "")
 
 COOKIE_NAME     = "aria_session"
 SESSION_MAX_AGE = 30 * 24 * 3600  # 30 days
 
 # ─────────────────────────── live-state cache ───────────────────────────
 _live: dict[str, Any] = {
-    "hl": None, "mexc": None,
-    "hl_ok": False, "mexc_ok": False,
+    "hl": None, "mexc": None, "bybit": None,
+    "hl_ok": False, "mexc_ok": False, "bybit_ok": False,
     "updated_at": 0.0,
     "fleet_convergence": {},
 }
@@ -70,7 +71,7 @@ def _require_auth(request: Request) -> None:
 async def _poll_live() -> None:
     while True:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            for key, url in [("hl", HL_STATE_URL), ("mexc", MEXC_STATE_URL)]:
+            for key, url in [("hl", HL_STATE_URL), ("mexc", MEXC_STATE_URL)] + ([("bybit", BYBIT_STATE_URL)] if BYBIT_STATE_URL else []):
                 try:
                     r = await client.get(url)
                     r.raise_for_status()
@@ -110,7 +111,9 @@ async def _poll_live() -> None:
             "hl_regime_confidence": _vls.get("HL",   {}).get("regime_confidence",   "—"),
             "mx_regime_confidence": _vls.get("MEXC", {}).get("regime_confidence",   "—"),
             "hl_btc_j1h":          round(float(_vls.get("HL",   {}).get("btc_j1h", 50.0)), 1),
-            "mx_btc_j1h":          round(float(_vls.get("MEXC", {}).get("btc_j1h", 50.0)), 1),
+            "mx_btc_j1h":          round(float(_vls.get("MEXC",  {}).get("btc_j1h", 50.0)), 1),
+            "by_regime":           _vls.get("BYBIT", {}).get("regime",             "RANGING"),
+            "by_btc_j1h":          round(float(_vls.get("BYBIT", {}).get("btc_j1h", 50.0)), 1),
             "hl_sync_vel":   round(float(_hl_sm.get("sync_vel",  0.0)), 4),
             "mx_sync_vel":   round(float(_mx_sm.get("sync_vel",  0.0)), 4),
             "hl_breadth_dn": round(float(_hl_sm.get("breadth_dn", 0.0)), 2),
@@ -779,10 +782,12 @@ async def logout() -> RedirectResponse:
 async def api_live(request: Request) -> JSONResponse:
     _require_auth(request)
     return JSONResponse({
-        "hl":                _live["hl"],
-        "mexc":              _live["mexc"],
-        "hl_ok":             _live["hl_ok"],
-        "mexc_ok":           _live["mexc_ok"],
+        "hl":   _live["hl"],
+        "mexc": _live["mexc"],
+        "hl_ok":    _live["hl_ok"],
+        "mexc_ok":  _live["mexc_ok"],
+        "bybit":    _live.get("bybit"),
+        "bybit_ok": _live.get("bybit_ok", False),
         "updated_at":        _live["updated_at"],
         "fleet_convergence": _live.get("fleet_convergence", {}),
     })
