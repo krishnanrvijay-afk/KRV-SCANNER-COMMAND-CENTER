@@ -1824,6 +1824,47 @@ body {
           <span class="fl-stat-txt" id="fl-mx-closed">-- closed</span>
         </div>
       </div>
+      <div class="fl-beam-col">
+        <div class="fl-beam-track">
+          <div class="fl-beam-particle"></div>
+          <div class="fl-beam-particle p2"></div>
+          <div class="fl-beam-particle p3"></div>
+        </div>
+        <div class="fl-beam-label">BYBIT LINK</div>
+        <div class="fl-beam-pnl" id="fl-byt-beam-pnl">&#x2014;</div>
+        <div class="fl-beam-secondary" id="fl-byt-beam-secondary">OPEN &#x2014;</div>
+      </div>
+      <div class="fl-vessel fl-byt" id="fl-vessel-byt">
+        <div class="fl-v-top">
+          <div class="fl-v-ring"><div class="fl-v-ring-pulse"></div><div class="fl-v-ring-core"></div></div>
+          <div class="fl-v-id">
+            <span class="fl-v-callsign">BYBIT-1</span>
+            <span class="fl-v-fullname">BYBIT FUTURES</span>
+          </div>
+          <div class="fl-v-regime ranging" id="fl-byt-regime">—</div>
+          <div class="fl-v-contact">
+            <div class="fl-v-contact-label">LAST CONTACT</div>
+            <div class="fl-v-contact-val" id="fl-contact-byt">&#x2014;</div>
+          </div>
+        </div>
+        <div class="fl-v-ecg">
+          <svg viewBox="0 0 200 24" preserveAspectRatio="none">
+            <path class="fl-v-ecg-path" d="M0,12 L40,12 L48,4 L56,20 L64,12 L80,12 L88,2 L96,22 L104,12 L200,12"/>
+          </svg>
+        </div>
+        <div class="fl-v-vitals">
+          <div class="fl-vit"><span class="fl-vit-label">DAILY P&amp;L</span><span class="fl-vit-val" id="fl-byt-pnl">&#x2014;</span></div>
+          <div class="fl-vit"><span class="fl-vit-label">OPEN</span><span class="fl-vit-val" id="fl-byt-open">&#x2014;</span></div>
+          <div class="fl-vit"><span class="fl-vit-label">SCANS</span><span class="fl-vit-val" id="fl-byt-scans">&#x2014;</span></div>
+        </div>
+        <div class="fl-v-stats">
+          <span class="fl-stat-wr" id="fl-byt-wr" style="color:#ffffff">--</span>
+          <span class="fl-stat-sep">&middot;</span>
+          <span class="fl-stat-txt" id="fl-byt-signals">-- signals</span>
+          <span class="fl-stat-sep">&middot;</span>
+          <span class="fl-stat-txt" id="fl-byt-closed">-- closed</span>
+        </div>
+      </div>
     </div>
     <div class="pnl-rail" style="margin-top:12px">
       <div class="pnl-rail-sub" style="margin-top:0">
@@ -3066,8 +3107,10 @@ function renderFleetLink() {
   var tagEl = document.getElementById("fl-live-tag");
   if (txtEl && tagEl) {
     var both = live.hl_ok && live.mexc_ok;
-    var one  = live.hl_ok || live.mexc_ok;
-    txtEl.textContent = both ? "BOTH VESSELS REPORTING" : one ? (live.hl_ok ? "HL REPORTING" : "MEXC REPORTING") : "NO CONTACT";
+    var bybitActive = !!live.bybit_ok;
+    var one  = live.hl_ok || live.mexc_ok || bybitActive;
+    var activeCount = (live.hl_ok?1:0)+(live.mexc_ok?1:0)+(bybitActive?1:0);
+    txtEl.textContent = activeCount===3 ? "ALL VESSELS REPORTING" : activeCount===2 ? "2 VESSELS REPORTING" : activeCount===1 ? "1 VESSEL REPORTING" : "NO CONTACT";
     var gc  = both ? "var(--green)" : one ? "var(--amber)" : "var(--red)";
     var gbd = both ? "rgba(0,230,118,0.3)"  : one ? "rgba(255,179,0,0.3)"  : "rgba(255,77,77,0.3)";
     var gbg = both ? "rgba(0,230,118,0.08)" : one ? "rgba(255,179,0,0.08)" : "rgba(255,77,77,0.08)";
@@ -3099,6 +3142,32 @@ function renderFleetLink() {
   };
   _setRegime('fl-hl-regime', _fc2.hl_regime, _fc2.hl_btc_j1h);
   _setRegime('fl-mx-regime', _fc2.mx_regime, _fc2.mx_btc_j1h);
+  _setRegime('fl-byt-regime', _fc2.by_regime, _fc2.by_btc_j1h);
+  // -- Bybit vessel vitals --
+  var bytV = live.bybit;
+  var bytPnl = bytV ? (_flPnl ? _flPnl(bytV) : null) : null;
+  var bpEl2 = document.getElementById('fl-byt-pnl');
+  if (bpEl2) { bpEl2.textContent = _flFmt(bytPnl); bpEl2.className = 'fl-vit-val' + (bytPnl!=null?(bytPnl>=0?' pos':' neg'):''); }
+  var el2;
+  el2=document.getElementById('fl-byt-open');  if(el2) el2.textContent = bytV ? (_flOpen ? _flOpen(bytV) : '—') : '—';
+  el2=document.getElementById('fl-byt-scans'); if(el2) el2.textContent = bytV ? (_flScans ? _flScans(bytV) : '—') : '—';
+  var bytBeamPnl = document.getElementById('fl-byt-beam-pnl');
+  if (bytBeamPnl) { bytBeamPnl.textContent = _flFmt(bytPnl); bytBeamPnl.className = 'fl-beam-pnl' + (bytPnl!=null?(bytPnl>=0?' pos':' neg'):''); }
+  // Vessel freshness ring
+  var bytVEl = document.getElementById('fl-vessel-byt');
+  if (bytVEl) {
+    if (live.bybit_ok) _flTs.byt = Date.now();
+    bytVEl.classList.remove('fl-ring-amber','fl-ring-red');
+    var bc = _flFreshCls(_flTs.byt); if(bc) bytVEl.classList.add(bc);
+  }
+  // Analytics stats
+  if (typeof analytics !== 'undefined' && analytics) {
+    var _aByt = analytics.bybit || {};
+    var bwp = Math.round((_aByt.win_rate || 0) * 100);
+    el2=document.getElementById('fl-byt-wr');      if(el2){el2.textContent='WR '+bwp+'%'; el2.style.color=_flWrCol ? _flWrCol(bwp) : '#fff';}
+    el2=document.getElementById('fl-byt-signals'); if(el2) el2.textContent=(_aByt.trade_count||0)+' signals';
+    el2=document.getElementById('fl-byt-closed');  if(el2) el2.textContent=(_aByt.trade_count||0)+' closed';
+  }
 }
 setInterval(function() {
   function _flRel(tsMs) {
