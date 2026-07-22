@@ -1703,11 +1703,7 @@ body {
     <div class="logo"><span class="logo-dot"></span>KRV FLEET COMMAND CENTER
       <div class="badge-paper">PAPER</div>
       <div id="halt-wrap">
-        <button id="dir-short-btn" class="dir-halt-btn dh-live" onclick="dirHaltToggle('short')" title="SHORT entries: LIVE / session-paused">&#9661; SHORT LIVE</button>
-        <button id="dir-long-btn"  class="dir-halt-btn dh-live" onclick="dirHaltToggle('long')"  title="LONG entries: LIVE / session-paused">&#9651; LONG LIVE</button>
-        <button id="fleet-halt-btn" title="build:21Jul-cmdcenter" class="fh-live" onclick="fleetHaltToggle()">&#9711; FLEET LIVE</button>
-        <div id="halt-bolt"></div>
-        <div id="halt-source-pill"></div>
+        <button id="fleet-halt-btn" title="Manual LIVE / HALT — all other panels are informational" class="fh-live" onclick="fleetHaltToggle()">&#9711; LIVE</button>
       </div>
     </div>
     <div class="header-right">
@@ -4646,7 +4642,7 @@ function renderFleetConvergence() {
     var sub = "HL:" + hl_r + " MX:" + mx_r + "  vel:" + (velAvg * 100).toFixed(1) + "%"
             + (isTier1 ? "  ⚠ PROTECT THE FLOOR ACTIVE — TIER-1 EVENT" : "");
     convEl.className = "fcb-" + dir.toLowerCase() + (isTier1 ? " fcb-tier1" : "");
-    var _hPaused = (dir === "SHORT" && _haltShort) || (dir === "LONG" && _haltLong);
+    var _hPaused = false;  // informational only — single toggle controls everything
     var _resetBtn = _hPaused
       ? " <button class='fcb-reset-btn' onclick='resetDirHalt(\""
         + dir.toLowerCase() + "\")'>&#8635; RESET " + dir + " PAUSE</button>"
@@ -6727,144 +6723,26 @@ function closeSessDirSheet() { document.getElementById('sess-dir-scrim').classLi
 
 
 <script>
-console.log("[FLEET] build=20Jul-manual-only");
-var _fleetHalted      = false;
-var _haltShort        = false;
-var _haltLong         = false;
-var _regimeAutoHalted  = false;  // true = LIVE was auto-halted by STOP zone regime
-var _userOverrodeRegime = false;  // true = user manually un-halted during regime (suppresses re-auto-halt)
+console.log("[FLEET] build=22Jul-simple-halt");
+var _fleetHalted = false;
 
 async function fleetHaltInit() {
   try {
     var r = await fetch('/api/fleet/status');
     var d = await r.json();
-    _fleetHalted = d.fleet_halt  || false;
-    _haltShort   = d.halt_short  || false;
-    _haltLong    = d.halt_long   || false;
+    _fleetHalted = d.fleet_halt || false;
     _updateHaltBtn();
-    _updateDirBtns();
   } catch(e) {
     console.error('Fleet status error:', e);
   }
 }
 
-/* Periodic refresh so auto-pauses triggered by scanner appear within 10s */
 setInterval(fleetHaltInit, 10000);
 
-async function dirHaltToggle(dir) {
-  var isShort = (dir === 'short');
-  // R3: prevent manual toggle when BTC hard-blocks this direction; neutral zone is always clickable
-  var _btcJ1h = (live && live.hl && live.hl.btc_j1h) || (live && live.mexc && live.mexc.btc_j1h) || 50;
-  var _rg = _btcRegime({j1h: _btcJ1h});
-  if (!isShort && _rg.state === 'CONFIRMED_SHORT') return;  // BTC>=80: LONG hard-blocked
-  if ( isShort && _rg.state === 'CONFIRMED_LONG')  return;  // BTC<20:  SHORT hard-blocked
-  if (_rg.state === 'STOP') return;                          // BTC 40-60: stop zone — both blocked
-  var newVal  = isShort ? !_haltShort : !_haltLong;
-  if (isShort) _haltShort = newVal; else _haltLong = newVal;
-  _updateDirBtns();
-  try {
-    await fetch('/api/fleet/halt-' + dir, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({halt: newVal})
-    });
-  } catch(e) {
-    if (isShort) _haltShort = !newVal; else _haltLong = !newVal;
-    _updateDirBtns();
-    console.error('Dir halt error:', e);
-  }
-}
-
-async function resetDirHalt(dir) {
-  var isShort = (dir === 'short');
-  if (isShort) _haltShort = false; else _haltLong = false;
-  _updateDirBtns();
-  try {
-    await fetch('/api/fleet/halt-' + dir, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({halt: false})
-    });
-  } catch(e) {
-    if (isShort) _haltShort = true; else _haltLong = true;
-    _updateDirBtns();
-    console.error('Dir halt reset error:', e);
-  }
-}
-
-function _updateDirBtns() {
-  var sb = document.getElementById('dir-short-btn');
-  var lb = document.getElementById('dir-long-btn');
-  // R3: read BTC regime — CONFIRMED_SHORT/LONG = one direction locked; STOP = both locked + auto-halt LIVE
-  var _btcJ1h = (live && live.hl && live.hl.btc_j1h) || (live && live.mexc && live.mexc.btc_j1h) || 50;
-  var _rg = _btcRegime({j1h: _btcJ1h});
-  var _longHardBlock  = (_rg.state === 'CONFIRMED_SHORT');  // BTC J1H >= 80 — LONGs hard-blocked
-  var _shortHardBlock = (_rg.state === 'CONFIRMED_LONG');   // BTC J1H <  20 — SHORTs hard-blocked
-  var _stopZone       = (_rg.state === 'STOP');             // BTC J1H 40-60 — both directions blocked
-  // Auto-halt LIVE when BTC enters STOP zone; auto-release when it leaves
-  if (_stopZone && !_fleetHalted && !_userOverrodeRegime) {
-    _regimeAutoHalted = true;
-    _fleetHalted = true;
-    _updateHaltBtn();
-    fetch('/api/fleet/halt', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({halt: true})})
-      .catch(function(e) { console.error('Regime auto-halt error:', e); });
-  } else if (!_stopZone && _regimeAutoHalted) {
-    _regimeAutoHalted = false;
-    _userOverrodeRegime = false;
-    _fleetHalted = false;
-    _updateHaltBtn();
-    fetch('/api/fleet/halt', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({halt: false})})
-      .catch(function(e) { console.error('Regime auto-release error:', e); });
-  }
-  // SHORT button
-  if (sb) {
-    if (_shortHardBlock) {
-      sb.disabled = true;
-      sb.className = 'dir-halt-btn dh-regime-lock';
-      sb.textContent = '▽ SHORT — HARD BLOCK';
-      sb.title = 'BTC J1H < 20 — regime hard-blocks SHORT entries. No manual override.';
-    } else if (_stopZone) {
-      sb.disabled = true;
-      sb.className = 'dir-halt-btn dh-regime-lock';
-      sb.textContent = '▽ SHORT — STOP ZONE';
-      sb.title = 'BTC J1H 40–60 — stop zone. Both directions blocked. No entries.';
-    } else {
-      sb.disabled = false;
-      sb.className = 'dir-halt-btn ' + (_haltShort ? 'dh-halt' : 'dh-live');
-      sb.textContent = _haltShort ? '▽ SHORT PAUSED' : '▽ SHORT LIVE';
-      sb.title = _haltShort ? 'SHORT paused — tap to re-enable' : 'Tap to pause SHORT entries';
-    }
-  }
-  // LONG button
-  if (lb) {
-    if (_longHardBlock) {
-      lb.disabled = true;
-      lb.className = 'dir-halt-btn dh-regime-lock';
-      lb.textContent = '△ LONG — HARD BLOCK';
-      lb.title = 'BTC J1H ≥ 80 — regime hard-blocks LONG entries. No manual override.';
-    } else if (_stopZone) {
-      lb.disabled = true;
-      lb.className = 'dir-halt-btn dh-regime-lock';
-      lb.textContent = '△ LONG — STOP ZONE';
-      lb.title = 'BTC J1H 40–60 — stop zone. Both directions blocked. No entries.';
-    } else {
-      lb.disabled = false;
-      lb.className = 'dir-halt-btn ' + (_haltLong ? 'dh-halt' : 'dh-live');
-      lb.textContent = _haltLong ? '△ LONG PAUSED' : '△ LONG LIVE';
-      lb.title = _haltLong ? 'LONG paused — tap to re-enable' : 'Tap to pause LONG entries';
-    }
-  }
-  try { renderFleetConvergence(); } catch(e) {}
-}
+/* dirHaltToggle / resetDirHalt / _updateDirBtns removed — single LIVE/HALT toggle only */
 
 async function fleetHaltToggle() {
-  var _wasHalted = _fleetHalted;
   _fleetHalted = !_fleetHalted;
-  // If user manually un-halts while regime auto-halt is active, record override
-  if (_wasHalted && !_fleetHalted && _regimeAutoHalted) {
-    _userOverrodeRegime = true;
-    _regimeAutoHalted   = false;
-  }
   _updateHaltBtn();
   try {
     await fetch('/api/fleet/halt', {
@@ -6889,24 +6767,6 @@ function _updateHaltBtn() {
     btn.textContent = '◎ LIVE';
     btn.style.background = '#22c55e';
   }
-  _updateSourcePill();
-}
-
-function _updateSourcePill() {
-  var pill = document.getElementById('halt-source-pill');
-  var bolt = document.getElementById('halt-bolt');
-  if (!pill || !bolt) return;
-  if (!_fleetHalted) {
-    pill.className = '';
-    pill.style.display = 'none';
-    bolt.className = '';
-    bolt.style.display = 'none';
-    return;
-  }
-  /* halted — manual only */
-  pill.className = 'hsp-manual';
-  pill.textContent = '⚡ MANUAL';
-  bolt.className = 'bolt-manual';
 }
 
 fleetHaltInit();
